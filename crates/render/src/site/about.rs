@@ -36,7 +36,7 @@ B_adj = B_raw - 0.32 × L_v</code></pre>
 </ol>
 
 <h2>Sources</h2>
-<table><thead><tr><th>source</th><th>status</th><th>rows</th><th>matched</th><th>unmatched</th></tr></thead><tbody>"#);
+<div class="doc-scroll"><table><thead><tr><th>source</th><th>status</th><th>rows</th><th>matched</th><th>unmatched</th></tr></thead><tbody>"#);
 
     for (source, summary) in &scoreboard.source_summary {
         write!(
@@ -51,7 +51,7 @@ B_adj = B_raw - 0.32 × L_v</code></pre>
         .unwrap();
     }
 
-    body.push_str(r#"</tbody></table>
+    body.push_str(r#"</tbody></table></div>
 
 <h2>Glossary</h2>
 <ul>

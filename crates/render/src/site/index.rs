@@ -7,11 +7,11 @@ use super::{html_escape, layout};
 pub fn render_index(scoreboard: &Scoreboard) -> String {
     let mut body = String::new();
 
-    // Mode toggle
+    // Mode toggle. Long-form label collapses to "adjusted" on mobile via CSS.
     body.push_str(
         r#"<div class="mode-toggle" role="radiogroup" aria-label="Score mode">
   <button type="button" data-mode-value="raw" aria-pressed="true">raw</button>
-  <button type="button" data-mode-value="adjusted" aria-pressed="false">adjusted for review opportunity-cost</button>
+  <button type="button" data-mode-value="adjusted" aria-pressed="false"><span class="mode-long">adjusted for review opportunity-cost</span><span class="mode-short">adjusted</span></button>
 </div>"#,
     );
 
@@ -111,7 +111,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
             v = html_escape(vendor),
         ));
     }
-    html.push_str(r#"</div></div><table class="leaderboard" id="leaderboard-table"><thead><tr>"#);
+    html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table"><thead><tr>"#);
     html.push_str(r#"<th data-sort="model"><button type="button" class="sort">model</button></th>"#);
     html.push_str(r#"<th data-sort="vendor"><button type="button" class="sort">vendor</button></th>"#);
 
@@ -133,7 +133,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         html.push_str(&render_row(scoreboard, model));
     }
 
-    html.push_str("</tbody></table></section>");
+    html.push_str("</tbody></table></div></section>");
     html
 }
 
@@ -175,7 +175,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     // Expansion row
     write!(
         html,
-        r#"<tr class="expand" data-row="{id}"><td colspan="10"><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing</span> {missing}</section></td></tr>"#,
+        r#"<tr class="expand" data-row="{id}"><td colspan="10"><div class="expand-inner"><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing</span> {missing}</section></div></td></tr>"#,
         groups = render_group_table(scoreboard, model),
         metrics = render_metric_table(scoreboard, model),
         sources = render_source_pills(scoreboard, model),

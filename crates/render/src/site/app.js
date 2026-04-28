@@ -180,11 +180,8 @@
       var d = new Date(iso);
       if (isNaN(d.getTime())) return;
       var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
-      var local = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+      el.textContent = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
         + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-      var tz = (typeof Intl !== 'undefined' && Intl.DateTimeFormat
-        && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'local';
-      el.textContent = local + ' ' + tz;
     });
   }
 })();

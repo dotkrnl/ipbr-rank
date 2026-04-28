@@ -76,6 +76,7 @@ body[data-mode="adjusted"] .mode-toggle [data-mode-value="adjusted"] {
   background: var(--panel); color: var(--text-strong);
 }
 .mode-toggle [data-mode-value="raw"] { border-right: 1px solid var(--line); }
+.mode-toggle .mode-short { display: none; }
 
 /* === Hero === */
 .hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin: 8px 0 28px; }
@@ -125,22 +126,28 @@ details.scoring code, details.scoring pre { background: var(--panel); padding: 1
 }
 .vendor-chips button.active { background: var(--panel); color: var(--text-strong); border-color: var(--accent); }
 
+.lb-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table.leaderboard { width: 100%; border-collapse: collapse; }
 table.leaderboard th, table.leaderboard td {
   padding: 7px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top;
 }
 table.leaderboard th {
-  position: sticky; top: 0; background: var(--bg); font-weight: 700;
-  color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; z-index: 1;
+  background: var(--bg); font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
 }
 table.leaderboard th.num { text-align: right; }
 table.leaderboard th button.sort {
   font: inherit; color: inherit; background: transparent; border: 0; padding: 0; cursor: pointer;
-  letter-spacing: inherit; text-transform: inherit;
+  letter-spacing: inherit; text-transform: inherit; text-align: inherit;
+  display: block; width: 100%;
 }
 table.leaderboard th button.sort::after { content: " ▼"; visibility: hidden; }
 table.leaderboard th[data-sort-active="desc"] button.sort { color: var(--text-strong); }
 table.leaderboard th[data-sort-active="desc"] button.sort::after { visibility: visible; }
+/* Right-aligned (numeric) columns: indicator before label so label stays flush right */
+table.leaderboard th.num button.sort::after { content: none; }
+table.leaderboard th.num button.sort::before { content: "▼ "; visibility: hidden; }
+table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibility: visible; }
 table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.leaderboard td.num[data-tier="high"] { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] { color: var(--muted); }
@@ -207,28 +214,46 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
   .brand { font-size: inherit; }
   nav a { margin-left: 0; margin-right: 14px; }
 
-  .mode-toggle { flex-wrap: wrap; }
-  .mode-toggle [data-mode-value] { white-space: normal; text-align: left; }
-  .mode-toggle [data-mode-value="raw"] { border-right: 0; border-bottom: 1px solid var(--line); }
+  /* Mode toggle stays inline with short labels */
+  .mode-toggle .mode-long { display: none; }
+  .mode-toggle .mode-short { display: inline; }
+  .mode-toggle [data-mode-value] { padding: 6px 12px; }
 
   .toolbar input { min-width: 0; flex: 1 1 auto; width: 100%; }
   .toolbar { flex-direction: column; align-items: stretch; }
   .vendor-chips { gap: 4px; }
 
-  /* Horizontal scroll for the wide leaderboard */
-  table.leaderboard { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
-  table.leaderboard thead, table.leaderboard tbody { display: table; width: max-content; min-width: 100%; }
-  table.leaderboard th, table.leaderboard td { padding: 6px 8px; }
-  table.leaderboard tr.expand td { white-space: normal; }
+  /* Wider-than-viewport leaderboard scrolls horizontally inside .lb-scroll */
+  table.leaderboard { min-width: max-content; }
+  table.leaderboard th, table.leaderboard td { padding: 5px 8px; white-space: nowrap; }
+  table.leaderboard tr.expand td { white-space: normal; padding: 0; }
 
-  /* Tighter expand layout */
+  /* Pin expand content to the visible viewport even when the table is
+     scrolled horizontally — the expand <td> spans 10 columns so without
+     this the breakdown sits far offscreen-right. */
+  .expand-inner {
+    position: sticky;
+    left: 0;
+    width: calc(100vw - 28px); /* shell padding */
+    max-width: calc(100vw - 28px);
+    box-sizing: border-box;
+    padding: 12px 8px 14px;
+  }
+
   .expand .exp-table {
-    grid-template-columns: minmax(110px, 1fr) minmax(60px, 1.3fr) 50px 56px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(50px, 1fr) 46px 52px;
     gap: 4px 8px;
   }
-  .expand .exp-meta-label:not(:first-child) { margin-left: 10px; }
+  .expand h4 { margin-top: 6px; }
+  .expand .exp-meta-label:not(:first-child) { margin-left: 0; display: block; margin-top: 6px; }
 
-  /* Smaller hero numbers but still bold */
+  /* Hero stays 2x2 with tighter rows */
   .hero { gap: 14px; }
   .hero .row { padding: 4px 0; }
+
+  /* About page: overflow tables inside .doc-scroll wrappers; loosen prose */
+  .doc-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0; }
+  .doc-scroll > table { margin: 0; min-width: max-content; }
+  .doc th, .doc td { padding: 5px 8px; white-space: nowrap; }
+  .doc pre { white-space: pre-wrap; word-break: break-word; }
 }
