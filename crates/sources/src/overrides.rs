@@ -141,6 +141,7 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
         }
         let mut fields = BTreeMap::new();
         fields.insert(entry.metric.clone(), Value::from(entry.value));
+        fields.insert("Note".to_string(), Value::from(entry.note.clone()));
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
             // The alias matcher takes any registered alias, and every
@@ -185,6 +186,12 @@ note = "OpenAI launch, 2026-04-23"
                 .get("SWEBenchVerified")
                 .and_then(Value::as_f64),
             Some(87.6)
+        );
+        assert_eq!(
+            by_model["anthropic/claude-opus-4.7"]
+                .get("Note")
+                .and_then(Value::as_str),
+            Some("Anthropic launch, 2026-04-16")
         );
         assert_eq!(
             by_model["openai/gpt-5.5"]

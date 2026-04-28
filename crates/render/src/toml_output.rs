@@ -118,27 +118,11 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         }
         out.push('\n');
 
-        if !model.synthesized.is_empty() {
-            out.push_str("[models.synthesized]\n");
-            for (metric, provenance) in &model.synthesized {
-                out.push_str(&format!(
-                    "{metric} = {{ source = {}, from = {} }}\n",
-                    toml_string(&provenance.source_id),
-                    toml_string(&provenance.from),
-                ));
-            }
-            out.push('\n');
-        }
-
         out.push_str("[models.missing]\n");
         out.push_str(&format!("metrics = {}\n", toml_array(missing.metrics)));
         out.push_str(&format!(
-            "groups_shrunk = {}\n",
+            "groups_shrunk = {}\n\n",
             toml_array(missing.groups_shrunk)
-        ));
-        out.push_str(&format!(
-            "synthesis_dominant = {}\n\n",
-            model.missing.synthesis_dominant
         ));
     }
 

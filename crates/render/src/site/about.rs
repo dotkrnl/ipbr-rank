@@ -56,7 +56,6 @@ B_adj = B_raw - 0.32 × L_v</code></pre>
 
 <h2>Glossary</h2>
 <ul>
-<li><strong>Synthesized</strong> — a metric value filled from a known sibling model when the source did not directly cover this model.</li>
 <li><strong>Trust threshold</strong> — the 70% group-coverage cutoff above which the present-weight mean is trusted directly.</li>
 <li><strong>Composite</strong> — a metric that is itself a weighted blend of related sub-metrics (currently SWEComposite).</li>
 <li><strong>A_* perspective</strong> — AISL's 17 capability axes weighted four ways (one weighting per role). Canary health is separate and penalty-only.</li>

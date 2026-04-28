@@ -257,11 +257,6 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
     }
     let mut html = String::from(r#"<div class="exp-table">"#);
     for (key, value) in &model.metrics {
-        let marker = if model.synthesized.contains_key(key) {
-            "*"
-        } else {
-            ""
-        };
         let key_owned = key.clone();
         let rank = rank_for(scoreboard, &model.canonical_id, |m| {
             m.metrics.get(&key_owned).copied()
@@ -269,7 +264,7 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
         let bar_width = rank_bar_width(rank);
         let (rank_label, rank_class) = rank_text(rank);
         html.push_str(&format!(
-            r#"<span class="exp-label">{key}{marker}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{value:.1}</span><span class="{rank_class}">{rank_label}</span>"#,
+            r#"<span class="exp-label">{key}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{value:.1}</span><span class="{rank_class}">{rank_label}</span>"#,
             key = html_escape(key),
             tier = score_tier(*value),
         ));
@@ -279,27 +274,18 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
 }
 
 fn render_source_pills(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    let synthesized_sources: std::collections::BTreeSet<&String> =
-        model.synthesized.values().map(|p| &p.source_id).collect();
-    let all_sources: std::collections::BTreeSet<&String> = model
-        .sources
-        .iter()
-        .chain(synthesized_sources.iter().copied())
-        .collect();
-    if all_sources.is_empty() {
+    if model.sources.is_empty() {
         return r#"<div class="muted">no sources</div>"#.to_string();
     }
     let mut html = String::new();
-    for source in &all_sources {
-        let synthesized_only = !model.sources.contains(*source);
-        let suffix = if synthesized_only { "*" } else { "" };
+    for source in &model.sources {
         let status = scoreboard
             .source_summary
-            .get(*source)
+            .get(source)
             .map(|s| s.status.as_str())
             .unwrap_or("unknown");
         html.push_str(&format!(
-            r#"<span class="pill" title="{status}">{name}{suffix}</span>"#,
+            r#"<span class="pill" title="{status}">{name}</span>"#,
             name = html_escape(source),
             status = html_escape(status),
         ));

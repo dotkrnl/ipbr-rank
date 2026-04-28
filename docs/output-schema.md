@@ -99,16 +99,9 @@ ArtificialAnalysisIntelligence = 78.0
 AI_correctness = 75.0
 # ... all normalized metrics populated for this model
 
-[models.synthesized]
-# Optional. Present only when at least one metric was estimated from
-# a sibling model (see `synthesis_dominant` and the `*` marker on the
-# rendered site). Omitted entirely when no metrics were synthesized.
-SWEBenchVerified = { source = "swebench", from = "anthropic/claude-opus-4.6" }
-
 [models.missing]
 metrics = ["TerminalBench", "SonarFunctionalSkill"]
 groups_shrunk = ["PLAN"]
-synthesis_dominant = false
 ```
 
 #### Model Fields
@@ -166,26 +159,12 @@ Metric keys are defined in `data/coefficients.toml` under `[metrics.*]`. See `do
 
 Only metrics that are *present* for this model appear in this table. Missing metrics are listed in `models.missing.metrics`.
 
-#### `[models.synthesized]` Table (added in 1.1.0)
-
-Optional. Maps metric key → provenance record. **The entire table is omitted when no metrics were synthesized**, so consumers should treat its absence as equivalent to an empty map.
-
-```toml
-[models.synthesized]
-SWEBenchVerified = { source = "swebench", from = "anthropic/claude-opus-4.6" }
-```
-
-- **`<MetricKey>`**: A metric key that also appears in `[models.metrics]` for this model. Its value was estimated from a sibling model rather than measured directly for this model.
-- **`source`**: String. The source ID that produced the donor row. Always identical to the source attached to the donor model — synthesis is same-source-only.
-- **`from`**: String. The canonical ID of the donor (sibling) model.
-
-Sorted by metric key. The metric value itself is still emitted under `[models.metrics]`; this table records where it came from.
+Some metric values are filled from a sibling model when the source did not directly cover this model (sibling synthesis, see methodology §4.5). Synthesis is an internal scoring detail used to compute the final score and is **not** surfaced in the rendered scoreboard — synthesized values appear in `[models.metrics]` indistinguishably from directly-measured values.
 
 #### `[models.missing]` Table
 
 - **`metrics`**: Array of strings, metric keys that are missing for this model.
 - **`groups_shrunk`**: Array of strings, group keys where less than 70% of the weight was present (the trust threshold — see methodology §4.2 — below which the score is shrunk toward 50).
-- **`synthesis_dominant`** *(added in 1.1.0)*: Boolean. `true` when more than `synthesis.per_model_cap` metrics for this model were filled in from sibling synthesis. Always present; defaults to `false`.
 
 ---
 
@@ -445,8 +424,7 @@ This enables golden testing and reproducible builds.
 
 ### 1.1.0
 
-- Added optional `[models.synthesized]` table mapping metric → `{source, from}` provenance for sibling-synthesized cells. Omitted entirely when no metrics were synthesized for a model.
-- Added `synthesis_dominant: bool` inside `[models.missing]`. Defaults to `false`; set to `true` when more than `synthesis.per_model_cap` metrics were filled by synthesis.
+- Sibling synthesis became an internal scoring detail. Synthesized metric values are still mixed into `[models.metrics]`, but no `[models.synthesized]` provenance table or `synthesis_dominant` flag is emitted.
 - Pre-1.1.0 consumers that gate on the major version (`1.x.x`) and ignore unknown fields parse 1.1.0 output unchanged.
 
 ### 1.0.0 (Initial)

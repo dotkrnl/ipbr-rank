@@ -2,6 +2,7 @@ use crate::alias::AliasIndex;
 use crate::coefficients::SynthesisConfig;
 use crate::model::{ModelRecord, RawRow, SourceId};
 use serde::Deserialize;
+use serde_json::Value;
 use std::collections::BTreeMap;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -97,7 +98,12 @@ pub fn synthesize_rows(
                 continue;
             };
 
+            let donor_model_name = donor.model_name.clone();
             let mut synthesized = donor;
+            synthesized.fields.insert(
+                "SynthesizedFromModelName".to_string(),
+                Value::from(donor_model_name),
+            );
             synthesized.model_name = display_name.to_string();
             synthesized.synthesized_from = Some(from_id.clone());
             rows.push(synthesized);
@@ -199,6 +205,35 @@ mod tests {
         assert_eq!(synth.len(), 1);
         assert_eq!(synth[0].synthesized_from.as_deref(), Some("openai/gpt-5.4"));
         assert_eq!(synth[0].model_name, "gpt-5.5");
+    }
+
+    #[test]
+    fn synthesized_rows_preserve_donor_name_for_effort_filtering() {
+        let records = vec![
+            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+            record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4", "gpt-5-4-high"]),
+        ];
+        let mut rows = rows_by_source(vec![raw(
+            "swebench_pro",
+            "gpt-5-4-high",
+            None,
+            &[("SWEBenchPro", json!(88.0))],
+        )]);
+
+        synthesize_rows(
+            &mut rows,
+            &[("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string())],
+            &records,
+            &cfg(0.50, 0.50),
+        );
+
+        let mut scored = records;
+        ingest_rows(&mut scored, rows.remove("swebench_pro").unwrap());
+
+        assert!(
+            !scored[0].raw_metrics.contains_key("SWEBenchPro"),
+            "synthesized high-effort donor row should not score as target default"
+        );
     }
 
     #[test]

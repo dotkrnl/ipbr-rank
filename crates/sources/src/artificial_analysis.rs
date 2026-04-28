@@ -76,13 +76,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         .and_then(Value::as_array)
         .ok_or_else(|| SourceError::Parse("Artificial Analysis payload missing data[]".into()))?;
 
-    // AA ships multiple rows per logical model (e.g. "Claude Opus 4.7 (Adaptive
-    // Reasoning, Max Effort)" and "Claude Opus 4.7 (Non-reasoning, High Effort)")
-    // and the alias matcher collapses both into the same canonical_id. The
-    // ingest layer keeps the *last* row's values for each metric, so without
-    // ordering we'd often end up with the lower-effort variant's numbers.
-    // Sort by intelligence index ascending so the highest-effort row appears
-    // last in iteration order and wins the last-write-wins merge.
+    // AA ships multiple rows per logical model (e.g. default/medium/high/max
+    // effort variants) and the alias matcher may collapse them into the same
+    // canonical_id. The ingest layer prefers default, then medium; this sort
+    // only keeps equal-priority variant ties deterministic.
     let mut sorted: Vec<&Value> = data.iter().collect();
     sorted.sort_by(|a, b| {
         let intelligence = |item: &Value| -> f64 {

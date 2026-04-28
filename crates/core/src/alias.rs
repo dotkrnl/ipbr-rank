@@ -133,10 +133,7 @@ pub fn strip_known_suffixes(input: &str) -> Vec<String> {
     // Normalize before stripping so spaces, hyphens, underscores, and slashes
     // all use the same token-boundary rules.
     let mut current = normalize_name(input);
-    loop {
-        let Some(next) = strip_one_known_suffix(&current) else {
-            break;
-        };
+    while let Some(next) = strip_one_known_suffix(&current) {
         stripped.push(next.clone());
         current = next;
     }

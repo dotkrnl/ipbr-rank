@@ -1,22 +1,18 @@
 #![allow(dead_code)]
 
-//! Round-trip regression for the documented 1.1.0 scoreboard schema.
+//! Round-trip regression for the documented scoreboard schema.
 //!
-//! Builds a `Scoreboard` containing both real and synthesized cells,
-//! serializes it via `ipbr_render::toml_output::write_scoreboard`, and
-//! re-parses the rendered TOML through a fresh `serde::Deserialize`
-//! struct that mirrors `docs/output-schema.md`. Every documented field
-//! must round-trip. A second deserializer that only knows about the
-//! 1.0.0 shape — i.e. one that ignores `synthesized` /
-//! `synthesis_dominant` — must still parse the same output unchanged,
-//! verifying the bump is additive and downstream consumers gating on
-//! the major version stay compatible.
+//! Builds a `Scoreboard`, serializes it via
+//! `ipbr_render::toml_output::write_scoreboard`, and re-parses the
+//! rendered TOML through a fresh `serde::Deserialize` struct that
+//! mirrors `docs/output-schema.md`. Synthesis is an internal scoring
+//! detail and intentionally absent from the rendered scoreboard, so no
+//! `[models.synthesized]` table or `synthesis_dominant` field is
+//! emitted.
 
 use std::collections::BTreeMap;
 
-use ipbr_core::{
-    Coefficients, MissingInfo, ModelRecord, SynthesisProvenance, Vendor, compute_scores_with,
-};
+use ipbr_core::{Coefficients, MissingInfo, ModelRecord, Vendor, compute_scores_with};
 use ipbr_render::{Scoreboard, toml_output::write_scoreboard};
 use serde::Deserialize;
 use tempfile::tempdir;
@@ -52,8 +48,6 @@ struct Model11 {
     groups: BTreeMap<String, f64>,
     metrics: BTreeMap<String, f64>,
     missing: Missing11,
-    #[serde(default)]
-    synthesized: BTreeMap<String, Provenance>,
 }
 
 #[derive(Deserialize)]
@@ -71,13 +65,6 @@ struct Scores {
 struct Missing11 {
     metrics: Vec<String>,
     groups_shrunk: Vec<String>,
-    synthesis_dominant: bool,
-}
-
-#[derive(Deserialize, PartialEq, Debug)]
-struct Provenance {
-    source: String,
-    from: String,
 }
 
 /// 1.0.0-shape consumer: matches a `1.x.x` major version, ignores
@@ -121,30 +108,23 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
         synthesis_dominant: false,
     };
 
-    let mut synth = ModelRecord::new(
+    let mut other = ModelRecord::new(
         "openai/gpt-5.5".to_string(),
         "GPT-5.5".to_string(),
         Vendor::Openai,
     );
-    synth.aliases.insert("gpt-5-5".to_string());
-    synth.sources.insert("openrouter".to_string());
-    synth.metrics.insert("LMArenaText".to_string(), 79.5);
-    synth.metrics.insert("SWEBenchVerified".to_string(), 70.25);
-    synth.groups.insert("CRE".to_string(), 78.0);
-    synth.synthesized.insert(
-        "SWEBenchVerified".to_string(),
-        SynthesisProvenance {
-            source_id: "openrouter".to_string(),
-            from: "openai/gpt-5.4".to_string(),
-        },
-    );
-    synth.missing = MissingInfo {
+    other.aliases.insert("gpt-5-5".to_string());
+    other.sources.insert("openrouter".to_string());
+    other.metrics.insert("LMArenaText".to_string(), 79.5);
+    other.metrics.insert("SWEBenchVerified".to_string(), 70.25);
+    other.groups.insert("CRE".to_string(), 78.0);
+    other.missing = MissingInfo {
         metrics: Default::default(),
         groups_shrunk: Default::default(),
-        synthesis_dominant: true,
+        synthesis_dominant: false,
     };
 
-    let mut models = vec![real, synth];
+    let mut models = vec![real, other];
     compute_scores_with(&mut models, &coefficients);
 
     let scoreboard = Scoreboard {
@@ -162,7 +142,7 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
         .expect("scoreboard.toml should be written");
 
     let parsed: Schema11 =
-        toml::from_str(&rendered).expect("rendered TOML must match documented 1.1.0 shape");
+        toml::from_str(&rendered).expect("rendered TOML must match documented schema shape");
 
     assert_eq!(parsed.schema_version, "1.1.0");
     assert_eq!(parsed.generated_at, "2026-01-01T00:00:00Z");
@@ -192,48 +172,33 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
     shrunk.dedup();
     assert_eq!(shrunk.len(), real.missing.groups_shrunk.len());
     assert!(was_sorted, "groups_shrunk must be emitted sorted");
-    assert!(!real.missing.synthesis_dominant);
-    assert!(
-        real.synthesized.is_empty(),
-        "real model has no synthesized entries"
-    );
     // Sanity-check role scores are real f64s (deserialized at all).
     let _ = real.scores.i_raw + real.scores.b_adj + real.scores.r;
 
-    let synth = parsed
+    let other = parsed
         .models
         .iter()
         .find(|m| m.canonical_id == "openai/gpt-5.5")
-        .expect("synth model present");
-    assert!(synth.missing.synthesis_dominant);
-    assert_eq!(synth.synthesized.len(), 1);
-    assert_eq!(
-        synth.synthesized.get("SWEBenchVerified"),
-        Some(&Provenance {
-            source: "openrouter".to_string(),
-            from: "openai/gpt-5.4".to_string(),
-        })
-    );
+        .expect("second model present");
     assert!(
-        !synth.metrics.contains_key("Synthesized"),
-        "synthesized values stay in [models.metrics] under their real key"
+        (other.metrics["SWEBenchVerified"] - 70.25).abs() < 1e-9,
+        "metrics round-trip for the second model"
     );
 
-    let legacy: Schema10 =
-        toml::from_str(&rendered).expect("1.0.0-shape consumer must parse 1.1.0 output unchanged");
+    assert!(
+        !rendered.contains("[models.synthesized]"),
+        "synthesis is an internal scoring detail and must not appear in the rendered scoreboard"
+    );
+    assert!(
+        !rendered.contains("synthesis_dominant"),
+        "synthesis_dominant must not appear in the rendered scoreboard"
+    );
+
+    let legacy: Schema10 = toml::from_str(&rendered)
+        .expect("1.0.0-shape consumer must parse the rendered output unchanged");
     assert!(
         legacy.schema_version.starts_with("1."),
-        "consumers gating on major version 1.x.x parse 1.1.0"
+        "consumers gating on major version 1.x.x parse the rendered output"
     );
     assert_eq!(legacy.models.len(), 2);
-    let legacy_synth = legacy
-        .models
-        .iter()
-        .find(|m| m.canonical_id == "openai/gpt-5.5")
-        .expect("synth model present in legacy view");
-    assert_eq!(
-        legacy_synth.metrics.get("SWEBenchVerified").copied(),
-        Some(70.25)
-    );
-    assert!(legacy_synth.missing.metrics.is_empty());
 }
