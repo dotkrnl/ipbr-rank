@@ -1,0 +1,59 @@
+name: refresh
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Restore upstream response cache
+        id: upstream-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: cache
+          key: upstream-cache-${{ github.run_id }}
+          restore-keys: |
+            upstream-cache-
+
+      - name: Build CLI
+        run: cargo build --release -p ipbr-rank-cli
+
+      - name: Run pipeline
+        env:
+          AA_API_KEY: ${{ secrets.AA_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: ./target/release/ipbr-rank --cache cache --out out all
+
+      - name: Save upstream response cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: cache
+          key: upstream-cache-${{ github.run_id }}
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx --yes wrangler@latest pages deploy out/site \
+            --project-name=ipbr \
+            --branch=main \
+            --commit-dirty=true
