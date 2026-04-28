@@ -1,0 +1,544 @@
+# Coefficients for ipbr-rank scoring, verbatim from the Python reference.
+# All numbers are exact copies — the Python reference is authoritative for v1.
+
+# AI Stupid Level perspective composites — role-shaped views over AISL's
+# axis surface. AISL ships three suites of evaluations (hourly, deep,
+# tooling) which jointly cover 18 axes; we use the parser's merged-axes
+# view so a model gets credit for every axis it has signal on.
+#
+# Each role pulls a tailored slice:
+#   * A_I (Idea): broad correctness + creative-flexibility axes
+#   * A_P (Planning): planCoherence + tooling suite axes (taskCompletion,
+#     contextAwareness, toolSelection) heavily weighted
+#   * A_B (Building): codeQuality, complexity, edgeCases, hallucination-
+#     resistance, plus the basic building axes
+#   * A_R (Reviewing): correctness + hallucination-resistance + spec
+#     adherence — the qualities that make a model a good code reviewer
+[ai_stupid_perspective_weights.A_I]
+AI_correctness = 0.16
+AI_spec = 0.16
+AI_code = 0.04
+AI_efficiency = 0.08
+AI_stability = 0.14
+AI_refusal = 0.10
+AI_recovery = 0.10
+AI_complexity = 0.08
+AI_edge_cases = 0.06
+AI_plan_coherence = 0.08
+
+[ai_stupid_perspective_weights.A_P]
+AI_correctness = 0.14
+AI_spec = 0.14
+AI_efficiency = 0.04
+AI_stability = 0.08
+AI_recovery = 0.06
+AI_plan_coherence = 0.18
+AI_memory_retention = 0.06
+AI_context_awareness = 0.10
+AI_task_completion = 0.10
+AI_tool_selection = 0.06
+AI_parameter_accuracy = 0.04
+
+[ai_stupid_perspective_weights.A_B]
+AI_correctness = 0.14
+AI_spec = 0.12
+AI_code = 0.22
+AI_efficiency = 0.08
+AI_stability = 0.08
+AI_recovery = 0.06
+AI_complexity = 0.10
+AI_edge_cases = 0.08
+AI_hallucination_resistance = 0.08
+AI_memory_retention = 0.04
+
+[ai_stupid_perspective_weights.A_R]
+# Tuned to lean into review-specific axes while keeping the most thinly-
+# covered ones (hallucination_resistance, error_handling — many AISL rows
+# don't carry these) under the 0.30 missing-weight ceiling so models still
+# clear the 0.70 trust threshold instead of getting shrunk to 50.
+#
+# hallucinationResistance up to 0.17 (the biggest review-specific signal —
+# does the model invent issues that aren't there?), edgeCases up to 0.13
+# (review = catching what implementers missed), recovery up to 0.10 (a
+# good reviewer recovers from a wrong initial read). correctness/spec
+# down because they saturate across frontier models and stop
+# differentiating; stability down for the same reason.
+AI_correctness = 0.18
+AI_spec = 0.14
+AI_code = 0.10
+AI_stability = 0.10
+AI_recovery = 0.18         # absorbed AI_error_handling's 0.08 (see DROPPED_AXIS_KEYS comment in aistupidlevel.rs)
+AI_hallucination_resistance = 0.17
+AI_edge_cases = 0.13
+
+# Group weights only reference metrics we actually source. Earlier revisions
+# carried NoveltyBench, EQWritingOrLongform, LiveBenchGeneral, NaturalPlan,
+# PlanBench, TravelPlanner, JudgeBench, CodeJudgeBench, RewardBench2,
+# CriticBench, LLMAggreFact — none of those have a public-leaderboard source
+# we ingest, so they were permanently missing for every model and quietly
+# dragged each group toward the 50-baseline shrink target. Better to be
+# narrower and honest than wide and fake.
+
+[group_weights.CRE]
+LMArenaCreativeOrOpenEnded = 0.65
+LMArenaText = 0.35
+
+[group_weights.GEN]
+ArtificialAnalysisIntelligence = 0.42
+LMArenaText = 0.25
+GPQA_HLE_Reasoning = 0.18
+ARC_AGI_2 = 0.15        # novel pattern induction — orthogonal to knowledge benchmarks
+
+[group_weights.PLAN]
+# PLAN composition reflects "structured multi-step decomposition" measured
+# end-to-end. TerminalBench is the heaviest input (0.34) because it most
+# directly evaluates planning-then-executing on a real shell. Tau2Bench and
+# AAReasoning fill in agentic tool-use and gpqa+hle structured reasoning
+# respectively. MCPAtlas drops to 0.06 here (it carries 0.12 in BUILD, where
+# tool-orchestration work belongs more squarely) — the asymmetry stops
+# MCPAtlas's per-vendor coverage gaps (no GPT-5.5 row, only GPT-5.4-mini /
+# 5.4) from dominating the P-axis.
+TerminalBench = 0.34
+Tau2Bench = 0.20
+ArtificialAnalysisReasoning = 0.20
+IFBench = 0.12
+LongContextRecall = 0.08
+MCPAtlas = 0.06
+
+# BUILD rebalanced: AACoding capped 0.18 → 0.12 (it's a meta-aggregate that
+# overlaps SWE-bench, LCB, Terminal — the prior weight double-counted that
+# overlap). Freed weight redistributed across the SWE composite (which is
+# the closest direct measure of real-world software work), GDPval (real-
+# world economic-value tasks), and SciCode (which measures correctness on
+# scientific code, an underweighted axis for research/data work).
+# BUILD rebalanced to make room for Sonar's code-quality signals. Sonar
+# measures properties of generated code itself (issue density, vuln
+# density, bugs per kLOC) rather than just pass-rate, which uniquely
+# captures the "is the code well-written" axis where headline benchmarks
+# fall short. Functional skill and issue density carry equal weight as
+# different dimensions of quality.
+[group_weights.BUILD]
+# BUILD rebalanced toward "real engineering work" — SWE composite + tool
+# orchestration. The previous balance over-rewarded contest-style coding
+# (LiveCodeBench, AACoding) which historically tracks GPT-5 well but
+# diverges from real-world software work. SWEComposite jumps from 0.30 →
+# 0.40 because once SWERebench / SWEBenchPro / SWEBenchVerified /
+# SWEBenchMultilingual all flow through one normalized signal, that signal
+# IS the headline building measurement. MCPAtlas doubles (0.06 → 0.12)
+# because real coding-agent loops ARE tool-orchestration loops.
+SWEComposite = 0.40
+MCPAtlas = 0.12
+TerminalBench = 0.09
+LiveCodeBench = 0.06
+ArtificialAnalysisCoding = 0.05
+SciCode = 0.05
+GDPval = 0.05
+SonarFunctionalSkill = 0.05
+SonarIssueDensity = 0.04
+LongContextRecall = 0.05
+CopilotArenaOrLMArenaCode = 0.04
+
+# Composite metrics — per-model weighted average of normalized input metrics.
+# Treated as a single derived metric in scoring so several SWE-flavor sources
+# don't pile up as independent weights.
+#
+# SWEBenchVerified back up to 0.35 (was 0.20): with the trust-threshold
+# fix in `missing_safe_avg`, models that have only a Verified hit no longer
+# get pulled toward 50, but the composite mean still benefits from a heavier
+# weight on the most widely-reported source so the metric remains
+# differentiating when SWERebench / Pro coverage is uneven.
+[composite_metrics.SWEComposite]
+SWERebench = 0.35            # contamination-resistant — highest trust
+SWEBenchVerified = 0.35      # most widely reported (incl. vendor system cards)
+SWEBenchPro = 0.20           # hardest, multi-file (1.8k tasks, 4.1 files avg)
+SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
+
+# JUDGE only has one ingested input today (the LM Arena Hard / Judge Arena
+# preference signal). The five other judge benchmarks listed in earlier
+# revisions (JudgeBench, CodeJudgeBench, RewardBench2, CriticBench,
+# LLMAggreFact) were never sourced and dragged this group toward 50 for
+# every model, which made the R-axis essentially noise. With a single
+# input, R is thin but at least reflects something we measure.
+[group_weights.JUDGE]
+JudgeArenaOrLMArenaHard = 1.00
+
+[group_weights.OPS_long]
+OutputSpeed = 0.55
+InverseTTFT = 0.20
+InverseCost = 0.10
+ContextWindow = 0.15
+
+[group_weights.OPS_precision]
+OutputSpeed = 0.35
+InverseTTFT = 0.35
+InverseCost = 0.15
+ContextWindow = 0.15
+
+[group_weights.OPS_review]
+OutputSpeed = 0.30
+InverseTTFT = 0.40
+InverseCost = 0.20
+ContextWindow = 0.10
+
+# Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
+# all carry weight 0.50 — the dominant signal in every role. The remaining
+# 0.42 is split across the role-specific public-leaderboard groups.
+#
+# Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
+# the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
+# population maps to 70..100, bottom 20 % to 0..70) means models in the
+# "fast enough" tier still cluster within a 2-point spread of each other
+# in the role score — the small-penalty regime the previous 0.03 weight
+# was trying to express. Models in the *bottom* 20 % drop sharply: at
+# weight 0.08 a model on the slowest tail loses ~5 points relative to
+# the fast cluster, which finally makes "utterly slow" actually hurt
+# without warping rankings between models that are merely "average fast"
+# vs "very fast." Use the OPS_* groups directly for a pure speed/cost
+# view of the population.
+[final_score_weights.I_raw]
+CRE = 0.30
+GEN = 0.12
+A_I = 0.50
+OPS_long = 0.08
+
+[final_score_weights.P_raw]
+# A_P is the dominant signal (0.50). PLAN's basket of TerminalBench /
+# Tau2Bench / AAReasoning / MCPAtlas can favor any of the top-3 vendors
+# depending on which gets a strong value in each — AISL's A_P perspective
+# captures planning behavior more directly than the raw leaderboard mix.
+PLAN = 0.25
+GEN = 0.17
+A_P = 0.50
+OPS_precision = 0.08
+
+[final_score_weights.B_raw]
+BUILD = 0.40
+PLAN = 0.02
+A_B = 0.50
+OPS_precision = 0.08
+
+# R-axis: A_R dominant at 0.50 (AISL's reviewing perspective is the most
+# direct public signal — hallucinationResistance / edgeCases / recovery
+# are review-specific). JUDGE (LMArena search/document hard-prompt
+# preference) sits at 0.20 as the second-largest weight: real
+# user-preference signal for review-style tasks, though Anthropic models
+# tend to top it. BUILD 0.12 keeps reviewing tied to "you can read the
+# code." PLAN 0.10 — a small slice for review-as-planning. OPS_review
+# 0.08 to match the rest of the role formulas (utterly slow models lose
+# more than the legacy 0.03 weight expressed).
+[final_score_weights.R]
+JUDGE = 0.20
+BUILD = 0.12
+PLAN = 0.10
+A_R = 0.50
+OPS_review = 0.08
+
+[reviewer_reservation]
+I_adj = 0.08
+P_adj = 0.18
+B_adj = 0.32
+
+[metrics.LMArenaText]
+higher_better = true
+log_scale = false
+groups = ["CRE", "GEN"]
+transform = "percentile"
+
+[metrics.LMArenaCreativeOrOpenEnded]
+higher_better = true
+log_scale = false
+groups = ["CRE"]
+transform = "percentile"
+
+[metrics.CopilotArenaOrLMArenaCode]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.JudgeArenaOrLMArenaHard]
+higher_better = true
+log_scale = false
+groups = ["JUDGE"]
+transform = "percentile"
+
+# All benchmark metrics use percentile normalization so they're on a
+# common scale before being averaged. Raw scores reflect each benchmark's
+# difficulty calibration (e.g. SWE-bench Verified saturates near 90% while
+# Rebench caps out around 65%), so a passthrough scoring would systematically
+# discount harder benchmarks. After percentile normalization, "top of
+# leaderboard X" maps to ~100 across all benchmarks, regardless of headline
+# difficulty.
+[metrics.ArtificialAnalysisIntelligence]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.ArtificialAnalysisCoding]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.ArtificialAnalysisReasoning]
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.LiveCodeBench]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.GPQA_HLE_Reasoning]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+# SWE-flavor metrics use percentile normalization so they enter the
+# SWEComposite on a comparable scale. Raw scores reflect benchmark difficulty
+# (Rebench tasks are harder than Verified by ~25% systematically), so
+# arithmetically combining raw percentages would unfairly discount models
+# with Rebench coverage. After percentile normalization, "top of Rebench"
+# and "top of Verified" both map to ~100 within their own populations.
+[metrics.SWEBenchVerified]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.TerminalBench]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+[metrics.SWEBenchMultilingual]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.SWERebench]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Scale's harder, multi-file SWE-Bench. Frontier scores 50-65% (vs Verified
+# saturating near 90), so it differentiates better at the top.
+[metrics.SWEBenchPro]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# MCP-Atlas — Scale's tool-orchestration leaderboard over 36 real MCP servers.
+# Feeds PLAN (planning multi-step tool sequences) and BUILD (real coding-agent
+# loops are tool-orchestration loops).
+[metrics.MCPAtlas]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+# ARC-AGI v2 (semi-private track) — pure novel-pattern induction.
+# Orthogonal to GPQA/HLE which test learned knowledge.
+[metrics.ARC_AGI_2]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+# AA already publishes per-eval scores in its existing payload; these were
+# previously unused. Wiring them up gives PLAN and BUILD more breadth without
+# adding any new HTTP fetches.
+[metrics.Tau2Bench]
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.SciCode]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.IFBench]
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.LongContextRecall]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+# Sonar Code Quality leaderboard — functional pass rate.
+[metrics.SonarFunctionalSkill]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Sonar issue density (issues / kLOC). Lower is better; the metric def
+# inverts via `higher_better = false` before percentile normalization.
+[metrics.SonarIssueDensity]
+higher_better = false
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# GDPval-AA measures real-world economic-value workflows across 44 knowledge-
+# work occupations via blind pairwise comparison (Elo). Currently sourced
+# only via overrides because AA's GDPval endpoint isn't exposed through the
+# LLM-list API we already fetch.
+[metrics.GDPval]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Operational metrics use the `tail_penalty` transform: the top 80 % of
+# the population maps into 70-100 (most models look "fast/cheap enough"
+# at a glance), only the bottom 20 % drops sharply. Linear/percentile
+# normalization made every spread between models matter equally, which
+# over-rewarded the very fastest models and over-punished moderately slow
+# ones. Users perceive operational speed/cost in tiers, not linearly.
+[metrics.OutputSpeed]
+higher_better = true
+log_scale = true
+groups = ["OPS_long", "OPS_precision", "OPS_review"]
+transform = "tail_penalty"
+
+[metrics.InverseTTFT]
+higher_better = false
+log_scale = true
+groups = ["OPS_long", "OPS_precision", "OPS_review"]
+transform = "tail_penalty"
+
+[metrics.InverseCost]
+higher_better = false
+log_scale = true
+groups = ["OPS_long", "OPS_precision", "OPS_review"]
+transform = "tail_penalty"
+
+[metrics.ContextWindow]
+higher_better = true
+log_scale = true
+groups = ["OPS_long", "OPS_precision", "OPS_review"]
+transform = "tail_penalty"
+
+[metrics.AI_correctness]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_spec]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_code]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_efficiency]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_stability]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_refusal]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_recovery]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P", "A_B", "A_R"]
+transform = "percentile"
+
+# Newly-wired AISL axes from the deep + tooling suites — surfaced via the
+# merged-history parser. Each axis flows into the role perspectives that
+# care about it (defined in [ai_stupid_perspective_weights.*]).
+[metrics.AI_complexity]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_B"]
+transform = "percentile"
+
+[metrics.AI_edge_cases]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_plan_coherence]
+higher_better = true
+log_scale = false
+groups = ["A_I", "A_P"]
+transform = "percentile"
+
+[metrics.AI_memory_retention]
+higher_better = true
+log_scale = false
+groups = ["A_P", "A_B"]
+transform = "percentile"
+
+# Lower hallucination rate is better — the AISL fetcher inverts the raw
+# rate so this metric scores higher_better.
+[metrics.AI_hallucination_resistance]
+higher_better = true
+log_scale = false
+groups = ["A_B", "A_R"]
+transform = "percentile"
+
+[metrics.AI_context_awareness]
+higher_better = true
+log_scale = false
+groups = ["A_P"]
+transform = "percentile"
+
+[metrics.AI_task_completion]
+higher_better = true
+log_scale = false
+groups = ["A_P"]
+transform = "percentile"
+
+[metrics.AI_tool_selection]
+higher_better = true
+log_scale = false
+groups = ["A_P"]
+transform = "percentile"
+
+[metrics.AI_parameter_accuracy]
+higher_better = true
+log_scale = false
+groups = ["A_P"]
+transform = "percentile"
+
+[metrics.AI_safety_compliance]
+higher_better = true
+log_scale = false
+groups = ["A_P"]
+transform = "percentile"

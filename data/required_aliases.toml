@@ -1,0 +1,136 @@
+# Required model aliases, ported verbatim from the Python reference's REQUIRED_ALIASES.
+# Each entry seeds a ModelRecord before source ingestion begins.
+#
+# Aliases are deliberately verbose: upstream sources express the same model
+# with different word orders ("claude-sonnet-4.5" vs "claude-4-5-sonnet"),
+# different decimal separators ("4.5" vs "4-5"), AA's reasoning/effort
+# suffixes, and common shorthand ("opus 4.7"). Add every observed form so
+# the alias matcher hits exact lookup instead of falling back to fuzzy.
+
+[models."openai/gpt-5.5"]
+vendor = "openai"
+aliases = [
+    "gpt-5.5", "gpt 5.5", "gpt-5-5", "openai:gpt-5.5", "openai/gpt-5.5",
+    # AA reasoning/effort variants — slug forms
+    "gpt-5-5-high", "gpt-5-5-medium", "gpt-5-5-low", "gpt-5-5-non-reasoning",
+]
+
+[models."openai/gpt-5.4"]
+vendor = "openai"
+aliases = [
+    "gpt-5.4", "gpt 5.4", "gpt-5-4", "gpt-5.4-high", "openai/gpt-5.4",
+    "gpt-5-4-high", "gpt-5-4-medium", "gpt-5-4-low", "gpt-5-4-non-reasoning",
+]
+
+[models."openai/gpt-5.3-codex"]
+vendor = "openai"
+aliases = [
+    "gpt-5.3-codex", "gpt 5.3 codex", "gpt-5-3-codex",
+    "openai/gpt-5.3-codex", "gpt-5.3-codex-high",
+]
+
+[models."anthropic/claude-sonnet-4"]
+vendor = "anthropic"
+aliases = [
+    "sonnet 4", "claude sonnet 4", "claude-sonnet-4", "claude-4-sonnet",
+    "anthropic/claude-sonnet-4",
+    "claude-4-sonnet-thinking", "claude-4-sonnet-non-reasoning",
+]
+
+[models."anthropic/claude-sonnet-4.5"]
+vendor = "anthropic"
+aliases = [
+    "sonnet 4.5", "claude sonnet 4.5",
+    "claude-sonnet-4-5", "claude-sonnet-4.5",
+    "claude-4-5-sonnet", "claude-4.5-sonnet",
+    "anthropic/claude-sonnet-4.5",
+    "claude-4-5-sonnet-thinking", "claude-4-5-sonnet-non-reasoning",
+]
+
+[models."anthropic/claude-opus-4.6"]
+vendor = "anthropic"
+aliases = [
+    "opus 4.6", "claude opus 4.6",
+    "claude-opus-4-6", "claude-opus-4.6",
+    "claude-4-6-opus", "claude-4.6-opus",
+    "anthropic/claude-opus-4.6",
+    "claude-opus-4-6-adaptive", "claude-opus-4-6-thinking", "claude-opus-4-6-non-reasoning",
+]
+
+[models."anthropic/claude-opus-4.7"]
+vendor = "anthropic"
+aliases = [
+    "opus 4.7", "claude opus 4.7",
+    "claude-opus-4-7", "claude-opus-4.7",
+    "claude-4-7-opus", "claude-4.7-opus",
+    "anthropic/claude-opus-4.7",
+    "claude-opus-4-7-adaptive", "claude-opus-4-7-thinking", "claude-opus-4-7-non-reasoning",
+    # SWE-bench w/ connector forms the extractor cannot handle (no " + " separator)
+    "Composio Coding Agent w/ Claude Opus 4.7",
+    "Agentless w/ Claude Opus 4.7",
+]
+
+[models."google/gemini-3.1-pro-preview"]
+vendor = "google"
+aliases = [
+    "gemini pro 3.1", "gemini 3.1 pro",
+    "gemini-3.1-pro", "gemini-3.1-pro-preview",
+    "gemini-3-1-pro", "gemini-3-1-pro-preview",
+    "google/gemini-3.1-pro-preview",
+]
+
+[models."google/gemini-3-pro"]
+vendor = "google"
+aliases = [
+    "gemini pro 3", "gemini 3 pro",
+    "gemini-3-pro", "gemini-3-pro-preview",
+    "gemini-3-pro-low", "gemini-3-pro-high", "gemini-3-pro-medium",
+    "google/gemini-3-pro",
+]
+
+[models."google/gemini-3-flash"]
+vendor = "google"
+aliases = [
+    "gemini flash 3", "gemini 3 flash",
+    "gemini-3-flash", "gemini-3-flash-preview", "gemini-3-flash-reasoning",
+    "google/gemini-3-flash",
+]
+
+[models."google/gemini-2.5-flash"]
+vendor = "google"
+aliases = [
+    "gemini flash 2.5", "gemini 2.5 flash",
+    "gemini-2.5-flash", "gemini-2-5-flash",
+    "google/gemini-2.5-flash",
+]
+
+[models."google/gemini-2.5-pro"]
+vendor = "google"
+aliases = [
+    "gemini pro 2.5", "gemini 2.5 pro",
+    "gemini-2.5-pro", "gemini-2-5-pro",
+    "google/gemini-2.5-pro",
+]
+
+[models."moonshotai/kimi-k2.6"]
+vendor = "moonshot"
+aliases = [
+    "kimi 2.6", "kimi k2.6",
+    "kimi-k2.6", "kimi-k2-6",
+    "kimi-latest",
+    "moonshot/kimi-k2.6", "moonshotai/kimi-k2.6",
+    # Scale leaderboards spell decimals as `p` (no `.` allowed in slugs).
+    # Note: `kimi-k2p5` upstream is the K2.5 model (a different release) — do
+    # NOT alias it here. Only K2.6's slug form would match.
+    "kimi-k2p6",
+]
+
+[models."z-ai/glm-5.1"]
+vendor = "zai"
+aliases = [
+    "glm 5.1", "glm-5.1", "glm-5-1",
+    "glm-5-1-non-reasoning",
+    "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1",
+    # Scale leaderboards: `p` instead of `.`
+    "glm-5p1",
+]

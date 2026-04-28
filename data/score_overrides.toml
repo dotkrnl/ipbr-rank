@@ -1,0 +1,172 @@
+# Hand-curated metric values from vendor reports / system cards / launch
+# announcements. Used to fill gaps that public leaderboards miss for newly
+# released models.
+#
+# Each entry is keyed by canonical_id (which is itself an alias) and emits
+# a single (metric, value) into the ingest pipeline through the synthetic
+# `overrides` source. Lower-priority than public leaderboard sources only
+# in the sense that if a public leaderboard *also* reports the same metric
+# for the same model, the leaderboard value wins per ingest precedence.
+#
+# IMPORTANT: every entry MUST cite its source in the `note` field. Numbers
+# without a citation rot quickly and become indistinguishable from typos.
+
+# ---------------------------------------------------------------------
+# SWE-bench Verified — vendor-reported figures missing from swebench.com
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "SWEBenchVerified"
+value = 87.6
+note = "Anthropic Claude Opus 4.7 launch announcement, 2026-04-16"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "SWEBenchVerified"
+value = 88.7
+note = "OpenAI GPT-5.5 launch, 2026-04-23"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "SWEBenchVerified"
+value = 78.2
+note = "OpenAI GPT-5.4 reported figure, 2026-Q1"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "SWEBenchVerified"
+value = 80.2
+note = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
+
+[[entries]]
+canonical_id = "google/gemini-3.1-pro-preview"
+metric = "SWEBenchVerified"
+value = 80.6
+note = "Google DeepMind Gemini 3.1 Pro model card, 2026-02-19"
+
+# ---------------------------------------------------------------------
+# Terminal-Bench 2.0 — vendor-reported figures
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "TerminalBench"
+value = 82.7
+note = "OpenAI GPT-5.5 launch announcement, 2026-04-23 (Terminal-Bench 2.0)"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "TerminalBench"
+value = 75.1
+note = "Cited alongside the GPT-5.5 launch as the prior-version baseline, 2026-04-23"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "TerminalBench"
+value = 69.4
+note = "Anthropic Claude Opus 4.7 launch comparison numbers, 2026-04-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "TerminalBench"
+value = 66.7
+note = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "TerminalBench"
+value = 63.5
+note = "Z.ai GLM-5.1 launch announcement, 2026-04-08"
+
+# ---------------------------------------------------------------------
+# GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
+# Elo ratings from blind pairwise comparison on real-world knowledge-
+# work tasks across 44 occupations. AA's web UI shows the leaderboard
+# but the LLM-list API doesn't include the per-model Elo, so we mirror
+# the values here from artificialanalysis.ai/evaluations/gdpval-aa.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "GDPval"
+value = 1781
+note = "GDPval-AA Elo, artificialanalysis.ai (xhigh effort), 2026-04-27"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "GDPval"
+value = 1753
+note = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "GDPval"
+value = 1674
+note = "GDPval-AA Elo (xhigh), 2026-04-27"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.6"
+metric = "GDPval"
+value = 1619
+note = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-4.5"
+metric = "GDPval"
+value = 1677
+note = "GDPval-AA Elo (Sonnet 4.6 Adaptive Reasoning, used as 4.5-class proxy), 2026-04-27"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "GDPval"
+value = 1535
+note = "GDPval-AA Elo (Reasoning), 2026-04-27"
+
+[[entries]]
+canonical_id = "openai/gpt-5.3-codex"
+metric = "GDPval"
+value = 1484
+note = "GDPval-AA Elo (xhigh), 2026-04-27"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "GDPval"
+value = 1488
+note = "GDPval-AA Elo, 2026-04-27"
+
+[[entries]]
+canonical_id = "google/gemini-3.1-pro-preview"
+metric = "GDPval"
+value = 1314
+note = "GDPval-AA Elo, 2026-04-27"
+
+[[entries]]
+canonical_id = "google/gemini-3-flash"
+metric = "GDPval"
+value = 1208
+note = "GDPval-AA Elo (Reasoning), 2026-04-27"
+
+[[entries]]
+canonical_id = "google/gemini-3-pro"
+metric = "GDPval"
+value = 1189
+note = "GDPval-AA Elo (high), 2026-04-27"
+
+# SWE-Bench Pro — Anthropic-reported and OpenAI-reported figures that don't
+# appear on Scale's public-dataset leaderboard. Matters because without these
+# Opus 4.7 / GPT-5.5 carry only a single Verified value through SWEComposite,
+# which drags the composite below the honest measurement level.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "SWEBenchPro"
+value = 64.3
+note = "Anthropic-reported, Claude Opus 4.7 (Adaptive Reasoning, Max Effort), 2026-04-16"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "SWEBenchPro"
+value = 58.6
+note = "OpenAI-reported on SWE-Bench Pro (xHigh), 2026-04-23"

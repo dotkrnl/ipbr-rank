@@ -1,0 +1,20 @@
+[package]
+name = "ipbr-rank-render"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "ipbr_render"
+
+[dependencies]
+ipbr-core = { package = "ipbr-rank-core", path = "../core" }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+thiserror = "2"
+
+[dev-dependencies]
+ipbr-rank-sources = { path = "../sources" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tempfile = "3"
+async-trait = "0.1"
+serde_json = "1"

@@ -1,0 +1,24 @@
+[package]
+name = "ipbr-rank-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "ipbr-rank"
+path = "src/main.rs"
+
+[dependencies]
+ipbr-core = { package = "ipbr-rank-core", path = "../core" }
+ipbr-rank-sources = { path = "../sources" }
+ipbr-render = { package = "ipbr-rank-render", path = "../render" }
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+time = { version = "0.3", features = ["formatting", "parsing"] }
+
+[dev-dependencies]
+assert_cmd = "2"
+tempfile = "3"

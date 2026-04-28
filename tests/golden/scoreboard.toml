@@ -1,0 +1,1235 @@
+schema_version = "1.1.0"
+generated_at = "2026-01-01T00:00:00Z"
+generator = "ipbr-rank 0.1.0"
+methodology = "v1"
+
+[sources."aistupidlevel"]
+status = "verified"
+n_rows_ingested = 24
+n_rows_matched = 18
+n_rows_unmatched = 13
+
+[sources."arc_agi"]
+status = "verified"
+n_rows_ingested = 149
+n_rows_matched = 36
+n_rows_unmatched = 118
+
+[sources."artificial_analysis"]
+status = "verified"
+n_rows_ingested = 56
+n_rows_matched = 34
+n_rows_unmatched = 27
+
+[sources."livecodebench"]
+status = "verified"
+n_rows_ingested = 41
+n_rows_matched = 24
+n_rows_unmatched = 24
+
+[sources."lmarena"]
+status = "verified"
+n_rows_ingested = 382
+n_rows_matched = 44
+n_rows_unmatched = 345
+
+[sources."mcp_atlas"]
+status = "verified"
+n_rows_ingested = 19
+n_rows_matched = 15
+n_rows_unmatched = 10
+
+[sources."openrouter"]
+status = "verified"
+n_rows_ingested = 355
+n_rows_matched = 38
+n_rows_unmatched = 324
+
+[sources."overrides"]
+status = "verified"
+n_rows_ingested = 23
+n_rows_matched = 30
+n_rows_unmatched = 0
+
+[sources."sonar"]
+status = "verified"
+n_rows_ingested = 58
+n_rows_matched = 23
+n_rows_unmatched = 41
+
+[sources."swebench"]
+status = "verified"
+n_rows_ingested = 201
+n_rows_matched = 35
+n_rows_unmatched = 173
+
+[sources."swebench_pro"]
+status = "verified"
+n_rows_ingested = 24
+n_rows_matched = 12
+n_rows_unmatched = 17
+
+[sources."swerebench"]
+status = "verified"
+n_rows_ingested = 91
+n_rows_matched = 16
+n_rows_unmatched = 79
+
+[sources."terminal_bench"]
+status = "verified"
+n_rows_ingested = 124
+n_rows_matched = 52
+n_rows_unmatched = 77
+
+[[models]]
+canonical_id = "anthropic/claude-opus-4.6"
+display_name = "claude-opus-4.6"
+vendor = "anthropic"
+thinking_effort = "default"
+aliases = ["anthropic/claude-opus-4.6", "claude opus 4.6", "claude-4-6-opus", "claude-4.6-opus", "claude-opus-4-6", "claude-opus-4-6-adaptive", "claude-opus-4-6-non-reasoning", "claude-opus-4-6-thinking", "claude-opus-4.6", "opus 4.6"]
+sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 85.747680
+p_raw = 64.017316
+b_raw = 80.980180
+r = 88.792283
+i_adj = 85.303023
+p_adj = 63.016839
+b_adj = 79.201555
+
+[models.groups]
+A_B = 88.476396
+A_I = 85.356213
+A_P = 61.732540
+A_R = 97.191819
+BUILD = 77.111897
+CRE = 100.000000
+GEN = 71.693849
+JUDGE = 100.000000
+OPS_long = 55.828893
+OPS_precision = 57.339353
+OPS_review = 54.907102
+PLAN = 65.503775
+
+[models.metrics]
+AI_code = 92.940687
+AI_complexity = 96.025777
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 39.550631
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 11.883140
+AI_parameter_accuracy = 100.000000
+AI_plan_coherence = 0.000000
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 74.902761
+AI_spec = 100.000000
+AI_stability = 97.898025
+AI_task_completion = 96.394631
+AI_tool_selection = 68.467099
+ARC_AGI_2 = 84.307967
+ArtificialAnalysisCoding = 46.842105
+ArtificialAnalysisIntelligence = 57.875458
+ArtificialAnalysisReasoning = 54.110899
+ContextWindow = 76.025411
+CopilotArenaOrLMArenaCode = 96.369346
+GDPval = 74.105802
+GPQA_HLE_Reasoning = 54.110899
+InverseCost = 0.000000
+InverseTTFT = 79.312402
+JudgeArenaOrLMArenaHard = 100.000000
+LMArenaCreativeOrOpenEnded = 100.000000
+LMArenaText = 100.000000
+LiveCodeBench = 76.020171
+MCPAtlas = 89.819515
+OutputSpeed = 51.932001
+SWEBenchMultilingual = 88.857678
+SWEBenchPro = 57.550056
+SWEBenchVerified = 87.155651
+SWEComposite = 82.807395
+SWERebench = 91.163251
+SonarFunctionalSkill = 76.720261
+SonarIssueDensity = 36.597919
+Tau2Bench = 72.609819
+TerminalBench = 63.734427
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "anthropic/claude-opus-4.7"
+display_name = "claude-opus-4.7"
+vendor = "anthropic"
+thinking_effort = "default"
+aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus 4.7", "anthropic/claude-opus-4.7", "claude opus 4.7", "claude-4-7-opus", "claude-4.7-opus", "claude-opus-4-7", "claude-opus-4-7-adaptive", "claude-opus-4-7-non-reasoning", "claude-opus-4-7-thinking", "claude-opus-4.7", "opus 4.7"]
+sources = ["aistupidlevel", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench"]
+
+[models.scores]
+i_raw = 86.668609
+p_raw = 66.626660
+b_raw = 79.661486
+r = 90.492170
+i_adj = 86.223953
+p_adj = 65.626183
+b_adj = 77.882861
+
+[models.groups]
+A_B = 81.687516
+A_I = 82.540082
+A_P = 54.838695
+A_R = 96.323026
+BUILD = 78.816377
+CRE = 97.709939
+GEN = 88.165988
+JUDGE = 98.591000
+OPS_long = 68.820854
+OPS_precision = 72.739810
+OPS_review = 72.431595
+PLAN = 73.599640
+
+[models.metrics]
+AI_code = 84.252755
+AI_complexity = 22.120438
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 60.539715
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 32.729944
+AI_parameter_accuracy = 60.255654
+AI_plan_coherence = 22.058585
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 0.000000
+AI_spec = 100.000000
+AI_stability = 97.898025
+AI_task_completion = 23.825007
+AI_tool_selection = 0.000000
+ArtificialAnalysisCoding = 70.000000
+ArtificialAnalysisIntelligence = 89.377289
+ArtificialAnalysisReasoning = 72.084130
+ContextWindow = 99.294594
+CopilotArenaOrLMArenaCode = 100.000000
+GDPval = 97.774441
+GPQA_HLE_Reasoning = 72.084130
+InverseCost = 72.161377
+InverseTTFT = 77.657907
+JudgeArenaOrLMArenaHard = 98.591000
+LMArenaCreativeOrOpenEnded = 97.709939
+LMArenaText = 97.709939
+LiveCodeBench = 70.507567
+MCPAtlas = 100.000000
+OutputSpeed = 56.688992
+SWEBenchPro = 100.000000
+SWEBenchVerified = 100.000000
+SWEComposite = 77.500000
+SonarFunctionalSkill = 80.413364
+SonarIssueDensity = 0.000000
+Tau2Bench = 54.521964
+TerminalBench = 81.054391
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "anthropic/claude-sonnet-4"
+display_name = "claude-sonnet-4"
+vendor = "anthropic"
+thinking_effort = "default"
+aliases = ["anthropic/claude-sonnet-4", "claude sonnet 4", "claude-4-sonnet", "claude-4-sonnet-non-reasoning", "claude-4-sonnet-thinking", "claude-sonnet-4", "sonnet 4"]
+sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
+
+[models.scores]
+i_raw = 80.073141
+p_raw = 55.249816
+b_raw = 73.698628
+r = 67.565742
+i_adj = 79.628485
+p_adj = 54.249339
+b_adj = 71.920002
+
+[models.groups]
+A_B = 90.038955
+A_I = 88.434468
+A_P = 65.540745
+A_R = 96.310860
+BUILD = 55.096673
+CRE = 77.399391
+GEN = 54.390957
+JUDGE = 19.855314
+OPS_long = 76.364684
+OPS_precision = 75.840257
+OPS_review = 74.516808
+PLAN = 28.663040
+
+[models.metrics]
+AI_code = 88.596721
+AI_complexity = 96.025777
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 68.319217
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 26.233025
+AI_parameter_accuracy = 39.789154
+AI_plan_coherence = 19.696447
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 100.000000
+AI_spec = 100.000000
+AI_stability = 93.432393
+AI_task_completion = 99.396861
+AI_tool_selection = 80.409912
+ARC_AGI_2 = 73.672114
+ArtificialAnalysisCoding = 61.578947
+ArtificialAnalysisIntelligence = 48.351648
+ArtificialAnalysisReasoning = 20.458891
+ContextWindow = 99.294594
+CopilotArenaOrLMArenaCode = 86.533030
+GDPval = 79.197872
+GPQA_HLE_Reasoning = 20.458891
+InverseCost = 78.011659
+InverseTTFT = 67.756006
+JudgeArenaOrLMArenaHard = 19.855314
+LMArenaCreativeOrOpenEnded = 77.399391
+LMArenaText = 77.399391
+LiveCodeBench = 0.000000
+MCPAtlas = 48.646362
+OutputSpeed = 72.942050
+SWEBenchPro = 18.729033
+SWEBenchVerified = 56.868533
+SWEComposite = 63.299542
+SWERebench = 95.199413
+SonarFunctionalSkill = 60.365090
+SonarIssueDensity = 17.428113
+Tau2Bench = 0.000000
+TerminalBench = 46.823154
+
+[models.synthesized]
+GDPval = { source = "overrides", from = "anthropic/claude-sonnet-4.5" }
+TerminalBench = { source = "terminal_bench", from = "anthropic/claude-sonnet-4.5" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "anthropic/claude-sonnet-4.5"
+display_name = "claude-sonnet-4.5"
+vendor = "anthropic"
+thinking_effort = "default"
+aliases = ["anthropic/claude-sonnet-4.5", "claude sonnet 4.5", "claude-4-5-sonnet", "claude-4-5-sonnet-non-reasoning", "claude-4-5-sonnet-thinking", "claude-4.5-sonnet", "claude-sonnet-4-5", "claude-sonnet-4.5", "sonnet 4.5"]
+sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 76.675397
+p_raw = 65.110761
+b_raw = 68.732416
+r = 62.501994
+i_adj = 76.230740
+p_adj = 64.110284
+b_adj = 66.953791
+
+[models.groups]
+A_B = 89.386605
+A_I = 90.882338
+A_P = 82.432353
+A_R = 95.876463
+BUILD = 45.657433
+CRE = 68.388844
+GEN = 49.182885
+JUDGE = 0.000000
+OPS_long = 60.195355
+OPS_precision = 61.595938
+OPS_review = 60.531791
+PLAN = 42.423276
+
+[models.metrics]
+AI_code = 84.252755
+AI_complexity = 96.025777
+AI_context_awareness = 100.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 67.178349
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 36.097833
+AI_parameter_accuracy = 84.660322
+AI_plan_coherence = 53.607664
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 77.503806
+AI_spec = 100.000000
+AI_stability = 93.432393
+AI_task_completion = 100.000000
+AI_tool_selection = 53.512835
+ARC_AGI_2 = 13.904494
+ContextWindow = 99.294594
+CopilotArenaOrLMArenaCode = 32.558777
+GDPval = 84.350437
+InverseCost = 78.011659
+JudgeArenaOrLMArenaHard = 0.000000
+LMArenaCreativeOrOpenEnded = 68.388844
+LMArenaText = 68.388844
+LiveCodeBench = 81.532775
+MCPAtlas = 0.000000
+SWEBenchMultilingual = 0.000000
+SWEBenchPro = 22.526742
+SWEBenchVerified = 72.963000
+SWEComposite = 56.307786
+SWERebench = 75.043964
+SonarFunctionalSkill = 27.918541
+SonarIssueDensity = 29.735576
+TerminalBench = 36.539046
+
+[models.missing]
+metrics = []
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "google/gemini-2.5-flash"
+display_name = "gemini-2.5-flash"
+vendor = "google"
+thinking_effort = "default"
+aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2.5-flash", "google/gemini-2.5-flash"]
+sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 73.494997
+p_raw = 55.180019
+b_raw = 63.808249
+r = 70.451771
+i_adj = 73.494997
+p_adj = 55.180019
+b_adj = 63.808249
+
+[models.groups]
+A_B = 95.571027
+A_I = 91.780655
+A_P = 68.365305
+A_R = 97.806073
+BUILD = 25.407429
+CRE = 57.590622
+GEN = 44.397656
+JUDGE = 50.000000
+OPS_long = 62.497057
+OPS_precision = 64.997057
+OPS_review = 64.998038
+PLAN = 33.000000
+
+[models.metrics]
+AI_code = 100.000000
+AI_complexity = 100.000000
+AI_context_awareness = 92.792704
+AI_correctness = 87.811517
+AI_edge_cases = 100.000000
+AI_efficiency = 100.000000
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 31.935353
+AI_parameter_accuracy = 49.317994
+AI_plan_coherence = 21.635148
+AI_recovery = 100.000000
+AI_refusal = 100.000000
+AI_safety_compliance = 100.000000
+AI_spec = 100.000000
+AI_stability = 100.000000
+AI_task_completion = 34.687745
+AI_tool_selection = 59.008007
+ARC_AGI_2 = 0.000000
+ContextWindow = 99.980379
+InverseCost = 100.000000
+LMArenaCreativeOrOpenEnded = 57.590622
+LMArenaText = 57.590622
+LiveCodeBench = 48.457149
+SWEBenchVerified = 0.000000
+SWEComposite = 0.000000
+SWERebench = 0.000000
+TerminalBench = 0.000000
+
+[models.missing]
+metrics = []
+groups_shrunk = ["GEN", "JUDGE", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "google/gemini-2.5-pro"
+display_name = "gemini-2.5-pro"
+vendor = "google"
+thinking_effort = "default"
+aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro", "google/gemini-2.5-pro"]
+sources = ["arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 33.498564
+p_raw = 43.441190
+b_raw = 42.248760
+r = 36.754735
+i_adj = 33.498564
+p_adj = 43.441190
+b_adj = 42.248760
+
+[models.groups]
+A_B = 50.000000
+A_I = 50.000000
+A_P = 50.000000
+A_R = 50.000000
+BUILD = 28.931720
+CRE = 0.000000
+GEN = 30.197268
+JUDGE = 0.073756
+OPS_long = 60.936150
+OPS_precision = 62.655696
+OPS_review = 61.876224
+PLAN = 33.180796
+
+[models.metrics]
+ARC_AGI_2 = 1.315117
+ContextWindow = 99.980379
+CopilotArenaOrLMArenaCode = 0.000000
+InverseCost = 84.390930
+JudgeArenaOrLMArenaHard = 0.073756
+LMArenaCreativeOrOpenEnded = 0.000000
+LMArenaText = 0.000000
+LiveCodeBench = 42.944545
+SWEBenchVerified = 24.707986
+SWEComposite = 14.517974
+SWERebench = 4.327963
+TerminalBench = 0.531753
+
+[models.missing]
+metrics = []
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "google/gemini-3-flash"
+display_name = "gemini-3-flash"
+vendor = "google"
+thinking_effort = "default"
+aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash-preview", "gemini-3-flash-reasoning", "google/gemini-3-flash"]
+sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 42.871875
+p_raw = 39.903833
+b_raw = 31.733526
+r = 23.937288
+i_adj = 42.871875
+p_adj = 39.903833
+b_adj = 31.733526
+
+[models.groups]
+A_B = 10.900000
+A_I = 14.300000
+A_P = 34.023291
+A_R = 7.500000
+BUILD = 45.051108
+CRE = 78.094644
+GEN = 37.940730
+JUDGE = 18.717438
+OPS_long = 96.757422
+OPS_precision = 94.398120
+OPS_review = 93.518769
+PLAN = 35.561655
+
+[models.metrics]
+AI_code = 7.500000
+AI_complexity = 7.500000
+AI_context_awareness = 17.732910
+AI_correctness = 7.500000
+AI_edge_cases = 7.500000
+AI_efficiency = 7.500000
+AI_hallucination_resistance = 7.500000
+AI_memory_retention = 92.500000
+AI_parameter_accuracy = 7.500000
+AI_plan_coherence = 92.500000
+AI_recovery = 7.500000
+AI_refusal = 7.500000
+AI_safety_compliance = 9.759586
+AI_spec = 7.500000
+AI_stability = 7.500000
+AI_task_completion = 7.500000
+AI_tool_selection = 92.500000
+ARC_AGI_2 = 39.440756
+ArtificialAnalysisCoding = 17.894737
+ArtificialAnalysisIntelligence = 9.523810
+ArtificialAnalysisReasoning = 47.227533
+ContextWindow = 99.980379
+CopilotArenaOrLMArenaCode = 32.820480
+GDPval = 1.510200
+GPQA_HLE_Reasoning = 47.227533
+InverseCost = 97.183044
+InverseTTFT = 85.210304
+JudgeArenaOrLMArenaHard = 18.717438
+LMArenaCreativeOrOpenEnded = 78.094644
+LMArenaText = 78.094644
+LiveCodeBench = 53.969754
+MCPAtlas = 6.345178
+OutputSpeed = 100.000000
+SWEBenchMultilingual = 100.000000
+SWEBenchPro = 0.000000
+SWEBenchVerified = 87.723357
+SWEComposite = 67.453339
+SWERebench = 76.429041
+SonarFunctionalSkill = 43.218539
+SonarIssueDensity = 20.859285
+Tau2Bench = 12.144703
+TerminalBench = 47.629900
+
+[models.synthesized]
+AI_code = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_complexity = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_context_awareness = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_correctness = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_edge_cases = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_efficiency = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_hallucination_resistance = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_memory_retention = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_parameter_accuracy = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_plan_coherence = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_recovery = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_refusal = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_safety_compliance = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_spec = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_stability = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_task_completion = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_tool_selection = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "google/gemini-3-pro"
+display_name = "gemini-3-pro"
+vendor = "google"
+thinking_effort = "default"
+aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-high", "gemini-3-pro-low", "gemini-3-pro-medium", "gemini-3-pro-preview", "google/gemini-3-pro"]
+sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 43.923739
+p_raw = 43.848308
+b_raw = 28.882967
+r = 21.045563
+i_adj = 43.923739
+p_adj = 43.848308
+b_adj = 28.882967
+
+[models.groups]
+A_B = 4.000000
+A_I = 8.000000
+A_P = 31.203872
+A_R = 0.000000
+BUILD = 50.353732
+CRE = 93.534561
+GEN = 49.884929
+JUDGE = 17.405907
+OPS_long = 73.464735
+OPS_precision = 70.111403
+OPS_review = 73.239055
+PLAN = 56.628088
+
+[models.metrics]
+AI_code = 0.000000
+AI_complexity = 0.000000
+AI_context_awareness = 12.038717
+AI_correctness = 0.000000
+AI_edge_cases = 0.000000
+AI_efficiency = 0.000000
+AI_hallucination_resistance = 0.000000
+AI_memory_retention = 100.000000
+AI_parameter_accuracy = 0.000000
+AI_plan_coherence = 100.000000
+AI_recovery = 0.000000
+AI_refusal = 0.000000
+AI_safety_compliance = 2.658336
+AI_spec = 0.000000
+AI_stability = 0.000000
+AI_task_completion = 0.000000
+AI_tool_selection = 100.000000
+ARC_AGI_2 = 36.248723
+ArtificialAnalysisCoding = 38.421053
+ArtificialAnalysisIntelligence = 24.175824
+ArtificialAnalysisReasoning = 60.611855
+ContextWindow = 0.000000
+CopilotArenaOrLMArenaCode = 52.144779
+GDPval = 0.000000
+GPQA_HLE_Reasoning = 60.611855
+InverseCost = 81.306367
+InverseTTFT = 73.359691
+JudgeArenaOrLMArenaHard = 17.405907
+LMArenaCreativeOrOpenEnded = 93.534561
+LMArenaText = 93.534561
+LiveCodeBench = 59.482358
+MCPAtlas = 53.158488
+OutputSpeed = 92.113018
+SWEBenchMultilingual = 27.059925
+SWEBenchPro = 21.260839
+SWEBenchVerified = 70.124470
+SWEComposite = 56.304744
+SWERebench = 70.865770
+SonarFunctionalSkill = 56.144400
+SonarIssueDensity = 14.295305
+Tau2Bench = 46.770026
+TerminalBench = 60.695837
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "google/gemini-3.1-pro-preview"
+display_name = "gemini-3.1-pro-preview"
+vendor = "google"
+thinking_effort = "default"
+aliases = ["gemini 3.1 pro", "gemini pro 3.1", "gemini-3-1-pro", "gemini-3-1-pro-preview", "gemini-3.1-pro", "gemini-3.1-pro-preview", "google/gemini-3.1-pro-preview"]
+sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 54.910547
+p_raw = 63.088583
+b_raw = 44.588694
+r = 45.258491
+i_adj = 54.910547
+p_adj = 63.088583
+b_adj = 44.588694
+
+[models.groups]
+A_B = 10.900000
+A_I = 14.300000
+A_P = 34.023291
+A_R = 7.500000
+BUILD = 76.026390
+CRE = 97.947349
+GEN = 93.959179
+JUDGE = 81.801081
+OPS_long = 88.765508
+OPS_precision = 85.867226
+OPS_review = 84.141359
+PLAN = 92.937997
+
+[models.metrics]
+AI_code = 7.500000
+AI_complexity = 7.500000
+AI_context_awareness = 17.732910
+AI_correctness = 7.500000
+AI_edge_cases = 7.500000
+AI_efficiency = 7.500000
+AI_hallucination_resistance = 7.500000
+AI_memory_retention = 92.500000
+AI_parameter_accuracy = 7.500000
+AI_plan_coherence = 92.500000
+AI_recovery = 7.500000
+AI_refusal = 7.500000
+AI_safety_compliance = 9.759586
+AI_spec = 7.500000
+AI_stability = 7.500000
+AI_task_completion = 7.500000
+AI_tool_selection = 92.500000
+ARC_AGI_2 = 94.943820
+ArtificialAnalysisCoding = 85.789474
+ArtificialAnalysisIntelligence = 88.644689
+ArtificialAnalysisReasoning = 100.000000
+ContextWindow = 99.980379
+CopilotArenaOrLMArenaCode = 59.366965
+GDPval = 20.233154
+GPQA_HLE_Reasoning = 100.000000
+InverseCost = 81.306367
+InverseTTFT = 75.898636
+JudgeArenaOrLMArenaHard = 81.801081
+LMArenaCreativeOrOpenEnded = 97.947349
+LMArenaText = 97.947349
+LiveCodeBench = 64.994962
+MCPAtlas = 97.715736
+OutputSpeed = 91.741976
+SWEBenchPro = 33.075933
+SWEBenchVerified = 81.478590
+SWEComposite = 77.592265
+SWERebench = 99.143844
+SonarFunctionalSkill = 100.000000
+SonarIssueDensity = 26.304405
+Tau2Bench = 90.697674
+TerminalBench = 89.258584
+
+[models.synthesized]
+AI_code = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_complexity = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_context_awareness = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_correctness = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_edge_cases = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_efficiency = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_hallucination_resistance = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_memory_retention = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_parameter_accuracy = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_plan_coherence = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_recovery = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_refusal = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_safety_compliance = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_spec = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_stability = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_task_completion = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+AI_tool_selection = { source = "aistupidlevel", from = "google/gemini-3-pro" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "moonshotai/kimi-k2.6"
+display_name = "kimi-k2.6"
+vendor = "moonshot"
+thinking_effort = "default"
+aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "kimi-latest", "moonshot/kimi-k2.6", "moonshotai/kimi-k2.6"]
+sources = ["aistupidlevel", "livecodebench", "lmarena", "openrouter", "overrides", "swebench"]
+
+[models.scores]
+i_raw = 73.356250
+p_raw = 53.399764
+b_raw = 77.069917
+r = 84.933965
+i_adj = 73.356250
+p_adj = 53.399764
+b_adj = 77.069917
+
+[models.groups]
+A_B = 85.493390
+A_I = 84.899670
+A_P = 55.867671
+A_R = 96.323026
+BUILD = 70.772292
+CRE = 80.163919
+GEN = 28.871741
+JUDGE = 83.793650
+OPS_long = 42.407873
+OPS_precision = 59.370744
+OPS_review = 64.972725
+PLAN = 63.232290
+
+[models.metrics]
+AI_code = 84.252755
+AI_complexity = 96.025777
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 32.096444
+AI_hallucination_resistance = 100.000000
+AI_memory_retention = 0.000000
+AI_parameter_accuracy = 67.079129
+AI_plan_coherence = 6.091371
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 53.844302
+AI_spec = 100.000000
+AI_stability = 97.898025
+AI_task_completion = 79.283898
+AI_tool_selection = 19.762905
+ArtificialAnalysisCoding = 7.500000
+ArtificialAnalysisIntelligence = 7.500000
+ArtificialAnalysisReasoning = 7.500000
+ContextWindow = 69.215103
+CopilotArenaOrLMArenaCode = 87.511416
+GDPval = 50.967058
+GPQA_HLE_Reasoning = 7.500000
+InverseCost = 98.503371
+InverseTTFT = 90.251351
+JudgeArenaOrLMArenaHard = 83.793650
+LMArenaCreativeOrOpenEnded = 80.163919
+LMArenaText = 80.163919
+LiveCodeBench = 37.431941
+MCPAtlas = 78.093627
+OutputSpeed = 7.500000
+SWEBenchVerified = 74.666118
+SWEComposite = 83.583059
+SWERebench = 92.500000
+SonarFunctionalSkill = 31.903432
+SonarIssueDensity = 92.500000
+Tau2Bench = 91.182171
+TerminalBench = 76.952294
+
+[models.synthesized]
+ArtificialAnalysisCoding = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+ArtificialAnalysisIntelligence = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+ArtificialAnalysisReasoning = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+GPQA_HLE_Reasoning = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+InverseTTFT = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+MCPAtlas = { source = "mcp_atlas", from = "z-ai/glm-5.1" }
+OutputSpeed = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+SWERebench = { source = "swerebench", from = "z-ai/glm-5.1" }
+SonarFunctionalSkill = { source = "sonar", from = "z-ai/glm-5.1" }
+SonarIssueDensity = { source = "sonar", from = "z-ai/glm-5.1" }
+Tau2Bench = { source = "artificial_analysis", from = "z-ai/glm-5.1" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.3-codex"
+display_name = "gpt-5.3-codex"
+vendor = "openai"
+thinking_effort = "default"
+aliases = ["gpt 5.3 codex", "gpt-5-3-codex", "gpt-5.3-codex", "gpt-5.3-codex-high", "openai/gpt-5.3-codex"]
+sources = ["aistupidlevel", "artificial_analysis", "livecodebench", "lmarena", "openrouter", "overrides", "sonar", "swebench", "swerebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 79.164929
+p_raw = 60.826382
+b_raw = 73.604813
+r = 79.489508
+i_adj = 79.164929
+p_adj = 60.826382
+b_adj = 73.604813
+
+[models.groups]
+A_B = 78.847606
+A_I = 85.072176
+A_P = 56.170210
+A_R = 84.863968
+BUILD = 67.637731
+CRE = 76.223348
+GEN = 63.891054
+JUDGE = 83.904217
+OPS_long = 76.186385
+OPS_precision = 73.037144
+OPS_review = 71.817783
+PLAN = 64.147305
+
+[models.metrics]
+AI_code = 66.876890
+AI_complexity = 96.025777
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 55.831692
+AI_hallucination_resistance = 45.441716
+AI_memory_retention = 0.000000
+AI_parameter_accuracy = 94.402971
+AI_plan_coherence = 1.015228
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 84.614767
+AI_spec = 100.000000
+AI_stability = 93.432393
+AI_task_completion = 64.774287
+AI_tool_selection = 36.131108
+ARC_AGI_2 = 36.205950
+ArtificialAnalysisCoding = 73.157895
+ArtificialAnalysisIntelligence = 62.271062
+ArtificialAnalysisReasoning = 73.613767
+ContextWindow = 86.046903
+CopilotArenaOrLMArenaCode = 39.779891
+GDPval = 50.260532
+GPQA_HLE_Reasoning = 73.613767
+InverseCost = 84.390930
+InverseTTFT = 56.450761
+JudgeArenaOrLMArenaHard = 83.904217
+LMArenaCreativeOrOpenEnded = 76.223348
+LMArenaText = 76.223348
+LiveCodeBench = 92.557984
+MCPAtlas = 54.122955
+OutputSpeed = 79.182009
+SWEBenchPro = 82.241967
+SWEBenchVerified = 77.220795
+SWEComposite = 83.330599
+SWERebench = 90.062479
+SonarFunctionalSkill = 17.366817
+SonarIssueDensity = 5.269832
+Tau2Bench = 41.085271
+TerminalBench = 73.913704
+
+[models.synthesized]
+ARC_AGI_2 = { source = "arc_agi", from = "openai/gpt-5.4" }
+JudgeArenaOrLMArenaHard = { source = "lmarena", from = "openai/gpt-5.4" }
+LMArenaCreativeOrOpenEnded = { source = "lmarena", from = "openai/gpt-5.4" }
+LMArenaText = { source = "lmarena", from = "openai/gpt-5.4" }
+MCPAtlas = { source = "mcp_atlas", from = "openai/gpt-5.4" }
+SWEBenchPro = { source = "swebench_pro", from = "openai/gpt-5.4" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.4"
+display_name = "gpt-5.4"
+vendor = "openai"
+thinking_effort = "default"
+aliases = ["gpt 5.4", "gpt-5-4", "gpt-5-4-high", "gpt-5-4-low", "gpt-5-4-medium", "gpt-5-4-non-reasoning", "gpt-5.4", "gpt-5.4-high", "openai/gpt-5.4"]
+sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
+
+[models.scores]
+i_raw = 70.033445
+p_raw = 68.976335
+b_raw = 72.515064
+r = 65.710755
+i_adj = 70.033445
+p_adj = 68.976335
+b_adj = 72.515064
+
+[models.groups]
+A_B = 78.398278
+A_I = 86.044167
+A_P = 64.435634
+A_R = 84.863968
+BUILD = 68.583092
+CRE = 42.589662
+GEN = 75.054343
+JUDGE = 16.292944
+OPS_long = 65.349271
+OPS_precision = 53.841650
+OPS_review = 48.917899
+PLAN = 78.767790
+
+[models.metrics]
+AI_code = 66.876890
+AI_complexity = 96.025777
+AI_context_awareness = 0.000000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 50.215092
+AI_hallucination_resistance = 45.441716
+AI_memory_retention = 0.000000
+AI_parameter_accuracy = 88.532097
+AI_plan_coherence = 18.781726
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 100.000000
+AI_spec = 100.000000
+AI_stability = 93.432393
+AI_task_completion = 93.793510
+AI_tool_selection = 79.881634
+ARC_AGI_2 = 90.947395
+ArtificialAnalysisCoding = 95.263158
+ArtificialAnalysisIntelligence = 85.714286
+ArtificialAnalysisReasoning = 82.026769
+ContextWindow = 100.000000
+CopilotArenaOrLMArenaCode = 36.666094
+GDPval = 83.820542
+GPQA_HLE_Reasoning = 82.026769
+InverseCost = 78.750793
+InverseTTFT = 0.000000
+JudgeArenaOrLMArenaHard = 16.292944
+LMArenaCreativeOrOpenEnded = 42.589662
+LMArenaText = 42.589662
+LiveCodeBench = 98.070588
+MCPAtlas = 54.850536
+OutputSpeed = 77.225803
+SWEBenchPro = 87.931726
+SWEBenchVerified = 89.142622
+SWEComposite = 71.286263
+SonarFunctionalSkill = 22.378886
+SonarIssueDensity = 5.344422
+Tau2Bench = 46.770026
+TerminalBench = 99.893649
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.5"
+display_name = "gpt-5.5"
+vendor = "openai"
+thinking_effort = "default"
+aliases = ["gpt 5.5", "gpt-5-5", "gpt-5-5-high", "gpt-5-5-low", "gpt-5-5-medium", "gpt-5-5-non-reasoning", "gpt-5.5", "openai/gpt-5.5", "openai:gpt-5.5"]
+sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "openrouter", "overrides", "sonar", "swebench", "terminal_bench"]
+
+[models.scores]
+i_raw = 83.794208
+p_raw = 77.666866
+b_raw = 78.165238
+r = 84.348373
+i_adj = 83.794208
+p_adj = 77.666866
+b_adj = 78.165238
+
+[models.groups]
+A_B = 82.059833
+A_I = 86.865924
+A_P = 65.242206
+A_R = 87.164354
+BUILD = 72.697921
+CRE = 76.223348
+GEN = 93.711669
+JUDGE = 83.904217
+OPS_long = 78.110509
+OPS_precision = 77.812102
+OPS_review = 76.320965
+PLAN = 91.559246
+
+[models.metrics]
+AI_code = 84.252755
+AI_complexity = 96.025777
+AI_context_awareness = 7.500000
+AI_correctness = 100.000000
+AI_edge_cases = 88.718166
+AI_efficiency = 39.301525
+AI_hallucination_resistance = 46.125458
+AI_memory_retention = 7.500000
+AI_parameter_accuracy = 82.752282
+AI_plan_coherence = 23.464467
+AI_recovery = 97.636592
+AI_refusal = 100.000000
+AI_safety_compliance = 92.500000
+AI_spec = 100.000000
+AI_stability = 97.898025
+AI_task_completion = 87.224484
+AI_tool_selection = 75.399389
+ARC_AGI_2 = 100.000000
+ArtificialAnalysisCoding = 100.000000
+ArtificialAnalysisIntelligence = 100.000000
+ArtificialAnalysisReasoning = 98.087954
+ContextWindow = 100.000000
+GDPval = 100.000000
+GPQA_HLE_Reasoning = 98.087954
+InverseCost = 70.812455
+InverseTTFT = 74.239886
+JudgeArenaOrLMArenaHard = 83.904217
+LMArenaCreativeOrOpenEnded = 76.223348
+LMArenaText = 76.223348
+LiveCodeBench = 100.000000
+MCPAtlas = 54.122955
+OutputSpeed = 74.875066
+SWEBenchPro = 85.821887
+SWEBenchVerified = 96.522800
+SWEComposite = 73.447358
+SonarFunctionalSkill = 0.000000
+SonarIssueDensity = 41.162869
+Tau2Bench = 81.912145
+TerminalBench = 100.000000
+
+[models.synthesized]
+AI_context_awareness = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_hallucination_resistance = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_memory_retention = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_parameter_accuracy = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_plan_coherence = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_safety_compliance = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_task_completion = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+AI_tool_selection = { source = "aistupidlevel", from = "openai/gpt-5.4" }
+JudgeArenaOrLMArenaHard = { source = "lmarena", from = "openai/gpt-5.4" }
+LMArenaCreativeOrOpenEnded = { source = "lmarena", from = "openai/gpt-5.4" }
+LMArenaText = { source = "lmarena", from = "openai/gpt-5.4" }
+MCPAtlas = { source = "mcp_atlas", from = "openai/gpt-5.4" }
+Rank = { source = "lmarena", from = "openai/gpt-5.4" }
+RatingLower = { source = "lmarena", from = "openai/gpt-5.4" }
+RatingUpper = { source = "lmarena", from = "openai/gpt-5.4" }
+VoteCount = { source = "lmarena", from = "openai/gpt-5.4" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "z-ai/glm-5.1"
+display_name = "glm-5.1"
+vendor = "zai"
+thinking_effort = "default"
+aliases = ["glm 5.1", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "glm-5p1", "z-ai/glm-5.1", "z.ai glm 5.1", "zai/glm-5.1"]
+sources = ["artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swerebench"]
+
+[models.scores]
+i_raw = 75.616699
+p_raw = 57.259445
+b_raw = 75.591484
+r = 81.150886
+i_adj = 75.616699
+p_adj = 57.259445
+b_adj = 75.591484
+
+[models.groups]
+A_B = 80.169382
+A_I = 79.664720
+A_P = 54.987521
+A_R = 89.374572
+BUILD = 72.883416
+CRE = 87.166671
+GEN = 50.588676
+JUDGE = 78.724602
+OPS_long = 44.546210
+OPS_precision = 63.317639
+OPS_review = 69.157377
+PLAN = 64.400794
+
+[models.metrics]
+AI_code = 79.114841
+AI_complexity = 89.121911
+AI_context_awareness = 7.500000
+AI_correctness = 92.500000
+AI_edge_cases = 82.910441
+AI_efficiency = 34.781978
+AI_hallucination_resistance = 92.500000
+AI_memory_retention = 7.500000
+AI_parameter_accuracy = 64.517260
+AI_plan_coherence = 12.677665
+AI_recovery = 90.491103
+AI_refusal = 92.500000
+AI_safety_compliance = 53.267657
+AI_spec = 92.500000
+AI_stability = 90.713321
+AI_task_completion = 74.891314
+AI_tool_selection = 24.298469
+ArtificialAnalysisCoding = 22.105263
+ArtificialAnalysisIntelligence = 46.153846
+ArtificialAnalysisReasoning = 10.133843
+ContextWindow = 76.222996
+CopilotArenaOrLMArenaCode = 89.574347
+GDPval = 59.268745
+GPQA_HLE_Reasoning = 10.133843
+InverseCost = 98.880804
+InverseTTFT = 100.000000
+JudgeArenaOrLMArenaHard = 78.724602
+LMArenaCreativeOrOpenEnded = 87.166671
+LMArenaText = 87.166671
+LiveCodeBench = 31.919336
+MCPAtlas = 83.051325
+OutputSpeed = 5.863056
+SWEBenchVerified = 70.692176
+SWEComposite = 85.346088
+SWERebench = 100.000000
+SonarFunctionalSkill = 28.709920
+SonarIssueDensity = 100.000000
+Tau2Bench = 100.000000
+TerminalBench = 72.090550
+
+[models.synthesized]
+AI_code = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_complexity = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_context_awareness = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_correctness = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_edge_cases = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_efficiency = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_hallucination_resistance = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_memory_retention = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_parameter_accuracy = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_plan_coherence = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_recovery = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_refusal = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_safety_compliance = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_spec = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_stability = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_task_completion = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+AI_tool_selection = { source = "aistupidlevel", from = "moonshotai/kimi-k2.6" }
+JudgeArenaOrLMArenaHard = { source = "lmarena", from = "moonshotai/kimi-k2.6" }
+
+[models.missing]
+metrics = []
+groups_shrunk = []
+synthesis_dominant = false
+
