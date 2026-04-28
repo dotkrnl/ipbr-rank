@@ -185,10 +185,11 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
             .map(|(_, weight)| *weight)
             .sum();
 
-        // Keep this in sync with `FULL_COVERAGE_TRUST_THRESHOLD` in
-        // ipbr-core's missing-safe aggregator: groups shrink when present
-        // coverage is below 70%, i.e. missing weight is above 30%.
-        if missing_weight / total_weight > 0.30 {
+        // Keep this in sync with the transition zone in ipbr-core's
+        // missing-safe aggregator: groups shrink when present coverage is
+        // below the top of the transition band (0.80), i.e. missing weight
+        // is above 20%.
+        if missing_weight / total_weight > 0.20 {
             groups_shrunk.push(group.clone());
         }
     }

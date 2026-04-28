@@ -46,7 +46,7 @@ fail the run.
 - **Axes emitted (17 total)**:
   - **Hourly suite (9)**: `AI_correctness`, `AI_spec` (`format`), `AI_code` (`codeQuality`), `AI_efficiency`, `AI_stability`, `AI_refusal` (`safety`), `AI_recovery` (`debugging`), `AI_complexity`, `AI_edge_cases`
   - **Deep suite (3)**: `AI_plan_coherence`, `AI_memory_retention`, `AI_hallucination_resistance`
-  - **Tooling suite (5)**: `AI_context_awareness`, `AI_task_completion`, `AI_tool_selection`, `AI_parameter_accuracy`, `AI_safety_compliance`
+  - **Tooling suite (4)**: `AI_context_awareness`, `AI_task_completion`, `AI_tool_selection`, `AI_parameter_accuracy`
 - **Canary signal**: `AI_canary_health` is emitted separately from `suite=canary` correctness when present and from unresolved `driftIncidents` with `metadata.detectionMethod = "canary_drift"` (`100 - dropPercent`). If both exist, the lower health value wins. It is a penalty-only health signal in scoring, not part of the A_* capability perspectives.
 - **Fixture**: `data/fixtures/aistupidlevel_dashboard.json`
 

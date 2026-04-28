@@ -94,9 +94,9 @@ i_raw = 61.678508
 p_raw = 50.724533
 b_raw = 55.929540
 r = 50.766144
-i_adj = 61.287942
-p_adj = 49.845761
-b_adj = 54.367278
+i_adj = 61.337215
+p_adj = 49.956625
+b_adj = 54.564370
 
 [models.groups]
 A_B = 77.775452
@@ -126,7 +126,6 @@ AI_parameter_accuracy = 66.367052
 AI_plan_coherence = 43.238469
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 95.341540
 AI_task_completion = 78.749558
@@ -155,26 +154,26 @@ sources = ["aistupidlevel", "artificial_analysis", "lmarena", "mcp_atlas", "open
 
 [models.scores]
 i_raw = 77.488343
-p_raw = 68.408988
-b_raw = 73.782622
-r = 64.679879
-i_adj = 77.097777
-p_adj = 67.530215
-b_adj = 72.220359
+p_raw = 68.177977
+b_raw = 73.698261
+r = 64.500806
+i_adj = 77.147050
+p_adj = 67.410069
+b_adj = 72.333091
 
 [models.groups]
 A_B = 80.988515
 A_I = 89.276359
 A_P = 76.181962
 A_R = 81.190605
-BUILD = 70.888988
+BUILD = 70.760312
 CRE = 73.733140
 GEN = 67.070156
 LM_ARENA_REVIEW_PROXY = 9.696007
 OPS_long = 77.330432
 OPS_precision = 75.571644
 OPS_review = 74.669328
-PLAN = 62.098334
+PLAN = 61.418891
 
 [models.metrics]
 AI_canary_health = 89.500000
@@ -190,7 +189,6 @@ AI_parameter_accuracy = 100.000000
 AI_plan_coherence = 35.937050
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 68.167824
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 100.000000
@@ -220,7 +218,7 @@ TerminalBench = 54.924242
 
 [models.missing]
 metrics = []
-groups_shrunk = []
+groups_shrunk = ["BUILD", "PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-opus-4.6"
@@ -232,26 +230,26 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 
 [models.scores]
 i_raw = 89.656166
-p_raw = 72.276657
-b_raw = 80.227712
-r = 76.767617
-i_adj = 89.265600
-p_adj = 71.397885
-b_adj = 78.665450
+p_raw = 71.806172
+b_raw = 80.101287
+r = 76.421890
+i_adj = 89.314873
+p_adj = 71.038264
+b_adj = 78.736117
 
 [models.groups]
 A_B = 86.621705
 A_I = 85.009699
 A_P = 62.542277
 A_R = 96.056438
-BUILD = 79.146715
+BUILD = 78.967172
 CRE = 100.000000
 GEN = 87.489776
 LM_ARENA_REVIEW_PROXY = 31.752127
 OPS_long = 79.568865
 OPS_precision = 77.782781
 OPS_review = 75.613382
-PLAN = 74.639969
+PLAN = 73.256188
 
 [models.metrics]
 AI_canary_health = 83.300000
@@ -267,7 +265,6 @@ AI_parameter_accuracy = 100.000000
 AI_plan_coherence = 0.000000
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 81.874944
 AI_spec = 100.000000
 AI_stability = 95.341540
 AI_task_completion = 95.744971
@@ -299,7 +296,7 @@ TerminalBench = 64.469697
 
 [models.missing]
 metrics = []
-groups_shrunk = []
+groups_shrunk = ["BUILD", "PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-opus-4.7"
@@ -311,26 +308,26 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 
 [models.scores]
 i_raw = 88.688626
-p_raw = 74.408363
-b_raw = 82.348973
-r = 87.945732
-i_adj = 88.298061
-p_adj = 73.529590
-b_adj = 80.786711
+p_raw = 73.817366
+b_raw = 82.192673
+r = 87.512498
+i_adj = 88.347334
+p_adj = 73.049458
+b_adj = 80.827502
 
 [models.groups]
 A_B = 80.781081
 A_I = 82.814090
 A_P = 55.981699
 A_R = 95.264513
-BUILD = 85.872454
+BUILD = 85.651480
 CRE = 94.985734
 GEN = 95.933066
 LM_ARENA_REVIEW_PROXY = 100.000000
 OPS_long = 79.309751
 OPS_precision = 77.133986
 OPS_review = 74.840009
-PLAN = 80.951306
+PLAN = 79.213081
 
 [models.metrics]
 AI_canary_health = 88.200000
@@ -346,7 +343,6 @@ AI_parameter_accuracy = 63.349167
 AI_plan_coherence = 20.648792
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 24.900926
 AI_spec = 100.000000
 AI_stability = 95.341540
 AI_task_completion = 23.664436
@@ -377,7 +373,7 @@ TerminalBench = 78.568182
 
 [models.missing]
 metrics = []
-groups_shrunk = []
+groups_shrunk = ["BUILD", "PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-sonnet-4"
@@ -392,9 +388,9 @@ i_raw = 41.136558
 p_raw = 50.888542
 b_raw = 59.404455
 r = 65.932715
-i_adj = 40.745993
-p_adj = 50.009770
-b_adj = 57.842192
+i_adj = 40.795266
+p_adj = 50.120634
+b_adj = 58.039284
 
 [models.groups]
 A_B = 83.836348
@@ -423,7 +419,6 @@ AI_parameter_accuracy = 88.485588
 AI_plan_coherence = 27.769990
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 78.749558
@@ -463,9 +458,9 @@ i_raw = 68.137586
 p_raw = 57.759059
 b_raw = 62.562370
 r = 57.313547
-i_adj = 67.747020
-p_adj = 56.880286
-b_adj = 61.000108
+i_adj = 67.796293
+p_adj = 56.991151
+b_adj = 61.197200
 
 [models.groups]
 A_B = 88.246436
@@ -495,7 +490,6 @@ AI_parameter_accuracy = 82.327916
 AI_plan_coherence = 52.768526
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 83.753401
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 100.000000
@@ -536,9 +530,9 @@ i_raw = 76.164158
 p_raw = 59.284130
 b_raw = 74.881039
 r = 67.101971
-i_adj = 75.773592
-p_adj = 58.405357
-b_adj = 73.318777
+i_adj = 75.822865
+p_adj = 58.516221
+b_adj = 73.515869
 
 [models.groups]
 A_B = 88.835766
@@ -567,7 +561,6 @@ AI_parameter_accuracy = 47.433008
 AI_plan_coherence = 18.243928
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 98.726968
@@ -646,7 +639,6 @@ AI_parameter_accuracy = 95.545670
 AI_plan_coherence = 14.728682
 AI_recovery = 0.000000
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 0.000000
 AI_task_completion = 93.161381
@@ -672,18 +664,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter",
 [models.scores]
 i_raw = 62.248894
 p_raw = 49.858992
-b_raw = 49.953465
-r = 60.003311
+b_raw = 50.371801
+r = 60.178251
 i_adj = 62.248894
 p_adj = 49.858992
-b_adj = 49.953465
+b_adj = 50.371801
 
 [models.groups]
 A_B = 95.571027
 A_I = 91.667258
 A_P = 69.862033
 A_R = 97.806073
-BUILD = 19.526780
+BUILD = 20.287391
 CRE = 45.406365
 GEN = 41.459569
 LM_ARENA_REVIEW_PROXY = 76.844057
@@ -705,7 +697,6 @@ AI_parameter_accuracy = 54.843290
 AI_plan_coherence = 20.217695
 AI_recovery = 100.000000
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 100.000000
 AI_task_completion = 34.453964
@@ -728,7 +719,7 @@ TerminalBench = 0.000000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "google/gemini-2.5-pro"
@@ -774,7 +765,6 @@ AI_parameter_accuracy = 21.516690
 AI_plan_coherence = 92.500000
 AI_recovery = 72.421246
 AI_refusal = 7.500000
-AI_safety_compliance = 32.745432
 AI_spec = 7.500000
 AI_stability = 10.889839
 AI_task_completion = 7.500000
@@ -844,7 +834,6 @@ AI_parameter_accuracy = 21.516690
 AI_plan_coherence = 92.500000
 AI_recovery = 72.421246
 AI_refusal = 7.500000
-AI_safety_compliance = 32.745432
 AI_spec = 7.500000
 AI_stability = 10.889839
 AI_task_completion = 7.500000
@@ -923,7 +912,6 @@ AI_parameter_accuracy = 16.490224
 AI_plan_coherence = 100.000000
 AI_recovery = 76.377936
 AI_refusal = 0.000000
-AI_safety_compliance = 29.700508
 AI_spec = 0.000000
 AI_stability = 3.988046
 AI_task_completion = 0.000000
@@ -994,7 +982,6 @@ AI_parameter_accuracy = 21.516690
 AI_plan_coherence = 92.500000
 AI_recovery = 72.421246
 AI_refusal = 7.500000
-AI_safety_compliance = 32.745432
 AI_spec = 7.500000
 AI_stability = 10.889839
 AI_task_completion = 7.500000
@@ -1073,7 +1060,6 @@ AI_parameter_accuracy = 81.482720
 AI_plan_coherence = 9.560724
 AI_recovery = 0.000000
 AI_refusal = 100.000000
-AI_safety_compliance = 88.888889
 AI_spec = 100.000000
 AI_stability = 0.000000
 AI_task_completion = 93.161381
@@ -1139,7 +1125,6 @@ AI_parameter_accuracy = 68.655571
 AI_plan_coherence = 4.392765
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 66.666667
 AI_spec = 100.000000
 AI_stability = 95.341540
 AI_task_completion = 78.749558
@@ -1176,18 +1161,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_at
 [models.scores]
 i_raw = 68.752118
 p_raw = 55.110149
-b_raw = 59.959715
-r = 62.190794
+b_raw = 59.706462
+r = 62.084888
 i_adj = 68.752118
 p_adj = 55.110149
-b_adj = 59.959715
+b_adj = 59.706462
 
 [models.groups]
 A_B = 80.421604
 A_I = 83.206220
 A_P = 61.637944
 A_R = 92.622861
-BUILD = 47.220239
+BUILD = 46.759780
 CRE = 67.494564
 GEN = 46.873641
 LM_ARENA_REVIEW_PROXY = 21.000750
@@ -1209,7 +1194,6 @@ AI_parameter_accuracy = 91.014402
 AI_plan_coherence = 4.392765
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 84.763510
 AI_task_completion = 93.161381
@@ -1278,7 +1262,6 @@ AI_parameter_accuracy = 89.904470
 AI_plan_coherence = 0.000000
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 88.888889
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 64.337735
@@ -1343,7 +1326,6 @@ AI_parameter_accuracy = 85.338875
 AI_plan_coherence = 17.312661
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 100.000000
 AI_spec = 100.000000
 AI_stability = 91.174437
 AI_task_completion = 93.161381
@@ -1386,26 +1368,26 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 
 [models.scores]
 i_raw = 81.426835
-p_raw = 81.763125
-b_raw = 72.922456
-r = 83.063662
+p_raw = 80.913832
+b_raw = 74.623462
+r = 83.246341
 i_adj = 81.426835
-p_adj = 81.763125
-b_adj = 72.922456
+p_adj = 80.913832
+b_adj = 74.623462
 
 [models.groups]
 A_B = 79.458465
 A_I = 85.716648
 A_P = 63.350438
 A_R = 84.571343
-BUILD = 66.663173
+BUILD = 69.846744
 CRE = 73.275098
 GEN = 90.913291
 LM_ARENA_REVIEW_PROXY = 91.467301
 OPS_long = 83.258863
 OPS_precision = 81.970951
 OPS_review = 79.622315
-PLAN = 94.478644
+PLAN = 91.980723
 
 [models.metrics]
 AI_code = 76.798287
@@ -1420,7 +1402,6 @@ AI_parameter_accuracy = 80.038044
 AI_plan_coherence = 22.215762
 AI_recovery = 98.715804
 AI_refusal = 100.000000
-AI_safety_compliance = 92.500000
 AI_spec = 100.000000
 AI_stability = 95.341540
 AI_task_completion = 86.687174
@@ -1447,7 +1428,7 @@ TerminalBench = 100.000000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD"]
+groups_shrunk = ["BUILD", "PLAN"]
 
 [[models]]
 canonical_id = "xai/grok-4-latest"
@@ -1493,7 +1474,6 @@ AI_parameter_accuracy = 0.000000
 AI_plan_coherence = 100.000000
 AI_recovery = 97.248198
 AI_refusal = 26.398454
-AI_safety_compliance = 0.000000
 AI_spec = 26.305389
 AI_stability = 79.645110
 AI_task_completion = 6.690443
@@ -1557,7 +1537,6 @@ AI_parameter_accuracy = 0.000000
 AI_plan_coherence = 100.000000
 AI_recovery = 100.000000
 AI_refusal = 100.000000
-AI_safety_compliance = 0.000000
 AI_spec = 100.000000
 AI_stability = 100.000000
 AI_task_completion = 6.690443
@@ -1587,18 +1566,18 @@ sources = ["aistupidlevel", "lmarena", "openrouter", "swebench", "swebench_pro",
 [models.scores]
 i_raw = 40.459704
 p_raw = 43.102136
-b_raw = 36.944658
-r = 44.159545
+b_raw = 37.813144
+r = 44.522730
 i_adj = 40.459704
 p_adj = 43.102136
-b_adj = 36.944658
+b_adj = 37.813144
 
 [models.groups]
 A_B = 55.318798
 A_I = 54.000000
 A_P = 46.647241
 A_R = 58.500000
-BUILD = 21.882712
+BUILD = 23.461779
 CRE = 23.776283
 GEN = 43.444071
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -1613,7 +1592,6 @@ AI_hallucination_resistance = 100.000000
 AI_memory_retention = 82.969943
 AI_parameter_accuracy = 0.000000
 AI_plan_coherence = 100.000000
-AI_safety_compliance = 0.000000
 AI_task_completion = 6.690443
 AI_tool_selection = 0.000000
 ContextWindow = 75.033917
@@ -1632,7 +1610,7 @@ TerminalBench = 13.712121
 
 [models.missing]
 metrics = []
-groups_shrunk = ["GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "z-ai/glm-4.7"
@@ -1645,18 +1623,18 @@ sources = ["aistupidlevel", "lmarena", "mcp_atlas", "openrouter", "sonar", "swer
 [models.scores]
 i_raw = 33.058625
 p_raw = 41.540256
-b_raw = 47.451204
-r = 49.424099
+b_raw = 47.734567
+r = 49.542596
 i_adj = 33.058625
 p_adj = 41.540256
-b_adj = 47.451204
+b_adj = 47.734567
 
 [models.groups]
 A_B = 55.318798
 A_I = 51.312661
 A_P = 40.600729
 A_R = 58.500000
-BUILD = 40.826116
+BUILD = 41.341322
 CRE = 9.168598
 GEN = 39.792149
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -1671,7 +1649,6 @@ AI_hallucination_resistance = 100.000000
 AI_memory_retention = 82.969943
 AI_parameter_accuracy = 0.000000
 AI_plan_coherence = 66.408269
-AI_safety_compliance = 0.000000
 AI_task_completion = 6.690443
 AI_tool_selection = 0.000000
 ContextWindow = 74.880405
@@ -1688,7 +1665,7 @@ TerminalBench = 27.045455
 
 [models.missing]
 metrics = []
-groups_shrunk = ["GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "z-ai/glm-5.1"
@@ -1734,7 +1711,6 @@ AI_parameter_accuracy = 65.857235
 AI_plan_coherence = 11.233850
 AI_recovery = 91.408433
 AI_refusal = 92.500000
-AI_safety_compliance = 64.166667
 AI_spec = 92.500000
 AI_stability = 88.540309
 AI_task_completion = 74.437125

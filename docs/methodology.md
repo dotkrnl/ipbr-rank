@@ -173,17 +173,19 @@ else:
 got penalized for not appearing on every peripheral leaderboard — a
 flagship missing one or two ~0.10-weight metrics would still drift
 toward 50 even though every direct measurement said top-of-population.
-With `FULL_COVERAGE_TRUST_THRESHOLD = 0.70`, a model has to be missing
-≥30 % of a group's weight before the shrink kicks in. Below that, we
-trust the present-weighted mean directly and let the synthesis layer
-fill peripheral gaps.
+The transition uses a smooth step across a 0.60–0.80 band instead of a
+hard cliff at 0.70. This prevents a tiny change in coverage (e.g. a new
+source adding one small metric) from causing a discontinuous ~15‑point
+jump in the group score. Well-covered models (≥80 %) trust the present
+mean directly; models below 60 % get the full proportional shrink;
+between those points the score blends smoothly.
 
 **Invariant**: If all metrics are missing, `present_weight = 0`, and
 `group_score = 50`.
 
 **Shrunk groups**: A group is marked "shrunk" in the output if
-`present_weight / total_weight < 0.70` (the same threshold) — i.e.
-whenever the shrink branch fired.
+`present_weight / total_weight < 0.80` — i.e. whenever any shrinkage
+was applied.
 
 ---
 
@@ -391,6 +393,10 @@ defines it as `recoveredFromErrors / failedCalls.length`, with the
 `failedCalls = 0` branch returning 0 instead of 1 — so a model that never
 fails gets the same score as one that fails everything and recovers
 nothing. The freed weight in A_R folded into AI_recovery.
+
+`AI_safety_compliance` was also dropped: it was fetched but never
+referenced in any weight table, so it contributed nothing to scores.
+Removing it keeps the coefficient surface honest.
 
 ---
 

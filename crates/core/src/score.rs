@@ -171,12 +171,7 @@ fn apply_canary_health_penalty(records: &mut [ModelRecord]) {
         if r.synthesized.contains_key(CANARY_HEALTH_METRIC) {
             continue;
         }
-        let Some(health) = r
-            .raw_metrics
-            .get(CANARY_HEALTH_METRIC)
-            .copied()
-            .and_then(as_score_0_100)
-        else {
+        let Some(health) = r.metrics.get(CANARY_HEALTH_METRIC).copied() else {
             continue;
         };
         let penalty =

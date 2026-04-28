@@ -4,15 +4,12 @@ use std::collections::BTreeMap;
 const EPS: f64 = 1e-12;
 pub const SHRINK_TARGET: f64 = 50.0;
 
-/// Coverage threshold above which we trust the present-weight mean directly
-/// instead of pulling it toward 50. Below this, missing metrics still drag
-/// the score toward the population baseline (so a model with only a single
-/// peripheral signal doesn't ride one outlier to the top); at or above it,
-/// we treat the gap as "the leaderboard hasn't caught up" rather than
-/// "this model is mediocre on what we can't measure." Empirically chosen so
-/// a model missing two ~0.10-weight metrics in a 1.0-weight group is still
-/// scored on its present coverage instead of getting a 50-anchor penalty.
+/// Coverage threshold around which we transition from shrink-to-50 to
+/// trusting the present-weight mean directly. The transition uses a smooth
+/// step over a ±0.10 band (0.60 → 0.80) so that a tiny change in coverage
+/// cannot cause a large discontinuous jump in the group score.
 const FULL_COVERAGE_TRUST_THRESHOLD: f64 = 0.70;
+const TRUST_TRANSITION_WIDTH: f64 = 0.20;
 
 pub fn missing_safe_avg(
     metrics: &BTreeMap<String, f64>,
@@ -48,11 +45,18 @@ pub fn missing_safe_avg(
 
     let present_mean = weighted_sum / present_weight;
     let w_present = present_weight / total_weight;
-    let value = if w_present >= FULL_COVERAGE_TRUST_THRESHOLD {
-        present_mean
-    } else {
-        present_mean * w_present + SHRINK_TARGET * (1.0 - w_present)
-    };
+
+    // Old hard-step formula: shrink toward 50 proportional to missing weight.
+    let shrink_value = present_mean * w_present + SHRINK_TARGET * (1.0 - w_present);
+
+    // Smooth transition from full-shrink to no-shrink across
+    // [threshold - width/2, threshold + width/2].
+    let t = ((w_present - (FULL_COVERAGE_TRUST_THRESHOLD - TRUST_TRANSITION_WIDTH / 2.0))
+        / TRUST_TRANSITION_WIDTH)
+        .clamp(0.0, 1.0);
+    let smooth_t = t * t * (3.0 - 2.0 * t);
+    let value = shrink_value * (1.0 - smooth_t) + present_mean * smooth_t;
+
     value.clamp(0.0, 100.0)
 }
 

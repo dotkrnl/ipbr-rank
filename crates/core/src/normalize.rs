@@ -1,6 +1,6 @@
 const EPS: f64 = 1e-12;
 
-fn percentile_linear(sorted: &[f64], q: f64) -> f64 {
+pub(crate) fn percentile_linear(sorted: &[f64], q: f64) -> f64 {
     debug_assert!(!sorted.is_empty());
     if sorted.len() == 1 {
         return sorted[0];
@@ -112,7 +112,7 @@ pub fn tail_penalty_norm(
     let lo = percentile_linear(&sorted, 0.02);
     let hi = percentile_linear(&sorted, 0.98);
     if (hi - lo).abs() < EPS {
-        return Some(85.0);
+        return Some(50.0);
     }
     let raw = (v - lo) / (hi - lo);
     let clipped = raw.clamp(0.0, 1.0);
@@ -249,5 +249,23 @@ mod tests {
         approx(as_score_0_100(85.0).unwrap(), 85.0);
         approx(as_score_0_100(150.0).unwrap(), 100.0);
         approx(as_score_0_100(-5.0).unwrap(), 0.0);
+    }
+
+    #[test]
+    fn tail_penalty_identical_population_returns_50() {
+        let v = tail_penalty_norm(5.0, &[5.0, 5.0, 5.0], true, false).unwrap();
+        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
+    }
+
+    #[test]
+    fn tail_penalty_single_value_returns_50() {
+        let v = tail_penalty_norm(7.0, &[7.0], true, false).unwrap();
+        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
+    }
+
+    #[test]
+    fn tail_penalty_lower_better_identical_population_returns_50() {
+        let v = tail_penalty_norm(5.0, &[5.0, 5.0], false, false).unwrap();
+        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
     }
 }

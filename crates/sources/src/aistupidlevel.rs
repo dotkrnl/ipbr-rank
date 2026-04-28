@@ -152,11 +152,6 @@ const AXIS_MAPPINGS: &[AxisMapping] = &[
         live_key: "parameterAccuracy",
         suite: "tooling",
     },
-    AxisMapping {
-        metric_key: "AI_safety_compliance",
-        live_key: "safetyCompliance",
-        suite: "tooling",
-    },
 ];
 
 // No-op kept around so we don't have to edit the parser's match logic;

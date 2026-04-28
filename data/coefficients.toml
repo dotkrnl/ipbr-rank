@@ -1,5 +1,5 @@
-# Coefficients for ipbr-rank scoring, verbatim from the Python reference.
-# All numbers are exact copies — the Python reference is authoritative for v1.
+# Coefficients for ipbr-rank scoring.
+# This file is the authoritative source of truth; the CLI embeds it verbatim.
 
 # AI Stupid Level perspective composites — role-shaped views over AISL's
 # capability-axis surface. AISL ships three capability suites (hourly,
@@ -535,12 +535,6 @@ groups = ["A_P"]
 transform = "percentile"
 
 [metrics.AI_parameter_accuracy]
-higher_better = true
-log_scale = false
-groups = ["A_P"]
-transform = "percentile"
-
-[metrics.AI_safety_compliance]
 higher_better = true
 log_scale = false
 groups = ["A_P"]

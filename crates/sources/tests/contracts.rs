@@ -271,7 +271,6 @@ async fn aistupidlevel_fixture_contract() {
             "AI_task_completion",
             "AI_tool_selection",
             "AI_parameter_accuracy",
-            "AI_safety_compliance",
         ]
         .iter()
         .filter(|key| row.fields.contains_key(**key))
