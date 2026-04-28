@@ -27,7 +27,7 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
 
 pub(crate) fn layout(title: &str, scoreboard: &Scoreboard, body: &str) -> String {
     format!(
-        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><span class="prompt">$</span>ipbr-rank · live llm coding-role score<div class="meta">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {source_count} sources</div></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a></nav></header><main>{body}</main></div></body></html>"#,
+        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr-rank · live llm coding-role score</a><div class="meta">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {source_count} sources</div></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
         title = html_escape(title),
         generated_at = html_escape(&scoreboard.generated_at),
         source_count = scoreboard.source_summary.len(),
@@ -35,22 +35,40 @@ pub(crate) fn layout(title: &str, scoreboard: &Scoreboard, body: &str) -> String
     )
 }
 
+/// External URLs the site is allowed to link to. Anything else triggers
+/// the no-external-network invariant. Keep this list short and explicit.
+const EXTERNAL_LINK_ALLOWLIST: &[&str] = &["https://github.com/dotkrnl/ipbr-rank"];
+
+fn is_allowed_external(url: &str) -> bool {
+    EXTERNAL_LINK_ALLOWLIST
+        .iter()
+        .any(|allowed| url == *allowed || url.starts_with(&format!("{allowed}/")))
+}
+
 fn validate_site(root: &Path) -> Result<(), RenderError> {
     for html_path in html_files(root)? {
         let html = std::fs::read_to_string(&html_path)?;
+
+        // Strip allowlisted URLs from the haystack before the marker scan
+        // so e.g. our GitHub link doesn't trip the "no https://" rule.
+        let mut scrubbed = html.clone();
+        for allowed in EXTERNAL_LINK_ALLOWLIST {
+            scrubbed = scrubbed.replace(allowed, "");
+        }
         for marker in ["http://", "https://", "//cdn", "data:"] {
-            if html.contains(marker) {
+            if scrubbed.contains(marker) {
                 return Err(RenderError::Serialization(format!(
                     "{} contains external reference marker {marker}",
                     html_path.display()
                 )));
             }
         }
+
         for link in attr_values(&html, "href")
             .into_iter()
             .chain(attr_values(&html, "src"))
         {
-            if link.starts_with('#') {
+            if link.starts_with('#') || is_allowed_external(&link) {
                 continue;
             }
             let link = link.split('#').next().unwrap_or_default();

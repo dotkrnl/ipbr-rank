@@ -209,9 +209,13 @@ fn collect_html(path: &Path, files: &mut Vec<PathBuf>) {
 }
 
 fn assert_no_external_references(path: &Path, html: &str) {
+    // The GitHub repo link is the one allowlisted external URL (see
+    // EXTERNAL_LINK_ALLOWLIST in crates/render/src/site/mod.rs); strip it
+    // before scanning so the no-external-deps invariant still holds.
+    let scrubbed = html.replace("https://github.com/dotkrnl/ipbr-rank", "");
     for needle in ["http://", "https://", "//cdn", "data:"] {
         assert!(
-            !html.contains(needle),
+            !scrubbed.contains(needle),
             "{} unexpectedly contains external reference marker {needle}",
             path.display()
         );
@@ -304,7 +308,7 @@ fn assert_links_exist(site_dir: &Path, path: &Path, html: &str) {
         .into_iter()
         .chain(extract_attr_values(html, "src"))
     {
-        if link.starts_with('#') {
+        if link.starts_with('#') || link.starts_with("https://github.com/dotkrnl/ipbr-rank") {
             continue;
         }
         let link = link.split('#').next().unwrap_or_default();

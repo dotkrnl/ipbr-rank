@@ -51,6 +51,8 @@ header {
 }
 .brand { font-weight: 700; color: var(--text-strong); }
 .brand .prompt { color: var(--accent); margin-right: 6px; }
+.brand-link { color: inherit; text-decoration: none; }
+.brand-link:hover { color: var(--accent); }
 .meta { color: var(--muted); }
 nav a { margin-left: 14px; color: var(--muted); }
 nav a:hover { color: var(--text-strong); }
