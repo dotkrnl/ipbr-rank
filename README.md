@@ -5,15 +5,47 @@ A Rust workspace that fetches public LLM benchmarks from verified sources, norma
 ## Quick Start
 
 ```bash
-# Install
-cargo build --release
-
-# Run with all verified sources (requires AA_API_KEY)
-export AA_API_KEY=your_key_here
-./target/release/ipbr-rank all
-
-# Output: out/scoreboard.toml, out/missing.toml, out/coefficients.toml, out/site/index.html
+# One-shot live refresh (sources .env, builds release, runs fetch→score→render)
+scripts/refresh.sh                 # writes out/
+scripts/refresh.sh --open          # also opens out/site/index.html
+scripts/refresh.sh --offline       # use cached responses only
+scripts/refresh.sh --only artificial_analysis,lmarena
+scripts/refresh.sh --publish       # also deploy out/site to Cloudflare Pages
 ```
+
+`.env` is sourced for credentials:
+
+| variable | needed for |
+|---|---|
+| `AA_API_KEY` | Artificial Analysis fetcher |
+| `OPENROUTER_API_KEY` | OpenRouter pricing/context |
+| `HF_TOKEN` | LMArena / OpenEvals via HuggingFace |
+| `CLOUDFLARE_ACCOUNT_ID` | only required for `--publish` |
+| `CLOUDFLARE_PAGES_PROJECT` | optional, default `ipbr` |
+
+Manual invocation works too:
+
+```bash
+cargo build --release -p ipbr-rank-cli
+./target/release/ipbr-rank --cache cache --out out all
+```
+
+## Deployment
+
+The rendered site lives at `out/site/` and is fully static (no external
+network deps; the validator rejects `http://`, `https://`, and `data:` URLs).
+
+`scripts/refresh.sh --publish` deploys it to Cloudflare Pages via wrangler:
+
+```bash
+# one-time auth (interactive, opens a browser)
+npx wrangler login
+
+# fetch + render + deploy
+scripts/refresh.sh --publish
+```
+
+The current production deployment is at https://ipbr.pages.dev.
 
 ## Four Building Roles
 

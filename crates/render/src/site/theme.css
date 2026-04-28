@@ -198,4 +198,37 @@ body[data-mode="adjusted"] th.score-raw { display: none; }
 .doc table { width: 100%; border-collapse: collapse; margin: 14px 0; }
 .doc th, .doc td { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; }
 
-footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); }
+
+/* === Mobile === */
+@media (max-width: 760px) {
+  .shell { padding: 16px 14px; }
+  header { flex-wrap: wrap; gap: 8px; }
+  .brand { font-size: inherit; }
+  nav a { margin-left: 0; margin-right: 14px; }
+
+  .mode-toggle { flex-wrap: wrap; }
+  .mode-toggle [data-mode-value] { white-space: normal; text-align: left; }
+  .mode-toggle [data-mode-value="raw"] { border-right: 0; border-bottom: 1px solid var(--line); }
+
+  .toolbar input { min-width: 0; flex: 1 1 auto; width: 100%; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .vendor-chips { gap: 4px; }
+
+  /* Horizontal scroll for the wide leaderboard */
+  table.leaderboard { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+  table.leaderboard thead, table.leaderboard tbody { display: table; width: max-content; min-width: 100%; }
+  table.leaderboard th, table.leaderboard td { padding: 6px 8px; }
+  table.leaderboard tr.expand td { white-space: normal; }
+
+  /* Tighter expand layout */
+  .expand .exp-table {
+    grid-template-columns: minmax(110px, 1fr) minmax(60px, 1.3fr) 50px 56px;
+    gap: 4px 8px;
+  }
+  .expand .exp-meta-label:not(:first-child) { margin-left: 10px; }
+
+  /* Smaller hero numbers but still bold */
+  .hero { gap: 14px; }
+  .hero .row { padding: 4px 0; }
+}
