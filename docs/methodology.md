@@ -2,11 +2,18 @@
 
 This document describes the complete mathematical pipeline for computing the four building-role scores (Idea, Planning, Building, Reviewing) from public LLM benchmarks. The pipeline has been audited and rebalanced multiple times since the original v1 spec; this doc reflects the current behavior of the Rust implementation in `crates/core`.
 
+> **How these numbers were chosen.** Every coefficient, group composition,
+> and penalty curve below was settled by Claude, Gemini, GPT, and Kimi
+> debating each other across iterative code-review rounds. The human
+> referee only adjudicated when the models deadlocked. The four models
+> hold the repo's copyright, and yes — they helped score themselves; the
+> peer-review structure is the only safeguard against that.
+
 ---
 
 ## 1. Overview
 
-The scoring pipeline has six stages:
+The scoring pipeline has seven stages:
 
 1. **Ingestion**: Fetch rows from each source, match model names to canonical IDs via alias matching, optionally synthesize missing rows from sibling models (`data/synthesis_aliases.toml`).
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
@@ -97,7 +104,7 @@ This reflects genuine uncertainty about whether a sibling's score
 transfers cleanly. Synthesized values still count, just slightly more
 conservatively than direct measurements.
 
-### 3.5 Manual Override Penalty
+### 3.6 Manual Override Penalty
 
 Manual overrides from `data/score_overrides.toml` are public, cited
 measurements used to fill gaps before a source lands on the ingested

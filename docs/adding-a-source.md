@@ -2,18 +2,20 @@
 
 This document describes the verification protocol and implementation checklist for adding a new benchmark source to ipbr-rank.
 
-> **Note:** Some snippets below reference patterns that have since been simplified — the `html-sources` feature flag was retired (HTML sources are always built), `include_experimental` was removed from the registry signature, and the `Experimental` status is no longer used in production (everything we ingest is `Verified`). Use this doc as a structural guide; refer to existing source modules in `crates/sources/src/` (e.g. `sonar.rs`, `swerebench.rs`, `artificial_analysis.rs`) for current patterns.
+Every source we ship is `Verified`. The `Experimental` and `Disabled`
+variants of `VerificationStatus` exist in the trait but are not used by
+anything currently registered — see `crates/sources/src/registry.rs`.
+Refer to existing source modules (`sonar.rs`, `swerebench.rs`,
+`artificial_analysis.rs`, `terminal_bench.rs`) for current patterns.
 
 ---
 
 ## Verification Protocol
 
-Every source must pass two gates before being marked `verified = true`:
+Every source must pass two gates before it is added to the registry:
 
 1. **Fixture-based contract test** — Capture a live response, write a test that parses it without panics and recognizes ≥N expected models.
-2. **Live smoke test** — At least one successful fetch in CI against the real endpoint, with the date recorded in `docs/sources.md`.
-
-Sources that fail verification stay in the registry as `experimental` and do not gate the build.
+2. **Live smoke test** — At least one successful fetch against the real endpoint (locally with secrets, or via `cargo test --workspace --features live`).
 
 ---
 
@@ -35,7 +37,7 @@ impl Source for YourSource {
     }
 
     fn status(&self) -> VerificationStatus {
-        VerificationStatus::Experimental  // Start as Experimental
+        VerificationStatus::Verified
     }
 
     fn required_secret(&self) -> Option<SecretRef> {
@@ -47,7 +49,7 @@ impl Source for YourSource {
         http: &dyn Http,
         opts: FetchOptions<'_>,
         secrets: &SecretStore,
-    ) -> Result<Vec<RawRow>> {
+    ) -> Result<Vec<RawRow>, SourceError> {
         // Implementation here
         todo!()
     }
@@ -138,8 +140,9 @@ fn parse_response(body: &str) -> Result<Vec<RawRow>> {
 ```
 
 **For HTML sources**:
-- Use the `scraper` crate for parsing (always available — the `html-sources` feature flag was retired)
-- See `crates/sources/src/terminal_bench.rs` or `swerebench.rs` for examples
+- Use the `scraper` crate for parsing (already a dependency).
+- See `crates/sources/src/terminal_bench.rs` or `swerebench.rs` for examples.
+- Override `cache_paths()` and use `use_cached_html` / `cache_html_path` so the cache lookup hits the right extension.
 
 ### 4. Write a Contract Test
 
@@ -202,12 +205,11 @@ In `crates/sources/src/registry.rs`:
 ```rust
 use crate::{YourSource, ...};
 
-pub fn registry(include_experimental: bool) -> Vec<Box<dyn Source>> {
-    let mut sources: Vec<Box<dyn Source>> = vec![
+pub fn registry() -> Vec<Box<dyn Source>> {
+    vec![
         // ... existing sources
         Box::new(YourSource),
-    ];
-    // ...
+    ]
 }
 ```
 
@@ -218,12 +220,12 @@ Add a section to `docs/sources.md`:
 ```markdown
 ## your_source
 
-- **Status**: Experimental
+- **Status**: Verified
 - **API**: Your Source Name endpoint description
 - **Secret**: `YOUR_API_KEY` (via `--your-api-key-file` or environment variable) / None
+- **Cache TTL**: 24 h
 - **Fixture**: `data/fixtures/your_source.json`
-- **Metrics contributed**: MetricName1, MetricName2
-- **Last verified**: Not yet verified
+- **Metrics emitted**: MetricName1, MetricName2
 
 Description of what this source provides and any caveats.
 ```
@@ -241,19 +243,6 @@ cargo test --workspace
 cargo test --package ipbr-sources your_source -- --ignored
 ```
 
-### 8. Mark as Verified (After CI Success)
-
-Once the live smoke test passes in CI:
-
-1. Update `docs/sources.md` with the verification date and CI run link
-2. Change `status()` in `your_source.rs`:
-   ```rust
-   fn status(&self) -> VerificationStatus {
-       VerificationStatus::Verified
-   }
-   ```
-3. Commit with message: `feat(sources): mark your_source as verified`
-
 ---
 
 ## Adding New Metrics
@@ -266,7 +255,7 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    higher_better = true
    log_scale = false
    groups = ["BUILD"]  # or whichever groups this metric belongs to
-   transform = "direct"  # or "percentile"
+   transform = "as_score"  # or "percentile" or "tail_penalty"
    ```
 
 2. Add the metric to the appropriate group weights:
@@ -365,37 +354,6 @@ fn secret_env_name(secret: SecretRef) -> &'static str {
 
 ---
 
-## HTML Sources (Feature-Gated)
-
-For HTML-based sources (web scraping):
-
-1. **Feature gate the module**:
-   ```rust
-   #[cfg(feature = "html-sources")]
-   mod your_html_source;
-   
-   #[cfg(feature = "html-sources")]
-   pub use your_html_source::YourHtmlSource;
-   ```
-
-2. **Register only when feature is enabled**:
-   ```rust
-   #[cfg(feature = "html-sources")]
-   fn html_sources(sources: &mut Vec<Box<dyn Source>>, include_experimental: bool) {
-       if include_experimental {
-           sources.push(Box::new(crate::YourHtmlSource));
-       }
-   }
-   ```
-
-3. **Use `scraper` for parsing** (see `bfcl.rs` example)
-
-4. **Document ToS compliance** in `docs/sources.md`
-
-5. **Mark as Experimental** — HTML sources are fragile and should remain experimental unless the site has a stable structure and explicit permission for scraping.
-
----
-
 ## CI Integration
 
 Once your source is verified, ensure it's covered by CI:
@@ -414,11 +372,8 @@ A: Check the parser logic. The contract test should fail if `rows.len() < expect
 **Q: The alias matcher isn't recognizing my models**  
 A: Check `data/required_aliases.toml` — if the models are new, you may need to add canonical IDs. The unmatched models are logged as warnings at runtime.
 
-**Q: My source is verified but still shows as experimental**  
-A: Verify you changed `status()` to return `VerificationStatus::Verified` and that the change is committed.
-
-**Q: HTML source isn't compiling**  
-A: Ensure `#[cfg(feature = "html-sources")]` is on the module and that you're running `cargo build --features html-sources`.
+**Q: My HTML source's cache file isn't being used**  
+A: Override `cache_paths()` so it points at the `.html` extension, and gate the cache lookup with `use_cached_html` instead of `use_cached_json`.
 
 ---
 
@@ -448,7 +403,7 @@ impl Source for MinimalSource {
     }
 
     fn status(&self) -> VerificationStatus {
-        VerificationStatus::Experimental
+        VerificationStatus::Verified
     }
 
     fn required_secret(&self) -> Option<crate::SecretRef> {
@@ -460,7 +415,7 @@ impl Source for MinimalSource {
         http: &dyn Http,
         opts: FetchOptions<'_>,
         _secrets: &SecretStore,
-    ) -> Result<Vec<RawRow>> {
+    ) -> Result<Vec<RawRow>, crate::SourceError> {
         let body = if opts.offline {
             let path = opts.cache_dir.context("offline needs cache")?.join("minimal.json");
             std::fs::read_to_string(&path)?

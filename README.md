@@ -2,6 +2,13 @@
 
 A Rust workspace that fetches public LLM benchmarks from verified sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a beautifully rendered static website.
 
+> **Fully vibe-coded.** No human wrote the scoring weights — Claude, Gemini,
+> GPT, and Kimi argued over every coefficient, every group composition, and
+> every penalty curve in this repo. Round after round of cross-model code
+> review settled the numbers; the human just refereed and pressed merge.
+> The repo's copyright reflects that: the four debating models are the
+> credited authors. See `docs/methodology.md` for what they landed on.
+
 ## Quick Start
 
 ```bash
@@ -19,7 +26,7 @@ scripts/refresh.sh --publish       # also deploy out/site to Cloudflare Pages
 |---|---|
 | `AA_API_KEY` | Artificial Analysis fetcher |
 | `OPENROUTER_API_KEY` | OpenRouter pricing/context |
-| `HF_TOKEN` | LMArena / OpenEvals via HuggingFace |
+| `HF_TOKEN` | LMArena via HuggingFace |
 | `CLOUDFLARE_ACCOUNT_ID` | only required for `--publish` |
 | `CLOUDFLARE_PAGES_PROJECT` | optional, default `ipbr` |
 
@@ -45,7 +52,10 @@ npx wrangler login
 scripts/refresh.sh --publish
 ```
 
-The current production deployment is at https://ipbr.pages.dev.
+The current production deployment is at https://ipbr.pages.dev. CI re-runs
+`refresh.sh --publish` every 10 minutes on `main` (see
+`.github/workflows/refresh.yml`), so the site stays current without manual
+intervention.
 
 ## Four Building Roles
 
@@ -173,6 +183,7 @@ Commands:
   all              fetch -> score -> render (default)
   verify-sources   Run contract tests against live endpoints
   list-models      Emit canonical IDs + vendor from required_aliases.toml
+  triage           List unmatched leaderboard rows from the cache (--min-count N)
 
 Options:
   --out DIR                     Output directory [default: out]
@@ -253,8 +264,12 @@ ipbr-rank/
 │   ├── sources.md              # One section per source
 │   ├── adding-a-source.md      # Verification protocol
 │   └── output-schema.md        # TOML schema reference
-└── templates/                  # Tera templates for the static site
+└── scripts/
+    └── refresh.sh              # One-shot fetch → score → render (+ optional --publish)
 ```
+
+The static site (theme, scripts, HTML) is generated entirely from Rust in
+`crates/render/src/site/` — there are no external template files.
 
 ## Testing
 
@@ -271,4 +286,4 @@ UPDATE_GOLDEN=1 cargo test
 
 ## License
 
-Not currently open-source. Internal use only.
+Released under the MIT License — see [`LICENSE`](LICENSE).

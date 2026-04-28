@@ -31,6 +31,7 @@ fail the run.
 - **Cache TTL**: 24 h
 - **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `Tau2Bench`, `SciCode`, `IFBench`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `InverseTTFT` / `InverseCost`.
 - **Multi-row dedup**: AA ships several rows per logical model (e.g. "Claude Opus 4.7 (Adaptive Reasoning, Max Effort)" and "(Non-reasoning, High Effort)"). The fetcher sorts ascending by intelligence index so the highest-effort row appears last and wins the last-write merge; speed/ttft sentinel zeros are skipped.
+- **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
 ## aistupidlevel
@@ -174,10 +175,11 @@ After per-metric normalization, fields that came in via synthesis are
 pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
 §3.4) so they read as a softer signal than direct measurements.
 
-Active pairs:
-- `openai/gpt-5.5 → openai/gpt-5.4` (forward sibling)
-- `google/gemini-3.1-pro-preview → google/gemini-3-pro` (size tier)
-- `google/gemini-3-flash → google/gemini-3-pro` (same generation)
-- `openai/gpt-5.3-codex → openai/gpt-5.4` (sibling)
-- `anthropic/claude-sonnet-4 → anthropic/claude-sonnet-4.5` (forward)
-- `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric, same capability tier)
+Active pairs (target ← donor; see `data/synthesis_aliases.toml` for the
+authoritative list with rationale comments):
+
+- OpenAI: `gpt-5.5 ← gpt-5.4`, `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`
+- Anthropic: `claude-opus-4.7 ← claude-opus-4.6`, `claude-opus-4.5 ← claude-opus-4.6`, `claude-sonnet-4.6 ← claude-sonnet-4.5`, `claude-sonnet-4 ← claude-sonnet-4.5`
+- Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-3-flash ← gemini-3-pro`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
+- z.ai / Moonshot: `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric), `z-ai/glm-4.6 ← z-ai/glm-4.7`
+- xAI: `xai/grok-code-fast-1 ← xai/grok-4-latest`

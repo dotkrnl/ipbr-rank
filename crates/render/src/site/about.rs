@@ -11,6 +11,10 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <p>ipbr-rank is a public-LLM coding-role scoreboard. It pulls model performance from public benchmarks, normalizes them onto a common 0-100 scale, and produces four role scores: Idea, Plan, Build, Review.</p>
 <p>All inputs come from public, verifiable sources. Weights and aggregation rules are explicit and versioned. A small number of vendor-published metrics that haven't yet appeared on public leaderboards are recorded as overrides. There is no manual reranking.</p>
 
+<h2>Fully vibe-coded</h2>
+<p>No human picked these weights. Claude, Gemini, GPT, and Kimi argued every coefficient, group composition, and penalty curve in this repo through round after round of cross-model code review until the numbers settled. The human just refereed and pressed merge — the four debating models are the credited copyright holders.</p>
+<p>Yes, that means the models being scored helped score themselves. The cross-review process is the safeguard: each weight had to survive scrutiny from peers ranked alongside it.</p>
+
 <h2>The four roles</h2>
 <ul>
 <li><strong>Idea</strong> — open-ended creativity, general intelligence, breadth. Driven by LM Arena Text, AI Stupid Level idea-shaped axes, and reasoning blends.</li>

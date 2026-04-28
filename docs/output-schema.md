@@ -45,16 +45,16 @@ Optional. Maps source ID → metadata.
 
 ```toml
 [sources.openrouter]
-status = "verified"               # String, "verified" | "experimental" | "skipped"
-rows = 312                        # Integer, total rows fetched
-matched = 298                     # Integer, rows successfully matched to canonical IDs
-unmatched = 14                    # Integer, rows that failed alias matching
+status = "verified"               # String, "verified" | "skipped"
+n_rows_ingested = 312             # Integer, total rows fetched
+n_rows_matched = 298              # Integer, rows successfully matched to canonical IDs
+n_rows_unmatched = 14             # Integer, rows that failed alias matching
 ```
 
-- **`status`**: Source status at runtime. `"skipped"` if required secret was missing.
-- **`rows`**: Total number of raw rows fetched from this source.
-- **`matched`**: Number of rows successfully matched to a canonical model ID via alias matcher.
-- **`unmatched`**: Number of rows that failed matching (logged as warnings, discarded).
+- **`status`**: Source status at runtime. `"skipped"` if a required secret was missing.
+- **`n_rows_ingested`**: Total number of raw rows fetched from this source.
+- **`n_rows_matched`**: Rows successfully matched to a canonical model ID via the alias matcher.
+- **`n_rows_unmatched`**: Rows that failed matching (logged as warnings, discarded).
 
 ### `[[models]]` Array
 
@@ -173,24 +173,24 @@ Some metric values are filled from a sibling model when the source did not direc
 A denormalized view of missing data, easier to query than iterating `scoreboard.toml`.
 
 ```toml
-schema_version = "1.1.0"
 generated_at = "2026-04-26T11:35:46Z"
 
-[[models]]
-canonical_id = "anthropic/claude-opus-4.7"
+[models."anthropic/claude-opus-4.7"]
 display_name = "Claude Opus 4.7"
-vendor = "anthropic"
-missing_metrics = ["TerminalBench", "SonarFunctionalSkill"]
-missing_count = 2
+metrics = ["TerminalBench", "SonarFunctionalSkill"]
 groups_shrunk = ["PLAN"]
 ```
 
 ### Fields
 
-- **`canonical_id`**, **`display_name`**, **`vendor`**: Same as in `scoreboard.toml`.
-- **`missing_metrics`**: Array of strings, missing metric keys.
-- **`missing_count`**: Integer, `missing_metrics.len()`.
-- **`groups_shrunk`**: Array of strings, groups where `present_weight / total_weight < 0.70` (the trust threshold).
+- **`generated_at`**: RFC3339 timestamp, matches `scoreboard.toml`.
+- **`[models."<canonical_id>"]`**: One table per model, keyed by canonical ID.
+  - **`display_name`**: Human-readable name (same value as in `scoreboard.toml`).
+  - **`metrics`**: Array of strings, metric keys missing for this model.
+  - **`groups_shrunk`**: Array of strings, groups where `present_weight / total_weight < 0.70` (the trust threshold).
+
+`missing.toml` does not include a `schema_version` field — its shape is
+covered by `scoreboard.toml`'s version bumps.
 
 ---
 
@@ -227,9 +227,9 @@ LMArenaText = 0.35
 # ... same structure for other groups
 
 [final_score_weights.I_raw]
-CRE = 0.30
-GEN = 0.12
-A_I = 0.50
+CRE = 0.40
+GEN = 0.17
+A_I = 0.35
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
@@ -291,9 +291,9 @@ struct Scoreboard {
 #[derive(Deserialize)]
 struct SourceSummary {
     status: String,
-    rows: usize,
-    matched: usize,
-    unmatched: usize,
+    n_rows_ingested: usize,
+    n_rows_matched: usize,
+    n_rows_unmatched: usize,
 }
 
 #[derive(Deserialize)]
