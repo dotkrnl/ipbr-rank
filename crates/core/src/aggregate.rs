@@ -104,8 +104,9 @@ mod tests {
         // skip the shrink and report the present-weight mean directly.
         // Without this, models missing one minor source would be pulled
         // toward 50 even though the bulk of their coverage is intact.
-        let metrics: BTreeMap<String, f64> =
-            [("a".to_string(), 80.0), ("b".to_string(), 100.0)].into_iter().collect();
+        let metrics: BTreeMap<String, f64> = [("a".to_string(), 80.0), ("b".to_string(), 100.0)]
+            .into_iter()
+            .collect();
         let w = weights(&[("a", 0.4), ("b", 0.4), ("c", 0.2)]);
         let mut missing = MissingInfo::new();
         let v = missing_safe_avg(&metrics, &w, &mut missing, "");

@@ -77,10 +77,10 @@ type RoleExtractor = fn(&ipbr_core::ModelRecord) -> f64;
 
 fn role_specs() -> [(&'static str, &'static str, RoleExtractor, RoleExtractor); 4] {
     [
-        ("idea",   "idea",   |m| m.scores.i_raw, |m| m.scores.i_adj),
-        ("plan",   "plan",   |m| m.scores.p_raw, |m| m.scores.p_adj),
-        ("build",  "build",  |m| m.scores.b_raw, |m| m.scores.b_adj),
-        ("review", "review", |m| m.scores.r,     |m| m.scores.r),
+        ("idea", "idea", |m| m.scores.i_raw, |m| m.scores.i_adj),
+        ("plan", "plan", |m| m.scores.p_raw, |m| m.scores.p_adj),
+        ("build", "build", |m| m.scores.b_raw, |m| m.scores.b_adj),
+        ("review", "review", |m| m.scores.r, |m| m.scores.r),
     ]
 }
 
@@ -112,13 +112,21 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         ));
     }
     html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table"><thead><tr>"#);
-    html.push_str(r#"<th data-sort="model"><button type="button" class="sort">model</button></th>"#);
-    html.push_str(r#"<th data-sort="vendor"><button type="button" class="sort">vendor</button></th>"#);
+    html.push_str(
+        r#"<th data-sort="model"><button type="button" class="sort">model</button></th>"#,
+    );
+    html.push_str(
+        r#"<th data-sort="vendor"><button type="button" class="sort">vendor</button></th>"#,
+    );
 
     // Score columns — emit raw and adjusted as separate <th>s; CSS hides one set per mode.
     // The build column is the default sort, marked active on initial render.
     for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
-        let active_attr = if key == "b" { r#" data-sort-active="desc""# } else { "" };
+        let active_attr = if key == "b" {
+            r#" data-sort-active="desc""#
+        } else {
+            ""
+        };
         html.push_str(&format!(
             r#"<th class="num score-raw" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
         ));
@@ -126,7 +134,9 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
             r#"<th class="num score-adjusted" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
         ));
     }
-    html.push_str(r#"<th class="num" data-sort="r"><button type="button" class="sort">review</button></th>"#);
+    html.push_str(
+        r#"<th class="num" data-sort="r"><button type="button" class="sort">review</button></th>"#,
+    );
     html.push_str(r#"<th></th></tr></thead><tbody>"#);
 
     for model in &models {
@@ -186,7 +196,11 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     html
 }
 
-fn rank_for(scoreboard: &Scoreboard, canonical_id: &str, lookup: impl Fn(&ipbr_core::ModelRecord) -> Option<f64>) -> Option<(usize, usize)> {
+fn rank_for(
+    scoreboard: &Scoreboard,
+    canonical_id: &str,
+    lookup: impl Fn(&ipbr_core::ModelRecord) -> Option<f64>,
+) -> Option<(usize, usize)> {
     let mut scored: Vec<(f64, &str)> = scoreboard
         .models
         .iter()
@@ -222,7 +236,9 @@ fn render_group_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -
     let mut html = String::from(r#"<div class="exp-table">"#);
     for (group, score) in &model.groups {
         let group_owned = group.clone();
-        let rank = rank_for(scoreboard, &model.canonical_id, |m| m.groups.get(&group_owned).copied());
+        let rank = rank_for(scoreboard, &model.canonical_id, |m| {
+            m.groups.get(&group_owned).copied()
+        });
         let bar_width = rank_bar_width(rank);
         let (rank_label, rank_class) = rank_text(rank);
         html.push_str(&format!(
@@ -241,9 +257,15 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
     }
     let mut html = String::from(r#"<div class="exp-table">"#);
     for (key, value) in &model.metrics {
-        let marker = if model.synthesized.contains_key(key) { "*" } else { "" };
+        let marker = if model.synthesized.contains_key(key) {
+            "*"
+        } else {
+            ""
+        };
         let key_owned = key.clone();
-        let rank = rank_for(scoreboard, &model.canonical_id, |m| m.metrics.get(&key_owned).copied());
+        let rank = rank_for(scoreboard, &model.canonical_id, |m| {
+            m.metrics.get(&key_owned).copied()
+        });
         let bar_width = rank_bar_width(rank);
         let (rank_label, rank_class) = rank_text(rank);
         html.push_str(&format!(
@@ -257,11 +279,8 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
 }
 
 fn render_source_pills(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    let synthesized_sources: std::collections::BTreeSet<&String> = model
-        .synthesized
-        .values()
-        .map(|p| &p.source_id)
-        .collect();
+    let synthesized_sources: std::collections::BTreeSet<&String> =
+        model.synthesized.values().map(|p| &p.source_id).collect();
     let all_sources: std::collections::BTreeSet<&String> = model
         .sources
         .iter()

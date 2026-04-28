@@ -634,7 +634,7 @@ mod tests {
     }
 
     fn lmarena_fixture_inputs() -> Vec<(String, String, Option<String>)> {
-        let payload = parse_fixture(include_str!("../../../cache/lmarena_overall.json"));
+        let payload = parse_fixture(include_str!("../../../data/fixtures/lmarena_overall.json"));
         let mut rows = BTreeSet::new();
         let configs = payload
             .get("configs")
@@ -677,7 +677,9 @@ mod tests {
     }
 
     fn openrouter_fixture_inputs() -> Vec<(String, String, Option<String>)> {
-        let payload = parse_fixture(include_str!("../../../cache/openrouter_models.json"));
+        let payload = parse_fixture(include_str!(
+            "../../../data/fixtures/openrouter_models.json"
+        ));
         payload
             .get("data")
             .and_then(serde_json::Value::as_array)
@@ -703,7 +705,9 @@ mod tests {
     }
 
     fn swebench_fixture_inputs() -> Vec<(String, String, Option<String>)> {
-        let payload = parse_fixture(include_str!("../../../cache/swebench_leaderboards.json"));
+        let payload = parse_fixture(include_str!(
+            "../../../data/fixtures/swebench_leaderboards.json"
+        ));
         let verified = payload
             .get("leaderboards")
             .and_then(serde_json::Value::as_array)
@@ -753,7 +757,9 @@ mod tests {
     }
 
     fn aistupidlevel_fixture_inputs() -> Vec<(String, String, Option<String>)> {
-        let payload = parse_fixture(include_str!("../../../cache/aistupidlevel_dashboard.json"));
+        let payload = parse_fixture(include_str!(
+            "../../../data/fixtures/aistupidlevel_dashboard.json"
+        ));
         let data = payload.get("data").unwrap_or(&payload);
         data.get("modelScores")
             .and_then(serde_json::Value::as_array)

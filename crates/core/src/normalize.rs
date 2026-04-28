@@ -117,7 +117,11 @@ pub fn tail_penalty_norm(
     let raw = (v - lo) / (hi - lo);
     let clipped = raw.clamp(0.0, 1.0);
     // Map to the population position in 0..1 oriented so that "good" is 1.
-    let position = if higher_better { clipped } else { 1.0 - clipped };
+    let position = if higher_better {
+        clipped
+    } else {
+        1.0 - clipped
+    };
     // Two-piece linear bend at p20 of the position scale: top 80% squeezes
     // into 70..100, bottom 20% spans 0..70. Net effect: most models cluster
     // in the high band, only outliers at the slow tail get penalized.

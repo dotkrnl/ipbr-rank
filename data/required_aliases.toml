@@ -64,8 +64,8 @@ aliases = [
 [models."anthropic/claude-opus-4.7"]
 vendor = "anthropic"
 aliases = [
-    "opus 4.7", "claude opus 4.7",
-    "claude-opus-4-7", "claude-opus-4.7",
+    "opus 4.7", "claude opus 4.7", "claude 4.7",
+    "claude-opus-4-7", "claude-opus-4.7", "claude-4-7",
     "claude-4-7-opus", "claude-4.7-opus",
     "anthropic/claude-opus-4.7",
     "claude-opus-4-7-adaptive", "claude-opus-4-7-thinking", "claude-opus-4-7-non-reasoning",
@@ -132,7 +132,7 @@ aliases = [
 [models."z-ai/glm-5.1"]
 vendor = "zai"
 aliases = [
-    "glm 5.1", "glm-5.1", "glm-5-1",
+    "glm 5.1", "glm-5.1", "glm-5-1", "glm-5",
     "glm-5-1-non-reasoning",
     "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1",
     # Scale leaderboards: `p` instead of `.`

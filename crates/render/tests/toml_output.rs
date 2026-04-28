@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use ipbr_core::{
-    Coefficients, ModelRecord, RawRow, SourceSummary, SynthesisConfig, ThinkingEffort, Vendor,
-    compute_scores_with, ingest_rows, load_embedded_pairs, required_aliases, synthesize_rows,
+    Coefficients, ModelRecord, RawRow, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
+    ingest_rows, load_embedded_pairs, required_aliases, synthesize_rows,
 };
 use ipbr_render::{
     Scoreboard,
@@ -191,7 +191,7 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
     let mut source_summary = BTreeMap::new();
     let http = OfflineOnlyHttp;
     let synthesis_pairs = load_embedded_pairs().expect("embedded synthesis aliases should load");
-    let synthesis_cfg = SynthesisConfig::default();
+    let synthesis_cfg = coefficients.synthesis.clone().unwrap_or_default();
     let mut rows_by_source: BTreeMap<String, Vec<RawRow>> = BTreeMap::new();
     let mut fetched_rows: BTreeMap<String, usize> = BTreeMap::new();
     let mut fetched_statuses: BTreeMap<String, String> = BTreeMap::new();
