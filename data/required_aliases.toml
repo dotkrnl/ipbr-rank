@@ -35,6 +35,8 @@ aliases = [
     "sonnet 4", "claude sonnet 4", "claude-sonnet-4", "claude-4-sonnet",
     "anthropic/claude-sonnet-4",
     "claude-4-sonnet-thinking", "claude-4-sonnet-non-reasoning",
+    # AISL dated snapshot ID
+    "claude-sonnet-4-20250514",
 ]
 
 [models."anthropic/claude-sonnet-4.5"]
@@ -45,6 +47,8 @@ aliases = [
     "claude-4-5-sonnet", "claude-4.5-sonnet",
     "anthropic/claude-sonnet-4.5",
     "claude-4-5-sonnet-thinking", "claude-4-5-sonnet-non-reasoning",
+    # AISL dated snapshot ID
+    "claude-sonnet-4-5-20250929",
 ]
 
 [models."anthropic/claude-opus-4.6"]
@@ -133,4 +137,87 @@ aliases = [
     "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1",
     # Scale leaderboards: `p` instead of `.`
     "glm-5p1",
+]
+
+# ------------------------------------------------------------------
+# Models discovered via AISL (aistupidlevel) source — added 2026-04-27
+# ------------------------------------------------------------------
+
+[models."anthropic/claude-opus-4.1"]
+vendor = "anthropic"
+aliases = [
+    "claude-opus-4-1-20250805", "claude-opus-4-1", "claude opus 4.1",
+    "opus 4.1", "claude-opus-4.1", "anthropic/claude-opus-4.1",
+    "claude-opus-4-1-thinking", "claude-opus-4-1-non-reasoning",
+]
+
+[models."anthropic/claude-opus-4.5"]
+vendor = "anthropic"
+aliases = [
+    "claude-opus-4-5-20251101", "claude-opus-4-5", "claude opus 4.5",
+    "opus 4.5", "claude-opus-4.5", "anthropic/claude-opus-4.5",
+    "claude-opus-4-5-thinking", "claude-opus-4-5-non-reasoning",
+]
+
+[models."anthropic/claude-sonnet-4.6"]
+vendor = "anthropic"
+aliases = [
+    "claude-sonnet-4-6", "claude sonnet 4.6", "sonnet 4.6",
+    "claude-sonnet-4.6", "anthropic/claude-sonnet-4.6",
+    "claude-sonnet-4-6-thinking", "claude-sonnet-4-6-non-reasoning",
+]
+
+[models."openai/gpt-5.2"]
+vendor = "openai"
+aliases = [
+    "gpt-5.2", "gpt 5.2", "gpt-5-2", "openai/gpt-5.2",
+    "gpt-5-2-high", "gpt-5-2-medium", "gpt-5-2-low", "gpt-5-2-non-reasoning",
+]
+
+# DeepSeek V4-Flash. The upstream API routes both deepseek-chat and
+# deepseek-reasoner to this same underlying model (thinking on vs off).
+# AISL tracks them as separate entries; we merge them under one canonical.
+[models."deepseek/deepseek-v4-flash"]
+vendor = "deepseek"
+aliases = [
+    "deepseek-chat", "deepseek chat", "deepseek/deepseek-chat",
+    "deepseek-reasoner", "deepseek reasoner", "deepseek/deepseek-reasoner",
+    "deepseek-v4-flash", "deepseek v4 flash", "deepseek/deepseek-v4-flash",
+]
+
+[models."xai/grok-4-latest"]
+vendor = "xai"
+aliases = [
+    "grok-4-latest", "grok 4 latest", "grok-4", "grok 4",
+    "x-ai/grok-4", "xai/grok-4", "grok-4-0709",
+]
+
+[models."xai/grok-code-fast-1"]
+vendor = "xai"
+aliases = [
+    "grok-code-fast-1", "grok code fast 1", "grok-code-fast",
+    "x-ai/grok-code-fast-1", "xai/grok-code-fast-1",
+]
+
+[models."z-ai/glm-4.6"]
+vendor = "zai"
+aliases = [
+    "glm-4.6", "glm 4.6", "glm-4-6",
+    "z-ai/glm-4.6", "zai/glm-4.6", "glm-4p6",
+]
+
+[models."z-ai/glm-4.7"]
+vendor = "zai"
+aliases = [
+    "glm-4.7", "glm 4.7", "glm-4-7",
+    "z-ai/glm-4.7", "zai/glm-4.7", "glm-4p7",
+]
+
+[models."moonshotai/kimi-k2-0905"]
+vendor = "moonshot"
+aliases = [
+    "kimi-k2-0905-preview", "kimi k2 0905", "kimi-k2-0905",
+    "moonshotai/kimi-k2-0905", "moonshot/kimi-k2-0905",
+    # Turbo is the same model parameters, just a faster API endpoint
+    "kimi-k2-turbo-preview", "kimi k2 turbo", "kimi-k2-turbo",
 ]

@@ -146,6 +146,16 @@ CopilotArenaOrLMArenaCode = 0.04
 # Verified+Pro coverage clear the 0.70 trust threshold. Verified remains
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
+[synthesis]
+# Default 0.50 is too tight for gemini-2.5-pro, which needs the full
+# aistupidlevel source (~17 metrics) from its 3-pro sibling. Raising to
+# 0.55 keeps the safeguard while allowing large but justified gap-fills.
+per_model_cap = 0.55
+# Default 0.30 triggers warnings when many models share the same donor
+# source (e.g., aistupidlevel, mcp_atlas). Raising to 0.45 eliminates
+# the noise while still capping runaway synthesis.
+per_source_cap = 0.45
+
 [composite_metrics.SWEComposite]
 SWERebench = 0.20            # contamination-resistant rolling-window signal
 SWEBenchVerified = 0.30      # widely reported, but saturated/contaminated

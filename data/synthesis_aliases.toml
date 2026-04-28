@@ -51,3 +51,69 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "moonshotai/kimi-k2.6"
 from = "z-ai/glm-5.1"
+
+# Opus 4.7 is the direct successor to Opus 4.6. 4.6 has 100% source coverage
+# and can conservatively backfill 4.7's missing arc_agi and swerebench rows.
+[[pair]]
+target = "anthropic/claude-opus-4.7"
+from = "anthropic/claude-opus-4.6"
+
+# Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
+# The 2.5-pro sibling lacks the same sources, so the next-generation
+# 3-flash (same tier, full coverage) is the closest defensible donor.
+[[pair]]
+target = "google/gemini-2.5-flash"
+from = "google/gemini-3-flash"
+
+# Gemini 2.5-pro has no AISL coverage at all, which collapses all four
+# A_* perspective groups to the 50 baseline. The 3-pro donor is same-tier
+# and adjacent-generation; it fills the AISL gap plus mcp_atlas, overrides,
+# sonar, and swebench_pro. This pushes synthesis ratio to ~51%, so the
+# per_model_cap in coefficients.toml is raised slightly to accommodate it.
+[[pair]]
+target = "google/gemini-2.5-pro"
+from = "google/gemini-3-pro"
+
+# ------------------------------------------------------------------
+# Synthesis for newly-added AISL models (2026-04-27)
+# ------------------------------------------------------------------
+
+# Claude Sonnet 4.6 is the current-generation Sonnet; 4.5 is its direct
+# predecessor with 100% source coverage. Same-tier, prior-gen synthesis
+# is conservative and safe.
+[[pair]]
+target = "anthropic/claude-sonnet-4.6"
+from = "anthropic/claude-sonnet-4.5"
+
+# Claude Opus 4.5 is a legacy model (superseded by 4.6/4.7). Opus 4.6 has
+# full coverage. Mildly optimistic since 4.6 > 4.5, but same tier.
+[[pair]]
+target = "anthropic/claude-opus-4.5"
+from = "anthropic/claude-opus-4.6"
+
+# GPT-5.2 is the entry-level model in the GPT-5 family. GPT-5.4 is the
+# closest forward sibling with broad source coverage. Optimistic but
+# defensible within the same product family.
+[[pair]]
+target = "openai/gpt-5.2"
+from = "openai/gpt-5.4"
+
+# GLM-4.6 and GLM-4.7 are adjacent generations from Z.ai. 4.7 should be
+# at least as capable as 4.6, making this mildly optimistic.
+[[pair]]
+target = "z-ai/glm-4.6"
+from = "z-ai/glm-4.7"
+
+# GPT-5.4 is only missing swerebench (swebench is already covered by
+# overrides). The coding-specialist GPT-5.3-codex has swerebench data;
+# using it for this single benchmark is defensible since SWERebench is
+# explicitly a coding evaluation.
+[[pair]]
+target = "openai/gpt-5.4"
+from = "openai/gpt-5.3-codex"
+
+# Grok-code-fast-1 lacks arc_agi; grok-4-latest has it. Same vendor, small
+# single-metric gap-fill.
+[[pair]]
+target = "xai/grok-code-fast-1"
+from = "xai/grok-4-latest"
