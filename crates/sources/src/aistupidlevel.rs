@@ -326,9 +326,7 @@ fn axis_value(history: &Value, live_key: &str, suite: &str) -> Option<f64> {
     // the most recent timestamp; index N is the oldest). Walking the array in
     // natural order gives us the newest matching suite reading.
     let mut legacy_fallback = None;
-    let Some(entries) = history.as_array() else {
-        return None;
-    };
+    let entries = history.as_array()?;
     for entry in entries {
         let entry_suite = entry.get("suite").and_then(Value::as_str);
         let suite_matches = entry_suite == Some(suite);

@@ -36,18 +36,12 @@ use crate::{FetchOptions, Http, SecretStore, Source, SourceError, VerificationSt
 const SOURCE_ID: &str = "overrides";
 const EMBEDDED: &str = include_str!("../../../data/score_overrides.toml");
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct OverridesSource {
     /// Optional override path — when `None`, the source uses the embedded
     /// copy of `data/score_overrides.toml` baked in at build time. Tests
     /// pass an explicit path to exercise a custom file.
     file_path: Option<PathBuf>,
-}
-
-impl Default for OverridesSource {
-    fn default() -> Self {
-        Self { file_path: None }
-    }
 }
 
 impl OverridesSource {

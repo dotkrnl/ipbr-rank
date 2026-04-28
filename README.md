@@ -271,6 +271,17 @@ ipbr-rank/
 The static site (theme, scripts, HTML) is generated entirely from Rust in
 `crates/render/src/site/` — there are no external template files.
 
+## Pre-commit
+
+A `.pre-commit-config.yaml` runs `cargo fmt --check`, `cargo clippy -D
+warnings`, `scripts/check-docs.sh`, and basic repo-hygiene hooks.
+
+```bash
+pip install pre-commit  # one-time
+pre-commit install      # installs the git hook
+pre-commit run --all-files  # one-shot full sweep
+```
+
 ## Testing
 
 ```bash
