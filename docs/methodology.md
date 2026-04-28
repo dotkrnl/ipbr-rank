@@ -19,7 +19,7 @@ The scoring pipeline has seven stages:
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
 3. **Uncertainty penalties**: Values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Values from manual overrides are pulled toward 50 by 10 %.
 4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (currently only `SWEComposite`).
-5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*), with shrink-to-50 for missing data when present-weight coverage drops below the trust threshold (0.70).
+5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
 6. **Canary health penalty**: AISL canary drift is consumed as `AI_canary_health`, outside all groups. Healthy or missing canary data adds no points; degraded canary data subtracts up to 6 points from each raw role score.
 7. **Final scoring**: Role scores are weighted averages of groups; the reviewer-reservation penalty produces the `_adj` variants of I/P/B.
 
@@ -41,7 +41,7 @@ See Appendix A for the complete metric table.
 
 ### 3.1 Percentile-Based Robust Normalization (`transform = "percentile"`)
 
-For each metric, we collect all raw values across active models, compute the 5th and 95th percentiles, and map:
+For each metric, we collect raw values across active models, compute the 5th and 95th percentiles, and map:
 - Values at or below p5 → 0
 - Values at or above p95 → 100
 - Values between p5 and p95 → linearly interpolated
@@ -55,7 +55,7 @@ norm(x) = clip(100 × (x - p5) / (p95 - p5), 0, 100)
 
 **Inverse direction (`higher_better = false`)** flips the result so larger raw values map to smaller normalized scores.
 
-This is the default transform for nearly every metric — passthrough was retired in the audit because raw benchmark percentages aren't on a comparable scale across leaderboards.
+This is the default transform for nearly every metric — passthrough was retired in the audit because raw benchmark percentages aren't on a comparable scale across leaderboards. Synthesized sibling values and manual overrides are excluded from the normalization baseline when at least two direct measurements exist, so uncertainty fills cannot move the population cut points for directly measured models. If fewer than two direct measurements exist for a metric, the baseline falls back to all present values.
 
 ### 3.2 Tail-Penalty (`transform = "tail_penalty"`)
 
@@ -163,10 +163,14 @@ total_weight = sum(weight[m] for m in all_group_metrics)
 weighted_avg = sum(normalized[m] × weight[m] for m in present_metrics) / present_weight
 w_present = present_weight / total_weight
 
-if w_present >= 0.70:
-    group_score = weighted_avg                                     # trust the present mean
+shrink_value = weighted_avg × w_present + 50 × (1 - w_present)
+
+if w_present <= 0.60:
+    group_score = shrink_value
+elif w_present >= 0.80:
+    group_score = weighted_avg
 else:
-    group_score = weighted_avg × w_present + 50 × (1 - w_present)  # pull toward 50
+    group_score = smoothstep_blend(shrink_value, weighted_avg)
 ```
 
 **Why the threshold.** Without it, models with mostly-complete coverage
@@ -197,19 +201,19 @@ Each of the four roles (I_raw, P_raw, B_raw, R) is a weighted average of groups.
 
 From `[final_score_weights.*]` in `data/coefficients.toml`:
 
-All four role formulas put **A_\* at 0.35** — AISL's role-shaped
-perspectives remain the largest single behavioral signal, but the
-role-specific public-leaderboard groups collectively carry more weight.
-OPS_* stays at 0.08.
+All four role formulas put **A_\* at 0.30** — AISL's role-shaped
+perspectives remain a major behavioral signal, while the role-specific
+public-leaderboard groups collectively carry more weight. OPS_* stays at
+0.08.
 
 **I_raw** (Idea):
 ```
-I_raw = 0.40×CRE + 0.17×GEN + 0.35×A_I + 0.08×OPS_long
+I_raw = 0.43×CRE + 0.19×GEN + 0.30×A_I + 0.08×OPS_long
 ```
 
 **P_raw** (Planning):
 ```
-P_raw = 0.34×PLAN + 0.23×GEN + 0.35×A_P + 0.08×OPS_precision
+P_raw = 0.37×PLAN + 0.25×GEN + 0.30×A_P + 0.08×OPS_precision
 ```
 
 PLAN's basket of TerminalBench / Tau2Bench / AAReasoning / MCPAtlas can
@@ -219,19 +223,19 @@ leaderboard mix.
 
 **B_raw** (Building):
 ```
-B_raw = 0.55×BUILD + 0.02×PLAN + 0.35×A_B + 0.08×OPS_precision
+B_raw = 0.60×BUILD + 0.02×PLAN + 0.30×A_B + 0.08×OPS_precision
 ```
 
 **R** (Reviewing):
 ```
-R = 0.12×LM_ARENA_REVIEW_PROXY + 0.23×BUILD + 0.22×PLAN + 0.35×A_R + 0.08×OPS_review
+R = 0.12×LM_ARENA_REVIEW_PROXY + 0.255×BUILD + 0.245×PLAN + 0.30×A_R + 0.08×OPS_review
 ```
 
 A_R remains the largest single review-specific behavioral signal.
 LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.12:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.23 keeps reviewing tied to "you can read the
-code." PLAN 0.22 captures review-as-planning.
+code-review benchmark. BUILD 0.255 keeps reviewing tied to "you can read the
+code." PLAN 0.245 captures review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -385,8 +389,6 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | AI_task_completion | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
 | AI_tool_selection | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
 | AI_parameter_accuracy | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-| AI_safety_compliance | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-
 `AI_error_handling` was previously emitted from AISL's tooling suite but is
 now dropped from both the metric registry and `A_R` weights. Upstream
 defines it as `recoveredFromErrors / failedCalls.length`, with the
@@ -405,16 +407,16 @@ Removing it keeps the coefficient surface honest.
 All coefficients are verbatim from `data/coefficients.toml`. This table is for quick reference; the TOML file is authoritative.
 
 ### Final Score Weights
-All four roles weight the AISL perspective at 0.35. Role-specific public
-benchmark groups sum to 0.57, and OPS_* contributes 0.08 (paired with the
+All four roles weight the AISL perspective at 0.30. Role-specific public
+benchmark groups sum to 0.62, and OPS_* contributes 0.08 (paired with the
 tail-penalty curve so only genuinely slow models lose meaningful score).
 
 | Role | Group Contributions |
 |------|---------------------|
-| I_raw | CRE 0.40, GEN 0.17, A_I 0.35, OPS_long 0.08 |
-| P_raw | PLAN 0.34, GEN 0.23, A_P 0.35, OPS_precision 0.08 |
-| B_raw | BUILD 0.55, PLAN 0.02, A_B 0.35, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.12, BUILD 0.23, PLAN 0.22, A_R 0.35, OPS_review 0.08 |
+| I_raw | CRE 0.43, GEN 0.19, A_I 0.30, OPS_long 0.08 |
+| P_raw | PLAN 0.37, GEN 0.25, A_P 0.30, OPS_precision 0.08 |
+| B_raw | BUILD 0.60, PLAN 0.02, A_B 0.30, OPS_precision 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.12, BUILD 0.255, PLAN 0.245, A_R 0.30, OPS_review 0.08 |
 
 ### Reviewer-Reservation Penalties
 | Role | Coefficient |
@@ -435,7 +437,7 @@ values still contribute, just slightly more conservatively than direct
 measurements.
 
 AISL perspective groups (`A_I`, `A_P`, `A_B`, `A_R`) get one extra
-provenance-aware guard because they carry 0.35 of every final role score.
+provenance-aware guard because they carry 0.30 of every final role score.
 After the perspective weighted average is computed, the group is blended
 toward 50 by 25% of the present perspective weight that came from
 synthesized metrics. A fully synthesized AISL perspective therefore keeps
@@ -448,7 +450,7 @@ See `[ai_stupid_perspective_weights.*]` in `data/coefficients.toml` for the
 full breakdown of how the 17 AISL axes (the 9 hourly-suite axes plus
 `plan_coherence`, `memory_retention`, `hallucination_resistance` from the
 deep suite, and `context_awareness`, `task_completion`, `tool_selection`,
-`parameter_accuracy`, `safety_compliance` from the tooling suite) are
+`parameter_accuracy` from the tooling suite) are
 weighted into A_I / A_P / A_B / A_R.
 
 `AI_canary_health` is intentionally excluded from these perspective weights.

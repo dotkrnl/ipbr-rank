@@ -318,7 +318,7 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <p>Penalty coefficients differ by role: Build is penalized hardest (0.32), Plan moderately (0.18), Idea lightly (0.08). Review is never adjusted — it is the source of the penalty.</p>
 
 <h3>missing data</h3>
-<p>If a model is missing some metrics within a group, the group score is computed from the present metrics if at least 70% of the group weight is covered. Below that threshold, the score shrinks toward 50 proportional to the missing weight.</p>
+<p>If a model is missing some metrics within a group, the group score blends from shrink-to-50 to trusting the present metrics across 60-80% group coverage. At 80% coverage and above, the present-weight mean is trusted directly.</p>
 
 <p><a href="about.html">Full math, role definitions, and source list →</a></p>
 </div>

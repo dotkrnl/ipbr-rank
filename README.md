@@ -99,19 +99,19 @@ They are public, cited values, yet still hand-curated rather than directly
 ingested leaderboard rows.
 
 ### Group Aggregation
-Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, **OPS_review**, and **A_I / A_P / A_B / A_R** (AI Stupid Level perspectives across the 17 AISL capability axes). Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator uses the present-weight mean directly if **≥70 %** of the group's weight is present (so peripheral missing metrics don't penalize otherwise well-covered models); below that threshold, the score still shrinks toward 50 proportional to the missing weight. AISL canary health is kept outside the groups and can only subtract a small penalty from role scores.
+Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, **OPS_review**, and **A_I / A_P / A_B / A_R** (AI Stupid Level perspectives across the 17 AISL capability axes). Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator blends smoothly from shrink-to-50 to trusting the present-weight mean across **60-80 %** group coverage; at **≥80 %** coverage, peripheral missing metrics no longer penalize otherwise well-covered models. AISL canary health is kept outside the groups and can only subtract a small penalty from role scores.
 
 ### Final Scores
 Each role score is a weighted average of groups. AISL's role-shaped
-perspective (`A_*`) carries 0.35 in every formula, leaving the broader
+perspective (`A_*`) carries 0.30 in every formula, leaving the broader
 public benchmark groups collectively dominant.
 Operational metrics (speed, cost, context window) carry 0.08 — paired
 with the tail-penalty curve, this means "fast enough" models cluster
 within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.40×CRE + 0.17×GEN + 0.35×A_I + 0.08×OPS_long
-- **P_raw** = 0.34×PLAN + 0.23×GEN + 0.35×A_P + 0.08×OPS_precision
-- **B_raw** = 0.55×BUILD + 0.02×PLAN + 0.35×A_B + 0.08×OPS_precision
-- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.23×BUILD + 0.22×PLAN + 0.35×A_R + 0.08×OPS_review
+- **I_raw** = 0.43×CRE + 0.19×GEN + 0.30×A_I + 0.08×OPS_long
+- **P_raw** = 0.37×PLAN + 0.25×GEN + 0.30×A_P + 0.08×OPS_precision
+- **B_raw** = 0.60×BUILD + 0.02×PLAN + 0.30×A_B + 0.08×OPS_precision
+- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.255×BUILD + 0.245×PLAN + 0.30×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
 For each vendor **v**, compute:

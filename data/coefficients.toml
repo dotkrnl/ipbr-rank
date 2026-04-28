@@ -54,8 +54,8 @@ AI_memory_retention = 0.04
 [ai_stupid_perspective_weights.A_R]
 # Tuned to lean into review-specific axes while keeping the most thinly-
 # covered ones (hallucination_resistance, error_handling — many AISL rows
-# don't carry these) under the 0.30 missing-weight ceiling so models still
-# clear the 0.70 trust threshold instead of getting shrunk to 50.
+# don't carry these) under the 0.30 missing-weight ceiling so models avoid
+# the sparse-coverage side of the 0.60-0.80 shrink transition.
 #
 # hallucinationResistance up to 0.17 (the biggest review-specific signal —
 # does the model invent issues that aren't there?), edgeCases up to 0.13
@@ -143,7 +143,7 @@ CopilotArenaOrLMArenaCode = 0.04
 # don't pile up as independent weights.
 #
 # SWEComposite now favors SWE-Bench Pro and lets a model with direct
-# Verified+Pro coverage clear the 0.70 trust threshold. Verified remains
+# Verified+Pro coverage clear the shrink transition. Verified remains
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
 [synthesis]
@@ -188,9 +188,9 @@ InverseCost = 0.20
 ContextWindow = 0.10
 
 # Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
-# carry weight 0.35: large enough to preserve AISL's role-shaped behavioral
-# signal, but no longer dominant over the broader public benchmark basket.
-# The remaining 0.57 is split across role-specific public-leaderboard groups.
+# carry weight 0.30: large enough to preserve AISL's role-shaped behavioral
+# signal, but less able to dominate as one correlated source family. The
+# remaining 0.62 is split across role-specific public-leaderboard groups.
 #
 # Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
 # the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
@@ -204,24 +204,24 @@ ContextWindow = 0.10
 # vs "very fast." Use the OPS_* groups directly for a pure speed/cost
 # view of the population.
 [final_score_weights.I_raw]
-CRE = 0.40
-GEN = 0.17
-A_I = 0.35
+CRE = 0.43
+GEN = 0.19
+A_I = 0.30
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
-# A_P is still the largest single behavioral signal, but PLAN/GEN now carry
-# enough weight that direct public benchmark evidence can override AISL
-# outliers or synthesized AISL gaps.
-PLAN = 0.34
-GEN = 0.23
-A_P = 0.35
+# A_P is still a major behavioral signal, but PLAN/GEN now carry enough
+# weight that direct public benchmark evidence can override AISL outliers
+# or synthesized AISL gaps.
+PLAN = 0.37
+GEN = 0.25
+A_P = 0.30
 OPS_precision = 0.08
 
 [final_score_weights.B_raw]
-BUILD = 0.55
+BUILD = 0.60
 PLAN = 0.02
-A_B = 0.35
+A_B = 0.30
 OPS_precision = 0.08
 
 # R-axis: A_R remains the largest single review-specific signal, while the
@@ -231,9 +231,9 @@ OPS_precision = 0.08
 # preference proxy.
 [final_score_weights.R]
 LM_ARENA_REVIEW_PROXY = 0.12
-BUILD = 0.23
-PLAN = 0.22
-A_R = 0.35
+BUILD = 0.255
+PLAN = 0.245
+A_R = 0.30
 OPS_review = 0.08
 
 [reviewer_reservation]

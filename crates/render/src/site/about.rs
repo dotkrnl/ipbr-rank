@@ -34,8 +34,8 @@ B_adj = B_raw - 0.32 × L_v</code></pre>
 <h2>How scores are built</h2>
 <ol>
 <li><strong>Normalize</strong> — each metric is percentile-mapped within the active model population (5th/95th boundaries; log-scaled for cost/speed/latency). Operational metrics use a tail-penalty curve — the top 80% maps into 70-100 with mild differentiation; only the bottom 20% drops sharply.</li>
-<li><strong>Aggregate</strong> — metrics roll up into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_I/A_P/A_B/A_R). If at least 70% of a group's weight is present, the score is the present-weight mean. Below that threshold, it shrinks toward 50 proportional to missing weight.</li>
-<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL's role-shaped perspective (A_*) carries 0.35 in every formula. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
+<li><strong>Aggregate</strong> — metrics roll up into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_I/A_P/A_B/A_R). Scores blend from shrink-to-50 to trusting the present metrics across 60-80% group coverage.</li>
+<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL's role-shaped perspective (A_*) carries 0.30 in every formula. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
 <li><strong>Canary health</strong> — AISL canary drift is a penalty-only signal. Healthy or missing canary data adds nothing; degraded canary data can subtract up to 6 points from raw role scores.</li>
 <li><strong>Synthesize last</strong> — when a known sibling pair has a metric on one model but not the other, the missing field is filled from the sibling and softened toward 50 by 15% so it reads as a softer signal.</li>
 </ol>
@@ -60,7 +60,7 @@ B_adj = B_raw - 0.32 × L_v</code></pre>
 
 <h2>Glossary</h2>
 <ul>
-<li><strong>Trust threshold</strong> — the 70% group-coverage cutoff above which the present-weight mean is trusted directly.</li>
+<li><strong>Trust transition</strong> — the 60-80% group-coverage band where sparse groups move from shrink-to-50 toward the present-weight mean.</li>
 <li><strong>Composite</strong> — a metric that is itself a weighted blend of related sub-metrics (currently SWEComposite).</li>
 <li><strong>A_* perspective</strong> — AISL's 17 capability axes weighted four ways (one weighting per role). Canary health is separate and penalty-only.</li>
 </ul>

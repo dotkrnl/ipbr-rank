@@ -95,11 +95,24 @@ const CANARY_MAX_ROLE_PENALTY: f64 = 6.0;
 
 fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
     for (metric_key, def) in &coef.metrics {
-        let pop: Vec<f64> = records
+        let all_pop: Vec<f64> = records
             .iter()
             .filter_map(|r| r.raw_metrics.get(metric_key).copied())
             .filter(|v| v.is_finite())
             .collect();
+        let direct_pop: Vec<f64> = records
+            .iter()
+            .filter(|r| {
+                !r.synthesized.contains_key(metric_key) && !r.override_reported.contains(metric_key)
+            })
+            .filter_map(|r| r.raw_metrics.get(metric_key).copied())
+            .filter(|v| v.is_finite())
+            .collect();
+        let pop = if direct_pop.len() >= 2 {
+            &direct_pop
+        } else {
+            &all_pop
+        };
         for r in records.iter_mut() {
             let raw = match r.raw_metrics.get(metric_key) {
                 Some(v) if v.is_finite() => *v,
@@ -329,6 +342,77 @@ mod tests {
         assert!(
             (reported - 95.0).abs() < 0.5,
             "override-reported score should get a 10% uncertainty pull toward 50, got {reported}"
+        );
+    }
+
+    #[test]
+    fn synthesized_metrics_do_not_set_normalization_baseline() {
+        use crate::model::SynthesisProvenance;
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("AI_correctness", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("AI_correctness", 50.0)],
+            ),
+            make_record(
+                "s/synth",
+                Vendor::Other("s".into()),
+                &[("AI_correctness", 1000.0)],
+            ),
+        ];
+        records[2].synthesized.insert(
+            "AI_correctness".to_string(),
+            SynthesisProvenance {
+                source_id: "aistupidlevel".to_string(),
+                from: "d/direct".to_string(),
+            },
+        );
+
+        compute_scores_with(&mut records, &coef);
+
+        let direct = records[1].metrics.get("AI_correctness").copied().unwrap();
+        assert!(
+            direct > 95.0,
+            "synthesized outlier should not stretch direct normalization baseline, got {direct}"
+        );
+    }
+
+    #[test]
+    fn override_reported_metrics_do_not_set_normalization_baseline_when_direct_population_exists() {
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("TerminalBench", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("TerminalBench", 50.0)],
+            ),
+            make_record(
+                "o/override",
+                Vendor::Other("o".into()),
+                &[("TerminalBench", 1000.0)],
+            ),
+        ];
+        records[2]
+            .override_reported
+            .insert("TerminalBench".to_string());
+
+        compute_scores_with(&mut records, &coef);
+
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        assert!(
+            direct > 95.0,
+            "override outlier should not stretch direct normalization baseline, got {direct}"
         );
     }
 

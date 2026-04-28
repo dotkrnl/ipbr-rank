@@ -402,8 +402,8 @@ fn scoring_panel_has_role_definitions_and_link() {
     assert!(index.contains("reviewer-reservation"));
     // Link to full methodology page
     assert!(index.contains("href=\"about.html\""));
-    // Trust threshold note
-    assert!(index.contains("70%") || index.contains("70 %") || index.contains("0.70"));
+    // Trust transition note
+    assert!(index.contains("60-80%") || index.contains("60-80 %"));
 }
 
 #[test]

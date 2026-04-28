@@ -149,7 +149,7 @@ Possible group keys:
 - **`A_B`** (AI Stupid Level: Building perspective)
 - **`A_R`** (AI Stupid Level: Reviewing perspective)
 
-Groups where `present_weight / total_weight < 0.70` (the trust threshold) are marked as "shrunk" in `models.missing.groups_shrunk`.
+Groups where `present_weight / total_weight < 0.80` are marked as "shrunk" in `models.missing.groups_shrunk`; the scoring math blends from shrink-to-50 to trusting the present mean across 0.60-0.80 coverage.
 
 #### `[models.metrics]` Table
 
@@ -164,7 +164,7 @@ Some metric values are filled from a sibling model when the source did not direc
 #### `[models.missing]` Table
 
 - **`metrics`**: Array of strings, metric keys that are missing for this model.
-- **`groups_shrunk`**: Array of strings, group keys where less than 70% of the weight was present (the trust threshold — see methodology §4.2 — below which the score is shrunk toward 50).
+- **`groups_shrunk`**: Array of strings, group keys where less than 80% of the weight was present. See methodology §4.2 for the 0.60-0.80 smooth shrink transition.
 
 ---
 
@@ -187,7 +187,7 @@ groups_shrunk = ["PLAN"]
 - **`[models."<canonical_id>"]`**: One table per model, keyed by canonical ID.
   - **`display_name`**: Human-readable name (same value as in `scoreboard.toml`).
   - **`metrics`**: Array of strings, metric keys missing for this model.
-  - **`groups_shrunk`**: Array of strings, groups where `present_weight / total_weight < 0.70` (the trust threshold).
+  - **`groups_shrunk`**: Array of strings, groups where `present_weight / total_weight < 0.80`.
 
 `missing.toml` does not include a `schema_version` field — its shape is
 covered by `scoreboard.toml`'s version bumps.
@@ -227,9 +227,9 @@ LMArenaText = 0.35
 # ... same structure for other groups
 
 [final_score_weights.I_raw]
-CRE = 0.40
-GEN = 0.17
-A_I = 0.35
+CRE = 0.43
+GEN = 0.19
+A_I = 0.30
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
