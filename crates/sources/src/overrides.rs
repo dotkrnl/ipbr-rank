@@ -31,9 +31,7 @@ use ipbr_core::RawRow;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{
-    FetchOptions, Http, SecretStore, Source, SourceError, VerificationStatus,
-};
+use crate::{FetchOptions, Http, SecretStore, Source, SourceError, VerificationStatus};
 
 const SOURCE_ID: &str = "overrides";
 const EMBEDDED: &str = include_str!("../../../data/score_overrides.toml");
@@ -129,6 +127,12 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
                 entry.canonical_id
             )));
         }
+        if entry.note.trim().is_empty() {
+            return Err(SourceError::Parse(format!(
+                "overrides entry {}.{} is missing a note",
+                entry.canonical_id, entry.metric
+            )));
+        }
         if !entry.value.is_finite() {
             return Err(SourceError::Parse(format!(
                 "overrides entry {}.{} has non-finite value",
@@ -165,6 +169,7 @@ note = "Anthropic launch, 2026-04-16"
 canonical_id = "openai/gpt-5.5"
 metric = "TerminalBench"
 value = 82.7
+note = "OpenAI launch, 2026-04-23"
 "#;
 
     #[test]
@@ -195,6 +200,17 @@ value = 82.7
 [[entries]]
 canonical_id = "x"
 metric = ""
+value = 1.0
+"#;
+        assert!(parse_rows(bad).is_err());
+    }
+
+    #[test]
+    fn missing_note_is_rejected() {
+        let bad = r#"
+[[entries]]
+canonical_id = "x"
+metric = "TerminalBench"
 value = 1.0
 "#;
         assert!(parse_rows(bad).is_err());

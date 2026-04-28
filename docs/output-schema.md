@@ -83,7 +83,7 @@ CRE = 80.2
 GEN = 79.1
 PLAN = 75.3
 BUILD = 82.0
-JUDGE = 84.5
+LM_ARENA_REVIEW_PROXY = 84.5
 OPS_long = 71.0
 OPS_precision = 68.5
 OPS_review = 69.2
@@ -147,7 +147,7 @@ Possible group keys:
 - **`GEN`** (General Intelligence)
 - **`PLAN`** (Planning)
 - **`BUILD`** (Building)
-- **`JUDGE`** (Reviewing/Judging)
+- **`LM_ARENA_REVIEW_PROXY`** (LM Arena search/document review proxy)
 - **`OPS_long`** (Ops for long generation)
 - **`OPS_precision`** (Ops for precise tasks)
 - **`OPS_review`** (Ops for reviewing)
@@ -452,7 +452,7 @@ This enables golden testing and reproducible builds.
 ### 1.0.0 (Initial)
 - First stable schema
 - All four role scores (I_raw, P_raw, B_raw, R) plus adjusted (I_adj, P_adj, B_adj)
-- 12 groups (CRE, GEN, PLAN, BUILD, JUDGE, OPS_*, A_*)
+- 12 groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*)
 - Metrics defined in `data/coefficients.toml`
 - Missing-data tracking via `models.missing`
 

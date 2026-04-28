@@ -106,6 +106,8 @@ pub struct ModelRecord {
     pub scores: RoleScores,
     pub missing: MissingInfo,
     pub synthesized: BTreeMap<MetricKey, SynthesisProvenance>,
+    #[serde(default)]
+    pub override_reported: BTreeSet<MetricKey>,
 }
 
 impl ModelRecord {
@@ -123,6 +125,7 @@ impl ModelRecord {
             scores: RoleScores::default(),
             missing: MissingInfo::new(),
             synthesized: BTreeMap::new(),
+            override_reported: BTreeSet::new(),
         }
     }
 }

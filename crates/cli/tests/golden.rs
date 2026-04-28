@@ -37,6 +37,7 @@ fn offline_all_matches_golden_scoreboard() {
     assert!(out.join("coefficients.toml").is_file());
     assert!(out.join("site/index.html").is_file());
     assert!(out.join("site/about.html").is_file());
+    assert!(out.join("site/scoreboard.toml").is_file());
     assert!(out.join("site/assets/style.css").is_file());
     assert!(out.join("site/assets/app.js").is_file());
 }

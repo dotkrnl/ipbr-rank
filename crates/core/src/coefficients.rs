@@ -114,6 +114,14 @@ mod tests {
                 "{role} weights sum to {sum}, expected 1.0"
             );
         }
+        assert!(
+            c.final_score_weights["R"].contains_key("LM_ARENA_REVIEW_PROXY"),
+            "R should use the renamed LM Arena review proxy group"
+        );
+        assert!(
+            !c.final_score_weights["R"].contains_key("JUDGE"),
+            "R should no longer expose the old JUDGE group"
+        );
     }
 
     #[test]

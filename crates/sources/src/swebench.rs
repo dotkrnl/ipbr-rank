@@ -75,7 +75,12 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         .ok_or_else(|| SourceError::Parse("SWE-bench payload missing leaderboards[]".into()))?;
 
     let mut rows = Vec::new();
-    extract_board(leaderboards, is_verified_leaderboard, "SWEBenchVerified", &mut rows)?;
+    extract_board(
+        leaderboards,
+        is_verified_leaderboard,
+        "SWEBenchVerified",
+        &mut rows,
+    )?;
     // Multilingual is best-effort: the upstream payload has shipped this board
     // for some time, but we don't want a future rename to break the verified
     // pipeline, so a missing board is non-fatal.
@@ -112,7 +117,9 @@ fn extract_board(
         .get("results")
         .and_then(Value::as_array)
         .ok_or_else(|| {
-            SourceError::Parse(format!("SWE-bench leaderboard for {metric} missing results[]"))
+            SourceError::Parse(format!(
+                "SWE-bench leaderboard for {metric} missing results[]"
+            ))
         })?;
 
     for entry in results {

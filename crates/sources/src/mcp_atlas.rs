@@ -209,7 +209,12 @@ mod tests {
         let rows = parse_rows(FIXTURE, "MCPAtlas", "mcp_atlas").expect("fixture should parse");
         let by: BTreeMap<_, _> = rows
             .iter()
-            .map(|r| (r.model_name.as_str(), r.fields["MCPAtlas"].as_f64().unwrap()))
+            .map(|r| {
+                (
+                    r.model_name.as_str(),
+                    r.fields["MCPAtlas"].as_f64().unwrap(),
+                )
+            })
             .collect();
         assert_eq!(by["Claude Opus 4.7 (max)"], 79.1);
         assert_eq!(by["Gemini 3.1 Pro"], 78.2);

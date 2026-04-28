@@ -31,7 +31,7 @@ pub fn write_coefficients(
     Ok(())
 }
 
-fn render_scoreboard(scoreboard: &Scoreboard) -> String {
+pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
     let mut out = String::new();
     out.push_str(&format!(
         "schema_version = {}\n",
@@ -201,9 +201,10 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
             .map(|(_, weight)| *weight)
             .sum();
 
-        // REVIEWER: `ModelRecord` does not currently expose exact shrink factors per group,
-        // so we reconstruct `groups_shrunk` from effective missing metric weight (>50%).
-        if missing_weight / total_weight > 0.5 {
+        // Keep this in sync with `FULL_COVERAGE_TRUST_THRESHOLD` in
+        // ipbr-core's missing-safe aggregator: groups shrink when present
+        // coverage is below 70%, i.e. missing weight is above 30%.
+        if missing_weight / total_weight > 0.30 {
             groups_shrunk.push(group.clone());
         }
     }

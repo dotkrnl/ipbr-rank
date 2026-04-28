@@ -19,7 +19,7 @@ fail the run.
 
 - **Status**: Verified
 - **API**: LMArena leaderboard via HuggingFace datasets-server `/rows` (paginated, configs `text`, `webdev`, `search`, `document`)
-- **Secret**: None (HF token recommended to avoid 429s)
+- **Secret**: None required; if `HF_TOKEN` is set, the fetcher sends it as a HuggingFace bearer token to reduce datasets-server 429s.
 - **Cache TTL**: 24 h
 - **Fixture**: `data/fixtures/lmarena_overall.json`
 
@@ -29,7 +29,7 @@ fail the run.
 - **API**: Artificial Analysis `/api/v2/data/llms/models`, `x-api-key` header
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
 - **Cache TTL**: 24 h
-- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `LiveCodeBench` fallback, `Tau2Bench`, `SciCode`, `IFBench`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `InverseTTFT` / `InverseCost`.
+- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `Tau2Bench`, `SciCode`, `IFBench`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `InverseTTFT` / `InverseCost`.
 - **Multi-row dedup**: AA ships several rows per logical model (e.g. "Claude Opus 4.7 (Adaptive Reasoning, Max Effort)" and "(Non-reasoning, High Effort)"). The fetcher sorts ascending by intelligence index so the highest-effort row appears last and wins the last-write merge; speed/ttft sentinel zeros are skipped.
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
@@ -37,7 +37,7 @@ fail the run.
 
 - **Status**: Verified
 - **API**: `/api/dashboard/cached` (primary), `/dashboard/cached` as fallback. Both return the same payload shape; the legacy `/api/dashboard` endpoint now returns 404.
-- **Schema**: `data.modelScores[]` for the model list, `data.historyMap[id][]` for per-model time series. AISL runs three suites — `hourly`, `deep`, `tooling` — that each contribute different axes. The fetcher walks `historyMap` in array order (newest-first per upstream `timestamp`) and takes the first numeric value per axis, merging across suites so models carry their full axis surface. The `contextWindow` axis is dropped (overlaps OpenRouter's ContextWindow).
+- **Schema**: `data.modelScores[]` for the model list, `data.historyMap[id][]` for per-model time series, and `data.driftIncidents[]` for canary-drift alerts. AISL runs three capability suites — `hourly`, `deep`, `tooling` — that each contribute different axes. The fetcher reads each axis only from its intended suite so canary/tooling/deep rows cannot overwrite full-speed axes with overlapping keys. The `contextWindow` axis is dropped (overlaps OpenRouter's ContextWindow).
 - **`hallucinationRate` is NOT re-inverted**: upstream's `calculateHallucinationRate` already returns `Math.max(0, 1 - rate)` — the field name is misleading but the value is already a resistance score (higher = better). We pass it through as `AI_hallucination_resistance` directly. Earlier revisions did `1 - value` here and produced wildly wrong rankings; see commit history for the diagnosis.
 - **`errorHandling` is dropped**: upstream defines it as `recoveredFromErrors / failedCalls.length`, with the `failedCalls = 0` branch returning `0` instead of `1`. A model that never fails gets the same score as one that fails everything and recovers nothing — an upstream measurement quirk that the metric definition can't recover from. The freed weight in `A_R` was reabsorbed into `AI_recovery`.
 - **Secret**: None
@@ -46,6 +46,7 @@ fail the run.
   - **Hourly suite (9)**: `AI_correctness`, `AI_spec` (`format`), `AI_code` (`codeQuality`), `AI_efficiency`, `AI_stability`, `AI_refusal` (`safety`), `AI_recovery` (`debugging`), `AI_complexity`, `AI_edge_cases`
   - **Deep suite (3)**: `AI_plan_coherence`, `AI_memory_retention`, `AI_hallucination_resistance`
   - **Tooling suite (5)**: `AI_context_awareness`, `AI_task_completion`, `AI_tool_selection`, `AI_parameter_accuracy`, `AI_safety_compliance`
+- **Canary signal**: `AI_canary_health` is emitted separately from `suite=canary` correctness when present and from unresolved `driftIncidents` with `metadata.detectionMethod = "canary_drift"` (`100 - dropPercent`). If both exist, the lower health value wins. It is a penalty-only health signal in scoring, not part of the A_* capability perspectives.
 - **Fixture**: `data/fixtures/aistupidlevel_dashboard.json`
 
 ## openevals (removed)
@@ -149,7 +150,7 @@ the AISL deep + tooling suites instead.
 - **API**: None — reads `data/score_overrides.toml` (embedded into the binary at build time).
 - **Purpose**: Hand-curated metric values pulled from vendor system cards, launch posts, and other authoritative secondary sources. Fills coverage gaps for models that public leaderboards have not yet rated (typically newest frontier models — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0).
 - **Discipline**: Every entry MUST cite its source in the `note` field; values without citations are explicitly disallowed by code review.
-- **Precedence**: Overrides flow through the same ingest path as live sources, so a vendor-reported override carries the same weight as a leaderboard hit. If a public source later lands the same metric for the same model, the public value will overwrite the override on the next run.
+- **Precedence**: Overrides flow through the same ingest path as live sources. After normalization they are discounted 10% toward the 50 baseline, so a cited manual value is slightly softer than a directly ingested leaderboard hit. If a public source later lands the same metric for the same model, the public value overwrites the override on the next run and the discount is removed.
 
 ## Synthesis
 

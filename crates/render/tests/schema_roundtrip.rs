@@ -117,7 +117,7 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
     real.groups.insert("CRE".to_string(), 80.0);
     real.missing = MissingInfo {
         metrics: ["NoveltyBench".to_string()].into_iter().collect(),
-        groups_shrunk: ["JUDGE".to_string()].into_iter().collect(),
+        groups_shrunk: ["LM_ARENA_REVIEW_PROXY".to_string()].into_iter().collect(),
         synthesis_dominant: false,
     };
 

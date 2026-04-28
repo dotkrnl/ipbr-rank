@@ -17,7 +17,7 @@ fn site_renders_without_panicking() {
 }
 
 #[test]
-fn site_emits_only_index_about_and_assets() {
+fn site_emits_pages_api_toml_and_assets() {
     let scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
     let site_dir = tmp.path().join("site");
@@ -26,6 +26,7 @@ fn site_emits_only_index_about_and_assets() {
 
     assert!(site_dir.join("index.html").is_file());
     assert!(site_dir.join("about.html").is_file());
+    assert!(site_dir.join("scoreboard.toml").is_file());
     assert!(site_dir.join("assets/style.css").is_file());
     assert!(site_dir.join("assets/app.js").is_file());
 
@@ -64,7 +65,11 @@ fn sample_scoreboard() -> Scoreboard {
                 display_name: "Claude Opus 4.7",
                 vendor: Vendor::Anthropic,
                 thinking_effort: None,
-                groups: &[("CRE", 81.25), ("BUILD", 76.5), ("JUDGE", 84.0)],
+                groups: &[
+                    ("CRE", 81.25),
+                    ("BUILD", 76.5),
+                    ("LM_ARENA_REVIEW_PROXY", 84.0),
+                ],
                 metrics: &[("LMArenaText", 82.0), ("SWEBenchVerified", 77.0)],
                 sources: &["openrouter", "lmarena"],
                 missing: &["AI_recovery"],
@@ -74,7 +79,11 @@ fn sample_scoreboard() -> Scoreboard {
                 display_name: "GPT-5.5 High",
                 vendor: Vendor::Openai,
                 thinking_effort: Some(ThinkingEffort::High),
-                groups: &[("CRE", 79.0), ("BUILD", 88.25), ("JUDGE", 73.5)],
+                groups: &[
+                    ("CRE", 79.0),
+                    ("BUILD", 88.25),
+                    ("LM_ARENA_REVIEW_PROXY", 73.5),
+                ],
                 metrics: &[("LMArenaCode", 85.0), ("TerminalBench", 74.0)],
                 sources: &["openrouter"],
                 missing: &["AI_refusal", "AI_recovery"],
@@ -84,8 +93,15 @@ fn sample_scoreboard() -> Scoreboard {
                 display_name: "Gemini 3.1 Pro",
                 vendor: Vendor::Google,
                 thinking_effort: None,
-                groups: &[("CRE", 85.0), ("BUILD", 84.0), ("JUDGE", 70.0)],
-                metrics: &[("LMArenaText", 86.0), ("ArtificialAnalysisIntelligence", 82.0)],
+                groups: &[
+                    ("CRE", 85.0),
+                    ("BUILD", 84.0),
+                    ("LM_ARENA_REVIEW_PROXY", 70.0),
+                ],
+                metrics: &[
+                    ("LMArenaText", 86.0),
+                    ("ArtificialAnalysisIntelligence", 82.0),
+                ],
                 sources: &["openrouter", "lmarena"],
                 missing: &[],
             }),
@@ -156,10 +172,22 @@ fn style_css_contains_d2_theme_tokens() {
     render_site(&scoreboard, &site_dir).expect("site should render");
 
     let css = read(site_dir.join("assets/style.css"));
-    assert!(css.contains("#0f1419"), "expected D2 background token #0f1419 in CSS");
-    assert!(css.contains("ui-monospace"), "expected monospace font stack");
-    assert!(css.contains("data-mode=\"raw\""), "expected mode-toggle CSS selector");
-    assert!(css.contains("prefers-color-scheme: light"), "expected light-theme fallback");
+    assert!(
+        css.contains("#0f1419"),
+        "expected D2 background token #0f1419 in CSS"
+    );
+    assert!(
+        css.contains("ui-monospace"),
+        "expected monospace font stack"
+    );
+    assert!(
+        css.contains("data-mode=\"raw\""),
+        "expected mode-toggle CSS selector"
+    );
+    assert!(
+        css.contains("prefers-color-scheme: light"),
+        "expected light-theme fallback"
+    );
 }
 
 fn html_files(root: &Path) -> Vec<PathBuf> {
@@ -208,13 +236,19 @@ fn leaderboard_has_row_and_expansion_per_model() {
     // Table with raw + adjusted columns
     assert!(index.contains("class=\"leaderboard\""));
     assert!(index.contains("class=\"score-raw num\"") || index.contains("class=\"num score-raw\""));
-    assert!(index.contains("class=\"score-adjusted num\"") || index.contains("class=\"num score-adjusted\""));
+    assert!(
+        index.contains("class=\"score-adjusted num\"")
+            || index.contains("class=\"num score-adjusted\"")
+    );
 
     // One row + one hidden expansion per model — three models in fixture
     let row_count = index.matches("<tr class=\"row\"").count();
     let expand_count = index.matches("<tr class=\"expand\"").count();
     assert_eq!(row_count, 3, "expected 3 model rows, got {row_count}");
-    assert_eq!(expand_count, 3, "expected 3 expansion rows, got {expand_count}");
+    assert_eq!(
+        expand_count, 3,
+        "expected 3 expansion rows, got {expand_count}"
+    );
 
     // Anchor IDs use canonical-id form
     assert!(index.contains(r#"id="anthropic/claude-opus-4.7""#));
@@ -240,17 +274,29 @@ fn app_js_implements_required_features() {
     let js = read(site_dir.join("assets/app.js"));
     // Mode toggle
     assert!(js.contains("data-mode-value"), "missing mode toggle wiring");
-    assert!(js.contains("localStorage"), "missing localStorage persistence");
+    assert!(
+        js.contains("localStorage"),
+        "missing localStorage persistence"
+    );
     // Sort
     assert!(js.contains("data-sort"), "missing sort wiring");
-    assert!(js.contains("data-sort-active"), "sort should set active state");
+    assert!(
+        js.contains("data-sort-active"),
+        "sort should set active state"
+    );
     // Filter
-    assert!(js.contains("data-filter-input"), "missing filter input wiring");
+    assert!(
+        js.contains("data-filter-input"),
+        "missing filter input wiring"
+    );
     assert!(js.contains("data-vendor"), "missing vendor chip wiring");
     // Expand
     assert!(js.contains("expand-toggle"), "missing expand wiring");
     // Anchor auto-expand
-    assert!(js.contains("location.hash") || js.contains("hash"), "missing anchor handling");
+    assert!(
+        js.contains("location.hash") || js.contains("hash"),
+        "missing anchor handling"
+    );
 }
 
 fn assert_links_exist(site_dir: &Path, path: &Path, html: &str) {
@@ -367,14 +413,29 @@ fn hero_renders_top_three_per_role_with_dual_scores() {
     let index = read(site_dir.join("index.html"));
 
     // Four role columns, in order Idea, Plan, Build, Review.
-    assert!(index.contains("class=\"role idea\""), "hero missing idea column");
-    assert!(index.contains("class=\"role plan\""), "hero missing plan column");
-    assert!(index.contains("class=\"role build\""), "hero missing build column");
-    assert!(index.contains("class=\"role review\""), "hero missing review column");
+    assert!(
+        index.contains("class=\"role idea\""),
+        "hero missing idea column"
+    );
+    assert!(
+        index.contains("class=\"role plan\""),
+        "hero missing plan column"
+    );
+    assert!(
+        index.contains("class=\"role build\""),
+        "hero missing build column"
+    );
+    assert!(
+        index.contains("class=\"role review\""),
+        "hero missing review column"
+    );
 
     // The fixture has three models — hero shows three rows per role.
     let idea_rows = index.matches("class=\"row").count();
-    assert!(idea_rows >= 12, "hero should have at least 12 rows (3 per role x 4), got {idea_rows}");
+    assert!(
+        idea_rows >= 12,
+        "hero should have at least 12 rows (3 per role x 4), got {idea_rows}"
+    );
 
     // Both raw and adjusted score spans are emitted for each model in the hero.
     assert!(index.contains("score-raw"));
@@ -395,12 +456,42 @@ fn index_has_body_shell_and_mode_toggle() {
     render_site(&scoreboard, &site_dir).expect("site should render");
 
     let index = read(site_dir.join("index.html"));
-    assert!(index.contains("data-mode=\"raw\""), "body should default to data-mode=\"raw\"");
-    assert!(index.contains("class=\"mode-toggle\""), "mode toggle UI should be present");
-    assert!(index.contains("data-mode-value=\"raw\""), "raw mode button missing");
-    assert!(index.contains("data-mode-value=\"adjusted\""), "adjusted mode button missing");
-    assert!(index.contains("ipbr-rank"), "header should mention the project name");
-    assert!(index.contains("about.html"), "header should link to about page");
+    assert!(
+        index.contains("data-mode=\"raw\""),
+        "body should default to data-mode=\"raw\""
+    );
+    assert!(
+        index.contains("class=\"mode-toggle\""),
+        "mode toggle UI should be present"
+    );
+    assert!(
+        index.contains("data-mode-value=\"raw\""),
+        "raw mode button missing"
+    );
+    assert!(
+        index.contains("data-mode-value=\"adjusted\""),
+        "adjusted mode button missing"
+    );
+    assert!(
+        index.contains("ipbr-rank"),
+        "header should mention the project name"
+    );
+    assert!(
+        index.contains("live llm coding-role score"),
+        "header/title should use the live coding-role score label"
+    );
+    assert!(
+        !index.contains("models ·"),
+        "header meta should not include a model-count segment"
+    );
+    assert!(
+        index.contains("about.html"),
+        "header should link to about page"
+    );
+    assert!(
+        index.contains("scoreboard.toml"),
+        "header/footer should link to the TOML API"
+    );
 }
 
 #[test]

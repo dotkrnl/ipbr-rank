@@ -2,6 +2,7 @@ use std::path::{Component, Path, PathBuf};
 
 use crate::Scoreboard;
 use crate::toml_output::RenderError;
+use crate::toml_output::render_scoreboard;
 
 mod about;
 mod index;
@@ -17,6 +18,7 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
     std::fs::create_dir_all(out.join("assets"))?;
     std::fs::write(out.join("assets/style.css"), STYLE_CSS)?;
     std::fs::write(out.join("assets/app.js"), APP_JS)?;
+    std::fs::write(out.join("scoreboard.toml"), render_scoreboard(scoreboard))?;
     std::fs::write(out.join("index.html"), render_index(scoreboard))?;
     std::fs::write(out.join("about.html"), render_about(scoreboard))?;
     validate_site(out)?;
@@ -25,10 +27,9 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
 
 pub(crate) fn layout(title: &str, scoreboard: &Scoreboard, body: &str) -> String {
     format!(
-        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><span class="prompt">$</span>ipbr-rank · public llm coding-role scoreboard<div class="meta">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {model_count} models · {source_count} sources</div></div><nav><a href="about.html">about</a></nav></header><main>{body}</main></div></body></html>"#,
+        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><span class="prompt">$</span>ipbr-rank · live llm coding-role score<div class="meta">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {source_count} sources</div></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a></nav></header><main>{body}</main></div></body></html>"#,
         title = html_escape(title),
         generated_at = html_escape(&scoreboard.generated_at),
-        model_count = scoreboard.models.len(),
         source_count = scoreboard.source_summary.len(),
         body = body,
     )

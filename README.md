@@ -64,7 +64,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - OpenRouter API — model discovery, pricing, context windows
 - LM Arena — preference ratings across text, code, and hard prompts
 - Artificial Analysis — intelligence/coding/reasoning indices, plus tau2-bench, scicode, ifbench, lcr, and gpqa+hle reasoning blend
-- AI Stupid Level — 17 axes across hourly + deep + tooling suites (correctness, codeQuality, planCoherence, hallucinationResistance, taskCompletion, contextAwareness, etc.; tooling-suite errorHandling dropped due to upstream measurement quirk — see `docs/sources.md` AISL entry)
+- AI Stupid Level — 17 capability axes across hourly + deep + tooling suites, plus a dedicated canary health signal used only as a fast degradation penalty (tooling-suite errorHandling dropped due to upstream measurement quirk — see `docs/sources.md` AISL entry)
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE-rebench — continuously-refreshed agentic SWE leaderboard, rolling-window resolved rate
@@ -83,19 +83,25 @@ Each benchmark metric is **percentile-normalized** within the active model popul
 ### Synthesis Penalty
 Values that came in via sibling synthesis (e.g. GLM-5.1 borrowing from Kimi K2.6 on AISL) are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Synthesized metrics still contribute, just slightly more conservatively.
 
+Manual overrides from `data/score_overrides.toml` are also softened after
+normalization, but less aggressively: `final = score × 0.90 + 50 × 0.10`.
+They are public, cited values, yet still hand-curated rather than directly
+ingested leaderboard rows.
+
 ### Group Aggregation
-Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **JUDGE**, **OPS_long**, **OPS_precision**, **OPS_review**, and **A_I / A_P / A_B / A_R** (AI Stupid Level perspectives across the 17 AISL axes). Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator uses the present-weight mean directly if **≥70 %** of the group's weight is present (so peripheral missing metrics don't penalize otherwise well-covered models); below that threshold, the score still shrinks toward 50 proportional to the missing weight.
+Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, **OPS_review**, and **A_I / A_P / A_B / A_R** (AI Stupid Level perspectives across the 17 AISL capability axes). Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator uses the present-weight mean directly if **≥70 %** of the group's weight is present (so peripheral missing metrics don't penalize otherwise well-covered models); below that threshold, the score still shrinks toward 50 proportional to the missing weight. AISL canary health is kept outside the groups and can only subtract a small penalty from role scores.
 
 ### Final Scores
 Each role score is a weighted average of groups. AISL's role-shaped
-perspective (`A_*`) is the dominant signal at 0.50 in every formula.
+perspective (`A_*`) carries 0.35 in every formula, leaving the broader
+public benchmark groups collectively dominant.
 Operational metrics (speed, cost, context window) carry 0.08 — paired
 with the tail-penalty curve, this means "fast enough" models cluster
 within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.30×CRE + 0.12×GEN + 0.50×A_I + 0.08×OPS_long
-- **P_raw** = 0.25×PLAN + 0.17×GEN + 0.50×A_P + 0.08×OPS_precision
-- **B_raw** = 0.40×BUILD + 0.02×PLAN + 0.50×A_B + 0.08×OPS_precision
-- **R** = 0.20×JUDGE + 0.12×BUILD + 0.10×PLAN + 0.50×A_R + 0.08×OPS_review
+- **I_raw** = 0.40×CRE + 0.17×GEN + 0.35×A_I + 0.08×OPS_long
+- **P_raw** = 0.34×PLAN + 0.23×GEN + 0.35×A_P + 0.08×OPS_precision
+- **B_raw** = 0.55×BUILD + 0.02×PLAN + 0.35×A_B + 0.08×OPS_precision
+- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.23×BUILD + 0.22×PLAN + 0.35×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
 For each vendor **v**, compute:
@@ -191,9 +197,9 @@ cache regardless of mtime.
 | source | TTL | rationale |
 |---|---|---|
 | aistupidlevel | 1h | hourly stupidity dashboard |
-| openrouter, lmarena, artificial_analysis, openevals | 24h | daily refresh |
+| openrouter, lmarena, artificial_analysis | 24h | daily refresh |
 | livecodebench | 2d | weekly contests |
-| swebench, bfcl, terminal_bench, aider_polyglot | 7d | infrequent updates |
+| swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |
 
 To force a refresh of one source, delete its cache file (or `touch -t` it to
 the past) and rerun.
@@ -201,7 +207,7 @@ the past) and rerun.
 The HTTP layer also retries on `429 Too Many Requests` and `5xx` with
 exponential backoff (500 ms → 60 s, up to 6 attempts), honoring `Retry-After`
 when present — the HuggingFace datasets-server in particular rate-limits
-aggressively while paginating LMArena/OpenEvals.
+aggressively while paginating LMArena, so set `HF_TOKEN` when available.
 
 ### Offline Mode (for CI/tests)
 ```bash

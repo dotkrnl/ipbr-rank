@@ -1,6 +1,8 @@
 use crate::alias::AliasIndex;
 use crate::model::{ModelRecord, RawRow};
 
+const NON_SYNTHESIZED_METRICS: &[&str] = &["AI_canary_health"];
+
 #[derive(Debug, Default, Clone)]
 pub struct IngestStats {
     pub matched: usize,
@@ -44,11 +46,17 @@ fn ingest_real_row(
     match index.match_record(&row.model_name, row.vendor_hint.as_deref()) {
         Some(i) => {
             let record = &mut records[i];
+            let is_override = row.source_id == "overrides";
             record.sources.insert(row.source_id);
             for (key, value) in row.fields {
                 if let Some(num) = json_to_f64(&value) {
                     record.raw_metrics.insert(key.clone(), num);
                     record.synthesized.remove(&key);
+                    if is_override {
+                        record.override_reported.insert(key);
+                    } else {
+                        record.override_reported.remove(&key);
+                    }
                 }
             }
             stats.matched += 1;
@@ -70,12 +78,19 @@ fn ingest_synthesized_row(
                 .synthesized_from
                 .clone()
                 .expect("synthesized rows must carry synthesized_from");
+            let is_override = row.source_id == "overrides";
             for (key, value) in row.fields {
+                if NON_SYNTHESIZED_METRICS.contains(&key.as_str()) {
+                    continue;
+                }
                 if record.raw_metrics.contains_key(&key) {
                     continue;
                 }
                 if let Some(num) = json_to_f64(&value) {
                     record.raw_metrics.insert(key.clone(), num);
+                    if is_override {
+                        record.override_reported.insert(key.clone());
+                    }
                     record.synthesized.insert(
                         key,
                         crate::model::SynthesisProvenance {
@@ -155,5 +170,35 @@ mod tests {
         let stats = ingest_rows(&mut records, rows);
         assert_eq!(stats.matched, 0);
         assert_eq!(stats.unmatched.len(), 1);
+    }
+
+    #[test]
+    fn synthesized_rows_skip_canary_health_signal() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "openai/gpt-5.5".to_string(),
+                "gpt-5.5".to_string(),
+                Vendor::Openai,
+            );
+            r.aliases.insert("gpt-5.5".to_string());
+            r
+        }];
+        let mut row = raw(
+            "aistupidlevel",
+            "gpt-5.5",
+            &[
+                ("AI_canary_health", json!(42.0)),
+                ("AI_correctness", json!(80.0)),
+            ],
+        );
+        row.synthesized_from = Some("openai/gpt-5.4".to_string());
+
+        let stats = ingest_rows(&mut records, vec![row]);
+
+        assert_eq!(stats.matched, 1);
+        assert!(!records[0].raw_metrics.contains_key("AI_canary_health"));
+        assert!(!records[0].synthesized.contains_key("AI_canary_health"));
+        assert_eq!(records[0].raw_metrics.get("AI_correctness"), Some(&80.0));
+        assert!(records[0].synthesized.contains_key("AI_correctness"));
     }
 }

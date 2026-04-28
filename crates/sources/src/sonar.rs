@@ -50,7 +50,8 @@ use crate::{
 
 const SOURCE_ID: &str = "sonar";
 const CACHE_KEY: &str = "sonar";
-const URL: &str = "https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/data.json";
+const URL: &str =
+    "https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/data.json";
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct SonarSource;

@@ -2,9 +2,9 @@
 # All numbers are exact copies — the Python reference is authoritative for v1.
 
 # AI Stupid Level perspective composites — role-shaped views over AISL's
-# axis surface. AISL ships three suites of evaluations (hourly, deep,
-# tooling) which jointly cover 18 axes; we use the parser's merged-axes
-# view so a model gets credit for every axis it has signal on.
+# capability-axis surface. AISL ships three capability suites (hourly,
+# deep, tooling) which jointly cover 17 axes; canary health is registered
+# separately below and consumed only as a penalty signal.
 #
 # Each role pulls a tailored slice:
 #   * A_I (Idea): broad correctness + creative-flexibility axes
@@ -142,25 +142,22 @@ CopilotArenaOrLMArenaCode = 0.04
 # Treated as a single derived metric in scoring so several SWE-flavor sources
 # don't pile up as independent weights.
 #
-# SWEBenchVerified back up to 0.35 (was 0.20): with the trust-threshold
-# fix in `missing_safe_avg`, models that have only a Verified hit no longer
-# get pulled toward 50, but the composite mean still benefits from a heavier
-# weight on the most widely-reported source so the metric remains
-# differentiating when SWERebench / Pro coverage is uneven.
+# SWEComposite now favors SWE-Bench Pro and lets a model with direct
+# Verified+Pro coverage clear the 0.70 trust threshold. Verified remains
+# useful for breadth, but Pro is the stronger live frontier signal because
+# Verified is increasingly saturated/contaminated at the top end.
 [composite_metrics.SWEComposite]
-SWERebench = 0.35            # contamination-resistant — highest trust
-SWEBenchVerified = 0.35      # most widely reported (incl. vendor system cards)
-SWEBenchPro = 0.20           # hardest, multi-file (1.8k tasks, 4.1 files avg)
+SWERebench = 0.20            # contamination-resistant rolling-window signal
+SWEBenchVerified = 0.30      # widely reported, but saturated/contaminated
+SWEBenchPro = 0.40           # hardest, multi-file (1.8k tasks, 4.1 files avg)
 SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
 
-# JUDGE only has one ingested input today (the LM Arena Hard / Judge Arena
-# preference signal). The five other judge benchmarks listed in earlier
-# revisions (JudgeBench, CodeJudgeBench, RewardBench2, CriticBench,
-# LLMAggreFact) were never sourced and dragged this group toward 50 for
-# every model, which made the R-axis essentially noise. With a single
-# input, R is thin but at least reflects something we measure.
-[group_weights.JUDGE]
-JudgeArenaOrLMArenaHard = 1.00
+# LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
+# benchmark. It coalesces LM Arena search/document preference ratings. That
+# is useful review-adjacent evidence, but not direct code-review capability,
+# so the R-axis weights it lightly.
+[group_weights.LM_ARENA_REVIEW_PROXY]
+LMArenaSearchDocument = 1.00
 
 [group_weights.OPS_long]
 OutputSpeed = 0.55
@@ -181,8 +178,9 @@ InverseCost = 0.20
 ContextWindow = 0.10
 
 # Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
-# all carry weight 0.50 — the dominant signal in every role. The remaining
-# 0.42 is split across the role-specific public-leaderboard groups.
+# carry weight 0.35: large enough to preserve AISL's role-shaped behavioral
+# signal, but no longer dominant over the broader public benchmark basket.
+# The remaining 0.57 is split across role-specific public-leaderboard groups.
 #
 # Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
 # the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
@@ -196,41 +194,36 @@ ContextWindow = 0.10
 # vs "very fast." Use the OPS_* groups directly for a pure speed/cost
 # view of the population.
 [final_score_weights.I_raw]
-CRE = 0.30
-GEN = 0.12
-A_I = 0.50
+CRE = 0.40
+GEN = 0.17
+A_I = 0.35
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
-# A_P is the dominant signal (0.50). PLAN's basket of TerminalBench /
-# Tau2Bench / AAReasoning / MCPAtlas can favor any of the top-3 vendors
-# depending on which gets a strong value in each — AISL's A_P perspective
-# captures planning behavior more directly than the raw leaderboard mix.
-PLAN = 0.25
-GEN = 0.17
-A_P = 0.50
+# A_P is still the largest single behavioral signal, but PLAN/GEN now carry
+# enough weight that direct public benchmark evidence can override AISL
+# outliers or synthesized AISL gaps.
+PLAN = 0.34
+GEN = 0.23
+A_P = 0.35
 OPS_precision = 0.08
 
 [final_score_weights.B_raw]
-BUILD = 0.40
+BUILD = 0.55
 PLAN = 0.02
-A_B = 0.50
+A_B = 0.35
 OPS_precision = 0.08
 
-# R-axis: A_R dominant at 0.50 (AISL's reviewing perspective is the most
-# direct public signal — hallucinationResistance / edgeCases / recovery
-# are review-specific). JUDGE (LMArena search/document hard-prompt
-# preference) sits at 0.20 as the second-largest weight: real
-# user-preference signal for review-style tasks, though Anthropic models
-# tend to top it. BUILD 0.12 keeps reviewing tied to "you can read the
-# code." PLAN 0.10 — a small slice for review-as-planning. OPS_review
-# 0.08 to match the rest of the role formulas (utterly slow models lose
-# more than the legacy 0.03 weight expressed).
+# R-axis: A_R remains the largest single review-specific signal, while the
+# renamed LM Arena proxy is deliberately lighter than the old JUDGE slot.
+# BUILD/PLAN absorb the freed weight so reviewing stays anchored in code-
+# reading capability and task decomposition rather than a search/document
+# preference proxy.
 [final_score_weights.R]
-JUDGE = 0.20
-BUILD = 0.12
-PLAN = 0.10
-A_R = 0.50
+LM_ARENA_REVIEW_PROXY = 0.12
+BUILD = 0.23
+PLAN = 0.22
+A_R = 0.35
 OPS_review = 0.08
 
 [reviewer_reservation]
@@ -256,10 +249,10 @@ log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
-[metrics.JudgeArenaOrLMArenaHard]
+[metrics.LMArenaSearchDocument]
 higher_better = true
 log_scale = false
-groups = ["JUDGE"]
+groups = ["LM_ARENA_REVIEW_PROXY"]
 transform = "percentile"
 
 # All benchmark metrics use percentile normalization so they're on a
@@ -542,3 +535,12 @@ higher_better = true
 log_scale = false
 groups = ["A_P"]
 transform = "percentile"
+
+# AISL canary is a fast drift-detection signal, not a full capability
+# benchmark. It intentionally has no group membership; score.rs consumes
+# it as a penalty-only health adjustment after role aggregation.
+[metrics.AI_canary_health]
+higher_better = true
+log_scale = false
+groups = []
+transform = "as_score"

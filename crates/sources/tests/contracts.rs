@@ -145,7 +145,7 @@ async fn lmarena_fixture_contract() {
     );
     // The fixture now spans all four configs (text / webdev / search / document),
     // and a row that only appears in search/document carries
-    // JudgeArenaOrLMArenaHard but no LMArenaText. So assert most-rows-text
+    // LMArenaSearchDocument but no LMArenaText. So assert most-rows-text
     // rather than every-row.
     let text_rows = rows
         .iter()
@@ -160,7 +160,7 @@ async fn lmarena_fixture_contract() {
     }));
     assert!(
         rows.iter()
-            .any(|row| row.fields.contains_key("JudgeArenaOrLMArenaHard")),
+            .any(|row| row.fields.contains_key("LMArenaSearchDocument")),
         "expected at least one search/document row in the fixture",
     );
 
@@ -254,7 +254,7 @@ async fn aistupidlevel_fixture_contract() {
         rows.len()
     );
     assert!(rows.iter().all(|row| {
-        let score_count = [
+        let metric_count = [
             "AI_correctness",
             "AI_spec",
             "AI_code",
@@ -262,11 +262,21 @@ async fn aistupidlevel_fixture_contract() {
             "AI_stability",
             "AI_refusal",
             "AI_recovery",
+            "AI_complexity",
+            "AI_edge_cases",
+            "AI_hallucination_resistance",
+            "AI_plan_coherence",
+            "AI_memory_retention",
+            "AI_context_awareness",
+            "AI_task_completion",
+            "AI_tool_selection",
+            "AI_parameter_accuracy",
+            "AI_safety_compliance",
         ]
         .iter()
         .filter(|key| row.fields.contains_key(**key))
         .count();
-        score_count >= 3
+        metric_count >= 3
     }));
 
     let (records, matched) = ingest_fixture_rows(rows);
@@ -385,17 +395,15 @@ fn registry_exposes_verified_sources() {
         VerificationStatus::Verified,
         None,
     )));
-    assert!(meta.contains(&(
-        "swerebench".to_string(),
-        VerificationStatus::Verified,
-        None,
-    )));
-    assert!(meta.contains(&(
-        "overrides".to_string(),
-        VerificationStatus::Verified,
-        None,
-    )));
-    for dropped in ["bigcodebench", "openevals", "bfcl", "aider_polyglot", "metr_horizons"] {
+    assert!(meta.contains(&("swerebench".to_string(), VerificationStatus::Verified, None,)));
+    assert!(meta.contains(&("overrides".to_string(), VerificationStatus::Verified, None,)));
+    for dropped in [
+        "bigcodebench",
+        "openevals",
+        "bfcl",
+        "aider_polyglot",
+        "metr_horizons",
+    ] {
         assert!(
             !meta.iter().any(|(id, _, _)| id == dropped),
             "{dropped} should be dropped from registry"

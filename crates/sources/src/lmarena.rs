@@ -44,7 +44,7 @@ impl Source for LmArenaSource {
         &self,
         http: &dyn Http,
         opts: FetchOptions<'_>,
-        _secrets: &SecretStore,
+        secrets: &SecretStore,
     ) -> Result<Vec<RawRow>, SourceError> {
         if use_cached_json(opts, self.cache_key(), self.cache_ttl()) {
             let Some(dir) = opts.cache_dir else {
@@ -62,6 +62,13 @@ impl Source for LmArenaSource {
 
         let mut wrapper = serde_json::Map::new();
         let mut configs = serde_json::Map::new();
+        let auth_header = secrets
+            .get(crate::SecretRef::HfToken)
+            .map(|token| format!("Bearer {token}"));
+        let headers = auth_header
+            .as_ref()
+            .map(|value| vec![("Authorization", value.as_str())])
+            .unwrap_or_default();
         for config in CONFIGS {
             let mut pages = Vec::new();
             let mut offset = 0usize;
@@ -69,7 +76,7 @@ impl Source for LmArenaSource {
                 let url = format!(
                     "https://datasets-server.huggingface.co/rows?dataset={DATASET}&config={config}&split=latest&offset={offset}&length=100"
                 );
-                let page = http.get_json(&url, &[]).await?;
+                let page = http.get_json(&url, &headers).await?;
                 let rows = page.get("rows").and_then(Value::as_array).ok_or_else(|| {
                     SourceError::Parse(format!("LMArena {config} payload missing rows[]"))
                 })?;
@@ -182,10 +189,9 @@ fn map_rating(config: &str, rating: f64, fields: &mut BTreeMap<String, Value>) {
             fields.insert("CopilotArenaOrLMArenaCode".to_string(), Value::from(rating));
         }
         "search" | "document" => {
-            // Reviewer note: the current coefficient set exposes a single hard-arena slot,
-            // so search/document are coalesced into that shared metric until a dedicated
-            // retrieval-style metric lands in a later source task.
-            merge_max(fields, "JudgeArenaOrLMArenaHard", rating);
+            // Search/document are coalesced into a single LM Arena
+            // review-style preference proxy.
+            merge_max(fields, "LMArenaSearchDocument", rating);
         }
         _ => {}
     }
@@ -217,6 +223,58 @@ fn copy_numeric(fields: &mut BTreeMap<String, Value>, key: &str, value: Option<&
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    struct HeaderCheckingHttp {
+        calls: AtomicUsize,
+    }
+
+    #[async_trait::async_trait]
+    impl Http for HeaderCheckingHttp {
+        async fn get_json(
+            &self,
+            _url: &str,
+            headers: &[(&str, &str)],
+        ) -> Result<Value, SourceError> {
+            self.calls.fetch_add(1, Ordering::Relaxed);
+            assert_eq!(headers, &[("Authorization", "Bearer hf_test_token")]);
+            Ok(json!({
+                "rows": [],
+                "num_rows_total": 0
+            }))
+        }
+
+        async fn get_text(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<String, SourceError> {
+            panic!("lmarena fetch should not request text")
+        }
+    }
+
+    #[tokio::test]
+    async fn fetch_sends_optional_hf_bearer_token() {
+        let http = HeaderCheckingHttp {
+            calls: AtomicUsize::new(0),
+        };
+        let secrets = SecretStore::new(None, None, Some("hf_test_token".to_string()));
+
+        let rows = LmArenaSource
+            .fetch(
+                &http,
+                FetchOptions {
+                    cache_dir: None,
+                    offline: false,
+                },
+                &secrets,
+            )
+            .await
+            .expect("empty HF pages still parse");
+
+        assert!(rows.is_empty());
+        assert_eq!(http.calls.load(Ordering::Relaxed), CONFIGS.len());
+    }
 
     #[test]
     fn parse_wrapper_maps_all_configs_and_pages() {
@@ -272,7 +330,7 @@ mod tests {
         assert_eq!(
             model_a
                 .fields
-                .get("JudgeArenaOrLMArenaHard")
+                .get("LMArenaSearchDocument")
                 .and_then(number_like),
             Some(995.0)
         );

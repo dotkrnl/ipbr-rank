@@ -4,9 +4,11 @@
 #
 # Each entry is keyed by canonical_id (which is itself an alias) and emits
 # a single (metric, value) into the ingest pipeline through the synthetic
-# `overrides` source. Lower-priority than public leaderboard sources only
-# in the sense that if a public leaderboard *also* reports the same metric
-# for the same model, the leaderboard value wins per ingest precedence.
+# `overrides` source. Values are normalized with the rest of the population
+# and then discounted 10% toward the 50 baseline. Lower-priority than public
+# leaderboard sources only in the sense that if a public leaderboard *also*
+# reports the same metric for the same model, the leaderboard value wins per
+# ingest precedence and the override discount is removed.
 #
 # IMPORTANT: every entry MUST cite its source in the `note` field. Numbers
 # without a citation rot quickly and become indistinguishable from typos.

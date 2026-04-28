@@ -17,25 +17,53 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     compute_aisl_perspectives(records, coef);
     aggregate_groups(records, coef);
     compute_role_scores(records, coef);
+    apply_canary_health_penalty(records);
     apply_reviewer_reservation(records, coef);
 }
 
 /// Compute the AI Stupid Level perspective groups (A_I / A_P / A_B / A_R)
-/// from the seven `AI_*` axis metrics. The resulting values are written
+/// from the AISL capability-axis metrics. The resulting values are written
 /// directly into `r.groups` so role aggregation can consume them as if
 /// they were aggregated from `[group_weights.A_X]` tables. We keep them
 /// in their own config block (`ai_stupid_perspective_weights`) instead of
 /// folding into `group_weights` because they aren't conceptually weighted
 /// averages of independent leaderboards — they're a fixed re-projection
-/// of one source's seven-axis output.
+/// of one source's capability suite output. `AI_canary_health` is excluded
+/// and applied later as a penalty-only drift signal.
 fn compute_aisl_perspectives(records: &mut [ModelRecord], coef: &Coefficients) {
     for r in records.iter_mut() {
         for (perspective, weights) in &coef.ai_stupid_perspective_weights {
             let prefix = format!("{perspective}/");
             let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix);
+            let value = synth_adjusted_group_value(value, weights, r);
             r.groups.insert(perspective.clone(), value);
         }
     }
+}
+
+fn synth_adjusted_group_value(
+    value: f64,
+    weights: &BTreeMap<String, f64>,
+    record: &ModelRecord,
+) -> f64 {
+    let mut present_weight = 0.0;
+    let mut synthesized_weight = 0.0;
+    for (metric, weight) in weights {
+        if !weight.is_finite() || !record.metrics.contains_key(metric) {
+            continue;
+        }
+        present_weight += weight;
+        if record.synthesized.contains_key(metric) {
+            synthesized_weight += weight;
+        }
+    }
+    if present_weight <= 0.0 || synthesized_weight <= 0.0 {
+        return value;
+    }
+
+    let synthesized_share = (synthesized_weight / present_weight).clamp(0.0, 1.0);
+    let uncertainty_pull = synthesized_share * AISL_SYNTHETIC_GROUP_PENALTY;
+    value * (1.0 - uncertainty_pull) + 50.0 * uncertainty_pull
 }
 
 /// Compute each composite metric as a missing-safe weighted average of its
@@ -60,6 +88,10 @@ fn compute_composite_metrics(records: &mut [ModelRecord], coef: &Coefficients) {
 /// fully claim a sibling's strengths — the gap reflects our genuine
 /// uncertainty about whether the donor's score transfers cleanly.
 const SYNTHESIS_PENALTY: f64 = 0.15;
+const AISL_SYNTHETIC_GROUP_PENALTY: f64 = 0.25;
+const OVERRIDE_REPORTED_PENALTY: f64 = 0.10;
+const CANARY_HEALTH_METRIC: &str = "AI_canary_health";
+const CANARY_MAX_ROLE_PENALTY: f64 = 6.0;
 
 fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
     for (metric_key, def) in &coef.metrics {
@@ -89,6 +121,15 @@ fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
                     v * (1.0 - SYNTHESIS_PENALTY) + 50.0 * SYNTHESIS_PENALTY
                 } else {
                     v
+                };
+                let final_value = if r.override_reported.contains(metric_key) {
+                    // Manual overrides are public but hand-curated. Keep
+                    // them strong, while making them slightly softer than a
+                    // directly ingested leaderboard row.
+                    final_value * (1.0 - OVERRIDE_REPORTED_PENALTY)
+                        + 50.0 * OVERRIDE_REPORTED_PENALTY
+                } else {
+                    final_value
                 };
                 r.metrics.insert(metric_key.clone(), final_value);
             }
@@ -122,6 +163,31 @@ fn compute_role_scores(records: &mut [ModelRecord], coef: &Coefficients) {
         r.scores.p_raw = *role_values.get("P_raw").unwrap_or(&50.0);
         r.scores.b_raw = *role_values.get("B_raw").unwrap_or(&50.0);
         r.scores.r = *role_values.get("R").unwrap_or(&50.0);
+    }
+}
+
+fn apply_canary_health_penalty(records: &mut [ModelRecord]) {
+    for r in records.iter_mut() {
+        if r.synthesized.contains_key(CANARY_HEALTH_METRIC) {
+            continue;
+        }
+        let Some(health) = r
+            .raw_metrics
+            .get(CANARY_HEALTH_METRIC)
+            .copied()
+            .and_then(as_score_0_100)
+        else {
+            continue;
+        };
+        let penalty =
+            (((100.0 - health).max(0.0) / 75.0).clamp(0.0, 1.0)) * CANARY_MAX_ROLE_PENALTY;
+        if penalty <= 0.0 {
+            continue;
+        }
+        r.scores.i_raw = (r.scores.i_raw - penalty).clamp(0.0, 100.0);
+        r.scores.p_raw = (r.scores.p_raw - penalty).clamp(0.0, 100.0);
+        r.scores.b_raw = (r.scores.b_raw - penalty).clamp(0.0, 100.0);
+        r.scores.r = (r.scores.r - penalty).clamp(0.0, 100.0);
     }
 }
 
@@ -200,9 +266,21 @@ mod tests {
         // high records share a raw value but the synthesized one should
         // be pulled toward 50 by SYNTHESIS_PENALTY.
         let mut records = vec![
-            make_record("l/low", Vendor::Other("l".into()), &[("AI_correctness", 0.0)]),
-            make_record("d/direct", Vendor::Other("d".into()), &[("AI_correctness", 100.0)]),
-            make_record("s/synth", Vendor::Other("s".into()), &[("AI_correctness", 100.0)]),
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("AI_correctness", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("AI_correctness", 100.0)],
+            ),
+            make_record(
+                "s/synth",
+                Vendor::Other("s".into()),
+                &[("AI_correctness", 100.0)],
+            ),
         ];
         records[2].synthesized.insert(
             "AI_correctness".to_string(),
@@ -221,6 +299,122 @@ mod tests {
         assert!(
             (synth - 92.5).abs() < 0.5,
             "synthesized AI_correctness should pull toward 50, got {synth} (direct={direct})"
+        );
+    }
+
+    #[test]
+    fn override_reported_metric_values_are_pulled_toward_50() {
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("TerminalBench", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+            make_record(
+                "o/override",
+                Vendor::Other("o".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+        ];
+        records[2]
+            .override_reported
+            .insert("TerminalBench".to_string());
+
+        compute_scores_with(&mut records, &coef);
+
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        let reported = records[2].metrics.get("TerminalBench").copied().unwrap();
+        assert!(direct > 95.0, "direct={direct}");
+        assert!(
+            (reported - 95.0).abs() < 0.5,
+            "override-reported score should get a 10% uncertainty pull toward 50, got {reported}"
+        );
+    }
+
+    #[test]
+    fn canary_health_is_penalty_only() {
+        let coef = Coefficients::load_embedded().unwrap();
+        let base_metrics = [
+            ("AI_correctness", 100.0),
+            ("AI_spec", 100.0),
+            ("AI_code", 100.0),
+            ("AI_efficiency", 100.0),
+            ("AI_stability", 100.0),
+            ("AI_refusal", 100.0),
+            ("AI_recovery", 100.0),
+        ];
+        let mut good_raw = base_metrics.to_vec();
+        good_raw.push(("AI_canary_health", 100.0));
+        let mut bad_raw = base_metrics.to_vec();
+        bad_raw.push(("AI_canary_health", 25.0));
+        let mut records = vec![
+            make_record("missing/x", Vendor::Other("a".into()), &base_metrics),
+            make_record("good/y", Vendor::Other("b".into()), &good_raw),
+            make_record("bad/z", Vendor::Other("c".into()), &bad_raw),
+        ];
+
+        compute_scores_with(&mut records, &coef);
+
+        let missing = records[0].scores.i_raw;
+        let good = records[1].scores.i_raw;
+        let bad = records[2].scores.i_raw;
+        assert!(
+            (good - missing).abs() < 1e-6,
+            "healthy canary should not boost role scores: good={good}, missing={missing}"
+        );
+        assert!(
+            bad < missing - 5.0,
+            "bad canary should apply a visible penalty: bad={bad}, missing={missing}"
+        );
+    }
+
+    #[test]
+    fn all_synthesized_aisl_perspective_gets_partial_uncertainty_pull() {
+        use crate::model::SynthesisProvenance;
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("AI_correctness", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("AI_correctness", 100.0)],
+            ),
+            make_record(
+                "s/synth",
+                Vendor::Other("s".into()),
+                &[("AI_correctness", 100.0)],
+            ),
+        ];
+        records[2].synthesized.insert(
+            "AI_correctness".to_string(),
+            SynthesisProvenance {
+                source_id: "aistupidlevel".to_string(),
+                from: "d/direct".to_string(),
+            },
+        );
+
+        compute_scores_with(&mut records, &coef);
+
+        let synth_ai = records[2].groups.get("A_I").copied().unwrap();
+        let expected = 56.8 * 0.75 + 50.0 * 0.25;
+        assert!(
+            (synth_ai - expected).abs() < 1e-6,
+            "fully synthesized AISL perspective should get a partial uncertainty pull, got {synth_ai}"
+        );
+        let direct_ai = records[1].groups.get("A_I").copied().unwrap();
+        assert!(
+            direct_ai > 50.0,
+            "direct AISL evidence should still score, got {direct_ai}"
         );
     }
 
@@ -283,7 +477,7 @@ mod tests {
                     ("AI_stability", 100.0),
                     ("AI_refusal", 100.0),
                     ("AI_recovery", 100.0),
-                    ("JudgeBench", 100.0),
+                    ("LMArenaSearchDocument", 100.0),
                 ],
             ),
             make_record(
@@ -318,8 +512,10 @@ mod tests {
         let mut coef = Coefficients::load_embedded().unwrap();
         // Strip BUILD down to a single weight on SWEComposite to make the
         // arithmetic verifiable end-to-end.
-        coef.group_weights
-            .insert("BUILD".to_string(), [("SWEComposite".to_string(), 1.0)].into_iter().collect());
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [("SWEComposite".to_string(), 1.0)].into_iter().collect(),
+        );
 
         // Two records both holding the same composite inputs at the
         // population extremes so percentile normalization yields 0/100.
@@ -365,8 +561,10 @@ mod tests {
     #[test]
     fn composite_metric_handles_partial_inputs() {
         let mut coef = Coefficients::load_embedded().unwrap();
-        coef.group_weights
-            .insert("BUILD".to_string(), [("SWEComposite".to_string(), 1.0)].into_iter().collect());
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [("SWEComposite".to_string(), 1.0)].into_iter().collect(),
+        );
 
         // Only one of the three SWE inputs is present — composite should
         // shrink toward 50 proportional to the missing weight.
@@ -377,12 +575,12 @@ mod tests {
         compute_scores_with(&mut records, &coef);
 
         let high = records[1].metrics.get("SWEComposite").copied().unwrap();
-        // SWERebench carries weight 0.35 of 1.00 in the composite — that's
+        // SWERebench carries weight 0.20 of 1.00 in the composite — that's
         // below the 0.70 trust threshold, so the present-weighted mean (100)
-        // still gets pulled toward 50: 100*0.35 + 50*0.65 = 67.5.
+        // still gets pulled toward 50: 100*0.20 + 50*0.80 = 60.
         assert!(
-            (high - 67.5).abs() < 1e-6,
-            "expected partial-coverage shrink to 67.5, got {high}"
+            (high - 60.0).abs() < 1e-6,
+            "expected partial-coverage shrink to 60, got {high}"
         );
     }
 
