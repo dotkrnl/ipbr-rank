@@ -145,7 +145,7 @@ pub fn as_score_0_100(value: f64) -> Option<f64> {
     if !value.is_finite() {
         return None;
     }
-    let scaled = if value.abs() <= 1.0 + EPS {
+    let scaled = if value >= -EPS && value <= 1.0 + EPS {
         value * 100.0
     } else {
         value
