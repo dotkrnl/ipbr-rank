@@ -823,12 +823,12 @@ mod tests {
         compute_scores_with(&mut records, &coef);
 
         let high = records[1].metrics.get("SWEComposite").copied().unwrap();
-        // SWERebench carries weight 0.30 of 1.00 in the composite — that's
+        // SWERebench carries weight 0.40 of 1.00 in the composite — that's
         // below the 0.60 trust threshold, so the present-weighted mean (100)
-        // gets pulled toward 50: 100*0.30 + 50*0.70 = 65.
+        // gets pulled toward 50: 100*0.40 + 50*0.60 = 70.
         assert!(
-            (high - 65.0).abs() < 1e-6,
-            "expected partial-coverage shrink to 65, got {high}"
+            (high - 70.0).abs() < 1e-6,
+            "expected partial-coverage shrink to 70, got {high}"
         );
     }
 

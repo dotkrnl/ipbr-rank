@@ -167,8 +167,8 @@ per_source_cap = 0.45
 # shrink-to-50 pressure via missing-data handling — stacking extra weight on top
 # double-penalised models without Pro rows), Verified↓0.05 (saturated/contaminated
 # at the frontier).
-SWERebench = 0.30            # contamination-resistant rolling-window signal
-SWEBenchVerified = 0.25      # widely reported, but saturated/contaminated
+SWERebench = 0.40            # contamination-resistant rolling-window signal
+SWEBenchVerified = 0.15      # widely reported, but saturated/contaminated
 SWEBenchPro = 0.35           # hardest, multi-file (1.8k tasks, 4.1 files avg)
 SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
 
@@ -197,9 +197,9 @@ BlendedCost = 0.10
 ContextWindow = 0.15
 
 [group_weights.OPS_precision]
-OutputSpeed = 0.35
+OutputSpeed = 0.30
 TTFT = 0.35
-BlendedCost = 0.15
+BlendedCost = 0.20
 ContextWindow = 0.15
 
 [group_weights.OPS_review]
@@ -208,10 +208,10 @@ ContextWindow = 0.15
 # TTFT was also overweighted at 0.40 — reviewers care more that the full
 # judgment lands than that the first token does. Rebalanced 2026-04 after
 # multi-agent review: OutputSpeed up, TTFT down, ContextWindow up.
-OutputSpeed = 0.35
-TTFT = 0.30
+OutputSpeed = 0.30
+TTFT = 0.25
 BlendedCost = 0.20
-ContextWindow = 0.15
+ContextWindow = 0.25
 
 # Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
 # carry weight 0.24 (down from 0.30 in 2026-04 after multi-agent review):
