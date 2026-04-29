@@ -15,16 +15,17 @@
 #   * A_R (Reviewing): correctness + hallucination-resistance + spec
 #     adherence — the qualities that make a model a good code reviewer
 [ai_stupid_perspective_weights.A_I]
-AI_correctness = 0.16
-AI_spec = 0.16
-AI_code = 0.04
+# AI_refusal (safety axis) and AI_code removed — neither measures idea quality.
+# Freed weight redistributed across correctness, spec, stability, recovery,
+# complexity, edge_cases, and plan_coherence.
+AI_correctness = 0.18
+AI_spec = 0.18
 AI_efficiency = 0.08
-AI_stability = 0.14
-AI_refusal = 0.10
-AI_recovery = 0.10
-AI_complexity = 0.08
-AI_edge_cases = 0.06
-AI_plan_coherence = 0.08
+AI_stability = 0.16
+AI_recovery = 0.12
+AI_complexity = 0.10
+AI_edge_cases = 0.08
+AI_plan_coherence = 0.10
 
 [ai_stupid_perspective_weights.A_P]
 AI_correctness = 0.14
@@ -157,9 +158,14 @@ per_model_cap = 0.55
 per_source_cap = 0.45
 
 [composite_metrics.SWEComposite]
-SWERebench = 0.20            # contamination-resistant rolling-window signal
-SWEBenchVerified = 0.30      # widely reported, but saturated/contaminated
-SWEBenchPro = 0.40           # hardest, multi-file (1.8k tasks, 4.1 files avg)
+# Rebalanced: Rebench↑0.10 (contamination-resistant rolling signal deserves more
+# weight), Pro↓0.05 (still dominant, but Pro's sparse coverage already creates
+# shrink-to-50 pressure via missing-data handling — stacking extra weight on top
+# double-penalised models without Pro rows), Verified↓0.05 (saturated/contaminated
+# at the frontier).
+SWERebench = 0.30            # contamination-resistant rolling-window signal
+SWEBenchVerified = 0.25      # widely reported, but saturated/contaminated
+SWEBenchPro = 0.35           # hardest, multi-file (1.8k tasks, 4.1 files avg)
 SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
 
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge

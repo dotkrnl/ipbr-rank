@@ -137,14 +137,14 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), InverseTTFT (0.20), InverseCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), InverseTTFT (0.35), InverseCost (0.15), ContextWindow (0.15) |
 | **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), InverseTTFT (0.40), InverseCost (0.20), ContextWindow (0.10) |
-| **A_I** (AIStupid Idea) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_refusal, AI_recovery, AI_complexity, AI_edge_cases, AI_plan_coherence |
+| **A_I** (AIStupid Idea) | AI_correctness (0.18), AI_spec (0.18), AI_efficiency (0.08), AI_stability (0.16), AI_recovery (0.12), AI_complexity (0.10), AI_edge_cases (0.08), AI_plan_coherence (0.10) — `AI_refusal` and `AI_code` removed (safety/code-quality signals that don't measure idea quality) |
 | **A_P** (AIStupid Planning) | AI_correctness, AI_spec, AI_efficiency, AI_stability, AI_recovery, AI_plan_coherence, AI_memory_retention, AI_context_awareness, AI_task_completion, AI_tool_selection, AI_parameter_accuracy |
 | **A_B** (AIStupid Building) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_recovery, AI_complexity, AI_edge_cases, AI_hallucination_resistance, AI_memory_retention |
 | **A_R** (AIStupid Reviewing) | AI_correctness, AI_spec, AI_code, AI_stability, AI_recovery, AI_hallucination_resistance, AI_edge_cases (`AI_error_handling` was dropped — see `docs/sources.md` AISL entry for the upstream measurement quirk that motivated it; the freed 0.08 weight folded into `AI_recovery`) |
 
 `SWEComposite` is a derived metric defined in `[composite_metrics.SWEComposite]`,
-computed as a missing-safe weighted average of `SWERebench` (0.20),
-`SWEBenchVerified` (0.30), `SWEBenchPro` (0.40), and `SWEBenchMultilingual`
+computed as a missing-safe weighted average of `SWERebench` (0.30),
+`SWEBenchVerified` (0.25), `SWEBenchPro` (0.35), and `SWEBenchMultilingual`
 (0.10). All four inputs use percentile normalization so they're on a
 comparable scale before the composite collapses them. See the source-level
 scoreboard for the raw input values when diagnosing per-model performance.
@@ -374,10 +374,10 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | ContextWindow | higher | **yes** | tail_penalty | OpenRouter | OPS_* |
 | AI_correctness | higher | no | percentile | AIStupidLevel (hourly suite) | A_I, A_P, A_B, A_R |
 | AI_spec | higher | no | percentile | AIStupidLevel (hourly suite, `format` axis) | A_I, A_P, A_B, A_R |
-| AI_code | higher | no | percentile | AIStupidLevel (`codeQuality` axis) | A_I, A_P, A_B, A_R |
+| AI_code | higher | no | percentile | AIStupidLevel (`codeQuality` axis) | A_B, A_R (removed from A_I — code quality ≠ idea quality) |
 | AI_efficiency | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
 | AI_stability | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
-| AI_refusal | higher | no | percentile | AIStupidLevel (`safety` axis) | A_I, A_P, A_B, A_R |
+| AI_refusal | higher | no | percentile | AIStupidLevel (`safety` axis) | A_P, A_B, A_R (removed from A_I — safety/refusal rate ≠ idea quality) |
 | AI_recovery | higher | no | percentile | AIStupidLevel (`debugging` axis) | A_I, A_P, A_B, A_R |
 | AI_complexity | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B |
 | AI_edge_cases | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B, A_R |
@@ -439,11 +439,15 @@ measurements.
 AISL perspective groups (`A_I`, `A_P`, `A_B`, `A_R`) get one extra
 provenance-aware guard because they carry 0.30 of every final role score.
 After the perspective weighted average is computed, the group is blended
-toward 50 by 25% of the present perspective weight that came from
-synthesized metrics. A fully synthesized AISL perspective therefore keeps
-75% of its synthesized estimate and gets a 25% uncertainty pull toward 50,
-while mixed direct/synthesized perspectives keep proportional credit for
-the direct measurements.
+toward 50 by 15% of the present perspective weight that came from
+synthesized metrics (reduced from 25% — the metric-level 15% penalty already
+discounts each synthesised AISL metric before it enters the group average;
+stacking a 25% group pull produced a combined ~18 pt effective penalty on
+fully-synthesised perspectives, harsher than any other source family). A
+fully synthesized AISL perspective therefore keeps 85% of its synthesized
+estimate and gets a 15% uncertainty pull toward 50, while mixed
+direct/synthesized perspectives keep proportional credit for the direct
+measurements.
 
 ### AI Stupid Level Perspective Weights
 See `[ai_stupid_perspective_weights.*]` in `data/coefficients.toml` for the

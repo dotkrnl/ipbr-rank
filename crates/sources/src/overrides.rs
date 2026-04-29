@@ -133,9 +133,12 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
                 entry.canonical_id, entry.metric
             )));
         }
+        // Note is intentionally NOT inserted into fields. EffortPreference::from_row
+        // reads all string fields to detect thinking/high/xHigh effort markers;
+        // provenance notes like "OpenAI-reported (xHigh)" would silently block the
+        // override value from scoring. The note is validated above but not emitted.
         let mut fields = BTreeMap::new();
         fields.insert(entry.metric.clone(), Value::from(entry.value));
-        fields.insert("Note".to_string(), Value::from(entry.note.clone()));
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
             // The alias matcher takes any registered alias, and every
@@ -182,10 +185,9 @@ note = "OpenAI launch, 2026-04-23"
             Some(87.6)
         );
         assert_eq!(
-            by_model["anthropic/claude-opus-4.7"]
-                .get("Note")
-                .and_then(Value::as_str),
-            Some("Anthropic launch, 2026-04-16")
+            by_model["anthropic/claude-opus-4.7"].get("Note"),
+            None,
+            "Note must not be emitted into fields to avoid effort-detection poisoning"
         );
         assert_eq!(
             by_model["openai/gpt-5.5"]
