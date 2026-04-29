@@ -87,11 +87,21 @@ the AISL deep + tooling suites instead.
 
 ## livecodebench
 
-- **Status**: Verified
+- **Status**: Verified (retired from BUILD weighting — see GSO below)
 - **API**: LiveCodeBench `performances_generation.json` (fetched from `livecodebench.github.io`)
 - **Secret**: None
 - **Cache TTL**: 2 d
 - **Fixture**: `data/fixtures/livecodebench.json`
+- **Note**: The upstream JSON has been frozen at mid-2025 frontier (latest entries are Claude-Opus-4 / Claude-Sonnet-4 / Gemini-2.5-Pro; no GPT-5/5.x, no Opus 4.5+, no Gemini 3, no Kimi K2.x, no DeepSeek V4) for ~12 months. The metric is still ingested for backwards-compat and historical reference but `groups = []` removes it from any role-score weighting. Successor: `gso`.
+
+## gso
+
+- **Status**: Verified
+- **API**: GSO ("Generalized Software Optimization") leaderboard JSON at `gso-bench.github.io/assets/leaderboard.json`. Same operators as LiveCodeBench's leaderboard SPA but actively accepting frontier submissions where LiveCodeBench has not since mid-2025.
+- **Secret**: None
+- **Cache TTL**: 2 d
+- **Fixture**: `data/fixtures/gso.json`
+- **Metric**: `GSO` — pass rate over 102 software-optimization tasks. We ingest the `score_hack_control` field (GSO's contamination-resistant variant, added explicitly to penalize deceptive optimizations) rather than raw `score`, mirroring our portfolio's bias toward contamination-resistant signals (cf. SWERebench preferred over SWE-Bench Verified). Filtered to `setting == "Opt@1"`. Among Opt@1 rows for the same model we keep the one with the lowest `reasoning_effort` so the variant policy (medium/thinking/adaptive only) is honored where possible — with the documented carve-out that GSO publishes only `-high` rows for some frontier models, which we accept rather than synthesize.
 
 ## swerebench
 

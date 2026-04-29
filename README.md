@@ -78,7 +78,8 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE-rebench — continuously-refreshed agentic SWE leaderboard, rolling-window resolved rate
-- LiveCodeBench — competitive-programming pass@1
+- LiveCodeBench — competitive-programming pass@1 (ingested for back-compat; *retired* from BUILD weighting after the upstream JSON froze at mid-2025 frontier — see `docs/sources.md`)
+- GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
 - Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
@@ -219,7 +220,7 @@ cache regardless of mtime.
 |---|---|---|
 | aistupidlevel | 1h | hourly stupidity dashboard |
 | openrouter, lmarena, artificial_analysis | 24h | daily refresh |
-| livecodebench | 2d | weekly contests |
+| livecodebench, gso | 2d | weekly-ish leaderboard refreshes |
 | swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |
 
 To force a refresh of one source, delete its cache file (or `touch -t` it to

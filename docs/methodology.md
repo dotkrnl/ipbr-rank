@@ -133,7 +133,7 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.42), LMArenaText (0.25), GPQA_HLE_Reasoning (0.18), ARC_AGI_2 (0.15) |
 | **PLAN** (Planning) | TerminalBench (0.34), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.20), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.06) |
-| **BUILD** (Building) | SWEComposite (0.42), MCPAtlas (0.10), TerminalBench (0.09), LiveCodeBench (0.05), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarComposite (0.10), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
+| **BUILD** (Building) | SWEComposite (0.45), MCPAtlas (0.10), TerminalBench (0.09), GSO (0.02), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarComposite (0.10), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), TTFT (0.35), BlendedCost (0.15), ContextWindow (0.15) |
@@ -391,7 +391,8 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | ArtificialAnalysisIntelligence | higher | no | percentile | Artificial Analysis | GEN |
 | ArtificialAnalysisCoding | higher | no | percentile | Artificial Analysis | BUILD |
 | ArtificialAnalysisReasoning | higher | no | percentile | Artificial Analysis (gpqa+hle blend) | PLAN |
-| LiveCodeBench | higher | no | percentile | LiveCodeBench JSON | BUILD |
+| LiveCodeBench | higher | no | percentile | LiveCodeBench JSON | (retired — see GSO) |
+| GSO | higher | no | percentile | gso-bench.github.io leaderboard JSON (`score_hack_control` field, `setting=Opt@1`) | BUILD |
 | GPQA_HLE_Reasoning | higher | no | percentile | Artificial Analysis (gpqa+hle blend) | GEN |
 | SWEBenchVerified | higher | no | percentile | SWE-bench JSON | (input to SWEComposite) |
 | SWEBenchMultilingual | higher | no | percentile | SWE-bench JSON | (input to SWEComposite) |

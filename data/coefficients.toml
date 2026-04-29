@@ -114,10 +114,12 @@ MCPAtlas = 0.06
 # scientific code, an underweighted axis for research/data work).
 [group_weights.BUILD]
 # BUILD rebalanced toward "real engineering work" — SWE composite + tool
-# orchestration. SWEComposite carries 0.42 (rolled forward from 0.40 after
-# absorbing the 0.02 freed when MCPAtlas was trimmed): once SWERebench /
-# SWEBenchPro / SWEBenchVerified / SWEBenchMultilingual all flow through
-# one normalized signal, that signal IS the headline building measurement.
+# orchestration. SWEComposite carries 0.45 (rolled forward through the
+# 0.40→0.42→0.45 path: first absorbing the 0.02 freed when MCPAtlas was
+# trimmed, then the 0.03 freed when LiveCodeBench was retired in favor of
+# GSO at 0.02). Once SWERebench / SWEBenchPro / SWEBenchVerified /
+# SWEBenchMultilingual all flow through one normalized signal, that signal
+# IS the headline building measurement.
 # MCPAtlas trimmed back from 0.12 → 0.10 (Codex review pushback: MCP
 # coverage is too sparse to justify the larger weight; the missing-data
 # shrinkage already handles per-vendor gaps without a coefficient bump).
@@ -125,10 +127,18 @@ MCPAtlas = 0.06
 # 0.10 — same total influence, but cleaner missing-data accounting (one
 # upstream payload should mark one missing entry, not four) and the three
 # density submetrics are highly correlated.
-SWEComposite = 0.42
+# LiveCodeBench retired 2026-04 — its public JSON had been frozen at mid-
+# 2025 frontier (no GPT-5/5.x, no Opus 4.5+, no Gemini 3, etc.) for ~12
+# months and was contributing zero signal to current top models. Replaced
+# by GSO at 0.02: same livecodebench.github.io operators, but GSO is the
+# active "Generalized Software Optimization" track with frontier coverage
+# and a contamination-resistant `score_hack_control` field (which we
+# ingest in preference to raw `score`, mirroring our portfolio's bias
+# toward contamination-resistant SWE signals like SWERebench).
+SWEComposite = 0.45
 MCPAtlas = 0.10
 TerminalBench = 0.09
-LiveCodeBench = 0.05
+GSO = 0.02
 ArtificialAnalysisCoding = 0.05
 SciCode = 0.05
 GDPval = 0.05
@@ -337,6 +347,23 @@ groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.LiveCodeBench]
+# Retained as an ingested metric for backwards-compat with the cached
+# fixture and any consumers reading per-source values, but removed from
+# group_weights.BUILD (see comment there). The upstream JSON has been
+# frozen at mid-2025 frontier for ~12 months; GSO is the active
+# replacement track. `groups = []` keeps it descriptively unscored.
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+# GSO ("Generalized Software Optimization") replaces LiveCodeBench in the
+# BUILD portfolio. We ingest the `score_hack_control` field — GSO's
+# contamination-resistant variant, added specifically to penalize
+# deceptive optimizations — rather than raw `score`. Filtered to the
+# `Opt@1` setting; among Opt@1 rows for the same model we keep the one
+# with the lowest reasoning_effort (per CLAUDE.md/memory variant policy).
+[metrics.GSO]
 higher_better = true
 log_scale = false
 groups = ["BUILD"]

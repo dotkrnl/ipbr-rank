@@ -1,5 +1,5 @@
 use crate::{
-    AiStupidLevelSource, ArcAgiSource, ArtificialAnalysisSource, LiveCodeBenchSource,
+    AiStupidLevelSource, ArcAgiSource, ArtificialAnalysisSource, GsoSource, LiveCodeBenchSource,
     LmArenaSource, McpAtlasSource, OpenRouterSource, OverridesSource, SonarSource, Source,
     SweBenchProSource, SweBenchSource, SweRebenchSource, TerminalBenchSource,
 };
@@ -14,6 +14,7 @@ pub fn registry() -> Vec<Box<dyn Source>> {
         Box::new(SweBenchProSource),
         Box::new(SweRebenchSource),
         Box::new(LiveCodeBenchSource),
+        Box::new(GsoSource),
         Box::new(TerminalBenchSource),
         Box::new(SonarSource),
         Box::new(McpAtlasSource),
