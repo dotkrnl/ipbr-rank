@@ -222,4 +222,16 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn composite_metrics_weights_sum_to_one() {
+        let c = Coefficients::load_embedded().unwrap();
+        for (name, weights) in &c.composite_metrics {
+            let sum: f64 = weights.values().sum();
+            assert!(
+                (sum - 1.0).abs() < 1e-9,
+                "{name} composite weights sum to {sum}, expected 1.0"
+            );
+        }
+    }
 }
