@@ -300,11 +300,7 @@ mod tests {
             r.aliases.insert("gpt-5.5".to_string());
             r
         }];
-        let mut row = raw(
-            "overrides",
-            "gpt-5.5",
-            &[("TerminalBench", json!(80.0))],
-        );
+        let mut row = raw("overrides", "gpt-5.5", &[("TerminalBench", json!(80.0))]);
         row.synthesized_from = Some("openai/gpt-5.4".to_string());
 
         let stats = ingest_rows(&mut records, vec![row]);

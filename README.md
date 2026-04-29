@@ -80,7 +80,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - SWE-rebench — continuously-refreshed agentic SWE leaderboard, rolling-window resolved rate
 - LiveCodeBench — competitive-programming pass@1
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
-- Sonar Code Quality — issue density, vulnerability density, functional pass rate (the only public benchmark that measures generated-code quality directly)
+- Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)
 - Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metric values (SWE-bench Verified, Terminal-Bench, GDPval) for models the public leaderboards have not yet rated

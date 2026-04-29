@@ -149,7 +149,7 @@ Possible group keys:
 - **`A_B`** (AI Stupid Level: Building perspective)
 - **`A_R`** (AI Stupid Level: Reviewing perspective)
 
-Groups where `present_weight / total_weight < 0.80` are marked as "shrunk" in `models.missing.groups_shrunk`; the scoring math blends from shrink-to-50 to trusting the present mean across 0.60-0.80 coverage.
+Groups where `present_weight / total_weight` is below the configured transition ceiling are marked as "shrunk" in `models.missing.groups_shrunk`; with the default coefficients, the scoring math blends from shrink-to-50 to trusting the present mean across 0.60-0.80 coverage.
 
 #### `[models.metrics]` Table
 
@@ -164,7 +164,7 @@ Some metric values are filled from a sibling model when the source did not direc
 #### `[models.missing]` Table
 
 - **`metrics`**: Array of strings, metric keys that are missing for this model.
-- **`groups_shrunk`**: Array of strings, group keys where less than 80% of the weight was present. See methodology §4.2 for the 0.60-0.80 smooth shrink transition.
+- **`groups_shrunk`**: Array of strings, group keys below the configured shrink-reporting coverage cutoff. See methodology §4.2 for the default 0.60-0.80 smooth shrink transition.
 
 ---
 
@@ -187,7 +187,7 @@ groups_shrunk = ["PLAN"]
 - **`[models."<canonical_id>"]`**: One table per model, keyed by canonical ID.
   - **`display_name`**: Human-readable name (same value as in `scoreboard.toml`).
   - **`metrics`**: Array of strings, metric keys missing for this model.
-  - **`groups_shrunk`**: Array of strings, groups where `present_weight / total_weight < 0.80`.
+  - **`groups_shrunk`**: Array of strings, groups below the configured shrink-reporting coverage cutoff.
 
 `missing.toml` does not include a `schema_version` field — its shape is
 covered by `scoreboard.toml`'s version bumps.
@@ -204,16 +204,14 @@ Same as `data/coefficients.toml`:
 
 ```toml
 [ai_stupid_perspective_weights.A_I]
-AI_correctness = 0.16
-AI_spec = 0.16
-AI_code = 0.04
+AI_correctness = 0.18
+AI_spec = 0.18
 AI_efficiency = 0.08
-AI_stability = 0.14
-AI_refusal = 0.10
-AI_recovery = 0.10
-AI_complexity = 0.08
-AI_edge_cases = 0.06
-AI_plan_coherence = 0.08
+AI_stability = 0.16
+AI_recovery = 0.12
+AI_complexity = 0.10
+AI_edge_cases = 0.08
+AI_plan_coherence = 0.10
 
 [ai_stupid_perspective_weights.A_P]
 # ... same structure for A_P, A_B, A_R (each pulls a tailored slice

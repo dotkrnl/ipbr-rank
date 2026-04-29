@@ -32,10 +32,13 @@
 //! }
 //! ```
 //!
-//! We emit two metrics:
+//! We emit four metrics:
 //!   * `SonarFunctionalSkill` — pass-rate-ish (higher is better)
 //!   * `SonarIssueDensity` — issues per kLOC (lower is better; metric def
-//!     in coefficients sets `higher_better = false`).
+//!     in coefficients sets `higher_better = false`)
+//!   * `SonarBugDensity` — bugs per kLOC (lower is better)
+//!   * `SonarVulnerabilityDensity` — vulnerabilities per kLOC (lower is
+//!     better).
 
 use std::collections::BTreeMap;
 use std::time::Duration;
@@ -137,6 +140,23 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             // `higher_better = false`, so we emit the raw rate here.
             fields.insert("SonarIssueDensity".to_string(), Value::from(issue_density));
         }
+        if let Some(bug_density) = item.get("bugDensityPerKloc").and_then(number_like)
+            && bug_density.is_finite()
+            && bug_density >= 0.0
+        {
+            fields.insert("SonarBugDensity".to_string(), Value::from(bug_density));
+        }
+        if let Some(vulnerability_density) = item
+            .get("vulnerabilityDensityPerKloc")
+            .and_then(number_like)
+            && vulnerability_density.is_finite()
+            && vulnerability_density >= 0.0
+        {
+            fields.insert(
+                "SonarVulnerabilityDensity".to_string(),
+                Value::from(vulnerability_density),
+            );
+        }
         if fields.is_empty() {
             continue;
         }
@@ -184,13 +204,17 @@ mod tests {
                     "name": "Claude Opus 4.7 Thinking",
                     "organization": "Anthropic",
                     "functionalSkill": 82.52,
-                    "issueDensity": 24.10
+                    "issueDensity": 24.10,
+                    "bugDensityPerKloc": 0.8,
+                    "vulnerabilityDensityPerKloc": 0.29
                 },
                 {
                     "name": "GPT-5.5 Medium",
                     "organization": "OpenAI",
                     "functionalSkill": 78.67,
-                    "issueDensity": 17.72
+                    "issueDensity": 17.72,
+                    "bugDensityPerKloc": 0.3,
+                    "vulnerabilityDensityPerKloc": 0.11
                 }
             ]
         });
@@ -206,6 +230,16 @@ mod tests {
         assert_eq!(
             opus.fields.get("SonarIssueDensity").and_then(Value::as_f64),
             Some(24.10)
+        );
+        assert_eq!(
+            opus.fields.get("SonarBugDensity").and_then(Value::as_f64),
+            Some(0.8)
+        );
+        assert_eq!(
+            opus.fields
+                .get("SonarVulnerabilityDensity")
+                .and_then(Value::as_f64),
+            Some(0.29)
         );
     }
 

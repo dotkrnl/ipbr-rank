@@ -20,7 +20,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Idea</strong> — open-ended creativity, general intelligence, breadth. Driven by LM Arena Text, AI Stupid Level idea-shaped axes, and reasoning blends.</li>
 <li><strong>Plan</strong> — structured reasoning, function-calling, multi-step task decomposition. Driven by Terminal-Bench, tau2-bench, IFBench, MCP-Atlas, and AISL plan axes.</li>
 <li><strong>Build</strong> — actually writing code that runs. Driven by SWE-bench (Verified + Multilingual + Pro), SWE-rebench, LiveCodeBench, Sonar code quality, and AISL build axes.</li>
-<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar issue density, and AISL review axes. <em>Review has no adjusted variant — it is the source of the penalty applied to the other three.</em></li>
+<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar code-quality metrics, and AISL review axes. <em>Review has no adjusted variant — it is the source of the penalty applied to the other three.</em></li>
 </ul>
 
 <h2>Raw vs adjusted</h2>

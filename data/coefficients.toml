@@ -112,12 +112,6 @@ MCPAtlas = 0.06
 # the closest direct measure of real-world software work), GDPval (real-
 # world economic-value tasks), and SciCode (which measures correctness on
 # scientific code, an underweighted axis for research/data work).
-# BUILD rebalanced to make room for Sonar's code-quality signals. Sonar
-# measures properties of generated code itself (issue density, vuln
-# density, bugs per kLOC) rather than just pass-rate, which uniquely
-# captures the "is the code well-written" axis where headline benchmarks
-# fall short. Functional skill and issue density carry equal weight as
-# different dimensions of quality.
 [group_weights.BUILD]
 # BUILD rebalanced toward "real engineering work" — SWE composite + tool
 # orchestration. The previous balance over-rewarded contest-style coding
@@ -130,12 +124,14 @@ MCPAtlas = 0.06
 SWEComposite = 0.40
 MCPAtlas = 0.12
 TerminalBench = 0.09
-LiveCodeBench = 0.06
+LiveCodeBench = 0.05
 ArtificialAnalysisCoding = 0.05
 SciCode = 0.05
 GDPval = 0.05
-SonarFunctionalSkill = 0.05
-SonarIssueDensity = 0.04
+SonarFunctionalSkill = 0.04
+SonarIssueDensity = 0.025
+SonarBugDensity = 0.02
+SonarVulnerabilityDensity = 0.015
 LongContextRecall = 0.05
 CopilotArenaOrLMArenaCode = 0.04
 
@@ -423,6 +419,20 @@ transform = "percentile"
 # Sonar issue density (issues / kLOC). Lower is better; the metric def
 # inverts via `higher_better = false` before percentile normalization.
 [metrics.SonarIssueDensity]
+higher_better = false
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Sonar bug density (bugs / kLOC). Lower is better.
+[metrics.SonarBugDensity]
+higher_better = false
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Sonar vulnerability density (vulnerabilities / kLOC). Lower is better.
+[metrics.SonarVulnerabilityDensity]
 higher_better = false
 log_scale = false
 groups = ["BUILD"]

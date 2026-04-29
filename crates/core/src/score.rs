@@ -78,7 +78,11 @@ fn compute_composite_metrics(
 
 const CANARY_HEALTH_METRIC: &str = "AI_canary_health";
 
-fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients, penalties: &PenaltiesConfig) {
+fn normalize_population(
+    records: &mut [ModelRecord],
+    coef: &Coefficients,
+    penalties: &PenaltiesConfig,
+) {
     for (metric_key, def) in &coef.metrics {
         let all_pop: Vec<f64> = records
             .iter()

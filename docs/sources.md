@@ -141,7 +141,7 @@ the AISL deep + tooling suites instead.
 - **API**: `sonarsource.com/.../leaderboard/data.json` — Vite SPA backed by a static JSON file; no auth, no rate limit.
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metrics**: `SonarFunctionalSkill` (pass rate, higher better) and `SonarIssueDensity` (issues per kLOC, lower better, flipped via `higher_better = false`). Sonar is the only public benchmark in our portfolio that measures generated-code quality directly (issue density, vuln density, bug density, complexity) instead of just pass rate.
+- **Metrics**: `SonarFunctionalSkill` (pass rate, higher better), `SonarIssueDensity` (issues per kLOC, lower better), `SonarBugDensity` (bugs per kLOC, lower better), and `SonarVulnerabilityDensity` (vulnerabilities per kLOC, lower better). Lower-is-better metrics are flipped via `higher_better = false`. Sonar is the only public benchmark in our portfolio that measures generated-code quality directly instead of just pass rate.
 - **Coverage**: 58 models including all 2026 frontier — Opus 4.5/4.6/4.7 Thinking, GPT-5.1/5.2/5.3/5.4/5.5 variants, Gemini 3 Pro/Flash/3.1 Pro, GLM-5, Kimi K2 Thinking. 13 of 14 flagships matched directly via existing aliases.
 - **Fixture**: `data/fixtures/sonar.json`
 

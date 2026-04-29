@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use ipbr_core::{Coefficients, ModelRecord, SCHEMA_VERSION};
+use ipbr_core::{Coefficients, ModelRecord, SCHEMA_VERSION, aggregate::shrink_coverage_cutoff};
 
 use crate::Scoreboard;
 
@@ -174,6 +174,8 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
 
     // Start with whatever core already recorded (now includes A_* perspectives).
     let mut groups_shrunk: Vec<String> = model.missing.groups_shrunk.iter().cloned().collect();
+    let aggregation = coefficients.aggregation.clone().unwrap_or_default();
+    let shrink_cutoff = shrink_coverage_cutoff(&aggregation);
 
     // Defensive re-computation for both regular groups and AISL perspectives.
     for (group, weights) in coefficients
@@ -192,11 +194,8 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
             .map(|(_, weight)| *weight)
             .sum();
 
-        // Keep this in sync with the transition zone in ipbr-core's
-        // missing-safe aggregator: groups shrink when present coverage is
-        // below the top of the transition band (0.80), i.e. missing weight
-        // is above 20%.
-        if missing_weight / total_weight > 0.20 {
+        let present_coverage = 1.0 - missing_weight / total_weight;
+        if present_coverage < shrink_cutoff {
             groups_shrunk.push(group.clone());
         }
     }

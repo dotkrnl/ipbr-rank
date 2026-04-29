@@ -118,6 +118,46 @@ fn missing_output_marks_groups_shrunk_at_actual_threshold() {
     );
 }
 
+#[test]
+fn missing_output_uses_configured_transition_ceiling() {
+    let mut coefficients =
+        Coefficients::load_embedded().expect("embedded coefficients should parse");
+    coefficients.aggregation = Some(ipbr_core::coefficients::AggregationConfig {
+        trust_threshold: 0.50,
+        trust_transition_width: 0.10,
+    });
+    let mut model = ModelRecord::new(
+        "test/model".to_string(),
+        "Test Model".to_string(),
+        Vendor::Other("test".to_string()),
+    );
+    model
+        .metrics
+        .insert("LMArenaCreativeOrOpenEnded".to_string(), 80.0);
+    let scoreboard = Scoreboard {
+        models: vec![model],
+        coefficients,
+        generated_at: "2026-01-01T00:00:00Z".to_string(),
+        generator: "ipbr-rank 0.1.0".to_string(),
+        methodology: "v1".to_string(),
+        source_summary: BTreeMap::new(),
+    };
+    let tmp = tempdir().expect("tempdir should be created");
+
+    write_missing(&scoreboard, tmp.path()).expect("missing output should render");
+
+    let missing = std::fs::read_to_string(tmp.path().join("missing.toml"))
+        .expect("missing.toml should exist");
+    let missing_value: toml::Value = toml::from_str(&missing).expect("missing TOML should parse");
+    let groups = missing_value["models"]["test/model"]["groups_shrunk"]
+        .as_array()
+        .expect("groups_shrunk should be an array");
+    assert!(
+        groups.iter().all(|group| group.as_str() != Some("CRE")),
+        "CRE has 65% coverage, above the configured 55% transition ceiling: {missing}"
+    );
+}
+
 #[tokio::test]
 async fn golden_scoreboard_matches_fixture_pipeline() {
     let tmp = tempdir().expect("tempdir should be created");

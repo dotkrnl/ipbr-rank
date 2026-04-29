@@ -5,8 +5,12 @@ use std::collections::BTreeMap;
 const EPS: f64 = 1e-12;
 pub const SHRINK_TARGET: f64 = 50.0;
 
+pub fn shrink_coverage_cutoff(cfg: &AggregationConfig) -> f64 {
+    (cfg.trust_threshold + cfg.trust_transition_width / 2.0).clamp(0.0, 1.0)
+}
+
 /// Returns the missing-safe weighted average and whether the group was
-/// shrunk (present weight < 0.80 of total weight).
+/// shrunk (present weight below the configured transition ceiling).
 pub fn missing_safe_avg(
     metrics: &BTreeMap<String, f64>,
     weights: &BTreeMap<String, f64>,
@@ -54,7 +58,7 @@ pub fn missing_safe_avg(
     let smooth_t = t * t * (3.0 - 2.0 * t);
     let value = shrink_value * (1.0 - smooth_t) + present_mean * smooth_t;
 
-    let shrunk = w_present < 0.80;
+    let shrunk = w_present < shrink_coverage_cutoff(cfg);
     (value.clamp(0.0, 100.0), shrunk)
 }
 
@@ -123,6 +127,24 @@ mod tests {
         assert!((v - 90.0).abs() < 1e-9, "expected 90, got {v}");
         assert!(!shrunk, "80 % coverage should not be shrunk");
         assert!(missing.metrics.contains("c"));
+    }
+
+    #[test]
+    fn shrunk_flag_uses_configured_transition_ceiling() {
+        let metrics: BTreeMap<String, f64> = [("a".to_string(), 80.0)].into_iter().collect();
+        let w = weights(&[("a", 0.65), ("b", 0.35)]);
+        let mut missing = MissingInfo::new();
+        let cfg = AggregationConfig {
+            trust_threshold: 0.50,
+            trust_transition_width: 0.10,
+        };
+
+        let (_v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+
+        assert!(
+            !shrunk,
+            "65% coverage is above the configured 55% transition ceiling"
+        );
     }
 
     #[test]

@@ -155,18 +155,18 @@ sources = ["aistupidlevel", "artificial_analysis", "lmarena", "mcp_atlas", "open
 [models.scores]
 i_raw = 76.304494
 p_raw = 68.283522
-b_raw = 75.795927
-r = 65.128487
+b_raw = 75.725532
+r = 65.097612
 i_adj = 76.304494
 p_adj = 68.283522
-b_adj = 75.795927
+b_adj = 75.725532
 
 [models.groups]
 A_B = 75.174611
 A_I = 85.758273
 A_P = 75.832168
 A_R = 77.473739
-BUILD = 77.356241
+BUILD = 77.232742
 CRE = 73.511245
 GEN = 67.004893
 LM_ARENA_REVIEW_PROXY = 10.014484
@@ -210,8 +210,10 @@ SWEBenchPro = 88.396956
 SWEBenchVerified = 81.544532
 SWEComposite = 82.544023
 SWERebench = 76.548510
+SonarBugDensity = 73.689183
 SonarFunctionalSkill = 100.000000
 SonarIssueDensity = 77.157578
+SonarVulnerabilityDensity = 87.188306
 TTFT = 76.392065
 Tau2Bench = 79.149303
 TerminalBench = 54.766552
@@ -231,18 +233,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 90.449900
 p_raw = 73.982861
-b_raw = 82.295435
-r = 77.501317
+b_raw = 82.153385
+r = 77.439015
 i_adj = 90.449900
 p_adj = 73.982861
-b_adj = 82.295435
+b_adj = 82.153385
 
 [models.groups]
 A_B = 82.633887
 A_I = 81.459329
 A_P = 62.744070
 A_R = 94.583331
-BUILD = 83.470334
+BUILD = 83.221125
 CRE = 100.000000
 GEN = 87.297978
 LM_ARENA_REVIEW_PROXY = 32.315486
@@ -288,8 +290,10 @@ SWEBenchPro = 100.000000
 SWEBenchVerified = 87.111214
 SWEComposite = 93.336234
 SWERebench = 91.571580
+SonarBugDensity = 59.518186
 SonarFunctionalSkill = 92.179803
 SonarIssueDensity = 46.815515
+SonarVulnerabilityDensity = 66.552021
 TTFT = 74.092566
 Tau2Bench = 86.621641
 TerminalBench = 64.224591
@@ -309,18 +313,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 88.535151
 p_raw = 76.089820
-b_raw = 81.366934
-r = 87.104442
+b_raw = 81.175558
+r = 87.020506
 i_adj = 88.535151
 p_adj = 76.089820
-b_adj = 81.366934
+b_adj = 81.175558
 
 [models.groups]
 A_B = 76.285512
 A_I = 78.162880
 A_P = 55.765441
 A_R = 93.723929
-BUILD = 84.749015
+BUILD = 84.413268
 CRE = 94.244905
 GEN = 95.552110
 LM_ARENA_REVIEW_PROXY = 100.000000
@@ -365,8 +369,10 @@ SWEBenchPro = 95.000000
 SWEBenchVerified = 100.000000
 SWEComposite = 93.167503
 SWERebench = 85.335843
+SonarBugDensity = 50.070855
 SonarFunctionalSkill = 93.903941
 SonarIssueDensity = 0.000000
+SonarVulnerabilityDensity = 25.279450
 TTFT = 72.084800
 Tau2Bench = 76.562725
 TerminalBench = 78.205224
@@ -386,18 +392,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter",
 [models.scores]
 i_raw = 36.167068
 p_raw = 49.466537
-b_raw = 57.684324
-r = 63.980663
+b_raw = 57.146644
+r = 63.744839
 i_adj = 36.167068
 p_adj = 49.466537
-b_adj = 57.684324
+b_adj = 57.146644
 
 [models.groups]
 A_B = 78.106293
 A_I = 85.583392
 A_P = 65.728304
 A_R = 84.891658
-BUILD = 47.409808
+BUILD = 46.466509
 CRE = 0.000000
 GEN = 30.032247
 LM_ARENA_REVIEW_PROXY = 84.579109
@@ -437,8 +443,10 @@ SWEBenchPro = 78.366140
 SWEBenchVerified = 54.171490
 SWEComposite = 63.881714
 SWERebench = 55.075069
+SonarBugDensity = 0.000000
 SonarFunctionalSkill = 26.416256
 SonarIssueDensity = 35.842756
+SonarVulnerabilityDensity = 0.000000
 TerminalBench = 47.415929
 
 [models.missing]
@@ -456,18 +464,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "mcp_atlas", 
 [models.scores]
 i_raw = 67.237485
 p_raw = 57.549454
-b_raw = 62.251359
-r = 56.839478
+b_raw = 61.372131
+r = 56.453851
 i_adj = 67.237485
 p_adj = 57.549454
-b_adj = 62.251359
+b_adj = 61.372131
 
 [models.groups]
 A_B = 83.343441
 A_I = 87.917216
 A_P = 83.732702
 A_R = 93.319422
-BUILD = 53.000151
+BUILD = 51.457644
 CRE = 63.396028
 GEN = 46.400553
 LM_ARENA_REVIEW_PROXY = 0.295155
@@ -509,8 +517,10 @@ SWEBenchPro = 81.196151
 SWEBenchVerified = 71.675542
 SWEComposite = 69.200450
 SWERebench = 74.905357
+SonarBugDensity = 2.834199
 SonarFunctionalSkill = 17.179803
 SonarIssueDensity = 30.022423
+SonarVulnerabilityDensity = 4.643164
 TerminalBench = 37.351749
 
 [models.missing]
@@ -528,18 +538,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_at
 [models.scores]
 i_raw = 73.919547
 p_raw = 58.878909
-b_raw = 74.998278
-r = 66.313216
+b_raw = 74.805776
+r = 66.228785
 i_adj = 73.919547
 p_adj = 58.878909
-b_adj = 74.998278
+b_adj = 74.805776
 
 [models.groups]
 A_B = 83.896264
 A_I = 84.573577
 A_P = 66.485224
 A_R = 93.749123
-BUILD = 75.202756
+BUILD = 74.865034
 CRE = 72.442392
 GEN = 62.818923
 LM_ARENA_REVIEW_PROXY = 22.435126
@@ -584,8 +594,10 @@ SWEBenchPro = 76.516729
 SWEBenchVerified = 79.445281
 SWEComposite = 83.739536
 SWERebench = 95.744691
+SonarBugDensity = 65.816407
 SonarFunctionalSkill = 84.544335
 SonarIssueDensity = 22.293784
+SonarVulnerabilityDensity = 21.840069
 TTFT = 0.000000
 Tau2Bench = 39.488432
 TerminalBench = 47.415929
@@ -664,18 +676,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter",
 [models.scores]
 i_raw = 58.469049
 p_raw = 47.824011
-b_raw = 47.325008
-r = 56.852604
+b_raw = 47.356164
+r = 56.866269
 i_adj = 58.469049
 p_adj = 47.824011
-b_adj = 47.325008
+b_adj = 47.356164
 
 [models.groups]
 A_B = 90.470551
 A_I = 86.285587
 A_P = 68.569185
 A_R = 95.264962
-BUILD = 23.627016
+BUILD = 23.681676
 CRE = 45.876138
 GEN = 41.589227
 LM_ARENA_REVIEW_PROXY = 77.793164
@@ -732,18 +744,18 @@ sources = ["arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swe
 [models.scores]
 i_raw = 19.473032
 p_raw = 37.457204
-b_raw = 33.056141
-r = 29.980660
+b_raw = 33.398637
+r = 30.130877
 i_adj = 19.473032
 p_adj = 37.457204
-b_adj = 33.056141
+b_adj = 33.398637
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 35.702505
+BUILD = 36.303375
 CRE = 0.000000
 GEN = 30.551546
 LM_ARENA_REVIEW_PROXY = 0.499623
@@ -783,8 +795,10 @@ SWEBenchPro = 75.714892
 SWEBenchVerified = 19.194258
 SWEComposite = 35.373060
 SWERebench = 1.789925
+SonarBugDensity = 52.736971
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
+SonarVulnerabilityDensity = 58.222270
 TerminalBench = 1.771506
 
 [models.missing]
@@ -802,18 +816,18 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 64.295533
 p_raw = 53.985292
-b_raw = 47.569763
-r = 44.639428
+b_raw = 47.823405
+r = 44.750675
 i_adj = 64.295533
 p_adj = 53.985292
-b_adj = 47.569763
+b_adj = 47.823405
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 55.207138
+BUILD = 55.652124
 CRE = 85.664254
 GEN = 57.895710
 LM_ARENA_REVIEW_PROXY = 21.173350
@@ -859,8 +873,10 @@ SWEBenchPro = 52.990378
 SWEBenchVerified = 87.728641
 SWEComposite = 73.380022
 SWERebench = 76.337430
+SonarBugDensity = 52.736971
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
+SonarVulnerabilityDensity = 58.222270
 TTFT = 81.249799
 Tau2Bench = 52.996120
 TerminalBench = 48.311064
@@ -880,18 +896,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 63.174648
 p_raw = 50.561378
-b_raw = 46.751672
-r = 42.006324
+b_raw = 47.035359
+r = 42.130747
 i_adj = 63.174648
 p_adj = 50.561378
-b_adj = 46.751672
+b_adj = 47.035359
 
 [models.groups]
 A_B = 14.712420
 A_I = 25.796077
 A_P = 38.064568
 A_R = 20.182163
-BUILD = 62.885763
+BUILD = 63.383458
 CRE = 94.081852
 GEN = 59.801052
 LM_ARENA_REVIEW_PROXY = 19.719012
@@ -932,8 +948,10 @@ SWEBenchPro = 80.252814
 SWEBenchVerified = 68.588408
 SWEComposite = 69.759032
 SWERebench = 70.585395
+SonarBugDensity = 53.219965
 SonarFunctionalSkill = 84.051724
 SonarIssueDensity = 6.741091
+SonarVulnerabilityDensity = 59.673259
 TerminalBench = 61.222039
 
 [models.missing]
@@ -951,18 +969,18 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 77.884482
 p_raw = 77.876094
-b_raw = 61.834197
-r = 67.499477
+b_raw = 62.018013
+r = 67.580098
 i_adj = 77.884482
 p_adj = 77.876094
-b_adj = 61.834197
+b_adj = 62.018013
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 78.060709
+BUILD = 78.383193
 CRE = 100.000000
 GEN = 99.900065
 LM_ARENA_REVIEW_PROXY = 91.125950
@@ -1007,8 +1025,10 @@ SWEBenchPro = 89.057292
 SWEBenchVerified = 80.936945
 SWEComposite = 90.390196
 SWERebench = 99.822959
+SonarBugDensity = 52.736971
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
+SonarVulnerabilityDensity = 58.222270
 TTFT = 69.532288
 Tau2Bench = 96.680558
 TerminalBench = 89.446029
@@ -1094,18 +1114,18 @@ sources = ["aistupidlevel", "livecodebench", "lmarena", "openrouter", "overrides
 [models.scores]
 i_raw = 71.495235
 p_raw = 57.304862
-b_raw = 71.053754
-r = 76.605833
+b_raw = 71.485828
+r = 76.795339
 i_adj = 71.495235
 p_adj = 57.304862
-b_adj = 71.053754
+b_adj = 71.485828
 
 [models.groups]
 A_B = 79.701597
 A_I = 81.516175
 A_P = 57.593056
 A_R = 93.723929
-BUILD = 68.967305
+BUILD = 69.725329
 CRE = 76.150001
 GEN = 50.828879
 LM_ARENA_REVIEW_PROXY = 93.335483
@@ -1144,8 +1164,10 @@ MCPAtlas = 92.500000
 SWEBenchVerified = 73.527823
 SWEComposite = 62.806577
 SWERebench = 73.082071
+SonarBugDensity = 92.500000
 SonarFunctionalSkill = 66.801108
 SonarIssueDensity = 92.500000
+SonarVulnerabilityDensity = 81.610060
 TerminalBench = 74.557124
 
 [models.missing]
@@ -1163,18 +1185,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_at
 [models.scores]
 i_raw = 66.719097
 p_raw = 54.587902
-b_raw = 59.119694
-r = 60.522841
+b_raw = 59.298881
+r = 60.601432
 i_adj = 66.719097
 p_adj = 54.587902
-b_adj = 59.119694
+b_adj = 59.298881
 
 [models.groups]
 A_B = 75.843897
 A_I = 80.533545
 A_P = 61.853293
 A_R = 90.978300
-BUILD = 50.777111
+BUILD = 51.091475
 CRE = 67.425000
 GEN = 46.856250
 LM_ARENA_REVIEW_PROXY = 21.444740
@@ -1212,8 +1234,10 @@ SWEBenchMultilingual = 0.000000
 SWEBenchPro = 38.242878
 SWEBenchVerified = 66.736127
 SWEComposite = 44.012405
+SonarBugDensity = 64.241852
 SonarFunctionalSkill = 67.179803
 SonarIssueDensity = 35.747340
+SonarVulnerabilityDensity = 73.430782
 TerminalBench = 58.219487
 
 [models.missing]
@@ -1231,18 +1255,18 @@ sources = ["aistupidlevel", "artificial_analysis", "livecodebench", "lmarena", "
 [models.scores]
 i_raw = 71.189652
 p_raw = 57.374158
-b_raw = 65.370105
-r = 70.464619
+b_raw = 64.955209
+r = 70.282647
 i_adj = 71.189652
 p_adj = 57.374158
-b_adj = 65.370105
+b_adj = 64.955209
 
 [models.groups]
 A_B = 72.079652
 A_I = 81.886608
 A_P = 57.128884
 A_R = 80.877604
-BUILD = 63.317358
+BUILD = 62.589470
 CRE = 73.010747
 GEN = 55.752687
 LM_ARENA_REVIEW_PROXY = 92.500000
@@ -1296,18 +1320,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 73.099059
 p_raw = 55.154884
-b_raw = 75.984288
-r = 65.798346
+b_raw = 76.898103
+r = 66.199142
 i_adj = 73.099059
 p_adj = 55.154884
-b_adj = 75.984288
+b_adj = 76.898103
 
 [models.groups]
 A_B = 71.717800
 A_I = 83.315037
 A_P = 64.778496
 A_R = 80.877604
-BUILD = 78.287268
+BUILD = 79.890451
 CRE = 77.071467
 GEN = 39.385709
 LM_ARENA_REVIEW_PROXY = 18.484861
@@ -1352,8 +1376,10 @@ SWEBenchPro = 92.500000
 SWEBenchVerified = 89.272208
 SWEComposite = 88.619669
 SWERebench = 83.548834
+SonarBugDensity = 84.711069
 SonarFunctionalSkill = 66.810345
 SonarIssueDensity = 6.836506
+SonarVulnerabilityDensity = 100.000000
 TTFT = 91.229771
 Tau2Bench = 0.000000
 TerminalBench = 99.954962
@@ -1373,18 +1399,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 80.426621
 p_raw = 82.952722
-b_raw = 83.355790
-r = 87.187894
-i_adj = 80.419944
-p_adj = 82.937700
-b_adj = 83.329086
+b_raw = 84.172590
+r = 87.546139
+i_adj = 80.384570
+p_adj = 82.858108
+b_adj = 84.004387
 
 [models.groups]
 A_B = 75.576582
 A_I = 83.736759
 A_P = 65.638600
 A_R = 83.334367
-BUILD = 86.870284
+BUILD = 88.303266
 CRE = 73.010747
 GEN = 90.642227
 LM_ARENA_REVIEW_PROXY = 92.500000
@@ -1427,8 +1453,10 @@ SWEBenchPro = 95.000000
 SWEBenchVerified = 97.298757
 SWEComposite = 91.821489
 SWERebench = 83.548834
+SonarBugDensity = 94.473311
 SonarFunctionalSkill = 46.453202
 SonarIssueDensity = 52.654931
+SonarVulnerabilityDensity = 99.226139
 TTFT = 85.591123
 Tau2Bench = 85.759448
 TerminalBench = 100.000000
@@ -1573,18 +1601,18 @@ sources = ["aistupidlevel", "lmarena", "openrouter", "swebench", "swebench_pro",
 [models.scores]
 i_raw = 40.118383
 p_raw = 42.872507
-b_raw = 37.259171
-r = 43.360676
+b_raw = 37.117797
+r = 43.298669
 i_adj = 40.118383
 p_adj = 42.872507
-b_adj = 37.259171
+b_adj = 37.117797
 
 [models.groups]
 A_B = 55.919549
 A_I = 55.000000
 A_P = 46.948830
 A_R = 58.500000
-BUILD = 24.348457
+BUILD = 24.100432
 CRE = 24.774207
 GEN = 43.693552
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -1611,8 +1639,10 @@ SWEBenchPro = 0.000000
 SWEBenchVerified = 64.266420
 SWEComposite = 30.635239
 SWERebench = 38.350366
+SonarBugDensity = 7.500000
 SonarFunctionalSkill = 7.500000
 SonarIssueDensity = 7.500000
+SonarVulnerabilityDensity = 28.987532
 TerminalBench = 13.931842
 
 [models.missing]
@@ -1630,18 +1660,18 @@ sources = ["aistupidlevel", "lmarena", "mcp_atlas", "openrouter", "sonar", "swer
 [models.scores]
 i_raw = 32.319477
 p_raw = 41.687903
-b_raw = 46.828969
-r = 48.486376
+b_raw = 46.952136
+r = 48.540397
 i_adj = 32.319477
 p_adj = 41.687903
-b_adj = 46.828969
+b_adj = 46.952136
 
 [models.groups]
 A_B = 55.919549
 A_I = 51.675192
 A_P = 40.964175
 A_R = 58.500000
-BUILD = 40.772493
+BUILD = 40.988575
 CRE = 10.523205
 GEN = 40.130801
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -1666,8 +1696,10 @@ LMArenaText = 10.523205
 MCPAtlas = 0.000000
 SWEComposite = 56.269457
 SWERebench = 70.898190
+SonarBugDensity = 51.645410
 SonarFunctionalSkill = 0.000000
 SonarIssueDensity = 50.822957
+SonarVulnerabilityDensity = 28.718831
 TerminalBench = 27.143072
 
 [models.missing]
@@ -1685,18 +1717,18 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 78.607924
 p_raw = 65.934954
-b_raw = 73.927593
-r = 79.246334
+b_raw = 74.428542
+r = 79.466049
 i_adj = 78.607924
 p_adj = 65.934954
-b_adj = 73.927593
+b_adj = 74.428542
 
 [models.groups]
 A_B = 75.246358
 A_I = 76.788748
 A_P = 56.454098
 A_R = 87.165339
-BUILD = 71.638644
+BUILD = 72.517501
 CRE = 85.541644
 GEN = 63.762304
 LM_ARENA_REVIEW_PROXY = 86.835160
@@ -1741,8 +1773,10 @@ SWEBenchMultilingual = 50.869565
 SWEBenchVerified = 69.205835
 SWEComposite = 71.561719
 SWERebench = 100.000000
+SonarBugDensity = 100.000000
 SonarFunctionalSkill = 69.766010
 SonarIssueDensity = 100.000000
+SonarVulnerabilityDensity = 87.188306
 TTFT = 100.000000
 Tau2Bench = 100.000000
 TerminalBench = 55.817445

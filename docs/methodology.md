@@ -133,7 +133,7 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.42), LMArenaText (0.25), GPQA_HLE_Reasoning (0.18), ARC_AGI_2 (0.15) |
 | **PLAN** (Planning) | TerminalBench (0.34), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.20), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.06) |
-| **BUILD** (Building) | SWEComposite (0.40), MCPAtlas (0.12), TerminalBench (0.09), LiveCodeBench (0.06), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarFunctionalSkill (0.05), SonarIssueDensity (0.04), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
+| **BUILD** (Building) | SWEComposite (0.40), MCPAtlas (0.12), TerminalBench (0.09), LiveCodeBench (0.05), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarFunctionalSkill (0.04), SonarIssueDensity (0.025), SonarBugDensity (0.02), SonarVulnerabilityDensity (0.015), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), TTFT (0.35), BlendedCost (0.15), ContextWindow (0.15) |
@@ -189,8 +189,9 @@ between those points the score blends smoothly.
 `group_score = 50`.
 
 **Shrunk groups**: A group is marked "shrunk" in the output if
-`present_weight / total_weight < 0.80` — i.e. whenever any shrinkage
-was applied.
+`present_weight / total_weight` is below the top of the configured
+transition band: `trust_threshold + trust_transition_width / 2`. With the
+default coefficients, that cutoff is `0.80`.
 
 ---
 
@@ -265,7 +266,7 @@ For each vendor **v**:
 2. Compute `R_outside_v = max(R across models not from vendor v)` — the best reviewer score excluding vendor v's models.
 3. Define the **reservation gap**: `L_v = max(0, R_all - R_outside_v)`.
 
-If vendor v has the best reviewer (or ties for the best), `L_v = 0` (no penalty). Otherwise, `L_v` measures how much better the best reviewer is compared to the best non-v reviewer.
+If vendor v does not have the unique best reviewer, its per-model penalty share is zero. If vendor v has the unique best reviewer, `L_v` measures how much better that reviewer is than the best non-v reviewer.
 
 ### 6.2 Penalty Coefficients
 
@@ -387,6 +388,8 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | LongContextRecall | higher | no | percentile | Artificial Analysis (lcr field) | BUILD, PLAN |
 | SonarFunctionalSkill | higher | no | percentile | Sonar code-quality JSON | BUILD |
 | SonarIssueDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
+| SonarBugDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
+| SonarVulnerabilityDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
 | OutputSpeed | higher | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | TTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
@@ -396,7 +399,7 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | AI_code | higher | no | percentile | AIStupidLevel (`codeQuality` axis) | A_B, A_R (removed from A_I — code quality ≠ idea quality) |
 | AI_efficiency | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
 | AI_stability | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
-| AI_refusal | higher | no | percentile | AIStupidLevel (`safety` axis) | A_P, A_B, A_R (removed from A_I — safety/refusal rate ≠ idea quality) |
+| AI_refusal | higher | no | percentile | AIStupidLevel (`safety` axis) | none — retained as an ingested metric, excluded from role perspectives |
 | AI_recovery | higher | no | percentile | AIStupidLevel (`debugging` axis) | A_I, A_P, A_B, A_R |
 | AI_complexity | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B |
 | AI_edge_cases | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B, A_R |
