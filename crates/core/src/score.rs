@@ -45,8 +45,12 @@ fn compute_aisl_perspectives(
     for r in records.iter_mut() {
         for (perspective, weights) in &coef.ai_stupid_perspective_weights {
             let prefix = format!("{perspective}/");
-            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
+            let (value, shrunk) =
+                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.groups.insert(perspective.clone(), value);
+            if shrunk {
+                r.missing.groups_shrunk.insert(perspective.clone());
+            }
         }
     }
 }
@@ -65,7 +69,8 @@ fn compute_composite_metrics(
     for r in records.iter_mut() {
         for (name, weights) in &coef.composite_metrics {
             let prefix = format!("{name}/");
-            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
+            let (value, _shrunk) =
+                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.metrics.insert(name.clone(), value);
         }
     }
@@ -138,8 +143,12 @@ fn aggregate_groups(
     for r in records.iter_mut() {
         for (group_key, weights) in &coef.group_weights {
             let prefix = format!("{group_key}/");
-            let v = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
+            let (v, shrunk) =
+                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.groups.insert(group_key.clone(), v);
+            if shrunk {
+                r.missing.groups_shrunk.insert(group_key.clone());
+            }
         }
     }
 }
@@ -157,7 +166,8 @@ fn compute_role_scores(
                 None => continue,
             };
             let prefix = format!("{role}/");
-            let v = missing_safe_avg(&r.groups, weights, &mut r.missing, &prefix, aggregation);
+            let (v, _shrunk) =
+                missing_safe_avg(&r.groups, weights, &mut r.missing, &prefix, aggregation);
             role_values.insert(role, v);
         }
         r.scores.i_raw = *role_values.get("I_raw").unwrap_or(&50.0);

@@ -1,5 +1,6 @@
 use ipbr_core::MissingInfo;
 use ipbr_core::aggregate::missing_safe_avg;
+use ipbr_core::coefficients::AggregationConfig;
 use proptest::prelude::*;
 use std::collections::BTreeMap;
 
@@ -37,13 +38,14 @@ proptest! {
         let w_map = build_weights(weights);
         let m_map = build_metrics(&metric_values);
         let mut missing = MissingInfo::new();
-        let before = missing_safe_avg(&m_map, &w_map, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let (before, _) = missing_safe_avg(&m_map, &w_map, &mut missing, "", &cfg);
 
         scores[i] = (scores[i] - delta).max(0.0);
         let metric_values_after: Vec<Option<f64>> = scores.iter().map(|v| Some(*v)).collect();
         let m_map_after = build_metrics(&metric_values_after);
         let mut missing_after = MissingInfo::new();
-        let after = missing_safe_avg(&m_map_after, &w_map, &mut missing_after, "");
+        let (after, _) = missing_safe_avg(&m_map_after, &w_map, &mut missing_after, "", &cfg);
         prop_assert!(
             after <= before + 1e-9,
             "decreasing a metric raised group score: before={before}, after={after}"
@@ -86,8 +88,9 @@ proptest! {
 
         let mut missing1 = MissingInfo::new();
         let mut missing2 = MissingInfo::new();
-        let v1 = missing_safe_avg(&m1, &w1, &mut missing1, "");
-        let v2 = missing_safe_avg(&m2, &w2, &mut missing2, "");
+        let cfg = AggregationConfig::default();
+        let (v1, _) = missing_safe_avg(&m1, &w1, &mut missing1, "", &cfg);
+        let (v2, _) = missing_safe_avg(&m2, &w2, &mut missing2, "", &cfg);
         prop_assert!((v1 - v2).abs() < 1e-9);
     }
 
@@ -98,7 +101,8 @@ proptest! {
         let w_map = build_weights(&weights);
         let m_map: BTreeMap<String, f64> = BTreeMap::new();
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&m_map, &w_map, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let (v, _) = missing_safe_avg(&m_map, &w_map, &mut missing, "", &cfg);
         prop_assert!((v - 50.0).abs() < 1e-9);
     }
 }

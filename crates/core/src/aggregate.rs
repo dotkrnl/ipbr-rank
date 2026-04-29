@@ -5,16 +5,18 @@ use std::collections::BTreeMap;
 const EPS: f64 = 1e-12;
 pub const SHRINK_TARGET: f64 = 50.0;
 
+/// Returns the missing-safe weighted average and whether the group was
+/// shrunk (present weight < 0.80 of total weight).
 pub fn missing_safe_avg(
     metrics: &BTreeMap<String, f64>,
     weights: &BTreeMap<String, f64>,
     missing_info: &mut MissingInfo,
     prefix: &str,
     cfg: &AggregationConfig,
-) -> f64 {
+) -> (f64, bool) {
     let total_weight: f64 = weights.values().copied().filter(|w| w.is_finite()).sum();
     if total_weight.abs() < EPS {
-        return SHRINK_TARGET;
+        return (SHRINK_TARGET, true);
     }
 
     let mut present_weight = 0.0;
@@ -35,7 +37,7 @@ pub fn missing_safe_avg(
     }
 
     if present_weight.abs() < EPS {
-        return SHRINK_TARGET;
+        return (SHRINK_TARGET, true);
     }
 
     let present_mean = weighted_sum / present_weight;
@@ -52,7 +54,8 @@ pub fn missing_safe_avg(
     let smooth_t = t * t * (3.0 - 2.0 * t);
     let value = shrink_value * (1.0 - smooth_t) + present_mean * smooth_t;
 
-    value.clamp(0.0, 100.0)
+    let shrunk = w_present < 0.80;
+    (value.clamp(0.0, 100.0), shrunk)
 }
 
 #[cfg(test)]
@@ -69,8 +72,9 @@ mod tests {
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 50.0).abs() < 1e-9);
+        assert!(shrunk, "all missing should be marked shrunk");
         assert_eq!(missing.metrics.len(), 2);
     }
 
@@ -82,8 +86,9 @@ mod tests {
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 70.0).abs() < 1e-9);
+        assert!(!shrunk, "full coverage should not be shrunk");
         assert!(missing.metrics.is_empty());
     }
 
@@ -95,8 +100,9 @@ mod tests {
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "g/", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "g/", &cfg);
         assert!((v - 75.0).abs() < 1e-9, "expected 75, got {v}");
+        assert!(shrunk, "50 % coverage should be shrunk");
         assert!(missing.metrics.contains("g/b"));
     }
 
@@ -112,9 +118,10 @@ mod tests {
         let w = weights(&[("a", 0.4), ("b", 0.4), ("c", 0.2)]);
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         // Present weighted mean: (0.4*80 + 0.4*100) / 0.8 = 90.
         assert!((v - 90.0).abs() < 1e-9, "expected 90, got {v}");
+        assert!(!shrunk, "80 % coverage should not be shrunk");
         assert!(missing.metrics.contains("c"));
     }
 
@@ -127,8 +134,9 @@ mod tests {
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 55.0).abs() < 1e-9);
+        assert!(shrunk, "NaN metric should count as missing");
         assert!(missing.metrics.contains("a"));
     }
 
@@ -138,7 +146,8 @@ mod tests {
         let w: BTreeMap<String, f64> = BTreeMap::new();
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
+        let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 50.0).abs() < 1e-9);
+        assert!(shrunk, "empty weights should be marked shrunk");
     }
 }

@@ -172,8 +172,15 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
     metrics.sort();
     metrics.dedup();
 
-    let mut groups_shrunk = Vec::new();
-    for (group, weights) in &coefficients.group_weights {
+    // Start with whatever core already recorded (now includes A_* perspectives).
+    let mut groups_shrunk: Vec<String> = model.missing.groups_shrunk.iter().cloned().collect();
+
+    // Defensive re-computation for both regular groups and AISL perspectives.
+    for (group, weights) in coefficients
+        .group_weights
+        .iter()
+        .chain(coefficients.ai_stupid_perspective_weights.iter())
+    {
         let total_weight: f64 = weights.values().sum();
         if total_weight <= 0.0 {
             continue;
@@ -194,6 +201,7 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
         }
     }
     groups_shrunk.sort();
+    groups_shrunk.dedup();
 
     ClassifiedMissing {
         metrics,

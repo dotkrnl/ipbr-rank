@@ -92,11 +92,11 @@ sources = ["aistupidlevel", "lmarena", "openrouter", "swerebench", "terminal_ben
 [models.scores]
 i_raw = 61.923343
 p_raw = 52.272530
-b_raw = 55.559366
-r = 50.390791
+b_raw = 55.392010
+r = 50.362898
 i_adj = 61.923343
 p_adj = 52.272530
-b_adj = 55.559366
+b_adj = 55.392010
 
 [models.groups]
 A_B = 72.865771
@@ -155,18 +155,18 @@ sources = ["aistupidlevel", "artificial_analysis", "lmarena", "mcp_atlas", "open
 [models.scores]
 i_raw = 76.304494
 p_raw = 68.283522
-b_raw = 76.193876
-r = 65.173570
+b_raw = 75.795927
+r = 65.128487
 i_adj = 76.304494
 p_adj = 68.283522
-b_adj = 76.193876
+b_adj = 75.795927
 
 [models.groups]
 A_B = 75.174611
 A_I = 85.758273
 A_P = 75.832168
 A_R = 77.473739
-BUILD = 77.219203
+BUILD = 77.356241
 CRE = 73.511245
 GEN = 67.004893
 LM_ARENA_REVIEW_PROXY = 10.014484
@@ -199,7 +199,7 @@ ArtificialAnalysisReasoning = 57.243319
 BlendedCost = 61.865137
 ContextWindow = 74.671663
 CopilotArenaOrLMArenaCode = 77.402045
-GDPval = 69.359457
+GDPval = 71.510508
 GPQA_HLE_Reasoning = 57.243319
 LMArenaCreativeOrOpenEnded = 73.511245
 LMArenaSearchDocument = 10.014484
@@ -231,11 +231,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 90.449900
 p_raw = 73.982861
-b_raw = 82.605048
-r = 77.552919
+b_raw = 82.295435
+r = 77.501317
 i_adj = 90.449900
 p_adj = 73.982861
-b_adj = 82.605048
+b_adj = 82.295435
 
 [models.groups]
 A_B = 82.633887
@@ -309,11 +309,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 88.535151
 p_raw = 76.089820
-b_raw = 81.537734
-r = 87.132909
+b_raw = 81.366934
+r = 87.104442
 i_adj = 88.535151
 p_adj = 76.089820
-b_adj = 81.537734
+b_adj = 81.366934
 
 [models.groups]
 A_B = 76.285512
@@ -386,18 +386,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter",
 [models.scores]
 i_raw = 36.167068
 p_raw = 49.466537
-b_raw = 57.592932
-r = 63.937947
+b_raw = 57.684324
+r = 63.980663
 i_adj = 36.167068
 p_adj = 49.466537
-b_adj = 57.592932
+b_adj = 57.684324
 
 [models.groups]
 A_B = 78.106293
 A_I = 85.583392
 A_P = 65.728304
 A_R = 84.891658
-BUILD = 47.232487
+BUILD = 47.409808
 CRE = 0.000000
 GEN = 30.032247
 LM_ARENA_REVIEW_PROXY = 84.579109
@@ -427,7 +427,7 @@ ARC_AGI_2 = 0.214979
 BlendedCost = 74.358249
 ContextWindow = 99.254763
 CopilotArenaOrLMArenaCode = 53.492322
-GDPval = 77.130035
+GDPval = 80.144483
 LMArenaCreativeOrOpenEnded = 0.000000
 LMArenaSearchDocument = 84.579109
 LMArenaText = 0.000000
@@ -456,11 +456,11 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "mcp_atlas", 
 [models.scores]
 i_raw = 67.237485
 p_raw = 57.549454
-b_raw = 62.548433
-r = 56.888990
+b_raw = 62.251359
+r = 56.839478
 i_adj = 67.237485
 p_adj = 57.549454
-b_adj = 62.548433
+b_adj = 62.251359
 
 [models.groups]
 A_B = 83.343441
@@ -528,18 +528,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_at
 [models.scores]
 i_raw = 73.919547
 p_raw = 58.878909
-b_raw = 75.629055
-r = 66.392387
+b_raw = 74.998278
+r = 66.313216
 i_adj = 73.919547
 p_adj = 58.878909
-b_adj = 75.629055
+b_adj = 74.998278
 
 [models.groups]
 A_B = 83.896264
 A_I = 84.573577
 A_P = 66.485224
 A_R = 93.749123
-BUILD = 75.035287
+BUILD = 75.202756
 CRE = 72.442392
 GEN = 62.818923
 LM_ARENA_REVIEW_PROXY = 22.435126
@@ -572,7 +572,7 @@ ArtificialAnalysisReasoning = 62.266426
 BlendedCost = 74.358249
 ContextWindow = 99.254763
 CopilotArenaOrLMArenaCode = 94.211219
-GDPval = 77.130035
+GDPval = 80.144483
 GPQA_HLE_Reasoning = 62.266426
 LMArenaCreativeOrOpenEnded = 72.442392
 LMArenaSearchDocument = 22.435126
@@ -664,18 +664,18 @@ sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter",
 [models.scores]
 i_raw = 58.469049
 p_raw = 47.824011
-b_raw = 47.235929
-r = 56.877202
+b_raw = 47.325008
+r = 56.852604
 i_adj = 58.469049
 p_adj = 47.824011
-b_adj = 47.235929
+b_adj = 47.325008
 
 [models.groups]
 A_B = 90.470551
 A_I = 86.285587
 A_P = 68.569185
 A_R = 95.264962
-BUILD = 23.881499
+BUILD = 23.627016
 CRE = 45.876138
 GEN = 41.589227
 LM_ARENA_REVIEW_PROXY = 77.793164
@@ -705,7 +705,7 @@ ARC_AGI_2 = 0.801284
 BlendedCost = 94.366183
 ContextWindow = 99.979271
 CopilotArenaOrLMArenaCode = 65.848709
-GDPval = 14.295534
+GDPval = 10.328371
 LMArenaCreativeOrOpenEnded = 45.876138
 LMArenaSearchDocument = 77.793164
 LMArenaText = 45.876138
@@ -732,18 +732,18 @@ sources = ["arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swe
 [models.scores]
 i_raw = 19.473032
 p_raw = 37.457204
-b_raw = 33.231078
-r = 30.048566
+b_raw = 33.056141
+r = 29.980660
 i_adj = 19.473032
 p_adj = 37.457204
-b_adj = 33.231078
+b_adj = 33.056141
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 35.952505
+BUILD = 35.702505
 CRE = 0.000000
 GEN = 30.551546
 LM_ARENA_REVIEW_PROXY = 0.499623
@@ -773,7 +773,7 @@ ARC_AGI_2 = 3.676974
 BlendedCost = 80.060978
 ContextWindow = 99.979271
 CopilotArenaOrLMArenaCode = 1.812166
-GDPval = 11.750000
+GDPval = 7.500000
 LMArenaCreativeOrOpenEnded = 0.000000
 LMArenaSearchDocument = 0.499623
 LMArenaText = 0.000000
@@ -802,11 +802,11 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 64.295533
 p_raw = 53.985292
-b_raw = 47.589583
-r = 44.642732
+b_raw = 47.569763
+r = 44.639428
 i_adj = 64.295533
 p_adj = 53.985292
-b_adj = 47.589583
+b_adj = 47.569763
 
 [models.groups]
 A_B = 20.005557
@@ -880,11 +880,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 63.174648
 p_raw = 50.561378
-b_raw = 46.978994
-r = 42.044210
+b_raw = 46.751672
+r = 42.006324
 i_adj = 63.174648
 p_adj = 50.561378
-b_adj = 46.978994
+b_adj = 46.751672
 
 [models.groups]
 A_B = 14.712420
@@ -951,11 +951,11 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 77.884482
 p_raw = 77.876094
-b_raw = 61.400392
-r = 67.427176
+b_raw = 61.834197
+r = 67.499477
 i_adj = 77.884482
 p_adj = 77.876094
-b_adj = 61.400392
+b_adj = 61.834197
 
 [models.groups]
 A_B = 20.005557
@@ -1028,11 +1028,11 @@ sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter"]
 [models.scores]
 i_raw = 27.080105
 p_raw = 31.380279
-b_raw = 49.196862
-r = 44.038501
+b_raw = 48.869132
+r = 43.983879
 i_adj = 27.080105
 p_adj = 31.380279
-b_adj = 49.196862
+b_adj = 48.869132
 
 [models.groups]
 A_B = 52.156528
@@ -1094,11 +1094,11 @@ sources = ["aistupidlevel", "livecodebench", "lmarena", "openrouter", "overrides
 [models.scores]
 i_raw = 71.495235
 p_raw = 57.304862
-b_raw = 71.295790
-r = 76.646172
+b_raw = 71.053754
+r = 76.605833
 i_adj = 71.495235
 p_adj = 57.304862
-b_adj = 71.295790
+b_adj = 71.053754
 
 [models.groups]
 A_B = 79.701597
@@ -1163,11 +1163,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_at
 [models.scores]
 i_raw = 66.719097
 p_raw = 54.587902
-b_raw = 59.059168
-r = 60.512753
+b_raw = 59.119694
+r = 60.522841
 i_adj = 66.719097
 p_adj = 54.587902
-b_adj = 59.059168
+b_adj = 59.119694
 
 [models.groups]
 A_B = 75.843897
@@ -1231,11 +1231,11 @@ sources = ["aistupidlevel", "artificial_analysis", "livecodebench", "lmarena", "
 [models.scores]
 i_raw = 71.189652
 p_raw = 57.374158
-b_raw = 65.521938
-r = 70.489924
+b_raw = 65.370105
+r = 70.464619
 i_adj = 71.189652
 p_adj = 57.374158
-b_adj = 65.521938
+b_adj = 65.370105
 
 [models.groups]
 A_B = 72.079652
@@ -1296,11 +1296,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 73.099059
 p_raw = 55.154884
-b_raw = 76.830122
-r = 65.939318
+b_raw = 75.984288
+r = 65.798346
 i_adj = 73.099059
 p_adj = 55.154884
-b_adj = 76.830122
+b_adj = 75.984288
 
 [models.groups]
 A_B = 71.717800
@@ -1373,11 +1373,11 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 80.426621
 p_raw = 82.952722
-b_raw = 83.202477
-r = 87.162342
-i_adj = 80.424266
-p_adj = 82.947424
-b_adj = 83.193059
+b_raw = 83.355790
+r = 87.187894
+i_adj = 80.419944
+p_adj = 82.937700
+b_adj = 83.329086
 
 [models.groups]
 A_B = 75.576582
@@ -1448,11 +1448,11 @@ sources = ["aistupidlevel", "arc_agi", "lmarena", "openrouter", "swerebench", "t
 [models.scores]
 i_raw = 63.026911
 p_raw = 44.202667
-b_raw = 45.256087
-r = 46.411317
+b_raw = 44.998144
+r = 46.368327
 i_adj = 63.026911
 p_adj = 44.202667
-b_adj = 45.256087
+b_adj = 44.998144
 
 [models.groups]
 A_B = 41.699509
@@ -1511,11 +1511,11 @@ sources = ["aistupidlevel", "lmarena", "openrouter", "swerebench", "terminal_ben
 [models.scores]
 i_raw = 63.456139
 p_raw = 49.240735
-b_raw = 59.406958
-r = 59.518838
+b_raw = 59.171368
+r = 59.479573
 i_adj = 63.456139
 p_adj = 49.240735
-b_adj = 59.406958
+b_adj = 59.171368
 
 [models.groups]
 A_B = 97.674221
@@ -1573,11 +1573,11 @@ sources = ["aistupidlevel", "lmarena", "openrouter", "swebench", "swebench_pro",
 [models.scores]
 i_raw = 40.118383
 p_raw = 42.872507
-b_raw = 36.934020
-r = 43.306484
+b_raw = 37.259171
+r = 43.360676
 i_adj = 40.118383
 p_adj = 42.872507
-b_adj = 36.934020
+b_adj = 37.259171
 
 [models.groups]
 A_B = 55.919549
@@ -1617,7 +1617,7 @@ TerminalBench = 13.931842
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["A_B", "A_I", "A_P", "A_R", "BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "z-ai/glm-4.7"
@@ -1630,11 +1630,11 @@ sources = ["aistupidlevel", "lmarena", "mcp_atlas", "openrouter", "sonar", "swer
 [models.scores]
 i_raw = 32.319477
 p_raw = 41.687903
-b_raw = 46.875285
-r = 48.494095
+b_raw = 46.828969
+r = 48.486376
 i_adj = 32.319477
 p_adj = 41.687903
-b_adj = 46.875285
+b_adj = 46.828969
 
 [models.groups]
 A_B = 55.919549
@@ -1672,7 +1672,7 @@ TerminalBench = 27.143072
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["A_B", "A_I", "A_P", "A_R", "BUILD", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "z-ai/glm-5.1"
@@ -1685,11 +1685,11 @@ sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_at
 [models.scores]
 i_raw = 78.607924
 p_raw = 65.934954
-b_raw = 73.963769
-r = 79.252364
+b_raw = 73.927593
+r = 79.246334
 i_adj = 78.607924
 p_adj = 65.934954
-b_adj = 73.963769
+b_adj = 73.927593
 
 [models.groups]
 A_B = 75.246358
