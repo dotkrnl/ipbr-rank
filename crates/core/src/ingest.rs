@@ -165,7 +165,6 @@ fn ingest_synthesized_row(
                 .synthesized_from
                 .clone()
                 .expect("synthesized rows must carry synthesized_from");
-            let is_override = row.source_id == "overrides";
             let preference = EffortPreference::from_row(&row);
             for (key, value) in row.fields {
                 if NON_SYNTHESIZED_METRICS.contains(&key.as_str()) {
@@ -179,9 +178,6 @@ fn ingest_synthesized_row(
                 }
                 if let Some(num) = json_to_f64(&value) {
                     record.raw_metrics.insert(key.clone(), num);
-                    if is_override {
-                        record.override_reported.insert(key.clone());
-                    }
                     record.synthesized.insert(
                         key,
                         crate::model::SynthesisProvenance {
@@ -291,6 +287,38 @@ mod tests {
         assert!(!records[0].synthesized.contains_key("AI_canary_health"));
         assert_eq!(records[0].raw_metrics.get("AI_correctness"), Some(&80.0));
         assert!(records[0].synthesized.contains_key("AI_correctness"));
+    }
+
+    #[test]
+    fn synthesized_rows_never_carry_override_flag() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "openai/gpt-5.5".to_string(),
+                "gpt-5.5".to_string(),
+                Vendor::Openai,
+            );
+            r.aliases.insert("gpt-5.5".to_string());
+            r
+        }];
+        let mut row = raw(
+            "overrides",
+            "gpt-5.5",
+            &[("TerminalBench", json!(80.0))],
+        );
+        row.synthesized_from = Some("openai/gpt-5.4".to_string());
+
+        let stats = ingest_rows(&mut records, vec![row]);
+
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&80.0));
+        assert!(
+            records[0].synthesized.contains_key("TerminalBench"),
+            "synthesized flag should be set"
+        );
+        assert!(
+            !records[0].override_reported.contains("TerminalBench"),
+            "synthesized rows must not be marked override_reported"
+        );
     }
 
     #[test]
