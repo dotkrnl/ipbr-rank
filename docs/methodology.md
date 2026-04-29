@@ -224,19 +224,19 @@ leaderboard mix.
 
 **B_raw** (Building):
 ```
-B_raw = 0.60×BUILD + 0.02×PLAN + 0.30×A_B + 0.08×OPS_precision
+B_raw = 0.57×BUILD + 0.05×PLAN + 0.30×A_B + 0.08×OPS_precision
 ```
 
 **R** (Reviewing):
 ```
-R = 0.12×LM_ARENA_REVIEW_PROXY + 0.255×BUILD + 0.245×PLAN + 0.30×A_R + 0.08×OPS_review
+R = 0.12×LM_ARENA_REVIEW_PROXY + 0.25×BUILD + 0.25×PLAN + 0.30×A_R + 0.08×OPS_review
 ```
 
 A_R remains the largest single review-specific behavioral signal.
 LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.12:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.255 keeps reviewing tied to "you can read the
-code." PLAN 0.245 captures review-as-planning.
+code-review benchmark. BUILD 0.25 keeps reviewing tied to "you can read the
+code." PLAN 0.25 captures review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -434,8 +434,8 @@ tail-penalty curve so only genuinely slow models lose meaningful score).
 |------|---------------------|
 | I_raw | CRE 0.43, GEN 0.19, A_I 0.30, OPS_long 0.08 |
 | P_raw | PLAN 0.37, GEN 0.25, A_P 0.30, OPS_precision 0.08 |
-| B_raw | BUILD 0.60, PLAN 0.02, A_B 0.30, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.12, BUILD 0.255, PLAN 0.245, A_R 0.30, OPS_review 0.08 |
+| B_raw | BUILD 0.57, PLAN 0.05, A_B 0.30, OPS_precision 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.12, BUILD 0.25, PLAN 0.25, A_R 0.30, OPS_review 0.08 |
 
 ### Reviewer-Reservation Penalties
 | Role | Coefficient |

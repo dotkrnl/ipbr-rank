@@ -110,8 +110,8 @@ with the tail-penalty curve, this means "fast enough" models cluster
 within a 1-2 point spread but genuinely slow models lose 4-6 points:
 - **I_raw** = 0.43×CRE + 0.19×GEN + 0.30×A_I + 0.08×OPS_long
 - **P_raw** = 0.37×PLAN + 0.25×GEN + 0.30×A_P + 0.08×OPS_precision
-- **B_raw** = 0.60×BUILD + 0.02×PLAN + 0.30×A_B + 0.08×OPS_precision
-- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.255×BUILD + 0.245×PLAN + 0.30×A_R + 0.08×OPS_review
+- **B_raw** = 0.57×BUILD + 0.05×PLAN + 0.30×A_B + 0.08×OPS_precision
+- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.25×BUILD + 0.25×PLAN + 0.30×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
 For each vendor **v**, compute:
