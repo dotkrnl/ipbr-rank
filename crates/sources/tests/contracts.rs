@@ -100,7 +100,7 @@ async fn openrouter_fixture_contract() {
     assert!(context_rows >= 50, "expected many context-window metrics");
     let cost_rows = rows
         .iter()
-        .filter(|row| row.fields.contains_key("InverseCost"))
+        .filter(|row| row.fields.contains_key("BlendedCost"))
         .count();
     assert!(cost_rows >= 50, "expected many cost metrics");
 
@@ -201,8 +201,8 @@ async fn artificial_analysis_fixture_contract() {
         row.fields.contains_key("ArtificialAnalysisIntelligence")
             && row.fields.contains_key("ArtificialAnalysisCoding")
             && row.fields.contains_key("OutputSpeed")
-            && row.fields.contains_key("InverseTTFT")
-            && row.fields.contains_key("InverseCost")
+            && row.fields.contains_key("TTFT")
+            && row.fields.contains_key("BlendedCost")
     }));
     // Reasoning is now blended from gpqa+hle, so it's only emitted when at
     // least one of those is present in the upstream payload. We require
@@ -228,8 +228,8 @@ async fn artificial_analysis_fixture_contract() {
                 .raw_metrics
                 .contains_key("ArtificialAnalysisIntelligence")
             && record.raw_metrics.contains_key("OutputSpeed")
-            && record.raw_metrics.contains_key("InverseTTFT")
-            && record.raw_metrics.contains_key("InverseCost")
+            && record.raw_metrics.contains_key("TTFT")
+            && record.raw_metrics.contains_key("BlendedCost")
     }));
 }
 

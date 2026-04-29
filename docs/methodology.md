@@ -59,7 +59,7 @@ This is the default transform for nearly every metric — passthrough was retire
 
 ### 3.2 Tail-Penalty (`transform = "tail_penalty"`)
 
-Used for operational metrics (OutputSpeed, InverseTTFT, InverseCost, ContextWindow). Linear/percentile normalization scaled every speed difference equally — meaning a 30 % slower model looked 30 % worse, even though users perceive operational speed in tiers. The new curve squeezes the top 80 % of the population into a 70-100 band (mild differentiation) and stretches the bottom 20 % across 0-70 (sharp penalty for extremely slow models). Net effect: fast and "fast enough" models look similar; only models that are genuinely sluggish stand out.
+Used for operational metrics (OutputSpeed, TTFT, BlendedCost, ContextWindow). Linear/percentile normalization scaled every speed difference equally — meaning a 30 % slower model looked 30 % worse, even though users perceive operational speed in tiers. The new curve squeezes the top 80 % of the population into a 70-100 band (mild differentiation) and stretches the bottom 20 % across 0-70 (sharp penalty for extremely slow models). Net effect: fast and "fast enough" models look similar; only models that are genuinely sluggish stand out.
 
 ### 3.3 Canary Health Penalty
 
@@ -68,15 +68,16 @@ capability benchmark. It has `groups = []` in `data/coefficients.toml`
 and is consumed directly after role aggregation:
 
 ```text
-canary_penalty = min(1, max(0, 100 - AI_canary_health) / 75) × 6
+canary_penalty = clamp((60 - AI_canary_health) / 40, 0, 1) × 6
 role_raw = max(0, role_raw - canary_penalty)
 ```
 
-So a healthy canary (`100`) or missing canary data has no effect, a
-moderate warning only subtracts a point or two, and severe canary failure
-caps at a 6-point role penalty. Synthesized canary values are ignored for
-this penalty, because sibling health should not stand in for a model's own
-drift signal.
+A canary deadband of `60` means healthy or mildly degraded canaries
+(`>= 60`) attract no penalty at all; below the deadband the penalty ramps
+linearly to the full 6-point cap once health falls to `20`. Missing
+canary data is also a no-op. Synthesized canary values are ignored for
+this penalty, because sibling health should not stand in for a model's
+own drift signal.
 
 ### 3.4 As-Score Passthrough (`transform = "as_score"`)
 
@@ -134,9 +135,9 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **PLAN** (Planning) | TerminalBench (0.34), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.20), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.06) |
 | **BUILD** (Building) | SWEComposite (0.40), MCPAtlas (0.12), TerminalBench (0.09), LiveCodeBench (0.06), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarFunctionalSkill (0.05), SonarIssueDensity (0.04), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
-| **OPS_long** (Ops for long generation) | OutputSpeed (0.55), InverseTTFT (0.20), InverseCost (0.10), ContextWindow (0.15) |
-| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), InverseTTFT (0.35), InverseCost (0.15), ContextWindow (0.15) |
-| **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), InverseTTFT (0.40), InverseCost (0.20), ContextWindow (0.10) |
+| **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
+| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), TTFT (0.35), BlendedCost (0.15), ContextWindow (0.15) |
+| **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.40), BlendedCost (0.20), ContextWindow (0.10) |
 | **A_I** (AIStupid Idea) | AI_correctness (0.18), AI_spec (0.18), AI_efficiency (0.08), AI_stability (0.16), AI_recovery (0.12), AI_complexity (0.10), AI_edge_cases (0.08), AI_plan_coherence (0.10) — `AI_refusal` and `AI_code` removed (safety/code-quality signals that don't measure idea quality) |
 | **A_P** (AIStupid Planning) | AI_correctness, AI_spec, AI_efficiency, AI_stability, AI_recovery, AI_plan_coherence, AI_memory_retention, AI_context_awareness, AI_task_completion, AI_tool_selection, AI_parameter_accuracy |
 | **A_B** (AIStupid Building) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_recovery, AI_complexity, AI_edge_cases, AI_hallucination_resistance, AI_memory_retention |
@@ -273,13 +274,31 @@ From `[reviewer_reservation]` in `data/coefficients.toml`:
 - P_adj coefficient: 0.18
 - B_adj coefficient: 0.32
 
-### 6.3 Adjusted Scores
+### 6.3 Per-Model Penalty Share
 
-For each model from vendor **v**:
+The vendor-level gap `L_v` is the *available* reservation budget. It is
+applied to each individual model in vendor **v** in proportion to that
+model's own contribution to the lead:
+
 ```
-I_adj = I_raw - 0.08 × L_v
-P_adj = P_raw - 0.18 × L_v
-B_adj = B_raw - 0.32 × L_v
+share_m = clamp((R_m - R_outside_v) / L_v, 0, 1)   # 1.0 for the actual top-R model
+penalty_m = L_v × share_m
+```
+
+So the actual top reviewer in vendor **v** pays the full reservation,
+sibling models with R at or below `R_outside_v` pay nothing, and models
+in between pay proportionally. This stops the reservation tax from
+hitting every model that happens to share a vendor with a strong
+reviewer, while preserving the original semantics for the model that
+actually drives the lead.
+
+### 6.4 Adjusted Scores
+
+For each model **m** from vendor **v**:
+```
+I_adj = I_raw - 0.08 × penalty_m
+P_adj = P_raw - 0.18 × penalty_m
+B_adj = B_raw - 0.32 × penalty_m
 ```
 
 The reviewing score **R** is not adjusted (it is used to compute the penalty).
@@ -369,8 +388,8 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | SonarFunctionalSkill | higher | no | percentile | Sonar code-quality JSON | BUILD |
 | SonarIssueDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
 | OutputSpeed | higher | **yes** | tail_penalty | Artificial Analysis | OPS_* |
-| InverseTTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
-| InverseCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
+| TTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
+| BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
 | ContextWindow | higher | **yes** | tail_penalty | OpenRouter | OPS_* |
 | AI_correctness | higher | no | percentile | AIStupidLevel (hourly suite) | A_I, A_P, A_B, A_R |
 | AI_spec | higher | no | percentile | AIStupidLevel (hourly suite, `format` axis) | A_I, A_P, A_B, A_R |
@@ -436,18 +455,14 @@ is blended toward 50: `final = score × 0.85 + 50 × 0.15`. Synthesized
 values still contribute, just slightly more conservatively than direct
 measurements.
 
-AISL perspective groups (`A_I`, `A_P`, `A_B`, `A_R`) get one extra
-provenance-aware guard because they carry 0.30 of every final role score.
-After the perspective weighted average is computed, the group is blended
-toward 50 by 15% of the present perspective weight that came from
-synthesized metrics (reduced from 25% — the metric-level 15% penalty already
-discounts each synthesised AISL metric before it enters the group average;
-stacking a 25% group pull produced a combined ~18 pt effective penalty on
-fully-synthesised perspectives, harsher than any other source family). A
-fully synthesized AISL perspective therefore keeps 85% of its synthesized
-estimate and gets a 15% uncertainty pull toward 50, while mixed
-direct/synthesized perspectives keep proportional credit for the direct
-measurements.
+AISL perspective groups (`A_I`, `A_P`, `A_B`, `A_R`) are aggregated as
+plain missing-safe weighted averages of the AISL capability metrics — no
+extra group-level synthesis discount. The metric-level synthesis pull
+(`final = normalized × 0.85 + 50 × 0.15` in 3.5) already discounts each
+synthesised AISL axis before it enters the perspective average; stacking
+a second pull on top double-discounted AISL synthesis relative to every
+other source family without any documented justification, so the group-
+level pull was removed.
 
 ### AI Stupid Level Perspective Weights
 See `[ai_stupid_perspective_weights.*]` in `data/coefficients.toml` for the

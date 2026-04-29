@@ -31,39 +31,18 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
 /// of one source's capability suite output. `AI_canary_health` is excluded
 /// and applied later as a penalty-only drift signal.
 fn compute_aisl_perspectives(records: &mut [ModelRecord], coef: &Coefficients) {
+    // AISL synthesis discounting is applied once, at the metric level
+    // (see `SYNTHESIS_PENALTY` in `normalize_population`). The previous
+    // implementation also pulled the entire perspective toward 50 a second
+    // time; that double-pull made AISL synthesis uniquely harsh compared
+    // with synthesis on any other source family.
     for r in records.iter_mut() {
         for (perspective, weights) in &coef.ai_stupid_perspective_weights {
             let prefix = format!("{perspective}/");
             let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix);
-            let value = synth_adjusted_group_value(value, weights, r);
             r.groups.insert(perspective.clone(), value);
         }
     }
-}
-
-fn synth_adjusted_group_value(
-    value: f64,
-    weights: &BTreeMap<String, f64>,
-    record: &ModelRecord,
-) -> f64 {
-    let mut present_weight = 0.0;
-    let mut synthesized_weight = 0.0;
-    for (metric, weight) in weights {
-        if !weight.is_finite() || !record.metrics.contains_key(metric) {
-            continue;
-        }
-        present_weight += weight;
-        if record.synthesized.contains_key(metric) {
-            synthesized_weight += weight;
-        }
-    }
-    if present_weight <= 0.0 || synthesized_weight <= 0.0 {
-        return value;
-    }
-
-    let synthesized_share = (synthesized_weight / present_weight).clamp(0.0, 1.0);
-    let uncertainty_pull = synthesized_share * AISL_SYNTHETIC_GROUP_PENALTY;
-    value * (1.0 - uncertainty_pull) + 50.0 * uncertainty_pull
 }
 
 /// Compute each composite metric as a missing-safe weighted average of its
@@ -88,16 +67,15 @@ fn compute_composite_metrics(records: &mut [ModelRecord], coef: &Coefficients) {
 /// fully claim a sibling's strengths — the gap reflects our genuine
 /// uncertainty about whether the donor's score transfers cleanly.
 const SYNTHESIS_PENALTY: f64 = 0.15;
-// Reduced from 0.25 → 0.15: the metric-level SYNTHESIS_PENALTY (0.15) already
-// discounts each synthesised AISL metric before it enters the group average.
-// Stacking a 0.25 group pull on top produced a combined ~18 pt effective penalty
-// on fully-synthesised AISL perspectives — harsher than any other source family.
-// At 0.15 the two layers apply equal conservatism, so the total remains
-// meaningful without treating AISL synthesis as uniquely suspect.
-const AISL_SYNTHETIC_GROUP_PENALTY: f64 = 0.15;
 const OVERRIDE_REPORTED_PENALTY: f64 = 0.10;
 const CANARY_HEALTH_METRIC: &str = "AI_canary_health";
 const CANARY_MAX_ROLE_PENALTY: f64 = 6.0;
+// Canary penalty deadband: health above this threshold attracts no penalty;
+// below it the penalty ramps linearly to `CANARY_MAX_ROLE_PENALTY` at
+// `CANARY_HEALTH_FLOOR`. Aligns with the "drift-detection signal" framing —
+// healthy or even slightly degraded canaries should not move role scores.
+const CANARY_HEALTH_DEADBAND: f64 = 60.0;
+const CANARY_HEALTH_FLOOR: f64 = 20.0;
 
 fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
     for (metric_key, def) in &coef.metrics {
@@ -193,8 +171,11 @@ fn apply_canary_health_penalty(records: &mut [ModelRecord]) {
         let Some(health) = r.metrics.get(CANARY_HEALTH_METRIC).copied() else {
             continue;
         };
-        let penalty =
-            (((100.0 - health).max(0.0) / 75.0).clamp(0.0, 1.0)) * CANARY_MAX_ROLE_PENALTY;
+        // Deadband: healthy canaries (>= 60) get no penalty. Below the
+        // deadband, ramp linearly to the full penalty at `CANARY_HEALTH_FLOOR`.
+        let span = CANARY_HEALTH_DEADBAND - CANARY_HEALTH_FLOOR;
+        let degradation = ((CANARY_HEALTH_DEADBAND - health) / span).clamp(0.0, 1.0);
+        let penalty = degradation * CANARY_MAX_ROLE_PENALTY;
         if penalty <= 0.0 {
             continue;
         }
@@ -227,6 +208,8 @@ fn apply_reviewer_reservation(records: &mut [ModelRecord], coef: &Coefficients) 
         .map(|r| r.scores.r)
         .fold(f64::NEG_INFINITY, f64::max);
 
+    // Per-vendor "max R among other vendors" — used to compute the vendor-
+    // level review-axis lead.
     let mut max_r_outside: BTreeMap<String, f64> = BTreeMap::new();
     for r in records.iter() {
         let outside = records
@@ -244,11 +227,23 @@ fn apply_reviewer_reservation(records: &mut [ModelRecord], coef: &Coefficients) 
             .get(r.vendor.as_str())
             .copied()
             .unwrap_or(f64::NEG_INFINITY);
-        let l_v = if outside.is_finite() && max_r_all.is_finite() {
+        // Vendor-level lead (only positive when this vendor's top R sits
+        // strictly above every other vendor's top R).
+        let vendor_lead = if outside.is_finite() && max_r_all.is_finite() {
             (max_r_all - outside).max(0.0)
         } else {
             0.0
         };
+        // Per-model share of that lead: 1.0 for the actual top-R model in
+        // the vendor, 0.0 for siblings tied with the outside maximum, and
+        // proportional in between. Stops the reservation tax from hitting
+        // every model that happens to share a vendor with a strong reviewer.
+        let model_share = if vendor_lead > 0.0 {
+            ((r.scores.r - outside) / vendor_lead).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        let l_v = vendor_lead * model_share;
         r.scores.i_adj = (r.scores.i_raw - i_w * l_v).clamp(0.0, 100.0);
         r.scores.p_adj = (r.scores.p_raw - p_w * l_v).clamp(0.0, 100.0);
         r.scores.b_adj = (r.scores.b_raw - b_w * l_v).clamp(0.0, 100.0);
@@ -492,14 +487,15 @@ mod tests {
 
         let synth_ai = records[2].groups.get("A_I").copied().unwrap();
         // AI_correctness weight in A_I = 0.18, total A_I weight = 1.0.
-        // Synth metric value = 92.5 (after SYNTHESIS_PENALTY).
-        // Shrink: 92.5 * 0.18 + 50 * 0.82 = 57.65 (w_present < 0.60 → full shrink).
-        // Group pull: 57.65 * (1 - AISL_SYNTHETIC_GROUP_PENALTY) + 50 * AISL_SYNTHETIC_GROUP_PENALTY
-        //           = 57.65 * 0.85 + 50 * 0.15 = 56.5025
-        let expected = 57.65 * 0.85 + 50.0 * 0.15;
+        // Synth metric value = 92.5 (after metric-level SYNTHESIS_PENALTY).
+        // Group missing-safe avg with present_weight 0.18 < 0.60 → full shrink:
+        //   92.5 * 0.18 + 50 * 0.82 = 57.65.
+        // Group-level synth pull was removed (single-layer discounting now);
+        // the group value should equal the shrink result directly.
+        let expected = 92.5 * 0.18 + 50.0 * 0.82;
         assert!(
             (synth_ai - expected).abs() < 1e-4,
-            "fully synthesized AISL perspective should get a partial uncertainty pull, got {synth_ai}"
+            "synthesized AISL perspective should reflect metric-level pull only, got {synth_ai}"
         );
         let direct_ai = records[1].groups.get("A_I").copied().unwrap();
         assert!(

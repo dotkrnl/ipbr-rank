@@ -120,13 +120,13 @@ respects `Retry-After`, so paginated fetches against rate-limited endpoints
 
 fn parse_response(body: &str) -> Result<Vec<RawRow>> {
     let data: YourResponseType = serde_json::from_str(body)?;
-    
+
     let mut rows = Vec::new();
     for item in data.items {
         let mut fields = serde_json::Map::new();
         fields.insert("metric_name".to_string(), json!(item.score));
         // ... populate other fields
-        
+
         rows.push(RawRow {
             source_id: "your_source".to_string(),
             model_name: item.name.clone(),
@@ -134,7 +134,7 @@ fn parse_response(body: &str) -> Result<Vec<RawRow>> {
             fields: serde_json::Value::Object(fields),
         });
     }
-    
+
     Ok(rows)
 }
 ```
@@ -156,7 +156,7 @@ async fn test_your_source_fixture() {
     let source = YourSource;
     let http = ReqwestHttp::default();
     let secrets = SecretStore::empty();
-    
+
     let cache_dir = std::path::PathBuf::from("../../data/fixtures");
     let rows = source
         .fetch(
@@ -172,14 +172,14 @@ async fn test_your_source_fixture() {
 
     // Contract assertions
     assert!(rows.len() >= 10, "expected at least 10 models, got {}", rows.len());
-    
+
     let first = &rows[0];
     assert!(!first.model_name.is_empty(), "model_name must not be empty");
     assert!(!first.fields.is_null(), "fields must be populated");
-    
+
     // Check expected models are recognized
     let model_names: Vec<&str> = rows.iter().map(|r| r.model_name.as_str()).collect();
-    assert!(model_names.contains(&"expected-model-name"), 
+    assert!(model_names.contains(&"expected-model-name"),
             "fixture must include expected-model-name");
 }
 ```
@@ -366,13 +366,13 @@ Once your source is verified, ensure it's covered by CI:
 
 ## Troubleshooting
 
-**Q: My source returns 0 rows but doesn't error**  
+**Q: My source returns 0 rows but doesn't error**
 A: Check the parser logic. The contract test should fail if `rows.len() < expected_minimum`.
 
-**Q: The alias matcher isn't recognizing my models**  
+**Q: The alias matcher isn't recognizing my models**
 A: Check `data/required_aliases.toml` — if the models are new, you may need to add canonical IDs. The unmatched models are logged as warnings at runtime.
 
-**Q: My HTML source's cache file isn't being used**  
+**Q: My HTML source's cache file isn't being used**
 A: Override `cache_paths()` so it points at the `.html` extension, and gate the cache lookup with `use_cached_html` instead of `use_cached_json`.
 
 ---

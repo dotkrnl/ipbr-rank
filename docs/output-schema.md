@@ -330,11 +330,11 @@ struct Missing {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let raw = std::fs::read_to_string("out/scoreboard.toml")?;
     let scoreboard: Scoreboard = toml::from_str(&raw)?;
-    
+
     for model in scoreboard.models {
         println!("{}: I={:.1}", model.canonical_id, model.scores.i_adj);
     }
-    
+
     Ok(())
 }
 ```

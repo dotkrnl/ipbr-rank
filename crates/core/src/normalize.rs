@@ -106,11 +106,19 @@ pub fn tail_penalty_norm(
     };
     let mut sorted = mapped;
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-    // Wider clipping window (p2 / p98) than robust_norm because the tail
-    // shape matters here — we want the slowest model in the population to
-    // really sit near 0, not at the 5th-percentile floor of robust_norm.
-    let lo = percentile_linear(&sorted, 0.02);
-    let hi = percentile_linear(&sorted, 0.98);
+    // For small populations p2/p98 is dominated by individual rows and the
+    // bend point becomes noisy. Fall back to min/max so the tail keeps the
+    // intended shape; switch to p2/p98 once we have enough rows that the
+    // winsorization is meaningful.
+    const SMALL_POP_THRESHOLD: usize = 20;
+    let (lo, hi) = if sorted.len() < SMALL_POP_THRESHOLD {
+        (sorted[0], sorted[sorted.len() - 1])
+    } else {
+        (
+            percentile_linear(&sorted, 0.02),
+            percentile_linear(&sorted, 0.98),
+        )
+    };
     if (hi - lo).abs() < EPS {
         return Some(50.0);
     }

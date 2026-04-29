@@ -230,7 +230,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             ],
         ) && ttft > 0.0
         {
-            fields.insert("InverseTTFT".to_string(), Value::from(ttft));
+            fields.insert("TTFT".to_string(), Value::from(ttft));
         }
 
         let prompt = number_at_paths(
@@ -270,7 +270,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         )
         .or_else(|| blend_cost(prompt, completion))
         {
-            fields.insert("InverseCost".to_string(), Value::from(blended));
+            fields.insert("BlendedCost".to_string(), Value::from(blended));
         }
 
         rows.push(RawRow {
@@ -401,12 +401,9 @@ mod tests {
             row.fields.get("OutputSpeed").and_then(number_like),
             Some(90.37)
         );
+        assert_eq!(row.fields.get("TTFT").and_then(number_like), Some(30.78));
         assert_eq!(
-            row.fields.get("InverseTTFT").and_then(number_like),
-            Some(30.78)
-        );
-        assert_eq!(
-            row.fields.get("InverseCost").and_then(number_like),
+            row.fields.get("BlendedCost").and_then(number_like),
             Some(11.25)
         );
     }

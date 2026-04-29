@@ -126,7 +126,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             if let (Some(prompt), Some(completion)) = (prompt, completion) {
                 let blended = (0.75 * prompt + 0.25 * completion) * 1_000_000.0;
                 if blended.is_finite() && blended > 0.0 {
-                    fields.insert("InverseCost".to_string(), Value::from(blended));
+                    fields.insert("BlendedCost".to_string(), Value::from(blended));
                 }
             }
         }
@@ -210,7 +210,7 @@ mod tests {
             row.fields.get("ContextWindow").and_then(number_like),
             Some(400000.0)
         );
-        assert!(row.fields.contains_key("InverseCost"));
+        assert!(row.fields.contains_key("BlendedCost"));
         assert_eq!(row.fields.get("SupportsTools"), Some(&Value::Bool(true)));
         assert_eq!(
             row.fields.get("SupportsStructuredOutputs"),

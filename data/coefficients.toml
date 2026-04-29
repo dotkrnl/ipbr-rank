@@ -177,20 +177,20 @@ LMArenaSearchDocument = 1.00
 
 [group_weights.OPS_long]
 OutputSpeed = 0.55
-InverseTTFT = 0.20
-InverseCost = 0.10
+TTFT = 0.20
+BlendedCost = 0.10
 ContextWindow = 0.15
 
 [group_weights.OPS_precision]
 OutputSpeed = 0.35
-InverseTTFT = 0.35
-InverseCost = 0.15
+TTFT = 0.35
+BlendedCost = 0.15
 ContextWindow = 0.15
 
 [group_weights.OPS_review]
 OutputSpeed = 0.30
-InverseTTFT = 0.40
-InverseCost = 0.20
+TTFT = 0.40
+BlendedCost = 0.20
 ContextWindow = 0.10
 
 # Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
@@ -427,13 +427,13 @@ log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
 transform = "tail_penalty"
 
-[metrics.InverseTTFT]
+[metrics.TTFT]
 higher_better = false
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
 transform = "tail_penalty"
 
-[metrics.InverseCost]
+[metrics.BlendedCost]
 higher_better = false
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
