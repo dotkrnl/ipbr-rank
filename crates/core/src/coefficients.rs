@@ -55,6 +55,77 @@ impl Default for SynthesisConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AggregationConfig {
+    #[serde(default = "default_trust_threshold")]
+    pub trust_threshold: f64,
+    #[serde(default = "default_trust_width")]
+    pub trust_transition_width: f64,
+}
+
+fn default_trust_threshold() -> f64 {
+    0.70
+}
+
+fn default_trust_width() -> f64 {
+    0.20
+}
+
+impl Default for AggregationConfig {
+    fn default() -> Self {
+        Self {
+            trust_threshold: default_trust_threshold(),
+            trust_transition_width: default_trust_width(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PenaltiesConfig {
+    #[serde(default = "default_synthesis_penalty")]
+    pub synthesis: f64,
+    #[serde(default = "default_override_penalty")]
+    pub override_reported: f64,
+    #[serde(default = "default_canary_deadband")]
+    pub canary_health_deadband: f64,
+    #[serde(default = "default_canary_floor")]
+    pub canary_health_floor: f64,
+    #[serde(default = "default_canary_max")]
+    pub canary_max_role_penalty: f64,
+}
+
+fn default_synthesis_penalty() -> f64 {
+    0.15
+}
+
+fn default_override_penalty() -> f64 {
+    0.10
+}
+
+fn default_canary_deadband() -> f64 {
+    60.0
+}
+
+fn default_canary_floor() -> f64 {
+    20.0
+}
+
+fn default_canary_max() -> f64 {
+    6.0
+}
+
+impl Default for PenaltiesConfig {
+    fn default() -> Self {
+        Self {
+            synthesis: default_synthesis_penalty(),
+            override_reported: default_override_penalty(),
+            canary_health_deadband: default_canary_deadband(),
+            canary_health_floor: default_canary_floor(),
+            canary_max_role_penalty: default_canary_max(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Coefficients {
     pub ai_stupid_perspective_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub group_weights: BTreeMap<String, BTreeMap<String, f64>>,
@@ -72,6 +143,10 @@ pub struct Coefficients {
     pub composite_metrics: BTreeMap<String, BTreeMap<String, f64>>,
     #[serde(default)]
     pub synthesis: Option<SynthesisConfig>,
+    #[serde(default)]
+    pub penalties: Option<PenaltiesConfig>,
+    #[serde(default)]
+    pub aggregation: Option<AggregationConfig>,
 }
 
 const EMBEDDED_COEFFICIENTS: &str = include_str!("../../../data/coefficients.toml");

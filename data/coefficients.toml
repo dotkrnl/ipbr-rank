@@ -225,8 +225,8 @@ A_P = 0.30
 OPS_precision = 0.08
 
 [final_score_weights.B_raw]
-BUILD = 0.60
-PLAN = 0.02
+BUILD = 0.57
+PLAN = 0.05
 A_B = 0.30
 OPS_precision = 0.08
 
@@ -237,8 +237,8 @@ OPS_precision = 0.08
 # preference proxy.
 [final_score_weights.R]
 LM_ARENA_REVIEW_PROXY = 0.12
-BUILD = 0.255
-PLAN = 0.245
+BUILD = 0.25
+PLAN = 0.25
 A_R = 0.30
 OPS_review = 0.08
 
@@ -246,6 +246,29 @@ OPS_review = 0.08
 I_adj = 0.08
 P_adj = 0.18
 B_adj = 0.32
+
+[aggregation]
+# Coverage threshold around which we transition from shrink-to-50 to
+# trusting the present-weight mean directly.
+trust_threshold = 0.70
+# The width of the smooth-step transition band (centered on trust_threshold).
+# 0.20 means the transition occurs over [0.60, 0.80].
+trust_transition_width = 0.20
+
+[penalties]
+# Conservative discount applied to per-metric values that came in via
+# sibling synthesis rather than a direct measurement. Pulls the score
+# toward 50 by this fraction.
+synthesis = 0.15
+# Manual overrides are public but hand-curated. Making them slightly
+# softer than a directly ingested leaderboard row (10% pull toward 50).
+override_reported = 0.10
+# Canary health deadband: health above this threshold attracts no penalty;
+# below it the penalty ramps linearly to `canary_max_role_penalty` at
+# `canary_health_floor`.
+canary_health_deadband = 60.0
+canary_health_floor = 20.0
+canary_max_role_penalty = 6.0
 
 [metrics.LMArenaText]
 higher_better = true

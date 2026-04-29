@@ -1,21 +1,16 @@
+use crate::coefficients::AggregationConfig;
 use crate::model::MissingInfo;
 use std::collections::BTreeMap;
 
 const EPS: f64 = 1e-12;
 pub const SHRINK_TARGET: f64 = 50.0;
 
-/// Coverage threshold around which we transition from shrink-to-50 to
-/// trusting the present-weight mean directly. The transition uses a smooth
-/// step over a ±0.10 band (0.60 → 0.80) so that a tiny change in coverage
-/// cannot cause a large discontinuous jump in the group score.
-const FULL_COVERAGE_TRUST_THRESHOLD: f64 = 0.70;
-const TRUST_TRANSITION_WIDTH: f64 = 0.20;
-
 pub fn missing_safe_avg(
     metrics: &BTreeMap<String, f64>,
     weights: &BTreeMap<String, f64>,
     missing_info: &mut MissingInfo,
     prefix: &str,
+    cfg: &AggregationConfig,
 ) -> f64 {
     let total_weight: f64 = weights.values().copied().filter(|w| w.is_finite()).sum();
     if total_weight.abs() < EPS {
@@ -51,8 +46,8 @@ pub fn missing_safe_avg(
 
     // Smooth transition from full-shrink to no-shrink across
     // [threshold - width/2, threshold + width/2].
-    let t = ((w_present - (FULL_COVERAGE_TRUST_THRESHOLD - TRUST_TRANSITION_WIDTH / 2.0))
-        / TRUST_TRANSITION_WIDTH)
+    let t = ((w_present - (cfg.trust_threshold - cfg.trust_transition_width / 2.0))
+        / cfg.trust_transition_width)
         .clamp(0.0, 1.0);
     let smooth_t = t * t * (3.0 - 2.0 * t);
     let value = shrink_value * (1.0 - smooth_t) + present_mean * smooth_t;
@@ -73,7 +68,8 @@ mod tests {
         let metrics = BTreeMap::new();
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 50.0).abs() < 1e-9);
         assert_eq!(missing.metrics.len(), 2);
     }
@@ -85,7 +81,8 @@ mod tests {
             .collect();
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 70.0).abs() < 1e-9);
         assert!(missing.metrics.is_empty());
     }
@@ -97,7 +94,8 @@ mod tests {
         let metrics: BTreeMap<String, f64> = [("a".to_string(), 100.0)].into_iter().collect();
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "g/");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "g/", &cfg);
         assert!((v - 75.0).abs() < 1e-9, "expected 75, got {v}");
         assert!(missing.metrics.contains("g/b"));
     }
@@ -113,7 +111,8 @@ mod tests {
             .collect();
         let w = weights(&[("a", 0.4), ("b", 0.4), ("c", 0.2)]);
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         // Present weighted mean: (0.4*80 + 0.4*100) / 0.8 = 90.
         assert!((v - 90.0).abs() < 1e-9, "expected 90, got {v}");
         assert!(missing.metrics.contains("c"));
@@ -127,7 +126,8 @@ mod tests {
             .collect();
         let w = weights(&[("a", 0.5), ("b", 0.5)]);
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 55.0).abs() < 1e-9);
         assert!(missing.metrics.contains("a"));
     }
@@ -137,7 +137,8 @@ mod tests {
         let metrics: BTreeMap<String, f64> = [("a".to_string(), 100.0)].into_iter().collect();
         let w: BTreeMap<String, f64> = BTreeMap::new();
         let mut missing = MissingInfo::new();
-        let v = missing_safe_avg(&metrics, &w, &mut missing, "");
+        let cfg = AggregationConfig::default();
+        let v = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 50.0).abs() < 1e-9);
     }
 }

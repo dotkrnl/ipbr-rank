@@ -1,5 +1,5 @@
 use crate::aggregate::missing_safe_avg;
-use crate::coefficients::{Coefficients, MetricTransform};
+use crate::coefficients::{Coefficients, MetricTransform, PenaltiesConfig};
 use crate::model::{ModelRecord, Vendor};
 use crate::normalize::{as_score_0_100, robust_norm, tail_penalty_norm};
 use std::collections::BTreeMap;
@@ -12,12 +12,14 @@ pub fn compute_scores(records: &mut [ModelRecord]) {
 }
 
 pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
-    normalize_population(records, coef);
-    compute_composite_metrics(records, coef);
-    compute_aisl_perspectives(records, coef);
-    aggregate_groups(records, coef);
-    compute_role_scores(records, coef);
-    apply_canary_health_penalty(records);
+    let penalties = coef.penalties.clone().unwrap_or_default();
+    let aggregation = coef.aggregation.clone().unwrap_or_default();
+    normalize_population(records, coef, &penalties);
+    compute_composite_metrics(records, coef, &aggregation);
+    compute_aisl_perspectives(records, coef, &aggregation);
+    aggregate_groups(records, coef, &aggregation);
+    compute_role_scores(records, coef, &aggregation);
+    apply_canary_health_penalty(records, &penalties);
     apply_reviewer_reservation(records, coef);
 }
 
@@ -30,7 +32,11 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
 /// averages of independent leaderboards — they're a fixed re-projection
 /// of one source's capability suite output. `AI_canary_health` is excluded
 /// and applied later as a penalty-only drift signal.
-fn compute_aisl_perspectives(records: &mut [ModelRecord], coef: &Coefficients) {
+fn compute_aisl_perspectives(
+    records: &mut [ModelRecord],
+    coef: &Coefficients,
+    aggregation: &crate::coefficients::AggregationConfig,
+) {
     // AISL synthesis discounting is applied once, at the metric level
     // (see `SYNTHESIS_PENALTY` in `normalize_population`). The previous
     // implementation also pulled the entire perspective toward 50 a second
@@ -39,7 +45,7 @@ fn compute_aisl_perspectives(records: &mut [ModelRecord], coef: &Coefficients) {
     for r in records.iter_mut() {
         for (perspective, weights) in &coef.ai_stupid_perspective_weights {
             let prefix = format!("{perspective}/");
-            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix);
+            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.groups.insert(perspective.clone(), value);
         }
     }
@@ -51,33 +57,23 @@ fn compute_aisl_perspectives(records: &mut [ModelRecord], coef: &Coefficients) {
 /// it were a regular metric. Provenance for missing inputs is recorded with a
 /// `<composite>/` prefix in `MissingInfo` so it doesn't collide with group
 /// missingness.
-fn compute_composite_metrics(records: &mut [ModelRecord], coef: &Coefficients) {
+fn compute_composite_metrics(
+    records: &mut [ModelRecord],
+    coef: &Coefficients,
+    aggregation: &crate::coefficients::AggregationConfig,
+) {
     for r in records.iter_mut() {
         for (name, weights) in &coef.composite_metrics {
             let prefix = format!("{name}/");
-            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix);
+            let value = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.metrics.insert(name.clone(), value);
         }
     }
 }
 
-/// Conservative discount applied to per-metric values that came in via
-/// sibling synthesis rather than a direct measurement. The synthesized
-/// score is blended toward 50 by `SYNTHESIS_PENALTY` so the model can't
-/// fully claim a sibling's strengths — the gap reflects our genuine
-/// uncertainty about whether the donor's score transfers cleanly.
-const SYNTHESIS_PENALTY: f64 = 0.15;
-const OVERRIDE_REPORTED_PENALTY: f64 = 0.10;
 const CANARY_HEALTH_METRIC: &str = "AI_canary_health";
-const CANARY_MAX_ROLE_PENALTY: f64 = 6.0;
-// Canary penalty deadband: health above this threshold attracts no penalty;
-// below it the penalty ramps linearly to `CANARY_MAX_ROLE_PENALTY` at
-// `CANARY_HEALTH_FLOOR`. Aligns with the "drift-detection signal" framing —
-// healthy or even slightly degraded canaries should not move role scores.
-const CANARY_HEALTH_DEADBAND: f64 = 60.0;
-const CANARY_HEALTH_FLOOR: f64 = 20.0;
 
-fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
+fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients, penalties: &PenaltiesConfig) {
     for (metric_key, def) in &coef.metrics {
         let all_pop: Vec<f64> = records
             .iter()
@@ -115,7 +111,7 @@ fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
                 let final_value = if r.synthesized.contains_key(metric_key) {
                     // Pull synthesized values toward the 50-baseline so they
                     // act as a softer signal than direct measurements.
-                    v * (1.0 - SYNTHESIS_PENALTY) + 50.0 * SYNTHESIS_PENALTY
+                    v * (1.0 - penalties.synthesis) + 50.0 * penalties.synthesis
                 } else {
                     v
                 };
@@ -123,8 +119,8 @@ fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
                     // Manual overrides are public but hand-curated. Keep
                     // them strong, while making them slightly softer than a
                     // directly ingested leaderboard row.
-                    final_value * (1.0 - OVERRIDE_REPORTED_PENALTY)
-                        + 50.0 * OVERRIDE_REPORTED_PENALTY
+                    final_value * (1.0 - penalties.override_reported)
+                        + 50.0 * penalties.override_reported
                 } else {
                     final_value
                 };
@@ -134,17 +130,25 @@ fn normalize_population(records: &mut [ModelRecord], coef: &Coefficients) {
     }
 }
 
-fn aggregate_groups(records: &mut [ModelRecord], coef: &Coefficients) {
+fn aggregate_groups(
+    records: &mut [ModelRecord],
+    coef: &Coefficients,
+    aggregation: &crate::coefficients::AggregationConfig,
+) {
     for r in records.iter_mut() {
         for (group_key, weights) in &coef.group_weights {
             let prefix = format!("{group_key}/");
-            let v = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix);
+            let v = missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
             r.groups.insert(group_key.clone(), v);
         }
     }
 }
 
-fn compute_role_scores(records: &mut [ModelRecord], coef: &Coefficients) {
+fn compute_role_scores(
+    records: &mut [ModelRecord],
+    coef: &Coefficients,
+    aggregation: &crate::coefficients::AggregationConfig,
+) {
     for r in records.iter_mut() {
         let mut role_values: BTreeMap<&str, f64> = BTreeMap::new();
         for &role in ROLE_KEYS {
@@ -153,7 +157,7 @@ fn compute_role_scores(records: &mut [ModelRecord], coef: &Coefficients) {
                 None => continue,
             };
             let prefix = format!("{role}/");
-            let v = missing_safe_avg(&r.groups, weights, &mut r.missing, &prefix);
+            let v = missing_safe_avg(&r.groups, weights, &mut r.missing, &prefix, aggregation);
             role_values.insert(role, v);
         }
         r.scores.i_raw = *role_values.get("I_raw").unwrap_or(&50.0);
@@ -163,7 +167,7 @@ fn compute_role_scores(records: &mut [ModelRecord], coef: &Coefficients) {
     }
 }
 
-fn apply_canary_health_penalty(records: &mut [ModelRecord]) {
+fn apply_canary_health_penalty(records: &mut [ModelRecord], penalties: &PenaltiesConfig) {
     for r in records.iter_mut() {
         if r.synthesized.contains_key(CANARY_HEALTH_METRIC) {
             continue;
@@ -173,9 +177,9 @@ fn apply_canary_health_penalty(records: &mut [ModelRecord]) {
         };
         // Deadband: healthy canaries (>= 60) get no penalty. Below the
         // deadband, ramp linearly to the full penalty at `CANARY_HEALTH_FLOOR`.
-        let span = CANARY_HEALTH_DEADBAND - CANARY_HEALTH_FLOOR;
-        let degradation = ((CANARY_HEALTH_DEADBAND - health) / span).clamp(0.0, 1.0);
-        let penalty = degradation * CANARY_MAX_ROLE_PENALTY;
+        let span = penalties.canary_health_deadband - penalties.canary_health_floor;
+        let degradation = ((penalties.canary_health_deadband - health) / span).clamp(0.0, 1.0);
+        let penalty = degradation * penalties.canary_max_role_penalty;
         if penalty <= 0.0 {
             continue;
         }
