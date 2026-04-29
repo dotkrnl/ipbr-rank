@@ -90,26 +90,26 @@ aliases = ["anthropic/claude-opus-4.1", "claude opus 4.1", "claude-opus-4-1", "c
 sources = ["aistupidlevel", "lmarena", "openrouter", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 61.923343
-p_raw = 52.272530
-b_raw = 55.392010
-r = 50.362898
-i_adj = 61.923343
-p_adj = 52.272530
-b_adj = 55.392010
+i_raw = 59.903524
+p_raw = 51.009328
+b_raw = 53.813281
+r = 47.879654
+i_adj = 59.903524
+p_adj = 51.009328
+b_adj = 53.813281
 
 [models.groups]
 A_B = 72.865771
 A_I = 85.475857
 A_P = 66.624535
 A_R = 80.245826
-BUILD = 48.572814
+BUILD = 48.467384
 CRE = 52.899531
 GEN = 50.724883
 LM_ARENA_REVIEW_PROXY = 0.000000
 OPS_long = 48.700749
 OPS_precision = 46.200749
-OPS_review = 42.467166
+OPS_review = 43.700749
 PLAN = 42.994295
 
 [models.metrics]
@@ -138,6 +138,7 @@ LMArenaSearchDocument = 0.000000
 LMArenaText = 52.899531
 SWEComposite = 50.675437
 SWERebench = 52.251458
+SonarComposite = 50.000000
 TerminalBench = 29.394986
 
 [models.missing]
@@ -153,26 +154,26 @@ aliases = ["anthropic/claude-opus-4.5", "claude opus 4.5", "claude-opus-4-5", "c
 sources = ["aistupidlevel", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 76.304494
-p_raw = 68.283522
-b_raw = 75.725532
-r = 65.097612
-i_adj = 76.304494
-p_adj = 68.283522
-b_adj = 75.725532
+i_raw = 75.374482
+p_raw = 67.527710
+b_raw = 75.874558
+r = 64.031701
+i_adj = 75.374482
+p_adj = 67.527710
+b_adj = 75.874558
 
 [models.groups]
 A_B = 75.174611
 A_I = 85.758273
 A_P = 75.832168
 A_R = 77.473739
-BUILD = 77.232742
+BUILD = 77.530097
 CRE = 73.511245
 GEN = 67.004893
 LM_ARENA_REVIEW_PROXY = 10.014484
 OPS_long = 77.953092
 OPS_precision = 76.037007
-OPS_review = 75.099246
+OPS_review = 75.310661
 PLAN = 61.350508
 
 [models.metrics]
@@ -211,6 +212,7 @@ SWEBenchVerified = 81.544532
 SWEComposite = 82.544023
 SWERebench = 76.548510
 SonarBugDensity = 73.689183
+SonarComposite = 87.105477
 SonarFunctionalSkill = 100.000000
 SonarIssueDensity = 77.157578
 SonarVulnerabilityDensity = 87.188306
@@ -220,7 +222,7 @@ TerminalBench = 54.766552
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "PLAN"]
+groups_shrunk = ["PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-opus-4.6"
@@ -231,26 +233,26 @@ aliases = ["anthropic/claude-opus-4.6", "claude opus 4.6", "claude-4-6-opus", "c
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 90.449900
-p_raw = 73.982861
-b_raw = 82.153385
-r = 77.439015
-i_adj = 90.449900
-p_adj = 73.982861
-b_adj = 82.153385
+i_raw = 91.181279
+p_raw = 74.890172
+b_raw = 82.369165
+r = 76.195944
+i_adj = 91.181279
+p_adj = 74.890172
+b_adj = 82.369165
 
 [models.groups]
 A_B = 82.633887
 A_I = 81.459329
 A_P = 62.744070
 A_R = 94.583331
-BUILD = 83.221125
+BUILD = 83.674765
 CRE = 100.000000
 GEN = 87.297978
 LM_ARENA_REVIEW_PROXY = 32.315486
 OPS_long = 80.318563
 OPS_precision = 78.371042
-OPS_review = 76.167524
+OPS_review = 77.759671
 PLAN = 73.149897
 
 [models.metrics]
@@ -291,6 +293,7 @@ SWEBenchVerified = 87.111214
 SWEComposite = 93.336234
 SWERebench = 91.571580
 SonarBugDensity = 59.518186
+SonarComposite = 70.462240
 SonarFunctionalSkill = 92.179803
 SonarIssueDensity = 46.815515
 SonarVulnerabilityDensity = 66.552021
@@ -300,7 +303,7 @@ TerminalBench = 64.224591
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "PLAN"]
+groups_shrunk = ["PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-opus-4.7"
@@ -311,26 +314,26 @@ aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench"]
 
 [models.scores]
-i_raw = 88.535151
-p_raw = 76.089820
-b_raw = 81.175558
-r = 87.020506
-i_adj = 88.535151
-p_adj = 76.089820
-b_adj = 81.175558
+i_raw = 89.539289
+p_raw = 77.817163
+b_raw = 81.874278
+r = 86.716838
+i_adj = 89.539289
+p_adj = 77.817163
+b_adj = 81.874278
 
 [models.groups]
 A_B = 76.285512
 A_I = 78.162880
 A_P = 55.765441
 A_R = 93.723929
-BUILD = 84.413268
+BUILD = 84.840091
 CRE = 94.244905
 GEN = 95.552110
 LM_ARENA_REVIEW_PROXY = 100.000000
 OPS_long = 80.075961
 OPS_precision = 77.769475
-OPS_review = 75.451118
+OPS_review = 77.258492
 PLAN = 79.055682
 
 [models.metrics]
@@ -370,6 +373,7 @@ SWEBenchVerified = 100.000000
 SWEComposite = 93.167503
 SWERebench = 85.335843
 SonarBugDensity = 50.070855
+SonarComposite = 51.367665
 SonarFunctionalSkill = 93.903941
 SonarIssueDensity = 0.000000
 SonarVulnerabilityDensity = 25.279450
@@ -379,7 +383,7 @@ TerminalBench = 78.205224
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "PLAN"]
+groups_shrunk = ["PLAN"]
 
 [[models]]
 canonical_id = "anthropic/claude-sonnet-4"
@@ -390,26 +394,26 @@ aliases = ["anthropic/claude-sonnet-4", "claude sonnet 4", "claude-4-sonnet", "c
 sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 36.167068
-p_raw = 49.466537
-b_raw = 57.146644
-r = 63.744839
-i_adj = 36.167068
-p_adj = 49.466537
-b_adj = 57.146644
+i_raw = 31.933032
+p_raw = 47.999876
+b_raw = 55.992925
+r = 62.353134
+i_adj = 31.933032
+p_adj = 47.999876
+b_adj = 55.992925
 
 [models.groups]
 A_B = 78.106293
 A_I = 85.583392
 A_P = 65.728304
 A_R = 84.891658
-BUILD = 46.466509
+BUILD = 47.660436
 CRE = 0.000000
 GEN = 30.032247
 LM_ARENA_REVIEW_PROXY = 84.579109
 OPS_long = 59.824039
 OPS_precision = 61.041952
-OPS_review = 59.797126
+OPS_review = 62.259864
 PLAN = 46.909804
 
 [models.metrics]
@@ -444,6 +448,7 @@ SWEBenchVerified = 54.171490
 SWEComposite = 63.881714
 SWERebench = 55.075069
 SonarBugDensity = 0.000000
+SonarComposite = 19.527191
 SonarFunctionalSkill = 26.416256
 SonarIssueDensity = 35.842756
 SonarVulnerabilityDensity = 0.000000
@@ -462,26 +467,26 @@ aliases = ["anthropic/claude-sonnet-4.5", "claude sonnet 4.5", "claude-4-5-sonne
 sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 67.237485
-p_raw = 57.549454
-b_raw = 61.372131
-r = 56.453851
-i_adj = 67.237485
-p_adj = 57.549454
-b_adj = 61.372131
+i_raw = 65.256350
+p_raw = 55.177411
+b_raw = 60.288102
+r = 53.774214
+i_adj = 65.256350
+p_adj = 55.177411
+b_adj = 60.288102
 
 [models.groups]
 A_B = 83.343441
 A_I = 87.917216
 A_P = 83.732702
 A_R = 93.319422
-BUILD = 51.457644
+BUILD = 52.929771
 CRE = 63.396028
 GEN = 46.400553
 LM_ARENA_REVIEW_PROXY = 0.295155
 OPS_long = 59.824039
 OPS_precision = 61.041952
-OPS_review = 59.797126
+OPS_review = 62.259864
 PLAN = 43.097699
 
 [models.metrics]
@@ -518,6 +523,7 @@ SWEBenchVerified = 71.675542
 SWEComposite = 69.200450
 SWERebench = 74.905357
 SonarBugDensity = 2.834199
+SonarComposite = 15.640841
 SonarFunctionalSkill = 17.179803
 SonarIssueDensity = 30.022423
 SonarVulnerabilityDensity = 4.643164
@@ -536,26 +542,26 @@ aliases = ["anthropic/claude-sonnet-4.6", "claude sonnet 4.6", "claude-sonnet-4-
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar", "swerebench"]
 
 [models.scores]
-i_raw = 73.919547
-p_raw = 58.878909
-b_raw = 74.805776
-r = 66.228785
-i_adj = 73.919547
-p_adj = 58.878909
-b_adj = 74.805776
+i_raw = 72.902971
+p_raw = 58.179273
+b_raw = 74.215221
+r = 64.664969
+i_adj = 72.902971
+p_adj = 58.179273
+b_adj = 74.215221
 
 [models.groups]
 A_B = 83.896264
 A_I = 84.573577
 A_P = 66.485224
 A_R = 93.749123
-BUILD = 74.865034
+BUILD = 75.174219
 CRE = 72.442392
 GEN = 62.818923
 LM_ARENA_REVIEW_PROXY = 22.435126
 OPS_long = 68.270621
 OPS_precision = 55.280686
-OPS_review = 49.858898
+OPS_review = 58.998598
 PLAN = 50.827451
 
 [models.metrics]
@@ -595,6 +601,7 @@ SWEBenchVerified = 79.445281
 SWEComposite = 83.739536
 SWERebench = 95.744691
 SonarBugDensity = 65.816407
+SonarComposite = 55.830472
 SonarFunctionalSkill = 84.544335
 SonarIssueDensity = 22.293784
 SonarVulnerabilityDensity = 21.840069
@@ -615,13 +622,13 @@ aliases = ["deepseek chat", "deepseek reasoner", "deepseek v4 flash", "deepseek-
 sources = ["aistupidlevel", "lmarena", "openrouter"]
 
 [models.scores]
-i_raw = 48.095192
-p_raw = 48.276348
-b_raw = 46.551367
-r = 47.018260
-i_adj = 48.095192
-p_adj = 48.276348
-b_adj = 46.551367
+i_raw = 49.802935
+p_raw = 48.950201
+b_raw = 47.412995
+r = 47.895711
+i_adj = 49.802935
+p_adj = 48.950201
+b_adj = 47.412995
 
 [models.groups]
 A_B = 35.639533
@@ -634,7 +641,7 @@ GEN = 52.246015
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 58.243832
 OPS_precision = 60.743832
-OPS_review = 62.162555
+OPS_review = 63.243832
 PLAN = 50.000000
 
 [models.metrics]
@@ -660,6 +667,7 @@ ContextWindow = 71.625547
 LMArenaCreativeOrOpenEnded = 58.984060
 LMArenaText = 58.984060
 SWEComposite = 50.000000
+SonarComposite = 50.000000
 
 [models.missing]
 metrics = []
@@ -674,26 +682,26 @@ aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2
 sources = ["aistupidlevel", "arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 58.469049
-p_raw = 47.824011
-b_raw = 47.356164
-r = 56.866269
-i_adj = 58.469049
-p_adj = 47.824011
-b_adj = 47.356164
+i_raw = 55.915875
+p_raw = 45.809082
+b_raw = 44.673794
+r = 54.094574
+i_adj = 55.915875
+p_adj = 45.809082
+b_adj = 44.673794
 
 [models.groups]
 A_B = 90.470551
 A_I = 86.285587
 A_P = 68.569185
 A_R = 95.264962
-BUILD = 23.681676
+BUILD = 25.689611
 CRE = 45.876138
 GEN = 41.589227
 LM_ARENA_REVIEW_PROXY = 77.793164
 OPS_long = 61.933509
 OPS_precision = 64.151818
-OPS_review = 63.871164
+OPS_review = 66.370127
 PLAN = 31.685954
 
 [models.metrics]
@@ -727,11 +735,12 @@ SWEBenchPro = 52.541821
 SWEBenchVerified = 0.000000
 SWEComposite = 20.432930
 SWERebench = 0.000000
+SonarComposite = 50.000000
 TerminalBench = 0.270230
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "google/gemini-2.5-pro"
@@ -742,26 +751,26 @@ aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro
 sources = ["arc_agi", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 19.473032
-p_raw = 37.457204
-b_raw = 33.398637
-r = 30.130877
-i_adj = 19.473032
-p_adj = 37.457204
-b_adj = 33.398637
+i_raw = 18.623979
+p_raw = 37.071793
+b_raw = 33.840273
+r = 30.401421
+i_adj = 18.623979
+p_adj = 37.071793
+b_adj = 33.840273
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 36.303375
+BUILD = 35.461581
 CRE = 0.000000
 GEN = 30.551546
 LM_ARENA_REVIEW_PROXY = 0.499623
 OPS_long = 60.502988
 OPS_precision = 62.006037
-OPS_review = 61.010123
+OPS_review = 63.509086
 PLAN = 34.871269
 
 [models.metrics]
@@ -796,6 +805,7 @@ SWEBenchVerified = 19.194258
 SWEComposite = 35.373060
 SWERebench = 1.789925
 SonarBugDensity = 52.736971
+SonarComposite = 54.165803
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
 SonarVulnerabilityDensity = 58.222270
@@ -814,26 +824,26 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 64.295533
-p_raw = 53.985292
-b_raw = 47.823405
-r = 44.750675
-i_adj = 64.295533
-p_adj = 53.985292
-b_adj = 47.823405
+i_raw = 66.836732
+p_raw = 54.933772
+b_raw = 50.653081
+r = 46.688157
+i_adj = 66.836732
+p_adj = 54.933772
+b_adj = 50.653081
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 55.652124
+BUILD = 56.784284
 CRE = 85.664254
 GEN = 57.895710
 LM_ARENA_REVIEW_PROXY = 21.173350
 OPS_long = 95.396495
 OPS_precision = 92.158787
-OPS_review = 90.797136
+OPS_review = 92.671120
 PLAN = 54.546478
 
 [models.metrics]
@@ -874,6 +884,7 @@ SWEBenchVerified = 87.728641
 SWEComposite = 73.380022
 SWERebench = 76.337430
 SonarBugDensity = 52.736971
+SonarComposite = 54.165803
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
 SonarVulnerabilityDensity = 58.222270
@@ -894,26 +905,26 @@ aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-high", 
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.174648
-p_raw = 50.561378
-b_raw = 47.035359
-r = 42.130747
-i_adj = 63.174648
-p_adj = 50.561378
-b_adj = 47.035359
+i_raw = 66.243370
+p_raw = 51.685860
+b_raw = 49.800142
+r = 43.811386
+i_adj = 66.243370
+p_adj = 51.685860
+b_adj = 49.800142
 
 [models.groups]
 A_B = 14.712420
 A_I = 25.796077
 A_P = 38.064568
 A_R = 20.182163
-BUILD = 63.383458
+BUILD = 63.262929
 CRE = 94.081852
 GEN = 59.801052
 LM_ARENA_REVIEW_PROXY = 19.719012
 OPS_long = 45.230354
 OPS_precision = 46.595531
-OPS_review = 50.460709
+OPS_review = 47.960709
 PLAN = 55.308384
 
 [models.metrics]
@@ -949,6 +960,7 @@ SWEBenchVerified = 68.588408
 SWEComposite = 69.759032
 SWERebench = 70.585395
 SonarBugDensity = 53.219965
+SonarComposite = 54.900944
 SonarFunctionalSkill = 84.051724
 SonarIssueDensity = 6.741091
 SonarVulnerabilityDensity = 59.673259
@@ -967,26 +979,26 @@ aliases = ["gemini 3.1 pro", "gemini pro 3.1", "gemini-3-1-pro", "gemini-3-1-pro
 sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 77.884482
-p_raw = 77.876094
-b_raw = 62.018013
-r = 67.580098
-i_adj = 77.884482
-p_adj = 77.876094
-b_adj = 62.018013
+i_raw = 82.115884
+p_raw = 81.183639
+b_raw = 65.927145
+r = 71.691260
+i_adj = 82.115884
+p_adj = 81.183639
+b_adj = 65.927145
 
 [models.groups]
 A_B = 20.005557
 A_I = 29.426665
 A_P = 39.854883
 A_R = 24.654838
-BUILD = 78.383193
+BUILD = 78.810769
 CRE = 100.000000
 GEN = 99.900065
 LM_ARENA_REVIEW_PROXY = 91.125950
 OPS_long = 88.443370
 OPS_precision = 83.898511
-OPS_review = 81.531370
+OPS_review = 84.287074
 PLAN = 92.520898
 
 [models.metrics]
@@ -1026,6 +1038,7 @@ SWEBenchVerified = 80.936945
 SWEComposite = 90.390196
 SWERebench = 99.822959
 SonarBugDensity = 52.736971
+SonarComposite = 54.165803
 SonarFunctionalSkill = 78.943966
 SonarIssueDensity = 13.229927
 SonarVulnerabilityDensity = 58.222270
@@ -1046,13 +1059,13 @@ aliases = ["kimi k2 0905", "kimi k2 turbo", "kimi-k2-0905", "kimi-k2-0905-previe
 sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter"]
 
 [models.scores]
-i_raw = 27.080105
-p_raw = 31.380279
-b_raw = 48.869132
-r = 43.983879
-i_adj = 27.080105
-p_adj = 31.380279
-b_adj = 48.869132
+i_raw = 26.017001
+p_raw = 30.710261
+b_raw = 48.480496
+r = 43.586914
+i_adj = 26.017001
+p_adj = 30.710261
+b_adj = 48.480496
 
 [models.groups]
 A_B = 52.156528
@@ -1065,7 +1078,7 @@ GEN = 8.181917
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 35.599904
 OPS_precision = 53.979877
-OPS_review = 60.527744
+OPS_review = 54.031669
 PLAN = 36.575657
 
 [models.metrics]
@@ -1096,6 +1109,7 @@ LMArenaCreativeOrOpenEnded = 27.818517
 LMArenaText = 27.818517
 OutputSpeed = 0.000000
 SWEComposite = 50.000000
+SonarComposite = 50.000000
 TTFT = 91.640905
 Tau2Bench = 32.878287
 
@@ -1112,26 +1126,26 @@ aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "kimi
 sources = ["aistupidlevel", "livecodebench", "lmarena", "openrouter", "overrides", "swebench"]
 
 [models.scores]
-i_raw = 71.495235
-p_raw = 57.304862
-b_raw = 71.485828
-r = 76.795339
-i_adj = 71.495235
-p_adj = 57.304862
-b_adj = 71.485828
+i_raw = 70.413631
+p_raw = 57.301833
+b_raw = 70.365818
+r = 75.251876
+i_adj = 70.413631
+p_adj = 57.301833
+b_adj = 70.365818
 
 [models.groups]
 A_B = 79.701597
 A_I = 81.516175
 A_P = 57.593056
 A_R = 93.723929
-BUILD = 69.725329
+BUILD = 69.026661
 CRE = 76.150001
 GEN = 50.828879
 LM_ARENA_REVIEW_PROXY = 93.335483
 OPS_long = 57.979944
 OPS_precision = 59.836744
-OPS_review = 60.271430
+OPS_review = 61.693545
 PLAN = 60.899422
 
 [models.metrics]
@@ -1165,6 +1179,7 @@ SWEBenchVerified = 73.527823
 SWEComposite = 62.806577
 SWERebench = 73.082071
 SonarBugDensity = 92.500000
+SonarComposite = 80.586952
 SonarFunctionalSkill = 66.801108
 SonarIssueDensity = 92.500000
 SonarVulnerabilityDensity = 81.610060
@@ -1183,26 +1198,26 @@ aliases = ["gpt 5.2", "gpt-5-2", "gpt-5-2-high", "gpt-5-2-low", "gpt-5-2-medium"
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 66.719097
-p_raw = 54.587902
-b_raw = 59.298881
-r = 60.601432
-i_adj = 66.719097
-p_adj = 54.587902
-b_adj = 59.298881
+i_raw = 65.315522
+p_raw = 53.925614
+b_raw = 57.768848
+r = 58.076921
+i_adj = 65.315522
+p_adj = 53.925614
+b_adj = 57.768848
 
 [models.groups]
 A_B = 75.843897
 A_I = 80.533545
 A_P = 61.853293
 A_R = 90.978300
-BUILD = 51.091475
+BUILD = 50.991606
 CRE = 67.425000
 GEN = 46.856250
 LM_ARENA_REVIEW_PROXY = 21.444740
 OPS_long = 58.294952
 OPS_precision = 59.798001
-OPS_review = 59.538098
+OPS_review = 61.301050
 PLAN = 52.794625
 
 [models.metrics]
@@ -1235,6 +1250,7 @@ SWEBenchPro = 38.242878
 SWEBenchVerified = 66.736127
 SWEComposite = 44.012405
 SonarBugDensity = 64.241852
+SonarComposite = 59.671744
 SonarFunctionalSkill = 67.179803
 SonarIssueDensity = 35.747340
 SonarVulnerabilityDensity = 73.430782
@@ -1253,26 +1269,26 @@ aliases = ["gpt 5.3 codex", "gpt-5-3-codex", "gpt-5.3-codex", "gpt-5.3-codex-hig
 sources = ["aistupidlevel", "artificial_analysis", "livecodebench", "lmarena", "openrouter", "overrides", "sonar", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 71.189652
-p_raw = 57.374158
-b_raw = 64.955209
-r = 70.282647
-i_adj = 71.189652
-p_adj = 57.374158
-b_adj = 64.955209
+i_raw = 70.139358
+p_raw = 57.391730
+b_raw = 66.485839
+r = 70.428908
+i_adj = 70.139358
+p_adj = 57.391730
+b_adj = 66.485839
 
 [models.groups]
 A_B = 72.079652
 A_I = 81.886608
 A_P = 57.128884
 A_R = 80.877604
-BUILD = 62.589470
+BUILD = 66.046523
 CRE = 73.010747
 GEN = 55.752687
 LM_ARENA_REVIEW_PROXY = 92.500000
 OPS_long = 57.950471
 OPS_precision = 59.281280
-OPS_review = 58.849137
+OPS_review = 60.612088
 PLAN = 58.256268
 
 [models.metrics]
@@ -1303,6 +1319,7 @@ LiveCodeBench = 92.557984
 SWEBenchVerified = 76.306244
 SWEComposite = 68.417326
 SWERebench = 89.469217
+SonarComposite = 50.000000
 TerminalBench = 74.283141
 
 [models.missing]
@@ -1318,26 +1335,26 @@ aliases = ["gpt 5.4", "gpt-5-4", "gpt-5-4-high", "gpt-5-4-low", "gpt-5-4-medium"
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 73.099059
-p_raw = 55.154884
-b_raw = 76.898103
-r = 66.199142
-i_adj = 73.099059
-p_adj = 55.154884
-b_adj = 76.898103
+i_raw = 71.593872
+p_raw = 54.059602
+b_raw = 77.308987
+r = 64.780944
+i_adj = 71.593872
+p_adj = 54.059602
+b_adj = 77.308987
 
 [models.groups]
 A_B = 71.717800
 A_I = 83.315037
 A_P = 64.778496
 A_R = 80.877604
-BUILD = 79.890451
+BUILD = 80.242873
 CRE = 77.071467
 GEN = 39.385709
 LM_ARENA_REVIEW_PROXY = 18.484861
 OPS_long = 93.506658
 OPS_precision = 91.757054
-OPS_review = 90.273237
+OPS_review = 90.946515
 PLAN = 50.092821
 
 [models.metrics]
@@ -1377,6 +1394,7 @@ SWEBenchVerified = 89.272208
 SWEComposite = 88.619669
 SWERebench = 83.548834
 SonarBugDensity = 84.711069
+SonarComposite = 60.375478
 SonarFunctionalSkill = 66.810345
 SonarIssueDensity = 6.836506
 SonarVulnerabilityDensity = 100.000000
@@ -1397,26 +1415,26 @@ aliases = ["gpt 5.5", "gpt-5-5", "gpt-5-5-high", "gpt-5-5-low", "gpt-5-5-medium"
 sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "openrouter", "overrides", "sonar", "swebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 80.426621
-p_raw = 82.952722
-b_raw = 84.172590
-r = 87.546139
-i_adj = 80.384570
-p_adj = 82.858108
-b_adj = 84.004387
+i_raw = 80.312004
+p_raw = 84.506479
+b_raw = 85.777703
+r = 88.399977
+i_adj = 80.177353
+p_adj = 84.203514
+b_adj = 85.239099
 
 [models.groups]
 A_B = 75.576582
 A_I = 83.736759
 A_P = 65.638600
 A_R = 83.334367
-BUILD = 88.303266
+BUILD = 89.601230
 CRE = 73.010747
 GEN = 90.642227
 LM_ARENA_REVIEW_PROXY = 92.500000
 OPS_long = 83.611859
 OPS_precision = 82.096468
-OPS_review = 79.685399
+OPS_review = 80.347432
 PLAN = 91.980723
 
 [models.metrics]
@@ -1454,6 +1472,7 @@ SWEBenchVerified = 97.298757
 SWEComposite = 91.821489
 SWERebench = 83.548834
 SonarBugDensity = 94.473311
+SonarComposite = 65.523597
 SonarFunctionalSkill = 46.453202
 SonarIssueDensity = 52.654931
 SonarVulnerabilityDensity = 99.226139
@@ -1474,26 +1493,26 @@ aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", 
 sources = ["aistupidlevel", "arc_agi", "lmarena", "openrouter", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.026911
-p_raw = 44.202667
-b_raw = 44.998144
-r = 46.368327
-i_adj = 63.026911
-p_adj = 44.202667
-b_adj = 44.998144
+i_raw = 63.672015
+p_raw = 44.155038
+b_raw = 44.875017
+r = 44.839897
+i_adj = 63.672015
+p_adj = 44.155038
+b_adj = 44.875017
 
 [models.groups]
 A_B = 41.699509
 A_I = 53.227260
 A_P = 42.835537
 A_R = 62.402167
-BUILD = 45.620305
+BUILD = 45.180960
 CRE = 75.877265
 GEN = 52.080714
 LM_ARENA_REVIEW_PROXY = 19.748129
 OPS_long = 56.702168
 OPS_precision = 57.920080
-OPS_review = 57.715878
+OPS_review = 59.137993
 PLAN = 37.022219
 
 [models.metrics]
@@ -1522,6 +1541,7 @@ LMArenaSearchDocument = 19.748129
 LMArenaText = 75.877265
 SWEComposite = 46.731907
 SWERebench = 39.106356
+SonarComposite = 50.000000
 TerminalBench = 11.830056
 
 [models.missing]
@@ -1537,26 +1557,26 @@ aliases = ["grok code fast 1", "grok-code-fast", "grok-code-fast-1", "x-ai/grok-
 sources = ["aistupidlevel", "lmarena", "openrouter", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.456139
-p_raw = 49.240735
-b_raw = 59.171368
-r = 59.479573
-i_adj = 63.456139
-p_adj = 49.240735
-b_adj = 59.171368
+i_raw = 60.408488
+p_raw = 47.347164
+b_raw = 55.117463
+r = 55.653874
+i_adj = 60.408488
+p_adj = 47.347164
+b_adj = 55.117463
 
 [models.groups]
 A_B = 97.674221
 A_I = 97.754672
 A_P = 68.826166
 A_R = 100.000000
-BUILD = 40.852988
+BUILD = 39.939922
 CRE = 48.121037
 GEN = 45.799948
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 59.196268
 OPS_precision = 61.661231
-OPS_review = 62.704079
+OPS_review = 64.126193
 PLAN = 33.000000
 
 [models.metrics]
@@ -1584,6 +1604,7 @@ LMArenaCreativeOrOpenEnded = 48.121037
 LMArenaText = 48.121037
 SWEComposite = 43.382471
 SWERebench = 27.941569
+SonarComposite = 50.000000
 TerminalBench = 0.000000
 
 [models.missing]
@@ -1599,26 +1620,26 @@ aliases = ["glm 4.6", "glm-4-6", "glm-4.6", "glm-4p6", "z-ai/glm-4.6", "zai/glm-
 sources = ["aistupidlevel", "lmarena", "openrouter", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 40.118383
-p_raw = 42.872507
-b_raw = 37.117797
-r = 43.298669
-i_adj = 40.118383
-p_adj = 42.872507
-b_adj = 37.117797
+i_raw = 38.872415
+p_raw = 42.336922
+b_raw = 35.687075
+r = 42.086485
+i_adj = 38.872415
+p_adj = 42.336922
+b_adj = 35.687075
 
 [models.groups]
 A_B = 55.919549
 A_I = 55.000000
 A_P = 46.948830
 A_R = 58.500000
-BUILD = 24.100432
+BUILD = 24.693273
 CRE = 24.774207
 GEN = 43.693552
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 58.296234
 OPS_precision = 60.566807
-OPS_review = 61.585684
+OPS_review = 62.837380
 PLAN = 35.186826
 
 [models.metrics]
@@ -1640,6 +1661,7 @@ SWEBenchVerified = 64.266420
 SWEComposite = 30.635239
 SWERebench = 38.350366
 SonarBugDensity = 7.500000
+SonarComposite = 10.723130
 SonarFunctionalSkill = 7.500000
 SonarIssueDensity = 7.500000
 SonarVulnerabilityDensity = 28.987532
@@ -1658,26 +1680,26 @@ aliases = ["glm 4.7", "glm-4-7", "glm-4.7", "glm-4p7", "z-ai/glm-4.7", "zai/glm-
 sources = ["aistupidlevel", "lmarena", "mcp_atlas", "openrouter", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 32.319477
-p_raw = 41.687903
-b_raw = 46.952136
-r = 48.540397
-i_adj = 32.319477
-p_adj = 41.687903
-b_adj = 46.952136
+i_raw = 30.738586
+p_raw = 41.601814
+b_raw = 46.932659
+r = 48.015864
+i_adj = 30.738586
+p_adj = 41.601814
+b_adj = 46.932659
 
 [models.groups]
 A_B = 55.919549
 A_I = 51.675192
 A_P = 40.964175
 A_R = 58.500000
-BUILD = 40.988575
+BUILD = 42.430480
 CRE = 10.523205
 GEN = 40.130801
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 58.338615
 OPS_precision = 60.641892
-OPS_review = 61.701149
+OPS_review = 62.945169
 PLAN = 39.228644
 
 [models.metrics]
@@ -1697,6 +1719,7 @@ MCPAtlas = 0.000000
 SWEComposite = 56.269457
 SWERebench = 70.898190
 SonarBugDensity = 51.645410
+SonarComposite = 27.342646
 SonarFunctionalSkill = 0.000000
 SonarIssueDensity = 50.822957
 SonarVulnerabilityDensity = 28.718831
@@ -1715,26 +1738,26 @@ aliases = ["glm 5.1", "glm-5", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "g
 sources = ["arc_agi", "artificial_analysis", "livecodebench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 78.607924
-p_raw = 65.934954
-b_raw = 74.428542
-r = 79.466049
-i_adj = 78.607924
-p_adj = 65.934954
-b_adj = 74.428542
+i_raw = 78.479717
+p_raw = 66.640266
+b_raw = 73.852147
+r = 78.308603
+i_adj = 78.479717
+p_adj = 66.640266
+b_adj = 73.852147
 
 [models.groups]
 A_B = 75.246358
 A_I = 76.788748
 A_P = 56.454098
 A_R = 87.165339
-BUILD = 72.517501
+BUILD = 71.885539
 CRE = 85.541644
 GEN = 63.762304
 LM_ARENA_REVIEW_PROXY = 86.835160
 OPS_long = 83.419432
 OPS_precision = 87.475247
-OPS_review = 89.483211
+OPS_review = 87.125955
 PLAN = 70.432782
 
 [models.metrics]
@@ -1774,6 +1797,7 @@ SWEBenchVerified = 69.205835
 SWEComposite = 71.561719
 SWERebench = 100.000000
 SonarBugDensity = 100.000000
+SonarComposite = 85.984650
 SonarFunctionalSkill = 69.766010
 SonarIssueDensity = 100.000000
 SonarVulnerabilityDensity = 87.188306

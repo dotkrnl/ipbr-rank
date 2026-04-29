@@ -225,9 +225,9 @@ LMArenaText = 0.35
 # ... same structure for other groups
 
 [final_score_weights.I_raw]
-CRE = 0.43
-GEN = 0.19
-A_I = 0.30
+CRE = 0.46
+GEN = 0.22
+A_I = 0.24
 OPS_long = 0.08
 
 [final_score_weights.P_raw]

@@ -103,29 +103,39 @@ Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIE
 
 ### Final Scores
 Each role score is a weighted average of groups. AISL's role-shaped
-perspective (`A_*`) carries 0.30 in every formula, leaving the broader
-public benchmark groups collectively dominant.
+perspective (`A_*`) carries 0.24 in every formula (down from 0.30 after
+the 2026-04 multi-agent review — AISL is one correlated source family,
+not a population of independent leaderboards), leaving role-specific
+public benchmark groups collectively dominant at 0.68.
 Operational metrics (speed, cost, context window) carry 0.08 — paired
 with the tail-penalty curve, this means "fast enough" models cluster
 within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.43×CRE + 0.19×GEN + 0.30×A_I + 0.08×OPS_long
-- **P_raw** = 0.37×PLAN + 0.25×GEN + 0.30×A_P + 0.08×OPS_precision
-- **B_raw** = 0.57×BUILD + 0.05×PLAN + 0.30×A_B + 0.08×OPS_precision
-- **R** = 0.12×LM_ARENA_REVIEW_PROXY + 0.25×BUILD + 0.25×PLAN + 0.30×A_R + 0.08×OPS_review
+- **I_raw** = 0.46×CRE + 0.22×GEN + 0.24×A_I + 0.08×OPS_long
+- **P_raw** = 0.41×PLAN + 0.27×GEN + 0.24×A_P + 0.08×OPS_precision
+- **B_raw** = 0.62×BUILD + 0.06×PLAN + 0.24×A_B + 0.08×OPS_precision
+- **R** = 0.13×LM_ARENA_REVIEW_PROXY + 0.27×BUILD + 0.28×PLAN + 0.24×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
-For each vendor **v**, compute:
+For each vendor **v**, compute the reservation gap:
 ```
 L_v = max(0, max(R_all) - max(R_outside_v))
 ```
-Then apply penalties:
+That gap is the *available* penalty budget. Each model **m** in vendor
+**v** then pays a share proportional to its own contribution to the lead
+(`share_m = clamp((R_m - R_outside_v) / L_v, 0, 1)`, so the actual top-R
+model pays the full reservation and siblings tied with the outside max
+pay nothing). The per-model penalty is:
 ```
-I_adj = I_raw - 0.08 × L_v
-P_adj = P_raw - 0.18 × L_v
-B_adj = B_raw - 0.32 × L_v
+penalty_m = L_v × share_m
+I_adj = I_raw - 0.08 × penalty_m
+P_adj = P_raw - 0.18 × penalty_m
+B_adj = B_raw - 0.32 × penalty_m
 ```
 
-This prevents vendors from artificially inflating scores through their own preference evaluations.
+This prevents vendors from artificially inflating scores through their
+own preference evaluations without taxing every model that happens to
+share a vendor with a strong reviewer. See `docs/methodology.md` §6 for
+the derivation.
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 

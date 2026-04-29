@@ -133,11 +133,11 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.42), LMArenaText (0.25), GPQA_HLE_Reasoning (0.18), ARC_AGI_2 (0.15) |
 | **PLAN** (Planning) | TerminalBench (0.34), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.20), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.06) |
-| **BUILD** (Building) | SWEComposite (0.40), MCPAtlas (0.12), TerminalBench (0.09), LiveCodeBench (0.05), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarFunctionalSkill (0.04), SonarIssueDensity (0.025), SonarBugDensity (0.02), SonarVulnerabilityDensity (0.015), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
+| **BUILD** (Building) | SWEComposite (0.42), MCPAtlas (0.10), TerminalBench (0.09), LiveCodeBench (0.05), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarComposite (0.10), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), TTFT (0.35), BlendedCost (0.15), ContextWindow (0.15) |
-| **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.40), BlendedCost (0.20), ContextWindow (0.10) |
+| **OPS_review** (Ops for reviewing) | OutputSpeed (0.35), TTFT (0.30), BlendedCost (0.20), ContextWindow (0.15) |
 | **A_I** (AIStupid Idea) | AI_correctness (0.18), AI_spec (0.18), AI_efficiency (0.08), AI_stability (0.16), AI_recovery (0.12), AI_complexity (0.10), AI_edge_cases (0.08), AI_plan_coherence (0.10) — `AI_refusal` and `AI_code` removed (safety/code-quality signals that don't measure idea quality) |
 | **A_P** (AIStupid Planning) | AI_correctness, AI_spec, AI_efficiency, AI_stability, AI_recovery, AI_plan_coherence, AI_memory_retention, AI_context_awareness, AI_task_completion, AI_tool_selection, AI_parameter_accuracy |
 | **A_B** (AIStupid Building) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_recovery, AI_complexity, AI_edge_cases, AI_hallucination_resistance, AI_memory_retention |
@@ -149,6 +149,17 @@ computed as a missing-safe weighted average of `SWERebench` (0.30),
 (0.10). All four inputs use percentile normalization so they're on a
 comparable scale before the composite collapses them. See the source-level
 scoreboard for the raw input values when diagnosing per-model performance.
+
+`SonarComposite` is the same pattern applied to the four Sonar code-quality
+submetrics (functional pass rate plus issue / bug / vulnerability density).
+Defined in `[composite_metrics.SonarComposite]` as a missing-safe weighted
+average of `SonarFunctionalSkill` (0.40), `SonarIssueDensity` (0.25),
+`SonarBugDensity` (0.20), and `SonarVulnerabilityDensity` (0.15) — weights
+proportional to their previous standalone BUILD weights. Collapsing them
+into one signal stops a single Sonar payload from registering as four
+independent missing entries when a model isn't on Sonar's leaderboard, and
+prevents the three highly-correlated density metrics from triple-counting
+the same "buggy code" signal.
 
 ### 4.2 Shrink-to-50 with Trust Threshold
 
@@ -203,19 +214,27 @@ Each of the four roles (I_raw, P_raw, B_raw, R) is a weighted average of groups.
 
 From `[final_score_weights.*]` in `data/coefficients.toml`:
 
-All four role formulas put **A_\* at 0.30** — AISL's role-shaped
-perspectives remain a major behavioral signal, while the role-specific
-public-leaderboard groups collectively carry more weight. OPS_* stays at
-0.08.
+All four role formulas put **A_\* at 0.24** — down from 0.30 in 2026-04
+after multi-agent review pointed out that the AISL perspective groups all
+re-project the same 17-axis capability suite from one source family,
+which had been driving 30 % of every role with correlated noise. The
+freed weight (0.06 per role) was redistributed to the role-specific
+public-leaderboard groups so direct-evidence portfolios collectively
+carry 0.68. OPS_* stays at 0.08.
+
+Codex's review pushed back on a one-shot drop to 0.22 because public
+PLAN/R coverage is still thinner than AISL's; 0.24 is the conservative
+phase-one cut, with a follow-up review planned once direct-evidence
+coverage grows.
 
 **I_raw** (Idea):
 ```
-I_raw = 0.43×CRE + 0.19×GEN + 0.30×A_I + 0.08×OPS_long
+I_raw = 0.46×CRE + 0.22×GEN + 0.24×A_I + 0.08×OPS_long
 ```
 
 **P_raw** (Planning):
 ```
-P_raw = 0.37×PLAN + 0.25×GEN + 0.30×A_P + 0.08×OPS_precision
+P_raw = 0.41×PLAN + 0.27×GEN + 0.24×A_P + 0.08×OPS_precision
 ```
 
 PLAN's basket of TerminalBench / Tau2Bench / AAReasoning / MCPAtlas can
@@ -225,19 +244,19 @@ leaderboard mix.
 
 **B_raw** (Building):
 ```
-B_raw = 0.57×BUILD + 0.05×PLAN + 0.30×A_B + 0.08×OPS_precision
+B_raw = 0.62×BUILD + 0.06×PLAN + 0.24×A_B + 0.08×OPS_precision
 ```
 
 **R** (Reviewing):
 ```
-R = 0.12×LM_ARENA_REVIEW_PROXY + 0.25×BUILD + 0.25×PLAN + 0.30×A_R + 0.08×OPS_review
+R = 0.13×LM_ARENA_REVIEW_PROXY + 0.27×BUILD + 0.28×PLAN + 0.24×A_R + 0.08×OPS_review
 ```
 
-A_R remains the largest single review-specific behavioral signal.
-LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.12:
+A_R remains a major review-specific behavioral signal.
+LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.13:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.25 keeps reviewing tied to "you can read the
-code." PLAN 0.25 captures review-as-planning.
+code-review benchmark. BUILD 0.27 keeps reviewing tied to "you can read the
+code." PLAN 0.28 captures review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -386,10 +405,10 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | IFBench | higher | no | percentile | Artificial Analysis (ifbench field) | PLAN |
 | GDPval | higher | no | percentile | overrides table (GDPval-AA Elo) | BUILD |
 | LongContextRecall | higher | no | percentile | Artificial Analysis (lcr field) | BUILD, PLAN |
-| SonarFunctionalSkill | higher | no | percentile | Sonar code-quality JSON | BUILD |
-| SonarIssueDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
-| SonarBugDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
-| SonarVulnerabilityDensity | **lower** | no | percentile | Sonar code-quality JSON | BUILD |
+| SonarFunctionalSkill | higher | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
+| SonarIssueDensity | **lower** | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
+| SonarBugDensity | **lower** | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
+| SonarVulnerabilityDensity | **lower** | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
 | OutputSpeed | higher | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | TTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
@@ -429,16 +448,16 @@ Removing it keeps the coefficient surface honest.
 All coefficients are verbatim from `data/coefficients.toml`. This table is for quick reference; the TOML file is authoritative.
 
 ### Final Score Weights
-All four roles weight the AISL perspective at 0.30. Role-specific public
-benchmark groups sum to 0.62, and OPS_* contributes 0.08 (paired with the
+All four roles weight the AISL perspective at 0.24. Role-specific public
+benchmark groups sum to 0.68, and OPS_* contributes 0.08 (paired with the
 tail-penalty curve so only genuinely slow models lose meaningful score).
 
 | Role | Group Contributions |
 |------|---------------------|
-| I_raw | CRE 0.43, GEN 0.19, A_I 0.30, OPS_long 0.08 |
-| P_raw | PLAN 0.37, GEN 0.25, A_P 0.30, OPS_precision 0.08 |
-| B_raw | BUILD 0.57, PLAN 0.05, A_B 0.30, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.12, BUILD 0.25, PLAN 0.25, A_R 0.30, OPS_review 0.08 |
+| I_raw | CRE 0.46, GEN 0.22, A_I 0.24, OPS_long 0.08 |
+| P_raw | PLAN 0.41, GEN 0.27, A_P 0.24, OPS_precision 0.08 |
+| B_raw | BUILD 0.62, PLAN 0.06, A_B 0.24, OPS_precision 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.13, BUILD 0.27, PLAN 0.28, A_R 0.24, OPS_review 0.08 |
 
 ### Reviewer-Reservation Penalties
 | Role | Coefficient |
