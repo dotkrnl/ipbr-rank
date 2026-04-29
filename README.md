@@ -117,15 +117,16 @@ within a 1-2 point spread but genuinely slow models lose 4-6 points:
 - **R** = 0.13×LM_ARENA_REVIEW_PROXY + 0.27×BUILD + 0.28×PLAN + 0.24×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
-For each vendor **v**, compute the reservation gap:
+For each vendor **v**, compute the reservation gap from the direct LM Arena
+search/document review proxy `Q = LMArenaSearchDocument`:
 ```
-L_v = max(0, max(R_all) - max(R_outside_v))
+L_v = max(0, max(Q_all) - max(Q_outside_v))
 ```
 That gap is the *available* penalty budget. Each model **m** in vendor
 **v** then pays a share proportional to its own contribution to the lead
-(`share_m = clamp((R_m - R_outside_v) / L_v, 0, 1)`, so the actual top-R
-model pays the full reservation and siblings tied with the outside max
-pay nothing). The per-model penalty is:
+(`share_m = clamp((Q_m - Q_outside_v) / L_v, 0, 1)`, so the actual top
+proxy model pays the full reservation and siblings tied with the outside
+proxy max pay nothing). The per-model penalty is:
 ```
 penalty_m = L_v × share_m
 I_adj = I_raw - 0.08 × penalty_m
@@ -134,9 +135,9 @@ B_adj = B_raw - 0.32 × penalty_m
 ```
 
 This prevents vendors from artificially inflating scores through their
-own preference evaluations without taxing every model that happens to
-share a vendor with a strong reviewer. See `docs/methodology.md` §6 for
-the derivation.
+own preference evaluations without taxing every model that merely has high
+BUILD/PLAN/AISL review capability. See `docs/methodology.md` §6 for the
+derivation.
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 

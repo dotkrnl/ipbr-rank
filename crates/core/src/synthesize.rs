@@ -65,7 +65,7 @@ pub fn synthesize_rows(
         for (target_id, from_id) in pairs {
             if real_count > 0
                 && synth_count > 0
-                && (synth_count as f64 / (real_count + synth_count) as f64) >= cfg.per_source_cap
+                && (synth_count as f64 / (real_count + synth_count) as f64) > cfg.per_source_cap
             {
                 // REVIEWER: the spec calls for a warning here, but `ipbr-core` deliberately avoids
                 // adding a logging dependency; `eprintln!` keeps the runtime signal without widening
@@ -299,6 +299,47 @@ mod tests {
             lmarena_rows[2].synthesized_from.as_deref(),
             Some("openai/gpt-5.4")
         );
+    }
+
+    #[test]
+    fn synthesize_per_source_cap_does_not_cap_at_exact_boundary() {
+        let records = vec![
+            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+            record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4"]),
+            record(
+                "google/gemini-3.1-pro-preview",
+                "gemini-3.1-pro-preview",
+                &["gemini-3.1-pro-preview"],
+            ),
+            record("google/gemini-3-pro", "gemini-3-pro", &["gemini-3-pro"]),
+            record("anthropic/claude-opus-4.7", "opus-4.7", &["opus-4.7"]),
+        ];
+        let mut rows = rows_by_source(vec![
+            raw("lmarena", "gpt-5.4", None, &[("score", json!(88.0))]),
+            raw("lmarena", "gemini-3-pro", None, &[("score", json!(81.0))]),
+        ]);
+
+        let stats = synthesize_rows(
+            &mut rows,
+            &[
+                ("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string()),
+                (
+                    "google/gemini-3.1-pro-preview".to_string(),
+                    "google/gemini-3-pro".to_string(),
+                ),
+                (
+                    "anthropic/claude-opus-4.7".to_string(),
+                    "anthropic/claude-opus-4.6".to_string(),
+                ),
+            ],
+            &records,
+            &cfg(0.50, 0.50),
+        );
+
+        let lmarena_rows = &rows["lmarena"];
+        assert_eq!(stats.per_source.get("lmarena"), Some(&2));
+        assert!(stats.capped_sources.is_empty());
+        assert_eq!(lmarena_rows.len(), 4);
     }
 
     #[test]

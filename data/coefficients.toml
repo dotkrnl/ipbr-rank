@@ -95,7 +95,7 @@ ARC_AGI_2 = 0.15        # novel pattern induction — orthogonal to knowledge be
 # end-to-end. TerminalBench is the heaviest input (0.34) because it most
 # directly evaluates planning-then-executing on a real shell. Tau2Bench and
 # AAReasoning fill in agentic tool-use and gpqa+hle structured reasoning
-# respectively. MCPAtlas drops to 0.06 here (it carries 0.12 in BUILD, where
+# respectively. MCPAtlas drops to 0.06 here (it carries 0.10 in BUILD, where
 # tool-orchestration work belongs more squarely) — the asymmetry stops
 # MCPAtlas's per-vendor coverage gaps (no GPT-5.5 row, only GPT-5.4-mini /
 # 5.4) from dominating the P-axis.

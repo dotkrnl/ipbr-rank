@@ -313,9 +313,9 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <p>Each model gets four role scores from public benchmarks. <strong>Idea</strong> measures open-ended creativity. <strong>Plan</strong> measures structured reasoning, function-calling, and multi-step decomposition. <strong>Build</strong> measures implementation skill — SWE-bench, LiveCodeBench, terminal tasks. <strong>Review</strong> measures preference judgment.</p>
 
 <h3>raw vs adjusted</h3>
-<p>The <em>raw</em> score is the benchmark composite, normalized to 0-100. The <em>adjusted</em> score subtracts a <strong>reviewer-reservation</strong> penalty: when a vendor's models dominate Review, that lead gets discounted from their Idea, Plan, and Build scores so vendors can't game their own preference evaluations.</p>
+<p>The <em>raw</em> score is the benchmark composite, normalized to 0-100. The <em>adjusted</em> score subtracts a <strong>reviewer-reservation</strong> penalty: when a vendor's models lead the direct LM Arena search/document review proxy, that proxy lead gets discounted from their Idea, Plan, and Build scores so vendors can't game their own preference evaluations.</p>
 
-<p>Penalty coefficients differ by role: Build is penalized hardest (0.32), Plan moderately (0.18), Idea lightly (0.08). Review is never adjusted — it is the source of the penalty.</p>
+<p>Penalty coefficients differ by role: Build is penalized hardest (0.32), Plan moderately (0.18), Idea lightly (0.08). Review is never adjusted.</p>
 
 <h3>missing data</h3>
 <p>If a model is missing some metrics within a group, the group score blends from shrink-to-50 to trusting the present metrics across 60-80% group coverage. At 80% coverage and above, the present-weight mean is trusted directly.</p>

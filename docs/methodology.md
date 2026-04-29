@@ -18,7 +18,7 @@ The scoring pipeline has seven stages:
 1. **Ingestion**: Fetch rows from each source, match model names to canonical IDs via alias matching, optionally synthesize missing rows from sibling models (`data/synthesis_aliases.toml`).
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
 3. **Uncertainty penalties**: Values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Values from manual overrides are pulled toward 50 by 10 %.
-4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (currently only `SWEComposite`).
+4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (`SWEComposite` and `SonarComposite`).
 5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
 6. **Canary health penalty**: AISL canary drift is consumed as `AI_canary_health`, outside all groups. Healthy or missing canary data adds no points; degraded canary data subtracts up to 6 points from each raw role score.
 7. **Final scoring**: Role scores are weighted averages of groups; the reviewer-reservation penalty produces the `_adj` variants of I/P/B.
@@ -276,16 +276,18 @@ population.
 
 ## 6. Reviewer-Reservation Penalty
 
-The raw I/P/B scores do not account for vendor bias in preference evaluations (e.g., a vendor's preference model may favor its own LLMs). The reviewer-reservation penalty corrects for this.
+The raw I/P/B scores do not account for vendor bias in preference evaluations (e.g., a vendor's preference model may favor its own LLMs). The reviewer-reservation penalty corrects for this using the direct LM Arena search/document review proxy (`LMArenaSearchDocument`), not the public `R` score. `R` also includes BUILD, PLAN, and AISL review evidence, so using it as the reservation basis would penalize genuine task capability instead of only preference-review advantage.
 
 ### 6.1 Penalty Derivation
 
-For each vendor **v**:
-1. Compute `R_all = max(R across all models)` — the best reviewer score globally.
-2. Compute `R_outside_v = max(R across models not from vendor v)` — the best reviewer score excluding vendor v's models.
-3. Define the **reservation gap**: `L_v = max(0, R_all - R_outside_v)`.
+Let `Q_m` be model **m**'s normalized `LMArenaSearchDocument` metric. Models without a direct proxy value do not create or pay a reservation penalty.
 
-If vendor v does not have the unique best reviewer, its per-model penalty share is zero. If vendor v has the unique best reviewer, `L_v` measures how much better that reviewer is than the best non-v reviewer.
+For each vendor **v**:
+1. Compute `Q_all = max(Q across models with direct proxy values)` — the best direct review-proxy score globally.
+2. Compute `Q_outside_v = max(Q across models not from vendor v)` — the best direct review-proxy score excluding vendor v's models.
+3. Define the **reservation gap**: `L_v = max(0, Q_all - Q_outside_v)`.
+
+If vendor v does not have the unique best direct review proxy, its per-model penalty share is zero. If vendor v has the unique best direct review proxy, `L_v` measures how much better that proxy is than the best non-v proxy.
 
 ### 6.2 Penalty Coefficients
 
@@ -301,16 +303,16 @@ applied to each individual model in vendor **v** in proportion to that
 model's own contribution to the lead:
 
 ```
-share_m = clamp((R_m - R_outside_v) / L_v, 0, 1)   # 1.0 for the actual top-R model
+share_m = clamp((Q_m - Q_outside_v) / L_v, 0, 1)   # 1.0 for the actual top-proxy model
 penalty_m = L_v × share_m
 ```
 
-So the actual top reviewer in vendor **v** pays the full reservation,
-sibling models with R at or below `R_outside_v` pay nothing, and models
-in between pay proportionally. This stops the reservation tax from
-hitting every model that happens to share a vendor with a strong
-reviewer, while preserving the original semantics for the model that
-actually drives the lead.
+So the actual top proxy model in vendor **v** pays the full reservation,
+sibling models with `Q` at or below `Q_outside_v` pay nothing, and models
+in between pay proportionally. This stops the reservation tax from hitting
+every model that happens to share a vendor with a strong reviewer proxy,
+while preserving the original semantics for the model that actually drives
+the lead.
 
 ### 6.4 Adjusted Scores
 
@@ -470,8 +472,8 @@ tail-penalty curve so only genuinely slow models lose meaningful score).
 ### Synthesis Penalty
 | Constant | Value |
 |----------|-------|
-| `SYNTHESIS_PENALTY` (in `crates/core/src/score.rs`) | 0.15 |
-| `OVERRIDE_REPORTED_PENALTY` (in `crates/core/src/score.rs`) | 0.10 |
+| `[penalties].synthesis` | 0.15 |
+| `[penalties].override_reported` | 0.10 |
 
 When a metric value comes in via the synthesis layer, its normalized score
 is blended toward 50: `final = score × 0.85 + 50 × 0.15`. Synthesized
