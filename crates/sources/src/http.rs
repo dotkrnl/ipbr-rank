@@ -43,7 +43,10 @@ async fn send_with_retry(
                     backoff = (backoff * 2).min(Duration::from_millis(MAX_BACKOFF_MS));
                     continue;
                 }
-                if status.is_server_error() && attempt < MAX_RETRIES {
+                if status.is_server_error()
+                    && status != reqwest::StatusCode::NOT_IMPLEMENTED
+                    && attempt < MAX_RETRIES
+                {
                     tokio::time::sleep(backoff).await;
                     backoff = (backoff * 2).min(Duration::from_millis(MAX_BACKOFF_MS));
                     continue;

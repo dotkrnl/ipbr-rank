@@ -45,20 +45,39 @@ def get_json_curl(url, headers=None, max_retries=8):
     """Fallback: use system curl when python urllib gets 429s."""
     delay = 10.0
     for attempt in range(max_retries):
-        cmd = ["/usr/bin/curl", "-fsS", "-A", UA]
+        cmd = ["/usr/bin/curl", "-sS", "-A", UA, "-w", "\n%{http_code}"]
         for k, v in (headers or {}).items():
             cmd += ["-H", f"{k}: {v}"]
         cmd.append(url)
         result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode == 0:
-            return json.loads(result.stdout)
-        if "429" in result.stderr and attempt < max_retries - 1:
+        if result.returncode != 0:
+            raise RuntimeError(f"curl failed: {result.stderr.strip()}")
+        body, _, status_text = result.stdout.rpartition("\n")
+        status = int(status_text) if status_text.isdigit() else 0
+        if 200 <= status < 300:
+            return json.loads(body)
+        if status == 429 and attempt < max_retries - 1:
             print(f"  curl 429, sleeping {delay}s")
             time.sleep(delay)
             delay *= 2
             continue
-        raise RuntimeError(f"curl failed: {result.stderr.strip()}")
+        if status == 501:
+            raise RuntimeError(f"curl failed HTTP {status}: {body.strip()}")
+        if status >= 500 and attempt < max_retries - 1:
+            print(f"  curl HTTP {status}, sleeping {delay}s")
+            time.sleep(delay)
+            delay *= 2
+            continue
+        raise RuntimeError(f"curl failed HTTP {status}: {body.strip()}")
     raise RuntimeError("curl: max retries exhausted")
+
+
+def is_locked_dataset_error(err):
+    message = str(err)
+    return (
+        "LockedDatasetTimeoutError" in message
+        or "dataset is currently locked" in message
+    )
 
 
 def get_text(url, headers=None):
@@ -142,7 +161,15 @@ def fetch_lmarena():
         offset = 0
         while True:
             url = f"https://datasets-server.huggingface.co/rows?dataset={dataset}&config={cfg}&split=latest&offset={offset}&length=100"
-            page = get_json_curl(url, headers)
+            try:
+                page = get_json_curl(url, headers)
+            except Exception as e:
+                if offset == 0 and (is_locked_dataset_error(e) or "HTTP 501" in str(e)):
+                    fallback_url = f"https://datasets-server.huggingface.co/first-rows?dataset={dataset}&config={cfg}&split=latest"
+                    page = get_json_curl(fallback_url, headers)
+                    pages.append(page)
+                    break
+                raise
             time.sleep(5.0)
             rows = page.get("rows") or []
             pages.append(page)

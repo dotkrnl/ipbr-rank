@@ -76,7 +76,18 @@ impl Source for LmArenaSource {
                 let url = format!(
                     "https://datasets-server.huggingface.co/rows?dataset={DATASET}&config={config}&split=latest&offset={offset}&length=100"
                 );
-                let page = http.get_json(&url, &headers).await?;
+                let page = match http.get_json(&url, &headers).await {
+                    Ok(page) => page,
+                    Err(err) if offset == 0 && is_locked_dataset_error(&err) => {
+                        let fallback_url = format!(
+                            "https://datasets-server.huggingface.co/first-rows?dataset={DATASET}&config={config}&split=latest"
+                        );
+                        let page = http.get_json(&fallback_url, &headers).await?;
+                        pages.push(page);
+                        break;
+                    }
+                    Err(err) => return Err(err),
+                };
                 let rows = page.get("rows").and_then(Value::as_array).ok_or_else(|| {
                     SourceError::Parse(format!("LMArena {config} payload missing rows[]"))
                 })?;
@@ -177,6 +188,17 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     Ok(rows_by_model.into_values().collect())
 }
 
+fn is_locked_dataset_error(err: &SourceError) -> bool {
+    match err {
+        SourceError::Http(message) => {
+            message.contains("LockedDatasetTimeoutError")
+                || message.contains("dataset is currently locked")
+                || message.contains("501 Not Implemented")
+        }
+        _ => false,
+    }
+}
+
 fn map_rating(config: &str, rating: f64, fields: &mut BTreeMap<String, Value>) {
     match config {
         "text" => {
@@ -274,6 +296,73 @@ mod tests {
 
         assert!(rows.is_empty());
         assert_eq!(http.calls.load(Ordering::Relaxed), CONFIGS.len());
+    }
+
+    struct LockedRowsHttp;
+
+    #[async_trait::async_trait]
+    impl Http for LockedRowsHttp {
+        async fn get_json(
+            &self,
+            url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<Value, SourceError> {
+            if url.contains("/rows?") && url.contains("config=text") {
+                return Err(SourceError::Http(
+                    "HTTP status server error (501 Not Implemented); LockedDatasetTimeoutError"
+                        .to_string(),
+                ));
+            }
+            if url.contains("/first-rows?") && url.contains("config=text") {
+                return Ok(json!({
+                    "rows": [
+                        {"row_idx": 0, "row": {
+                            "model_name": "claude-opus-4-6-thinking",
+                            "organization": "anthropic",
+                            "rating": 1499.4,
+                            "category": "overall"
+                        }}
+                    ],
+                    "truncated": true
+                }));
+            }
+            Ok(json!({
+                "rows": [],
+                "num_rows_total": 0
+            }))
+        }
+
+        async fn get_text(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<String, SourceError> {
+            panic!("lmarena fetch should not request text")
+        }
+    }
+
+    #[tokio::test]
+    async fn fetch_falls_back_to_first_rows_when_rows_endpoint_is_locked() {
+        let rows = LmArenaSource
+            .fetch(
+                &LockedRowsHttp,
+                FetchOptions {
+                    cache_dir: None,
+                    offline: false,
+                },
+                &SecretStore::default(),
+            )
+            .await
+            .expect("locked datasets-server rows endpoint should use first-rows fallback");
+
+        let row = rows
+            .iter()
+            .find(|row| row.model_name == "claude-opus-4-6-thinking")
+            .expect("fallback row should be parsed");
+        assert_eq!(
+            row.fields.get("LMArenaText").and_then(number_like),
+            Some(1499.4)
+        );
     }
 
     #[test]
