@@ -92,19 +92,16 @@ ARC_AGI_2 = 0.15        # novel pattern induction — orthogonal to knowledge be
 
 [group_weights.PLAN]
 # PLAN composition reflects "structured multi-step decomposition" measured
-# end-to-end. TerminalBench is the heaviest input (0.34) because it most
-# directly evaluates planning-then-executing on a real shell. Tau2Bench and
-# AAReasoning fill in agentic tool-use and gpqa+hle structured reasoning
-# respectively. MCPAtlas drops to 0.06 here (it carries 0.10 in BUILD, where
-# tool-orchestration work belongs more squarely) — the asymmetry stops
-# MCPAtlas's per-vendor coverage gaps (no GPT-5.5 row, only GPT-5.4-mini /
-# 5.4) from dominating the P-axis.
-TerminalBench = 0.34
-Tau2Bench = 0.20
-ArtificialAnalysisReasoning = 0.20
-IFBench = 0.12
-LongContextRecall = 0.08
-MCPAtlas = 0.06
+# end-to-end. TerminalBench remains important, but it is now capped at 0.20
+# because the public leaderboard measures agent scaffold + model + execution
+# policy, not pure model planning. The freed weight moves into model-leaning
+# reasoning/tool-use signals so PLAN is less dominated by any one agent harness.
+TerminalBench = 0.20
+Tau2Bench = 0.22
+ArtificialAnalysisReasoning = 0.22
+IFBench = 0.14
+LongContextRecall = 0.10
+MCPAtlas = 0.12
 
 # BUILD rebalanced: AACoding capped 0.18 → 0.12 (it's a meta-aggregate that
 # overlaps SWE-bench, LCB, Terminal — the prior weight double-counted that

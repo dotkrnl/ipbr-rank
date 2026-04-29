@@ -132,7 +132,7 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 |-----------|-------------------------------------------------------|
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.42), LMArenaText (0.25), GPQA_HLE_Reasoning (0.18), ARC_AGI_2 (0.15) |
-| **PLAN** (Planning) | TerminalBench (0.34), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.20), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.06) |
+| **PLAN** (Planning) | TerminalBench (0.20), ArtificialAnalysisReasoning (0.22), Tau2Bench (0.22), IFBench (0.14), LongContextRecall (0.10), MCPAtlas (0.12) |
 | **BUILD** (Building) | SWEComposite (0.45), MCPAtlas (0.10), TerminalBench (0.09), GSO (0.02), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarComposite (0.10), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
