@@ -178,6 +178,9 @@ fn apply_canary_health_penalty(records: &mut [ModelRecord], penalties: &Penaltie
         // Deadband: healthy canaries (>= 60) get no penalty. Below the
         // deadband, ramp linearly to the full penalty at `CANARY_HEALTH_FLOOR`.
         let span = penalties.canary_health_deadband - penalties.canary_health_floor;
+        if span <= 0.0 {
+            continue;
+        }
         let degradation = ((penalties.canary_health_deadband - health) / span).clamp(0.0, 1.0);
         let penalty = degradation * penalties.canary_max_role_penalty;
         if penalty <= 0.0 {
@@ -455,6 +458,26 @@ mod tests {
         assert!(
             bad < missing - 5.0,
             "bad canary should apply a visible penalty: bad={bad}, missing={missing}"
+        );
+    }
+
+    #[test]
+    fn canary_health_survives_deadband_leq_floor() {
+        let mut coef = Coefficients::load_embedded().unwrap();
+        let mut penalties = coef.penalties.clone().unwrap_or_default();
+        penalties.canary_health_deadband = 20.0;
+        penalties.canary_health_floor = 20.0;
+        coef.penalties = Some(penalties);
+
+        let mut records = vec![make_record(
+            "a/x",
+            Vendor::Other("a".into()),
+            &[("AI_canary_health", 10.0)],
+        )];
+        compute_scores_with(&mut records, &coef);
+        assert!(
+            records[0].scores.i_raw.is_finite(),
+            "span <= 0 must not produce NaN"
         );
     }
 
