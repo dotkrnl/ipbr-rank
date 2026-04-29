@@ -126,6 +126,9 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         ));
     }
 
+    if out.ends_with('\n') {
+        out.pop();
+    }
     out
 }
 
