@@ -53,8 +53,8 @@ n_rows_unmatched = 305
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 23
-n_rows_matched = 37
+n_rows_ingested = 27
+n_rows_matched = 41
 n_rows_unmatched = 0
 
 [sources."sonar"]
@@ -631,30 +631,30 @@ display_name = "deepseek-v4-flash"
 vendor = "deepseek"
 thinking_effort = "default"
 aliases = ["deepseek chat", "deepseek reasoner", "deepseek v4 flash", "deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash", "deepseek/deepseek-chat", "deepseek/deepseek-reasoner", "deepseek/deepseek-v4-flash"]
-sources = ["aistupidlevel", "lmarena", "openrouter"]
+sources = ["aistupidlevel", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 49.802935
-p_raw = 49.150201
-b_raw = 47.612995
-r = 48.068715
+p_raw = 50.044864
+b_raw = 55.142692
+r = 51.901750
 i_adj = 49.802935
-p_adj = 49.150201
-b_adj = 47.612995
+p_adj = 50.044864
+b_adj = 55.142692
 
 [models.groups]
 A_B = 35.639533
 A_I = 27.152655
 A_P = 39.517794
 A_R = 36.817519
-BUILD = 50.000000
+BUILD = 61.933502
 CRE = 58.984060
 GEN = 52.246015
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 58.243832
 OPS_precision = 63.243832
 OPS_review = 65.406387
-PLAN = 50.000000
+PLAN = 52.182105
 
 [models.metrics]
 AI_canary_health = 78.400000
@@ -678,8 +678,12 @@ BlendedCost = 100.000000
 ContextWindow = 71.625547
 LMArenaCreativeOrOpenEnded = 58.984060
 LMArenaText = 58.984060
-SWEComposite = 50.000000
+SWEBenchMultilingual = 58.608696
+SWEBenchPro = 95.000000
+SWEBenchVerified = 91.735355
+SWEComposite = 72.871173
 SonarComposite = 50.000000
+TerminalBench = 60.910524
 
 [models.missing]
 metrics = []

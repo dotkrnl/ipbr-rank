@@ -47,6 +47,12 @@ metric = "SWEBenchVerified"
 value = 80.6
 note = "Google DeepMind Gemini 3.1 Pro model card, 2026-02-19"
 
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "SWEBenchVerified"
+value = 78.6
+note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
+
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.0 — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -80,6 +86,12 @@ canonical_id = "z-ai/glm-5.1"
 metric = "TerminalBench"
 value = 63.5
 note = "Z.ai GLM-5.1 launch announcement, 2026-04-08"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "TerminalBench"
+value = 56.6
+note = "DeepSeek V4-Flash Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
 
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
@@ -172,3 +184,19 @@ canonical_id = "openai/gpt-5.5"
 metric = "SWEBenchPro"
 value = 58.6
 note = "OpenAI-reported on SWE-Bench Pro (xHigh), 2026-04-23"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "SWEBenchPro"
+value = 52.3
+note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
+
+# ---------------------------------------------------------------------
+# SWE-Bench Multilingual — vendor-reported figures
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "SWEBenchMultilingual"
+value = 70.2
+note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
