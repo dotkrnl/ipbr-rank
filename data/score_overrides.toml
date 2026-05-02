@@ -53,6 +53,30 @@ metric = "SWEBenchVerified"
 value = 78.6
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.1"
+metric = "SWEBenchVerified"
+value = 74.5
+note = "Anthropic Claude Opus 4.1 launch announcement, anthropic.com/news/claude-opus-4-1, 2025-08-05 (only variant Anthropic published in the launch post)"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2-0905"
+metric = "SWEBenchVerified"
+value = 69.2
+note = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, mean over 5 runs (69.2 +/- 0.63), 2025-09"
+
+[[entries]]
+canonical_id = "xai/grok-code-fast-1"
+metric = "SWEBenchVerified"
+value = 70.8
+note = "xAI launch announcement, x.ai/news/grok-code-fast-1: 'grok-code-fast-1 scored 70.8% using our own internal harness', 2025-08-28"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "SWEBenchVerified"
+value = 73.8
+note = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
+
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.0 — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -92,6 +116,12 @@ canonical_id = "deepseek/deepseek-v4-flash"
 metric = "TerminalBench"
 value = 56.6
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2-0905"
+metric = "TerminalBench"
+value = 44.5
+note = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, 'Terminal-Bench (Terminus-2)' = Terminal-Bench 2.0, mean over 5 runs (44.5 +/- 2.03), 2025-09"
 
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
@@ -167,6 +197,42 @@ metric = "GDPval"
 value = 1189
 note = "GDPval-AA Elo (high), 2026-04-27"
 
+[[entries]]
+canonical_id = "openai/gpt-5.2"
+metric = "GDPval"
+value = 1467
+note = "GDPval-AA Elo (xhigh), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2-0905"
+metric = "GDPval"
+value = 864
+note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Kimi K2 0905), 2026-04-27"
+
+[[entries]]
+canonical_id = "xai/grok-4-latest"
+metric = "GDPval"
+value = 983
+note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok 4 standard), 2026-04-27"
+
+[[entries]]
+canonical_id = "xai/grok-code-fast-1"
+metric = "GDPval"
+value = 761
+note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok Code Fast 1), 2026-04-27"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.6"
+metric = "GDPval"
+value = 1030
+note = "GDPval-AA Elo (Reasoning), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "GDPval"
+value = 1186
+note = "GDPval-AA Elo (Reasoning), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
+
 # SWE-Bench Pro — Anthropic-reported and OpenAI-reported figures that don't
 # appear on Scale's public-dataset leaderboard. Matters because without these
 # Opus 4.7 / GPT-5.5 carry only a single Verified value through SWEComposite,
@@ -191,6 +257,24 @@ metric = "SWEBenchPro"
 value = 52.3
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
+[[entries]]
+canonical_id = "openai/gpt-5.3-codex"
+metric = "SWEBenchPro"
+value = 56.8
+note = "OpenAI-reported on GPT-5.3-Codex launch, openai.com/index/introducing-gpt-5-3-codex (xHigh effort), 2026-02-05"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "SWEBenchPro"
+value = 58.6
+note = "Moonshot Kimi K2.6 tech blog, kimi.com/blog/kimi-k2-6, 2026-04-20"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "SWEBenchPro"
+value = 58.4
+note = "Z.ai GLM-5.1 launch / Hugging Face model card zai-org/GLM-5.1, 2026-04-08"
+
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -200,3 +284,45 @@ canonical_id = "deepseek/deepseek-v4-flash"
 metric = "SWEBenchMultilingual"
 value = 70.2
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.5"
+metric = "SWEBenchMultilingual"
+value = 76.2
+note = "Anthropic Claude Opus 4.5 System Card Table 2.4.A, 64k extended thinking, 5-trial average, 2025-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "SWEBenchMultilingual"
+value = 80.5
+note = "Anthropic Claude Opus 4.7 System Card Table 8.1.A, adaptive thinking max effort, 5-trial average, 2026-04-16"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-4.6"
+metric = "SWEBenchMultilingual"
+value = 75.9
+note = "Anthropic Claude Sonnet 4.6 System Card Section 2.2, adaptive thinking max effort, 10-trial average, 2026-02-17"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2-0905"
+metric = "SWEBenchMultilingual"
+value = 55.9
+note = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, mean over 5 runs (55.9 +/- 0.72), 2025-09"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "SWEBenchMultilingual"
+value = 76.7
+note = "Moonshot Kimi K2.6 tech blog, kimi.com/blog/kimi-k2-6, 2026-04-20"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.6"
+metric = "SWEBenchMultilingual"
+value = 53.8
+note = "Reported in Z.ai GLM-4.7 model card comparison table (huggingface.co/zai-org/GLM-4.7), which lists GLM-4.6 baseline at 53.8, 2025-12-23"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "SWEBenchMultilingual"
+value = 66.7
+note = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
