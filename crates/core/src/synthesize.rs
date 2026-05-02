@@ -60,12 +60,17 @@ pub fn synthesize_rows(
 
     for (source_id, rows) in rows_by_source.iter_mut() {
         let real_count = rows.len();
-        let mut synth_count = 0usize;
+        // Cap counts unique synthesis pairs that emitted (matching the
+        // original semantic: "how many target models use this source via
+        // synthesis"). Stats track total cloned rows for downstream debug.
+        let mut synth_pair_count = 0usize;
+        let mut synth_row_count = 0usize;
 
         for (target_id, from_id) in pairs {
             if real_count > 0
-                && synth_count > 0
-                && (synth_count as f64 / (real_count + synth_count) as f64) > cfg.per_source_cap
+                && synth_pair_count > 0
+                && (synth_pair_count as f64 / (real_count + synth_pair_count) as f64)
+                    > cfg.per_source_cap
             {
                 // REVIEWER: the spec calls for a warning here, but `ipbr-core` deliberately avoids
                 // adding a logging dependency; `eprintln!` keeps the runtime signal without widening
@@ -86,31 +91,41 @@ pub fn synthesize_rows(
             // always win, and partial real coverage (e.g. AISL hourly
             // axes for a freshly-released model) is preserved while the
             // donor's tail fills the rest.
-            let Some(donor) = rows
+            //
+            // Some sources emit multiple rows per model (e.g. swebench has a
+            // separate row for each leaderboard, and the overrides source
+            // emits one row per metric). Clone *every* matching donor row so
+            // each one gets a chance to fill a different field on the target.
+            let donors: Vec<RawRow> = rows
                 .iter()
-                .find(|row| resolve_canonical(row) == Some(from_id.as_str()))
+                .filter(|row| resolve_canonical(row) == Some(from_id.as_str()))
                 .cloned()
-            else {
+                .collect();
+
+            if donors.is_empty() {
                 continue;
-            };
+            }
 
             let Some(display_name) = display_name_for(target_id) else {
                 continue;
             };
 
-            let donor_model_name = donor.model_name.clone();
-            let mut synthesized = donor;
-            synthesized.fields.insert(
-                "SynthesizedFromModelName".to_string(),
-                Value::from(donor_model_name),
-            );
-            synthesized.model_name = display_name.to_string();
-            synthesized.synthesized_from = Some(from_id.clone());
-            rows.push(synthesized);
-            synth_count += 1;
+            for donor in donors {
+                let donor_model_name = donor.model_name.clone();
+                let mut synthesized = donor;
+                synthesized.fields.insert(
+                    "SynthesizedFromModelName".to_string(),
+                    Value::from(donor_model_name),
+                );
+                synthesized.model_name = display_name.to_string();
+                synthesized.synthesized_from = Some(from_id.clone());
+                rows.push(synthesized);
+                synth_row_count += 1;
+            }
+            synth_pair_count += 1;
         }
 
-        stats.per_source.insert(source_id.clone(), synth_count);
+        stats.per_source.insert(source_id.clone(), synth_row_count);
     }
 
     stats
@@ -205,6 +220,63 @@ mod tests {
         assert_eq!(synth.len(), 1);
         assert_eq!(synth[0].synthesized_from.as_deref(), Some("openai/gpt-5.4"));
         assert_eq!(synth[0].model_name, "gpt-5.5");
+    }
+
+    #[test]
+    fn synthesize_clones_every_donor_row_for_multi_row_sources() {
+        // swebench emits one row per (model, leaderboard); the overrides
+        // source emits one row per metric. Synthesis must clone *every*
+        // donor row so each one can fill a different field on the target,
+        // not just the first match.
+        let records = vec![
+            record(
+                "anthropic/claude-sonnet-4",
+                "claude-sonnet-4",
+                &["claude-sonnet-4"],
+            ),
+            record(
+                "anthropic/claude-sonnet-4.5",
+                "claude-sonnet-4.5",
+                &["claude-sonnet-4.5"],
+            ),
+        ];
+        let mut rows = rows_by_source(vec![
+            raw(
+                "swebench",
+                "claude-sonnet-4.5",
+                None,
+                &[("SWEBenchVerified", json!(72.0))],
+            ),
+            raw(
+                "swebench",
+                "claude-sonnet-4.5",
+                None,
+                &[("SWEBenchMultilingual", json!(67.0))],
+            ),
+        ]);
+
+        synthesize_rows(
+            &mut rows,
+            &[(
+                "anthropic/claude-sonnet-4".to_string(),
+                "anthropic/claude-sonnet-4.5".to_string(),
+            )],
+            &records,
+            &cfg(0.80, 0.80),
+        );
+
+        let synth: Vec<_> = rows["swebench"]
+            .iter()
+            .filter(|row| row.synthesized_from.is_some())
+            .collect();
+        assert_eq!(synth.len(), 2, "both donor rows should be cloned");
+        let metrics: std::collections::BTreeSet<_> = synth
+            .iter()
+            .flat_map(|r| r.fields.keys().filter(|k| k.starts_with("SWEBench")))
+            .map(String::as_str)
+            .collect();
+        assert!(metrics.contains("SWEBenchVerified"));
+        assert!(metrics.contains("SWEBenchMultilingual"));
     }
 
     #[test]
