@@ -6,85 +6,85 @@ methodology = "v1"
 [sources."aistupidlevel"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 39
+n_rows_matched = 41
 n_rows_unmatched = 1
 
 [sources."arc_agi"]
 status = "verified"
 n_rows_ingested = 149
-n_rows_matched = 56
+n_rows_matched = 58
 n_rows_unmatched = 107
 
 [sources."artificial_analysis"]
 status = "verified"
 n_rows_ingested = 56
-n_rows_matched = 47
+n_rows_matched = 49
 n_rows_unmatched = 20
 
 [sources."gso"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 24
+n_rows_matched = 25
 n_rows_unmatched = 12
 
 [sources."livecodebench"]
 status = "verified"
 n_rows_ingested = 41
-n_rows_matched = 31
+n_rows_matched = 33
 n_rows_unmatched = 24
 
 [sources."lmarena"]
 status = "verified"
 n_rows_ingested = 382
-n_rows_matched = 85
+n_rows_matched = 87
 n_rows_unmatched = 313
 
 [sources."mcp_atlas"]
 status = "verified"
 n_rows_ingested = 19
-n_rows_matched = 26
+n_rows_matched = 28
 n_rows_unmatched = 7
 
 [sources."openrouter"]
 status = "verified"
 n_rows_ingested = 355
-n_rows_matched = 66
+n_rows_matched = 68
 n_rows_unmatched = 305
 
 [sources."overrides"]
 status = "verified"
 n_rows_ingested = 48
-n_rows_matched = 64
+n_rows_matched = 66
 n_rows_unmatched = 0
 
 [sources."sonar"]
 status = "verified"
 n_rows_ingested = 58
-n_rows_matched = 37
+n_rows_matched = 39
 n_rows_unmatched = 35
 
 [sources."swebench"]
 status = "verified"
 n_rows_ingested = 201
-n_rows_matched = 48
+n_rows_matched = 50
 n_rows_unmatched = 167
 
 [sources."swebench_pro"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 22
+n_rows_matched = 23
 n_rows_unmatched = 14
 
 [sources."swerebench"]
 status = "verified"
 n_rows_ingested = 91
-n_rows_matched = 32
+n_rows_matched = 34
 n_rows_unmatched = 72
 
 [sources."terminal_bench"]
 status = "verified"
 n_rows_ingested = 124
-n_rows_matched = 87
+n_rows_matched = 89
 n_rows_unmatched = 52
 
 [[models]]
@@ -96,22 +96,22 @@ aliases = ["anthropic/claude-opus-4.1", "claude opus 4.1", "claude-opus-4-1", "c
 sources = ["aistupidlevel", "lmarena", "openrouter", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 59.903524
-p_raw = 51.992055
-b_raw = 55.283027
-r = 49.536517
-i_adj = 59.903524
-p_adj = 51.992055
-b_adj = 55.283027
+i_raw = 60.986074
+p_raw = 53.320639
+b_raw = 63.109288
+r = 52.944728
+i_adj = 60.986074
+p_adj = 53.320639
+b_adj = 63.109288
 
 [models.groups]
 A_B = 72.865771
 A_I = 85.475857
 A_P = 66.624535
 A_R = 80.245826
-BUILD = 50.881357
+BUILD = 63.504359
 CRE = 52.899531
-GEN = 50.724883
+GEN = 55.645562
 LM_ARENA_REVIEW_PROXY = 0.000000
 OPS_long = 48.700749
 OPS_precision = 43.700749
@@ -136,16 +136,25 @@ AI_spec = 100.000000
 AI_stability = 94.293434
 AI_task_completion = 75.556903
 AI_tool_selection = 80.904688
+ARC_AGI_2 = 82.804530
 BlendedCost = 0.000000
 ContextWindow = 74.671663
 CopilotArenaOrLMArenaCode = 53.927261
+GSO = 57.913442
 LMArenaCreativeOrOpenEnded = 52.899531
 LMArenaSearchDocument = 0.000000
 LMArenaText = 52.899531
+LiveCodeBench = 72.117145
+SWEBenchMultilingual = 92.500000
+SWEBenchPro = 82.637413
 SWEBenchVerified = 80.343830
-SWEComposite = 55.452158
+SWEComposite = 71.125252
 SWERebench = 52.251458
-SonarComposite = 50.000000
+SonarBugDensity = 70.135805
+SonarComposite = 81.539656
+SonarFunctionalSkill = 92.500000
+SonarIssueDensity = 73.083942
+SonarVulnerabilityDensity = 81.610060
 TerminalBench = 29.394986
 
 [models.missing]
@@ -1084,27 +1093,27 @@ aliases = ["kimi k2 0905", "kimi k2 turbo", "kimi-k2-0905", "kimi-k2-0905-previe
 sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 26.017001
-p_raw = 29.704354
-b_raw = 45.288796
-r = 41.243466
-i_adj = 26.017001
-p_adj = 29.704354
-b_adj = 45.288796
+i_raw = 26.141101
+p_raw = 31.080321
+b_raw = 55.344908
+r = 51.169000
+i_adj = 26.141101
+p_adj = 31.080321
+b_adj = 55.344908
 
 [models.groups]
 A_B = 52.156528
 A_I = 35.718622
 A_P = 38.278056
 A_R = 40.409151
-BUILD = 42.079110
+BUILD = 58.009818
 CRE = 27.818517
-GEN = 8.181917
-LM_ARENA_REVIEW_PROXY = 50.000000
+GEN = 8.746007
+LM_ARENA_REVIEW_PROXY = 86.835160
 OPS_long = 35.599904
 OPS_precision = 58.613714
 OPS_review = 54.785656
-PLAN = 33.218063
+PLAN = 36.202605
 
 [models.metrics]
 AI_canary_health = 88.900000
@@ -1124,27 +1133,37 @@ AI_spec = 100.000000
 AI_stability = 1.540238
 AI_task_completion = 90.529270
 AI_tool_selection = 79.679765
+ARC_AGI_2 = 11.942521
 ArtificialAnalysisCoding = 0.000000
 ArtificialAnalysisIntelligence = 0.000000
 ArtificialAnalysisReasoning = 0.000000
 BlendedCost = 92.676749
 ContextWindow = 53.360318
+CopilotArenaOrLMArenaCode = 88.187812
 GDPval = 5.000000
 GPQA_HLE_Reasoning = 0.000000
 LMArenaCreativeOrOpenEnded = 27.818517
+LMArenaSearchDocument = 86.835160
 LMArenaText = 27.818517
+LiveCodeBench = 39.317150
+MCPAtlas = 92.500000
 OutputSpeed = 0.000000
 SWEBenchMultilingual = 5.000000
 SWEBenchVerified = 65.618199
-SWEComposite = 47.842730
-SonarComposite = 50.000000
+SWEComposite = 57.670857
+SWERebench = 73.082071
+SonarBugDensity = 92.500000
+SonarComposite = 80.586952
+SonarFunctionalSkill = 66.801108
+SonarIssueDensity = 92.500000
+SonarVulnerabilityDensity = 81.610060
 TTFT = 91.640905
 Tau2Bench = 32.878287
 TerminalBench = 44.561627
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["PLAN"]
 
 [[models]]
 canonical_id = "moonshotai/kimi-k2.6"

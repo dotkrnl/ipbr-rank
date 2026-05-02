@@ -124,3 +124,21 @@ from = "openai/gpt-5.4"
 [[pair]]
 target = "xai/grok-code-fast-1"
 from = "xai/grok-4-latest"
+
+# Opus 4.1 (Aug 2025) is the oldest Opus we track and predates Anthropic's
+# adoption of SWE-bench Multilingual / SWE-Bench Pro / GDPval-AA in their
+# system cards. Opus 4.5 is the closest forward-sibling with full coverage.
+# Synthesis is mildly optimistic since 4.5 > 4.1 in capability, but better
+# than leaving 4.1 anchored at the 50-baseline on three of five SWE/agentic
+# metrics — currently 4.1 ranks below Sonnet 4, which contradicts release
+# ordering.
+[[pair]]
+target = "anthropic/claude-opus-4.1"
+from = "anthropic/claude-opus-4.5"
+
+# Kimi K2-0905 (Sept 2025) lacks SWE-Bench Pro; Moonshot only began reporting
+# Pro with K2.6. Use K2.6 as the donor for that single-metric gap. Mildly
+# optimistic but defensible within the same family.
+[[pair]]
+target = "moonshotai/kimi-k2-0905"
+from = "moonshotai/kimi-k2.6"
