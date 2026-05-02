@@ -37,6 +37,36 @@ pub fn load_pairs_from_str(raw: &str) -> Result<Vec<(String, String)>, toml::de:
         .collect())
 }
 
+/// After ingestion, identify synthesis pairs that contributed zero fields
+/// to their target. A pair is "stale" when the target now has direct
+/// upstream coverage for every field the donor would have supplied — the
+/// classic case is a freshly released model that finally lands on the
+/// rolling-window benchmark we'd been borrowing a sibling's row for.
+///
+/// Warnings go to stderr (no logging dependency in `ipbr-core`); the
+/// returned vec lets tests assert on which pairs were flagged.
+pub fn warn_stale_synthesis_pairs(
+    records: &[ModelRecord],
+    pairs: &[(String, String)],
+) -> Vec<(String, String)> {
+    let mut stale = Vec::new();
+    for (target, from) in pairs {
+        let Some(record) = records.iter().find(|r| r.canonical_id == *target) else {
+            // Target isn't registered at all — separate hygiene issue,
+            // surfaced elsewhere via required_aliases validation.
+            continue;
+        };
+        let useful = record.synthesized.values().any(|prov| prov.from == *from);
+        if !useful {
+            eprintln!(
+                "warning: synthesis pair {target} <- {from} contributed no fields after ingestion; consider removing it from data/synthesis_aliases.toml"
+            );
+            stale.push((target.clone(), from.clone()));
+        }
+    }
+    stale
+}
+
 pub fn synthesize_rows(
     rows_by_source: &mut BTreeMap<SourceId, Vec<RawRow>>,
     pairs: &[(String, String)],
@@ -277,6 +307,45 @@ mod tests {
             .collect();
         assert!(metrics.contains("SWEBenchVerified"));
         assert!(metrics.contains("SWEBenchMultilingual"));
+    }
+
+    #[test]
+    fn warn_stale_synthesis_pairs_flags_pair_with_zero_contributions() {
+        // Set up two pairs:
+        //   useful_pair: target has one synthesized field from the donor
+        //   stale_pair:  target has zero synthesized fields with provenance.from
+        //                matching the declared donor (target's data came from
+        //                a real source, not from this pair)
+        let mut useful_target = ModelRecord::new(
+            "openai/gpt-5.5".into(),
+            "gpt-5.5".into(),
+            Vendor::Other("test".into()),
+        );
+        useful_target.synthesized.insert(
+            "SWERebench".to_string(),
+            crate::model::SynthesisProvenance {
+                source_id: "swerebench".into(),
+                from: "openai/gpt-5.4".into(),
+            },
+        );
+        let stale_target = ModelRecord::new(
+            "anthropic/claude-opus-4.7".into(),
+            "claude-opus-4.7".into(),
+            Vendor::Other("test".into()),
+        );
+        // No `synthesized` entries — every metric came from a real source.
+        let records = vec![useful_target, stale_target];
+        let pairs = vec![
+            ("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string()),
+            (
+                "anthropic/claude-opus-4.7".to_string(),
+                "anthropic/claude-opus-4.6".to_string(),
+            ),
+        ];
+        let stale = warn_stale_synthesis_pairs(&records, &pairs);
+        assert_eq!(stale.len(), 1);
+        assert_eq!(stale[0].0, "anthropic/claude-opus-4.7");
+        assert_eq!(stale[0].1, "anthropic/claude-opus-4.6");
     }
 
     #[test]

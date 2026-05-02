@@ -489,6 +489,11 @@ async fn build_scoreboard(
         &synthesis_cfg,
     );
 
+    // Surface override entries duplicated by a real source — once a public
+    // leaderboard catches up, the hand-curated number gets clobbered by
+    // ingest precedence and the entry can be retired.
+    let _stale_overrides = ipbr_core::warn_stale_overrides(&rows_by_source, &records);
+
     for (source_id, rows) in rows_by_source {
         let row_count = fetched_rows.get(&source_id).copied().unwrap_or(rows.len());
         let status = fetched_statuses
@@ -506,6 +511,12 @@ async fn build_scoreboard(
     }
 
     ipbr_core::ingest::mark_synthesis_dominant(&mut records, synthesis_cfg.per_model_cap);
+
+    // Surface synthesis pairs that no longer contribute anything — typically
+    // a freshly released model has just landed on the rolling-window
+    // benchmark we'd been borrowing a sibling's row for. Stderr only; tests
+    // assert on the returned list directly via `warn_stale_synthesis_pairs`.
+    let _stale = ipbr_core::warn_stale_synthesis_pairs(&records, &synthesis_pairs);
 
     ipbr_core::compute_scores_with(&mut records, &coefficients);
 

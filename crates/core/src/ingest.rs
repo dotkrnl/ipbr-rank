@@ -1,6 +1,6 @@
 use crate::alias::{AliasIndex, normalize_name};
-use crate::model::{ModelRecord, RawRow};
-use std::collections::BTreeMap;
+use crate::model::{ModelRecord, RawRow, SourceId};
+use std::collections::{BTreeMap, BTreeSet};
 
 const NON_SYNTHESIZED_METRICS: &[&str] = &["AI_canary_health"];
 
@@ -28,6 +28,58 @@ pub fn ingest_rows(records: &mut [ModelRecord], rows: Vec<RawRow>) -> IngestStat
     }
 
     stats
+}
+
+/// Identify override entries that are also supplied by a non-override source
+/// for the same (model, metric). When a public leaderboard catches up, the
+/// override gets clobbered by the real value during ingest precedence — but
+/// the entry sits in `data/score_overrides.toml` indefinitely. Surfacing it
+/// keeps the file from bloating with retired hand-curations.
+///
+/// Stderr only (no logging dependency); the returned list lets tests assert
+/// on which entries were flagged.
+pub fn warn_stale_overrides(
+    rows_by_source: &BTreeMap<SourceId, Vec<RawRow>>,
+    records: &[ModelRecord],
+) -> Vec<(String, String, Vec<String>)> {
+    let index = AliasIndex::build(records);
+    let mut by_pair: BTreeMap<(usize, String), BTreeSet<String>> = BTreeMap::new();
+    for (source_id, rows) in rows_by_source {
+        for row in rows {
+            if row.synthesized_from.is_some() {
+                continue;
+            }
+            let Some(i) = index.match_record(&row.model_name, row.vendor_hint.as_deref()) else {
+                continue;
+            };
+            for key in row.fields.keys() {
+                by_pair
+                    .entry((i, key.clone()))
+                    .or_default()
+                    .insert(source_id.clone());
+            }
+        }
+    }
+    let mut stale = Vec::new();
+    for ((i, metric), sources) in by_pair {
+        if !sources.contains("overrides") {
+            continue;
+        }
+        let other: Vec<String> = sources
+            .iter()
+            .filter(|s| s.as_str() != "overrides")
+            .cloned()
+            .collect();
+        if other.is_empty() {
+            continue;
+        }
+        let canonical = records[i].canonical_id.clone();
+        eprintln!(
+            "warning: override for {canonical}/{metric} is duplicated by {other:?}; consider removing it from data/score_overrides.toml"
+        );
+        stale.push((canonical, metric, other));
+    }
+    stale
 }
 
 pub fn mark_synthesis_dominant(records: &mut [ModelRecord], per_model_cap: f64) {
@@ -248,6 +300,52 @@ mod tests {
         assert_eq!(records[0].raw_metrics.get("ContextWindow"), Some(&128000.0));
         assert_eq!(records[0].raw_metrics.get("OutputSpeed"), Some(&75.5));
         assert!(records[0].sources.contains("openrouter"));
+    }
+
+    #[test]
+    fn warn_stale_overrides_flags_metric_provided_by_real_source() {
+        let mut record = ModelRecord::new(
+            "anthropic/claude-opus-4.7".into(),
+            "claude-opus-4.7".into(),
+            Vendor::Anthropic,
+        );
+        record.aliases.insert("claude-opus-4.7".into());
+        let records = vec![record];
+
+        // overrides has SWEBenchVerified for the same model that lmarena
+        // also reports — the override is now redundant. Note: we set up a
+        // *second* override metric that isn't in any other source so we
+        // can confirm we don't false-positive on still-useful overrides.
+        let mut rows_by_source = BTreeMap::new();
+        rows_by_source.insert(
+            "overrides".to_string(),
+            vec![
+                raw(
+                    "overrides",
+                    "claude-opus-4.7",
+                    &[("SWEBenchVerified", json!(87.6))],
+                ),
+                raw(
+                    "overrides",
+                    "claude-opus-4.7",
+                    &[("SWEBenchPro", json!(64.3))],
+                ),
+            ],
+        );
+        rows_by_source.insert(
+            "swebench".to_string(),
+            vec![raw(
+                "swebench",
+                "claude-opus-4.7",
+                &[("SWEBenchVerified", json!(85.2))],
+            )],
+        );
+
+        let stale = warn_stale_overrides(&rows_by_source, &records);
+        assert_eq!(stale.len(), 1);
+        assert_eq!(stale[0].0, "anthropic/claude-opus-4.7");
+        assert_eq!(stale[0].1, "SWEBenchVerified");
+        assert_eq!(stale[0].2, vec!["swebench"]);
     }
 
     #[test]

@@ -142,3 +142,15 @@ from = "anthropic/claude-opus-4.5"
 [[pair]]
 target = "moonshotai/kimi-k2-0905"
 from = "moonshotai/kimi-k2.6"
+
+# DeepSeek V4-Flash (released 2026-04-24) is missing SWERebench, the
+# heaviest weight in SWEComposite (0.40). SWE-Rebench is a rolling-window
+# benchmark that updates monthly and simply hasn't reached V4-Flash yet —
+# this is a transient timing gap, not vendor non-publication. Cross-vendor
+# tier-proxy from Kimi K2.6: same open-weight tier, similar parameter scale
+# (V4-Flash 284B/13B-active vs K2.6 mid-size MoE), and editorial consensus
+# puts them in the same capability band. Remove this pair once V4-Flash
+# appears on swerebench.com directly.
+[[pair]]
+target = "deepseek/deepseek-v4-flash"
+from = "moonshotai/kimi-k2.6"
