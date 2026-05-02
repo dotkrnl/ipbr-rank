@@ -53,8 +53,8 @@ n_rows_unmatched = 305
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 48
-n_rows_matched = 121
+n_rows_ingested = 45
+n_rows_matched = 110
 n_rows_unmatched = 0
 
 [sources."sonar"]

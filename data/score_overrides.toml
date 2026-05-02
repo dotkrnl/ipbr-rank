@@ -82,18 +82,6 @@ note = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face mod
 # ---------------------------------------------------------------------
 
 [[entries]]
-canonical_id = "openai/gpt-5.5"
-metric = "TerminalBench"
-value = 82.7
-note = "OpenAI GPT-5.5 launch announcement, 2026-04-23 (Terminal-Bench 2.0)"
-
-[[entries]]
-canonical_id = "openai/gpt-5.4"
-metric = "TerminalBench"
-value = 75.1
-note = "Cited alongside the GPT-5.5 launch as the prior-version baseline, 2026-04-23"
-
-[[entries]]
 canonical_id = "anthropic/claude-opus-4.7"
 metric = "TerminalBench"
 value = 69.4
@@ -104,12 +92,6 @@ canonical_id = "moonshotai/kimi-k2.6"
 metric = "TerminalBench"
 value = 66.7
 note = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
-
-[[entries]]
-canonical_id = "z-ai/glm-5.1"
-metric = "TerminalBench"
-value = 63.5
-note = "Z.ai GLM-5.1 launch announcement, 2026-04-08"
 
 [[entries]]
 canonical_id = "deepseek/deepseek-v4-flash"
