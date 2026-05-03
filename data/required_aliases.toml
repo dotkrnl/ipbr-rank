@@ -174,15 +174,34 @@ aliases = [
     "gpt-5-2-high", "gpt-5-2-medium", "gpt-5-2-low", "gpt-5-2-non-reasoning",
 ]
 
-# DeepSeek V4-Flash. The upstream API routes both deepseek-chat and
-# deepseek-reasoner to this same underlying model (thinking on vs off).
-# AISL tracks them as separate entries; we merge them under one canonical.
+# DeepSeek V4-Flash. The upstream DeepSeek API exposes both `deepseek-chat`
+# (non-thinking) and `deepseek-reasoner` (thinking on) endpoints, both of
+# which currently route to V4-Flash on AISL. The two endpoints get scored
+# independently by AISL — `deepseek-reasoner` measures noticeably worse
+# than `deepseek-chat` on hourly axes (correctness 0.85 vs 0.99,
+# edgeCases 0.83 vs 0.98). We alias only `deepseek-chat` so V4-Flash
+# (and V4-Pro, which sibling-synthesizes from V4-Flash on AISL) reflects
+# the non-thinking endpoint's measurements consistently. The reasoner
+# row is left unmatched on purpose — it's a separate effort tier outside
+# the medium/thinking/adaptive policy.
 [models."deepseek/deepseek-v4-flash"]
 vendor = "deepseek"
 aliases = [
     "deepseek-chat", "deepseek chat", "deepseek/deepseek-chat",
-    "deepseek-reasoner", "deepseek reasoner", "deepseek/deepseek-reasoner",
     "deepseek-v4-flash", "deepseek v4 flash", "deepseek/deepseek-v4-flash",
+]
+
+# DeepSeek V4-Pro. Sibling flagship to V4-Flash (1.6T/49B-active MoE vs
+# Flash's 284B/13B-active), released 2026-04-24. AISL only tracks the
+# `deepseek-chat`/`deepseek-reasoner` API endpoints (which currently route
+# to V4-Flash), so V4-Pro borrows AISL via sibling-synthesis from V4-Flash.
+[models."deepseek/deepseek-v4-pro"]
+vendor = "deepseek"
+aliases = [
+    "deepseek-v4-pro", "deepseek v4 pro", "deepseek/deepseek-v4-pro",
+    "deepseek-v4-pro-thinking", "deepseek v4 pro thinking",
+    "deepseek-v4-pro-20260423", "deepseek/deepseek-v4-pro-20260423",
+    "deepseek-ai/deepseek-v4-pro",
 ]
 
 [models."xai/grok-4-latest"]

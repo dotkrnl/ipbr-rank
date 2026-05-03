@@ -54,6 +54,12 @@ value = 78.6
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
 [[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "SWEBenchVerified"
+value = 79.4
+note = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
+
+[[entries]]
 canonical_id = "anthropic/claude-opus-4.1"
 metric = "SWEBenchVerified"
 value = 74.5
@@ -98,6 +104,12 @@ canonical_id = "deepseek/deepseek-v4-flash"
 metric = "TerminalBench"
 value = 56.6
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "TerminalBench"
+value = 63.3
+note = "DeepSeek V4-Pro Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
 
 [[entries]]
 canonical_id = "moonshotai/kimi-k2-0905"
@@ -240,6 +252,12 @@ value = 52.3
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
 [[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "SWEBenchPro"
+value = 54.4
+note = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
+
+[[entries]]
 canonical_id = "openai/gpt-5.3-codex"
 metric = "SWEBenchPro"
 value = 56.8
@@ -266,6 +284,12 @@ canonical_id = "deepseek/deepseek-v4-flash"
 metric = "SWEBenchMultilingual"
 value = 70.2
 note = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "SWEBenchMultilingual"
+value = 74.1
+note = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
 
 [[entries]]
 canonical_id = "anthropic/claude-opus-4.5"

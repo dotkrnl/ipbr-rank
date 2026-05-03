@@ -149,8 +149,32 @@ from = "moonshotai/kimi-k2.6"
 # this is a transient timing gap, not vendor non-publication. Cross-vendor
 # tier-proxy from Kimi K2.6: same open-weight tier, similar parameter scale
 # (V4-Flash 284B/13B-active vs K2.6 mid-size MoE), and editorial consensus
-# puts them in the same capability band. Remove this pair once V4-Flash
-# appears on swerebench.com directly.
+# puts them in the same capability band. The per-field filter in
+# `ingest_synthesized_row` ensures Kimi only writes to fields V4-Flash
+# is missing — V4-Flash's real `deepseek-chat` AISL data is preserved
+# untouched, and Kimi only fills SWERebench (and any other Flash-missing
+# fields where Kimi has data). Remove this pair once V4-Flash appears on
+# swerebench.com directly.
 [[pair]]
 target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
+
+# DeepSeek V4-Pro (1.6T/49B-active, released 2026-04-24) borrows from its
+# same-generation sibling V4-Flash for AISL — AISL only tracks DeepSeek
+# under the `deepseek-chat` API endpoint (aliased to V4-Flash), so V4-Pro
+# has no direct AISL row of its own. Same vendor, same generation, same
+# training pipeline; only parameter scale differs. Pro > Flash on
+# capability so the AISL synthesis is mildly *conservative* — V4-Pro's
+# borrowed scores understate real strength rather than overstate.
+#
+# Pair ordering: this pair is declared *after* V4-Flash ← Kimi K2.6 above
+# so V4-Pro's donor pool from V4-Flash includes both the real
+# `deepseek-chat` row and the Kimi-derived synth row that fills V4-Flash's
+# SWERebench. At V4-Pro's `ingest_synthesized_row`, first-write-wins
+# means the chat-derived clone wins on AISL fields (it was pushed before
+# the Kimi pair ran), while the Kimi-derived clone fills SWERebench (no
+# competing chat row). Net effect: V4-Pro's AISL = deepseek-chat data
+# (consistent with V4-Flash); V4-Pro's SWERebench = Kimi-tier proxy.
+[[pair]]
+target = "deepseek/deepseek-v4-pro"
+from = "deepseek/deepseek-v4-flash"
