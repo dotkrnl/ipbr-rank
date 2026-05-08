@@ -183,6 +183,20 @@ from = "deepseek/deepseek-v4-flash"
 # Synthesis for newly-added models (2026-05-07, post AA fixture refresh)
 # ------------------------------------------------------------------
 
+# Kimi K2.5 ← Kimi K2.6. Same vendor, direct successor. K2.5 has no
+# AISL row (Moonshot's API endpoints moved to K2.6), so all four A_*
+# perspective groups default to the 50 baseline without this pair. K2.6
+# tracks `kimi-latest` / `kimi-k2-turbo-preview` on AISL, which fills
+# K2.5's AISL gap. Per Moonshot's own K2.6 launch numbers K2.6 ≥ K2.5
+# (SWE-Verified 80.2 vs 76.8, SWE-Pro 58.6 vs 50.7), so the synthesis is
+# mildly optimistic; the 15% synthesis penalty + 30% per-source cap keep
+# the bias bounded. Pair declared first so chained downstream pairs
+# (mimo-v2.5-pro ← K2.5 and minimax-m2.5 ← K2.5) see the AISL-filled
+# K2.5 row.
+[[pair]]
+target = "moonshotai/kimi-k2.5"
+from = "moonshotai/kimi-k2.6"
+
 # MiMo-V2.5 ← MiMo-V2.5-Pro. Same Xiaomi family, larger sibling. The
 # smaller V2.5 only self-reports SWE-Pro (56.1) and Terminal-Bench (65.8)
 # while V2.5-Pro carries SWE-Verified, SWE-Pro, Terminal-Bench plus full
@@ -199,15 +213,39 @@ from = "moonshotai/kimi-k2.5"
 target = "xiaomi/mimo-v2.5"
 from = "xiaomi/mimo-v2.5-pro"
 
+# MiniMax M2.5 ← Kimi K2.5. Cross-vendor tier proxy. M2.5 is an orphan
+# target — first MiniMax model in the rank, no same-vendor sibling, and
+# AA tracks no Tencent/MiniMax models on AISL. Kimi K2.5 was selected
+# over GLM-5 because K2.5 carries direct mcp_atlas data (`kimi-k2p5` on
+# Scale Labs) which fills M2.5's biggest single capability gap; the
+# already-declared K2.5 ← K2.6 pair above also bubbles AISL through the
+# chain. AA Coding scores cluster closely (m2.5 37.4 vs k2.5 39.5) so
+# the tier proxy is defensible. Pair must follow K2.5's own pair so the
+# K2.6-derived AISL rows are visible.
+[[pair]]
+target = "minimax/minimax-m2.5"
+from = "moonshotai/kimi-k2.5"
+
 # MiniMax M2.7 ← MiniMax M2.5. Same vendor, prior generation. M2.5 has
 # full SWE-Verified + SWE-Rebench + arc_agi + terminal_bench + AA
 # coverage; M2.7's vendor reports omit SWE-Verified entirely (a notable
 # gap — they emphasized SWE-Pro / Multilingual / TB instead). Synthesis
 # from M2.5 is conservative since M2.7 ≥ M2.5 in capability per launch
-# numbers (SWE-Pro 56.22 vs 55.4).
+# numbers (SWE-Pro 56.22 vs 55.4). Pair must follow M2.5's pair so M2.7
+# inherits the K2.5-derived AISL/MCP-Atlas fills indirectly.
 [[pair]]
 target = "minimax/minimax-m2.7"
 from = "minimax/minimax-m2.5"
+
+# GLM-5 ← GLM-5.1. Same vendor, direct successor. Z.ai didn't publish
+# SWE-Bench Pro for the base GLM-5 (only for 5.1, where it claims SOTA
+# 58.4). 5.1 is a meaningful capability step over 5, so the synthesis is
+# mildly optimistic — but the gap is small (one metric, primarily) and
+# 5.1's number is well-cited. Pair declared before the qwen3.6-plus pair
+# below so qwen3.6-plus's GLM-5 donor pool sees the SWE-Pro fill.
+[[pair]]
+target = "z-ai/glm-5"
+from = "z-ai/glm-5.1"
 
 # Qwen3.6-Plus ← GLM-5. Cross-vendor tier proxy. Qwen3.6-Plus has no
 # Alibaba sibling in our rank; AA's other Qwen entries are open-weight

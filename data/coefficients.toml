@@ -156,10 +156,14 @@ CopilotArenaOrLMArenaCode = 0.04
 # aistupidlevel source (~17 metrics) from its 3-pro sibling. Raising to
 # 0.55 keeps the safeguard while allowing large but justified gap-fills.
 per_model_cap = 0.55
-# Default 0.30 triggers warnings when many models share the same donor
-# source (e.g., aistupidlevel, mcp_atlas). Raising to 0.45 eliminates
-# the noise while still capping runaway synthesis.
-per_source_cap = 0.45
+# With 32 ranked models and ~24 AISL endpoints, the natural ceiling on
+# AISL synthesis is just above 0.50; current-generation orphan targets
+# (kimi-k2.5, minimax-m2.5) need AISL fills to avoid the 50-baseline
+# default on four perspective groups, and those fills must run after
+# the existing 18 AISL-targeting pairs in synthesis_aliases.toml. 0.55
+# accommodates the orphan fills without letting synthesis dominate any
+# single source.
+per_source_cap = 0.55
 
 [composite_metrics.SWEComposite]
 # Rebalanced: Rebench↑0.10 (contamination-resistant rolling signal deserves more
