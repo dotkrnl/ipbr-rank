@@ -1,5 +1,5 @@
 use crate::alias::{AliasIndex, normalize_name};
-use crate::model::{ModelRecord, RawRow, SourceId};
+use crate::model::{ModelRecord, RawRow, SourceId, Vendor};
 use std::collections::{BTreeMap, BTreeSet};
 
 const NON_SYNTHESIZED_METRICS: &[&str] = &["AI_canary_health"];
@@ -103,10 +103,14 @@ fn ingest_real_row(
             let record = &mut records[i];
             let is_override = row.source_id == "overrides";
             let preference = EffortPreference::from_row(&row);
+            // Capture before `row.source_id` is moved into `record.sources`.
+            let source_id = row.source_id.clone();
+            let canonical_id = record.canonical_id.clone();
+            let vendor = record.vendor.clone();
             record.sources.insert(row.source_id);
             for (key, value) in row.fields {
                 if let Some(num) = json_to_f64(&value) {
-                    if !preference.is_scoring_allowed() {
+                    if !is_scoring_allowed_for(preference, &source_id, &canonical_id, &vendor) {
                         continue;
                     }
                     let choice_key = (i, key.clone());
@@ -196,6 +200,48 @@ impl EffortPreference {
     fn is_scoring_allowed(self) -> bool {
         matches!(self, Self::Default | Self::Medium | Self::Thinking)
     }
+}
+
+/// Variant policy with two narrow per-source carve-outs:
+///
+/// 1. **Anthropic on MCP-Atlas** — Anthropic submits to Scale Labs' MCP-Atlas
+///    leaderboard only as `(max)` effort runs (no `(medium)` variant exists
+///    upstream). Without this carve-out opus-4.5/4.6/4.7 silently lose all
+///    MCP-Atlas signal, which is a heavily-weighted PLAN/BUILD metric.
+///
+/// 2. **gemini-3-pro on AA** — Artificial Analysis ships only the
+///    `gemini-3-pro-preview (high)` variant for that endpoint; there's no
+///    medium/thinking row. Without this carve-out gemini-3-pro loses 8 AA
+///    metrics (Intelligence, Coding, Reasoning, GPQA/HLE, Tau2, SciCode,
+///    IFBench, LCR) and ranks well below its actual capability tier.
+///
+/// Both carve-outs are *single-source-and-canonical-scoped* by design — they
+/// do not weaken the global "no high/xhigh/max" policy for any other model
+/// or any other source. If a vendor ever ships a non-max variant for the
+/// same endpoint, the existing `metric_choices` last-write-wins-by-effort
+/// logic will prefer the lower-effort variant.
+fn is_scoring_allowed_for(
+    preference: EffortPreference,
+    source_id: &str,
+    canonical_id: &str,
+    vendor: &Vendor,
+) -> bool {
+    if preference.is_scoring_allowed() {
+        return true;
+    }
+    if source_id == "mcp_atlas"
+        && matches!(preference, EffortPreference::Max | EffortPreference::High)
+        && matches!(vendor, Vendor::Anthropic)
+    {
+        return true;
+    }
+    if source_id == "artificial_analysis"
+        && matches!(preference, EffortPreference::High)
+        && canonical_id == "google/gemini-3-pro"
+    {
+        return true;
+    }
+    false
 }
 
 fn contains_phrase(normalized_text: &str, phrase: &str) -> bool {
