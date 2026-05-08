@@ -1,4 +1,6 @@
+use std::hash::{DefaultHasher, Hasher};
 use std::path::{Component, Path, PathBuf};
+use std::sync::OnceLock;
 
 use crate::Scoreboard;
 use crate::toml_output::RenderError;
@@ -15,9 +17,21 @@ use index::render_index;
 use scripts::APP_JS;
 use theme::STYLE_CSS;
 
+/// Content-hashed stylesheet path so Cloudflare Pages and browsers
+/// invalidate automatically when `STYLE_CSS` changes.
+fn style_css_path() -> &'static str {
+    static PATH: OnceLock<String> = OnceLock::new();
+    PATH.get_or_init(|| {
+        let mut hasher = DefaultHasher::new();
+        hasher.write(STYLE_CSS.as_bytes());
+        format!("assets/style.{:016x}.css", hasher.finish())
+    })
+    .as_str()
+}
+
 pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderError> {
     std::fs::create_dir_all(out.join("assets"))?;
-    std::fs::write(out.join("assets/style.css"), STYLE_CSS)?;
+    std::fs::write(out.join(style_css_path()), STYLE_CSS)?;
     std::fs::write(out.join("assets/app.js"), APP_JS)?;
     std::fs::write(out.join("scoreboard.toml"), render_scoreboard(scoreboard))?;
     std::fs::write(out.join("index.html"), render_index(scoreboard))?;
@@ -28,8 +42,9 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
 
 pub(crate) fn layout(title: &str, _scoreboard: &Scoreboard, body: &str) -> String {
     format!(
-        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr</a><span class="brand-strap">Live LLM coding scoreboard.</span></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
+        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="{style_href}"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr</a><span class="brand-strap">Live LLM coding scoreboard.</span></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
         title = html_escape(title),
+        style_href = style_css_path(),
         body = body,
     )
 }

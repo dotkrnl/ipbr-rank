@@ -27,13 +27,36 @@ fn site_emits_pages_api_toml_and_assets() {
     assert!(site_dir.join("index.html").is_file());
     assert!(site_dir.join("about.html").is_file());
     assert!(site_dir.join("scoreboard.toml").is_file());
-    assert!(site_dir.join("assets/style.css").is_file());
+    assert!(find_style_css(&site_dir).is_file());
     assert!(site_dir.join("assets/app.js").is_file());
+
+    // Stylesheet ships under a content-hashed name; the un-fingerprinted
+    // path must not be emitted, otherwise stale CDN/browser copies survive.
+    assert!(!site_dir.join("assets/style.css").exists());
 
     assert!(!site_dir.join("methodology.html").exists());
     assert!(!site_dir.join("sources.html").exists());
     assert!(!site_dir.join("model").exists());
     assert!(!site_dir.join("assets/sort.js").exists());
+}
+
+fn find_style_css(site_dir: &Path) -> PathBuf {
+    let assets = site_dir.join("assets");
+    let mut matches: Vec<PathBuf> = std::fs::read_dir(&assets)
+        .expect("assets dir should exist")
+        .filter_map(|entry| entry.ok().map(|e| e.path()))
+        .filter(|path| {
+            path.file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.starts_with("style.") && name.ends_with(".css"))
+        })
+        .collect();
+    assert_eq!(
+        matches.len(),
+        1,
+        "expected exactly one fingerprinted style.*.css under assets/, found {matches:?}"
+    );
+    matches.remove(0)
 }
 
 fn sample_scoreboard() -> Scoreboard {
@@ -169,7 +192,7 @@ fn style_css_contains_d2_theme_tokens() {
 
     render_site(&scoreboard, &site_dir).expect("site should render");
 
-    let css = read(site_dir.join("assets/style.css"));
+    let css = read(find_style_css(&site_dir));
     assert!(
         css.contains("#0f1419"),
         "expected D2 background token #0f1419 in CSS"

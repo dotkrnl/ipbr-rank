@@ -38,6 +38,16 @@ fn offline_all_matches_golden_scoreboard() {
     assert!(out.join("site/index.html").is_file());
     assert!(out.join("site/about.html").is_file());
     assert!(out.join("site/scoreboard.toml").is_file());
-    assert!(out.join("site/assets/style.css").is_file());
+    let assets = out.join("site/assets");
+    let style_css = std::fs::read_dir(&assets)
+        .expect("assets dir should exist")
+        .filter_map(|entry| entry.ok().map(|e| e.path()))
+        .find(|path| {
+            path.file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.starts_with("style.") && name.ends_with(".css"))
+        })
+        .expect("expected fingerprinted style.*.css under site/assets/");
+    assert!(style_css.is_file());
     assert!(out.join("site/assets/app.js").is_file());
 }
