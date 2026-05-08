@@ -83,6 +83,18 @@ metric = "SWEBenchVerified"
 value = 73.8
 note = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
 
+[[entries]]
+canonical_id = "xiaomi/mimo-v2.5-pro"
+metric = "SWEBenchVerified"
+value = 78.9
+note = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
+
+[[entries]]
+canonical_id = "qwen/qwen3.6-plus"
+metric = "SWEBenchVerified"
+value = 78.8
+note = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6 (figure also reproduced in apidog.com coverage), 2026-03-31"
+
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.0 — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -116,6 +128,30 @@ canonical_id = "moonshotai/kimi-k2-0905"
 metric = "TerminalBench"
 value = 44.5
 note = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, 'Terminal-Bench (Terminus-2)' = Terminal-Bench 2.0, mean over 5 runs (44.5 +/- 2.03), 2025-09"
+
+[[entries]]
+canonical_id = "xiaomi/mimo-v2.5"
+metric = "TerminalBench"
+value = 65.8
+note = "Xiaomi MiMo-V2.5 Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5, 2026-04-22"
+
+[[entries]]
+canonical_id = "xiaomi/mimo-v2.5-pro"
+metric = "TerminalBench"
+value = 68.4
+note = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
+
+[[entries]]
+canonical_id = "minimax/minimax-m2.7"
+metric = "TerminalBench"
+value = 57.0
+note = "MiniMax M2.7 launch announcement (Terminal Bench 2), https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
+
+[[entries]]
+canonical_id = "qwen/qwen3.6-plus"
+metric = "TerminalBench"
+value = 61.6
+note = "Alibaba Qwen3.6-Plus blog, Terminal-Bench 2.0 (Harbor/Terminus-2 harness, 5-run avg), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
@@ -275,6 +311,42 @@ metric = "SWEBenchPro"
 value = 58.4
 note = "Z.ai GLM-5.1 launch / Hugging Face model card zai-org/GLM-5.1, 2026-04-08"
 
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.5"
+metric = "SWEBenchPro"
+value = 50.7
+note = "Moonshot Kimi K2.5 Hugging Face model card evaluation table, https://huggingface.co/moonshotai/Kimi-K2.5, 2026-Q1"
+
+[[entries]]
+canonical_id = "xiaomi/mimo-v2.5"
+metric = "SWEBenchPro"
+value = 56.1
+note = "Xiaomi MiMo-V2.5 Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5, 2026-04-22"
+
+[[entries]]
+canonical_id = "xiaomi/mimo-v2.5-pro"
+metric = "SWEBenchPro"
+value = 57.2
+note = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
+
+[[entries]]
+canonical_id = "minimax/minimax-m2.5"
+metric = "SWEBenchPro"
+value = 55.4
+note = "MiniMax M2.5 Hugging Face model card evaluation table, https://huggingface.co/MiniMaxAI/MiniMax-M2.5, 2026-Q1"
+
+[[entries]]
+canonical_id = "minimax/minimax-m2.7"
+metric = "SWEBenchPro"
+value = 56.22
+note = "MiniMax M2.7 launch announcement, https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
+
+[[entries]]
+canonical_id = "qwen/qwen3.6-plus"
+metric = "SWEBenchPro"
+value = 56.6
+note = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
+
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -332,3 +404,27 @@ canonical_id = "z-ai/glm-4.7"
 metric = "SWEBenchMultilingual"
 value = 66.7
 note = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
+
+[[entries]]
+canonical_id = "minimax/minimax-m2.7"
+metric = "SWEBenchMultilingual"
+value = 76.5
+note = "MiniMax M2.7 launch announcement (SWE Multilingual), https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
+
+# ---------------------------------------------------------------------
+# MCP-Atlas — vendor-reported figures missing from Scale Labs leaderboard.
+# Scale Labs only carries 19-20 models on its public dataset; vendors
+# that self-report MCP-Atlas (Z.ai, Alibaba) are filled here.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "z-ai/glm-5"
+metric = "MCPAtlas"
+value = 67.8
+note = "Z.ai GLM-5 Hugging Face model card, MCP-Atlas Public Set, https://huggingface.co/zai-org/GLM-5"
+
+[[entries]]
+canonical_id = "qwen/qwen3.6-plus"
+metric = "MCPAtlas"
+value = 74.1
+note = "Alibaba Qwen3.6-Plus blog (Public Set, gemini-2.5-pro judger), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"

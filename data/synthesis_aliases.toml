@@ -178,3 +178,48 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "deepseek/deepseek-v4-pro"
 from = "deepseek/deepseek-v4-flash"
+
+# ------------------------------------------------------------------
+# Synthesis for newly-added models (2026-05-07, post AA fixture refresh)
+# ------------------------------------------------------------------
+
+# MiMo-V2.5 ← MiMo-V2.5-Pro. Same Xiaomi family, larger sibling. The
+# smaller V2.5 only self-reports SWE-Pro (56.1) and Terminal-Bench (65.8)
+# while V2.5-Pro carries SWE-Verified, SWE-Pro, Terminal-Bench plus full
+# AA. Per Xiaomi: V2.5 targets "Pro-level performance at half the
+# inference cost", so larger-sibling synthesis is mildly optimistic but
+# stays within the same training pipeline. Pair must be declared *after*
+# V2.5-Pro's own synthesis pair so V2.5's donor pool sees the
+# Kimi-derived rows that fill V2.5-Pro's missing fields.
+[[pair]]
+target = "xiaomi/mimo-v2.5-pro"
+from = "moonshotai/kimi-k2.5"
+
+[[pair]]
+target = "xiaomi/mimo-v2.5"
+from = "xiaomi/mimo-v2.5-pro"
+
+# MiniMax M2.7 ← MiniMax M2.5. Same vendor, prior generation. M2.5 has
+# full SWE-Verified + SWE-Rebench + arc_agi + terminal_bench + AA
+# coverage; M2.7's vendor reports omit SWE-Verified entirely (a notable
+# gap — they emphasized SWE-Pro / Multilingual / TB instead). Synthesis
+# from M2.5 is conservative since M2.7 ≥ M2.5 in capability per launch
+# numbers (SWE-Pro 56.22 vs 55.4).
+[[pair]]
+target = "minimax/minimax-m2.7"
+from = "minimax/minimax-m2.5"
+
+# Qwen3.6-Plus ← GLM-5. Cross-vendor tier proxy. Qwen3.6-Plus has no
+# Alibaba sibling in our rank; AA's other Qwen entries are open-weight
+# size variants (3.5-397B-A17B, 3-235B-A22B, etc.) that don't carry
+# sonar/swerebench/arc_agi either. GLM-5 was selected over Kimi K2.5
+# because GLM-5 carries Sonar (the only public benchmark scoring code
+# quality directly) and a direct arc_agi v2_Semi_Private row, both of
+# which Qwen3.6-Plus's blog cannot fill. AA Coding scores cluster
+# closely (qwen3.6-plus 42.9 vs glm-5 44.2), so the tier proxy is
+# defensible. Mildly conservative: GLM-5 underperforms qwen3.6-plus on
+# AA Reasoning blend (gpqa+hle), so the synthesized arc_agi will read
+# slightly low.
+[[pair]]
+target = "qwen/qwen3.6-plus"
+from = "z-ai/glm-5"

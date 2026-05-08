@@ -4310,6 +4310,154 @@
         "major": 20.5,
         "minor": 29.76
       }
+    },
+    {
+      "archetype": "The efficient performer",
+      "bugDensityPerKloc": 0.64,
+      "bugSeverityPerMloc": {
+        "blocker": 34,
+        "critical": 27,
+        "major": 273,
+        "minor": 305
+      },
+      "bugs": {
+        "apiContractViolation": 4.38,
+        "concurrencyThreading": 43.97,
+        "controlFlowMistake": 3.6,
+        "dataStructureBug": 0,
+        "exceptionHandling": 4.85,
+        "nullDataValueIssues": 8.61,
+        "other": 3.76,
+        "patternRegex": 5.95,
+        "performanceStructure": 10.17,
+        "resourceManagementLeak": 10.17,
+        "serializationSerializable": 0,
+        "typeSafetyCasts": 4.38
+      },
+      "codeSmellDensityPerKloc": 21.35,
+      "codeSmellSeverityPerMloc": {
+        "blocker": 74,
+        "critical": 3029,
+        "major": 9617,
+        "minor": 8019
+      },
+      "codeSmells": {
+        "assignmentFieldScopeVisibility": 5.2,
+        "cognitiveComputationalComplexity": 8.94,
+        "collectionGenericsParamType": 22.86,
+        "controlConditionalLogicSmell": 4.13,
+        "deadUnusedRedundantCode": 8.71,
+        "deprecationObsolete": 1.33,
+        "designFrameworkBestPractices": 10.68,
+        "exceptionHandlingSmell": 0,
+        "namingStyleDocumentation": 1.97,
+        "other": 30.54,
+        "regexPatternStringFormat": 8.6
+      },
+      "cognitiveComplexity": 134127,
+      "comments": 1.1,
+      "cyclomaticComplexity": 191860,
+      "description": "Explore GPT-5.4 Mini Medium on Sonar's LLM leaderboard—code quality, security, complexity, and reliability metrics.",
+      "dominantFlaw": "96.74% code smells",
+      "functionalSkill": 78.31,
+      "id": "gpt-5-4-mini-medium",
+      "issueDensity": 22.07,
+      "linesOfCode": 743271,
+      "name": "GPT-5.4 Mini Medium",
+      "organization": "OpenAI",
+      "releaseDate": "2026-03-17",
+      "securityIssues": {
+        "certificateValidationOmissions": 1,
+        "cryptographyMisconfiguration": 8,
+        "hardCodedCredentials": 0,
+        "inadequateIOErrorHandling": 22,
+        "other": 27,
+        "pathTraversalInjection": 8,
+        "xmlExternalEntity": 15
+      },
+      "title": "GPT-5.4 Mini Medium Leaderboard Model",
+      "version": "5.4",
+      "vulnerabilityDensityPerKloc": 0.08,
+      "vulnerabilitySeverity": {
+        "blocker": 28.33,
+        "critical": 16.67,
+        "major": 26.67,
+        "minor": 28.33
+      }
+    },
+    {
+      "archetype": "The compact performer",
+      "bugDensityPerKloc": 1.72,
+      "bugSeverityPerMloc": {
+        "blocker": 57,
+        "critical": 37,
+        "major": 1138,
+        "minor": 487
+      },
+      "bugs": {
+        "apiContractViolation": 2.23,
+        "concurrencyThreading": 21.27,
+        "controlFlowMistake": 5.97,
+        "dataStructureBug": 0,
+        "exceptionHandling": 4.28,
+        "nullDataValueIssues": 4.57,
+        "other": 47.99,
+        "patternRegex": 2.11,
+        "performanceStructure": 4.1,
+        "resourceManagementLeak": 5.33,
+        "serializationSerializable": 0.06,
+        "typeSafetyCasts": 2.75
+      },
+      "codeSmellDensityPerKloc": 24.56,
+      "codeSmellSeverityPerMloc": {
+        "blocker": 67,
+        "critical": 4312,
+        "major": 11232,
+        "minor": 8403
+      },
+      "codeSmells": {
+        "assignmentFieldScopeVisibility": 6.56,
+        "cognitiveComputationalComplexity": 12.36,
+        "collectionGenericsParamType": 13.77,
+        "controlConditionalLogicSmell": 4.66,
+        "deadUnusedRedundantCode": 15.01,
+        "deprecationObsolete": 1.35,
+        "designFrameworkBestPractices": 10.82,
+        "exceptionHandlingSmell": 0,
+        "namingStyleDocumentation": 1.76,
+        "other": 27.4,
+        "regexPatternStringFormat": 8.94
+      },
+      "cognitiveComplexity": 151044,
+      "comments": 3.7,
+      "cyclomaticComplexity": 190058,
+      "description": "Explore GPT-5.4 Nano Medium on Sonar's LLM leaderboard—code quality, security, complexity, and reliability metrics.",
+      "dominantFlaw": "93.31% code smells",
+      "functionalSkill": 77.94,
+      "id": "gpt-5-4-nano-medium",
+      "issueDensity": 26.32,
+      "linesOfCode": 702976,
+      "name": "GPT-5.4 Nano Medium",
+      "organization": "OpenAI",
+      "releaseDate": "2026-03-17",
+      "securityIssues": {
+        "certificateValidationOmissions": 9,
+        "cryptographyMisconfiguration": 11,
+        "hardCodedCredentials": 0,
+        "inadequateIOErrorHandling": 4,
+        "other": 10,
+        "pathTraversalInjection": 0,
+        "xmlExternalEntity": 7
+      },
+      "title": "GPT-5.4 Nano Medium Leaderboard Model",
+      "version": "5.4",
+      "vulnerabilityDensityPerKloc": 0.04,
+      "vulnerabilitySeverity": {
+        "blocker": 20.69,
+        "critical": 51.72,
+        "major": 17.24,
+        "minor": 10.34
+      }
     }
   ],
   "subtitle": "Independent analysis of code reliability, security, and maintainability for leading LLMs",

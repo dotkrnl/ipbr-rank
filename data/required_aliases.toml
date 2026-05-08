@@ -124,15 +124,14 @@ aliases = [
     "kimi-latest",
     "moonshot/kimi-k2.6", "moonshotai/kimi-k2.6",
     # Scale leaderboards spell decimals as `p` (no `.` allowed in slugs).
-    # Note: `kimi-k2p5` upstream is the K2.5 model (a different release) — do
-    # NOT alias it here. Only K2.6's slug form would match.
+    # `kimi-k2p5` is reserved for K2.5 below — do NOT alias it here.
     "kimi-k2p6",
 ]
 
 [models."z-ai/glm-5.1"]
 vendor = "zai"
 aliases = [
-    "glm 5.1", "glm-5.1", "glm-5-1", "glm-5",
+    "glm 5.1", "glm-5.1", "glm-5-1",
     "glm-5-1-non-reasoning",
     "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1",
     # Scale leaderboards: `p` instead of `.`
@@ -239,4 +238,117 @@ aliases = [
     "moonshotai/kimi-k2-0905", "moonshot/kimi-k2-0905",
     # Turbo is the same model parameters, just a faster API endpoint
     "kimi-k2-turbo-preview", "kimi k2 turbo", "kimi-k2-turbo",
+]
+
+# ------------------------------------------------------------------
+# Models added 2026-05-07 — refresh of the AA fixture (56 → 513 rows)
+# surfaced direct AA coverage for MiniMax, Xiaomi, and Alibaba lines that
+# were previously absent. GLM-5 base and Kimi K2.5 also moved from
+# alias-collision / commented-reservation status to first-class entries.
+# ------------------------------------------------------------------
+
+# GLM-5 (base) — distinct from GLM-5.1. AA carries both as separate slugs
+# (`glm-5` / `glm-5-1`); previously the `"glm-5"` shorthand was absorbed
+# into glm-5.1's alias list, silently merging the two models. Direct
+# coverage: AA, swebench (Verified+Multilingual), swerebench, arc_agi,
+# sonar (id `glm-5`), terminal_bench, lmarena, openrouter. Override fills
+# the MCP-Atlas gap (Z.ai HF card reports 67.8 on Public Set; Scale Labs
+# only carries glm-5p1 = GLM-5.1 today).
+[models."z-ai/glm-5"]
+vendor = "zai"
+aliases = [
+    "glm-5", "glm 5",
+    "glm-5-non-reasoning", "glm-5-thinking",
+    "z.ai glm 5", "z-ai/glm-5", "zai/glm-5",
+    # AA dated snapshot
+    "glm-5-20260211",
+]
+
+# Kimi K2.5 — Moonshot's predecessor to K2.6. AA carries both Reasoning
+# and Non-reasoning variants (`kimi-k2-5` / `kimi-k2-5-non-reasoning`).
+# Scale Labs uses the no-decimal form `kimi-k2p5`, which the K2.6 entry
+# above explicitly excludes. lmarena tracks `-instant` and `-thinking`
+# endpoint variants; both alias to the same canonical id since per the
+# variant-coverage policy we only score medium/thinking/adaptive.
+[models."moonshotai/kimi-k2.5"]
+vendor = "moonshot"
+aliases = [
+    "kimi 2.5", "kimi k2.5",
+    "kimi-k2.5", "kimi-k2-5",
+    "kimi-k2-5-non-reasoning", "kimi-k2-5-thinking",
+    "kimi-k2.5-instant", "kimi-k2.5-thinking",
+    "moonshot/kimi-k2.5", "moonshotai/kimi-k2.5",
+    # Scale leaderboards spell decimals as `p`.
+    "kimi-k2p5",
+]
+
+# Xiaomi MiMo-V2.5 — base of the V2.5 family ("Pro-level performance at
+# half the inference cost" per Xiaomi). Direct coverage limited to AA
+# (`mimo-v2-5-0424` is AA's dated slug) and OR/lmarena. SWE-Pro 56.1 and
+# Terminal-Bench 65.8 come from Xiaomi's HF card; the rest synthesizes
+# from MiMo-V2.5-Pro (same family, larger sibling).
+[models."xiaomi/mimo-v2.5"]
+vendor = "xiaomi"
+aliases = [
+    "mimo-v2.5", "mimo v2.5", "mimo-v2-5",
+    "MiMo-V2.5",
+    "xiaomi/mimo-v2.5", "xiaomi/mimo-v2-5",
+    "XiaomiMiMo/MiMo-V2.5",
+    # AA's dated snapshot form for the V2.5 base.
+    "mimo-v2-5-0424",
+]
+
+# Xiaomi MiMo-V2.5-Pro — 1.02T MoE flagship, 42B active params, 1M ctx.
+# AA carries Reasoning and Non-reasoning variants. Self-reported
+# SWE-Bench Verified 78.9, SWE-Pro 57.2, Terminal-Bench 68.4. Donor for
+# MiMo-V2.5 (its smaller V2.5 sibling).
+[models."xiaomi/mimo-v2.5-pro"]
+vendor = "xiaomi"
+aliases = [
+    "mimo-v2.5-pro", "mimo v2.5 pro", "mimo-v2-5-pro",
+    "MiMo-V2.5-Pro",
+    "mimo-v2-5-pro-non-reasoning", "mimo-v2-5-pro-thinking",
+    "xiaomi/mimo-v2.5-pro", "xiaomi/mimo-v2-5-pro",
+    "XiaomiMiMo/MiMo-V2.5-Pro",
+]
+
+# MiniMax M2.5 — first MiniMax model in the rank. Direct coverage on AA,
+# swebench, swerebench, arc_agi, terminal_bench, lmarena, openrouter.
+# AA's slug is `minimax-m2-5`; OR uses the redundant `minimax/minimax-m2.5`
+# (paid + `:free` variants both alias here).
+[models."minimax/minimax-m2.5"]
+vendor = "minimax"
+aliases = [
+    "minimax-m2.5", "minimax m2.5", "minimax-m2-5",
+    "minimax 2.5",
+    "MiniMax-M2.5", "MiniMax M2.5",
+    "minimax/minimax-m2.5",
+]
+
+# MiniMax M2.7 — the self-evolving successor to M2.5. AA, swerebench,
+# lmarena, OR direct; SWE-Verified is a notable vendor gap (M2.7 launch
+# emphasized SWE-Pro / Multilingual / Terminal-Bench instead).
+[models."minimax/minimax-m2.7"]
+vendor = "minimax"
+aliases = [
+    "minimax-m2.7", "minimax m2.7", "minimax-m2-7",
+    "minimax 2.7",
+    "MiniMax-M2.7", "MiniMax M2.7",
+    "minimax/minimax-m2.7",
+]
+
+# Qwen3.6-Plus — Alibaba's flagship "Plus" tier (always-on chain-of-
+# thought reasoning, 1M ctx). AA, lmarena, OR direct; vendor blog reports
+# SWE-Verified 78.8, SWE-Pro 56.6, Terminal-Bench 61.6, MCP-Atlas 74.1.
+# Synthesizes from GLM-5 for swerebench / arc_agi / sonar / gso (same-
+# tier flagship with broad coverage). Note: Qwen3.6-Plus is distinct from
+# the Qwen3.6-Max-Preview and the open-weight Qwen3.6-27B / 35B-A3B
+# variants AA also lists; only the Plus tier is covered here.
+[models."qwen/qwen3.6-plus"]
+vendor = "alibaba"
+aliases = [
+    "qwen3.6-plus", "qwen3.6 plus", "qwen3-6-plus",
+    "qwen 3.6 plus",
+    "qwen/qwen3.6-plus", "alibaba/qwen3.6-plus",
+    "Qwen3.6-Plus",
 ]
