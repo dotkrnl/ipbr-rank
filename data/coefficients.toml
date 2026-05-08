@@ -271,11 +271,6 @@ PLAN = 0.32
 A_R = 0.15
 OPS_review = 0.08
 
-[reviewer_reservation]
-I_adj = 0.08
-P_adj = 0.18
-B_adj = 0.32
-
 [aggregation]
 # Coverage threshold around which we transition from shrink-to-50 to
 # trusting the present-weight mean directly.

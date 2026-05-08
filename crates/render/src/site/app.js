@@ -1,29 +1,5 @@
 (function () {
   'use strict';
-  var STORAGE_KEY = 'ipbr-mode';
-
-  // === Mode toggle (raw / adjusted) ===
-  function applyMode(mode) {
-    document.body.setAttribute('data-mode', mode);
-    var buttons = document.querySelectorAll('.mode-toggle [data-mode-value]');
-    Array.prototype.forEach.call(buttons, function (btn) {
-      var active = btn.getAttribute('data-mode-value') === mode;
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
-  }
-  function initMode() {
-    var saved = null;
-    try { saved = localStorage.getItem(STORAGE_KEY); } catch (_) {}
-    if (saved === 'raw' || saved === 'adjusted') applyMode(saved);
-    var buttons = document.querySelectorAll('.mode-toggle [data-mode-value]');
-    Array.prototype.forEach.call(buttons, function (btn) {
-      btn.addEventListener('click', function () {
-        var mode = btn.getAttribute('data-mode-value');
-        applyMode(mode);
-        try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) {}
-      });
-    });
-  }
 
   // === Sort: descending only, click again returns to default order ===
   function initSort() {
@@ -43,13 +19,7 @@
           relayout(table, defaultOrder);
           return;
         }
-        // Mark every header that points at this key (raw + adjusted variants share data-sort)
-        // so the indicator persists when the user toggles modes.
-        Array.prototype.forEach.call(headers, function (h) {
-          if (h.getAttribute('data-sort') === key) {
-            h.setAttribute('data-sort-active', 'desc');
-          }
-        });
+        th.setAttribute('data-sort-active', 'desc');
         var rows = Array.prototype.filter.call(table.tBodies[0].rows, function (r) {
           return r.classList.contains('row');
         });
@@ -163,7 +133,6 @@
     boot();
   }
   function boot() {
-    initMode();
     initSort();
     initFilter();
     initExpand();

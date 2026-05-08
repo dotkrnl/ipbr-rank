@@ -64,7 +64,7 @@ intervention.
 - **B** (Building): Implementation, benchmarks (SWE-bench, LiveCodeBench, etc.)
 - **R** (Reviewing): Judging code quality, correctness, preference evaluation
 
-Each role has a **raw** score (0–100, based on public benchmarks) and an **adjusted** score that applies a **reviewer-reservation penalty** to prevent vendors from gaming their own preference evaluations.
+Each role has a single **raw** score (0–100, based on public benchmarks).
 
 ## Sources
 
@@ -116,29 +116,6 @@ spread but genuinely slow models lose 4-6 points:
 - **B_raw** = 0.70×BUILD + 0.07×PLAN + 0.15×A_B + 0.08×OPS_precision
 - **R** = 0.15×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.32×PLAN + 0.15×A_R + 0.08×OPS_review
 
-### Reviewer-Reservation Penalty
-For each vendor **v**, compute the reservation gap from the direct LM Arena
-search/document review proxy `Q = LMArenaSearchDocument`:
-```
-L_v = max(0, max(Q_all) - max(Q_outside_v))
-```
-That gap is the *available* penalty budget. Each model **m** in vendor
-**v** then pays a share proportional to its own contribution to the lead
-(`share_m = clamp((Q_m - Q_outside_v) / L_v, 0, 1)`, so the actual top
-proxy model pays the full reservation and siblings tied with the outside
-proxy max pay nothing). The per-model penalty is:
-```
-penalty_m = L_v × share_m
-I_adj = I_raw - 0.08 × penalty_m
-P_adj = P_raw - 0.18 × penalty_m
-B_adj = B_raw - 0.32 × penalty_m
-```
-
-This prevents vendors from artificially inflating scores through their
-own preference evaluations without taxing every model that merely has high
-BUILD/PLAN/AISL review capability. See `docs/methodology.md` §6 for the
-derivation.
-
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 
 ## Sample Output (TOML)
@@ -162,6 +139,7 @@ i_raw = 78.4
 p_raw = 81.1
 b_raw = 79.6
 r = 84.0
+# i_adj/p_adj/b_adj retained as raw aliases for API back-compat.
 i_adj = 78.4
 p_adj = 81.1
 b_adj = 79.6

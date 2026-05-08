@@ -7,14 +7,6 @@ use super::{html_escape, layout};
 pub fn render_index(scoreboard: &Scoreboard) -> String {
     let mut body = String::new();
 
-    // Mode toggle. Long-form label collapses to "adjusted" on mobile via CSS.
-    body.push_str(
-        r#"<div class="mode-toggle" role="radiogroup" aria-label="Score mode">
-  <button type="button" data-mode-value="raw" aria-pressed="true">raw</button>
-  <button type="button" data-mode-value="adjusted" aria-pressed="false"><span class="mode-long">adjusted for review opportunity-cost</span><span class="mode-short">adjusted</span></button>
-</div>"#,
-    );
-
     body.push_str(&render_hero(scoreboard));
 
     body.push_str(SCORING_PANEL);
@@ -35,26 +27,24 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
 
 fn render_hero(scoreboard: &Scoreboard) -> String {
     let mut html = String::from("<section class=\"hero\" id=\"hero\">");
-    for (role_id, role_label, raw_extractor, adj_extractor) in role_specs() {
+    for (role_id, role_label, extractor) in role_specs() {
         html.push_str(&format!(
             "<div class=\"role {role_id}\"><div class=\"role-head\">[ {role_label} ]</div>"
         ));
         let mut ranked: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
         ranked.sort_by(|left, right| {
-            raw_extractor(right)
-                .partial_cmp(&raw_extractor(left))
+            extractor(right)
+                .partial_cmp(&extractor(left))
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
         for (idx, model) in ranked.iter().take(3).enumerate() {
             let pos = idx + 1;
             let row_class = if idx == 0 { "row top" } else { "row" };
-            let raw = raw_extractor(model);
-            let adj = adj_extractor(model);
+            let score = extractor(model);
             html.push_str(&format!(
-                r#"<div class="{row_class}"><span class="pos">{pos}</span><span class="name">{name}</span><span class="score"><span class="score-raw" data-tier="{raw_tier}">{raw:.1}</span><span class="score-adjusted" data-tier="{adj_tier}">{adj:.1}</span></span></div>"#,
+                r#"<div class="{row_class}"><span class="pos">{pos}</span><span class="name">{name}</span><span class="score" data-tier="{tier}">{score:.1}</span></div>"#,
                 name = html_escape(&model.display_name),
-                raw_tier = score_tier(raw),
-                adj_tier = score_tier(adj),
+                tier = score_tier(score),
             ));
         }
         html.push_str("</div>");
@@ -75,12 +65,12 @@ fn score_tier(score: f64) -> &'static str {
 
 type RoleExtractor = fn(&ipbr_core::ModelRecord) -> f64;
 
-fn role_specs() -> [(&'static str, &'static str, RoleExtractor, RoleExtractor); 4] {
+fn role_specs() -> [(&'static str, &'static str, RoleExtractor); 4] {
     [
-        ("idea", "idea", |m| m.scores.i_raw, |m| m.scores.i_adj),
-        ("plan", "plan", |m| m.scores.p_raw, |m| m.scores.p_adj),
-        ("build", "build", |m| m.scores.b_raw, |m| m.scores.b_adj),
-        ("review", "review", |m| m.scores.r, |m| m.scores.r),
+        ("idea", "idea", |m| m.scores.i_raw),
+        ("plan", "plan", |m| m.scores.p_raw),
+        ("build", "build", |m| m.scores.b_raw),
+        ("review", "review", |m| m.scores.r),
     ]
 }
 
@@ -119,8 +109,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         r#"<th data-sort="vendor"><button type="button" class="sort">vendor</button></th>"#,
     );
 
-    // Score columns — emit raw and adjusted as separate <th>s; CSS hides one set per mode.
-    // The build column is the default sort, marked active on initial render.
+    // Score columns — build is the default sort, marked active on initial render.
     for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
         let active_attr = if key == "b" {
             r#" data-sort-active="desc""#
@@ -128,10 +117,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
             ""
         };
         html.push_str(&format!(
-            r#"<th class="num score-raw" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
-        ));
-        html.push_str(&format!(
-            r#"<th class="num score-adjusted" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
+            r#"<th class="num" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
         ));
     }
     html.push_str(
@@ -165,12 +151,11 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     )
     .unwrap();
 
-    for (raw, adj) in [(s.i_raw, s.i_adj), (s.p_raw, s.p_adj), (s.b_raw, s.b_adj)] {
+    for raw in [s.i_raw, s.p_raw, s.b_raw] {
         write!(
             html,
-            r#"<td class="num score-raw" data-tier="{raw_tier}">{raw:.1}</td><td class="num score-adjusted" data-tier="{adj_tier}">{adj:.1}</td>"#,
-            raw_tier = score_tier(raw),
-            adj_tier = score_tier(adj),
+            r#"<td class="num" data-tier="{tier}">{raw:.1}</td>"#,
+            tier = score_tier(raw),
         )
         .unwrap();
     }
@@ -312,10 +297,8 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <div class="scoring-body">
 <p>Each model gets four role scores from public benchmarks. <strong>Idea</strong> measures open-ended creativity. <strong>Plan</strong> measures structured reasoning, function-calling, and multi-step decomposition. <strong>Build</strong> measures implementation skill — SWE-bench, LiveCodeBench, terminal tasks. <strong>Review</strong> measures preference judgment.</p>
 
-<h3>raw vs adjusted</h3>
-<p>The <em>raw</em> score is the benchmark composite, normalized to 0-100. The <em>adjusted</em> score subtracts a <strong>reviewer-reservation</strong> penalty: when a vendor's models lead the direct LM Arena search/document review proxy, that proxy lead gets discounted from their Idea, Plan, and Build scores so vendors can't game their own preference evaluations.</p>
-
-<p>Penalty coefficients differ by role: Build is penalized hardest (0.32), Plan moderately (0.18), Idea lightly (0.08). Review is never adjusted.</p>
+<h3>scoring</h3>
+<p>Each role score is the benchmark composite for that role, normalized to 0-100 and combined via weighted average of group scores. See the about page for the full math.</p>
 
 <h3>missing data</h3>
 <p>If a model is missing some metrics within a group, the group score blends from shrink-to-50 to trusting the present metrics across 60-80% group coverage. At 80% coverage and above, the present-weight mean is trusted directly.</p>

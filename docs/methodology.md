@@ -13,15 +13,14 @@ This document describes the complete mathematical pipeline for computing the fou
 
 ## 1. Overview
 
-The scoring pipeline has seven stages:
+The scoring pipeline has six stages:
 
 1. **Ingestion**: Fetch rows from each source, match model names to canonical IDs via alias matching, optionally synthesize missing rows from sibling models (`data/synthesis_aliases.toml`).
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
 3. **Uncertainty penalties**: Values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Values from manual overrides are pulled toward 50 by 10 %.
 4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (`SWEComposite` and `SonarComposite`).
 5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
-6. **Canary health penalty**: AISL canary drift is consumed as `AI_canary_health`, outside all groups. Healthy or missing canary data adds no points; degraded canary data subtracts up to 6 points from each raw role score.
-7. **Final scoring**: Role scores are weighted averages of groups; the reviewer-reservation penalty produces the `_adj` variants of I/P/B.
+6. **Final scoring**: Role scores are weighted averages of groups. AISL canary drift is consumed as `AI_canary_health`, outside all groups, and can subtract up to 6 points from each role score; healthy or missing canary data adds no points.
 
 ---
 
@@ -269,68 +268,15 @@ population.
 
 **Verification**: For each role, the weights sum to 1.0 (within floating-point epsilon).
 
----
-
-## 6. Reviewer-Reservation Penalty
-
-The raw I/P/B scores do not account for vendor bias in preference evaluations (e.g., a vendor's preference model may favor its own LLMs). The reviewer-reservation penalty corrects for this using the direct LM Arena search/document review proxy (`LMArenaSearchDocument`), not the public `R` score. `R` also includes BUILD, PLAN, and AISL review evidence, so using it as the reservation basis would penalize genuine task capability instead of only preference-review advantage.
-
-### 6.1 Penalty Derivation
-
-Let `Q_m` be model **m**'s normalized `LMArenaSearchDocument` metric. Models without a direct proxy value do not create or pay a reservation penalty.
-
-For each vendor **v**:
-1. Compute `Q_all = max(Q across models with direct proxy values)` — the best direct review-proxy score globally.
-2. Compute `Q_outside_v = max(Q across models not from vendor v)` — the best direct review-proxy score excluding vendor v's models.
-3. Define the **reservation gap**: `L_v = max(0, Q_all - Q_outside_v)`.
-
-If vendor v does not have the unique best direct review proxy, its per-model penalty share is zero. If vendor v has the unique best direct review proxy, `L_v` measures how much better that proxy is than the best non-v proxy.
-
-### 6.2 Penalty Coefficients
-
-From `[reviewer_reservation]` in `data/coefficients.toml`:
-- I_adj coefficient: 0.08
-- P_adj coefficient: 0.18
-- B_adj coefficient: 0.32
-
-### 6.3 Per-Model Penalty Share
-
-The vendor-level gap `L_v` is the *available* reservation budget. It is
-applied to each individual model in vendor **v** in proportion to that
-model's own contribution to the lead:
-
-```
-share_m = clamp((Q_m - Q_outside_v) / L_v, 0, 1)   # 1.0 for the actual top-proxy model
-penalty_m = L_v × share_m
-```
-
-So the actual top proxy model in vendor **v** pays the full reservation,
-sibling models with `Q` at or below `Q_outside_v` pay nothing, and models
-in between pay proportionally. This stops the reservation tax from hitting
-every model that happens to share a vendor with a strong reviewer proxy,
-while preserving the original semantics for the model that actually drives
-the lead.
-
-### 6.4 Adjusted Scores
-
-For each model **m** from vendor **v**:
-```
-I_adj = I_raw - 0.08 × penalty_m
-P_adj = P_raw - 0.18 × penalty_m
-B_adj = B_raw - 0.32 × penalty_m
-```
-
-The reviewing score **R** is not adjusted (it is used to compute the penalty).
-
-**Rationale**: Building tasks are most sensitive to reviewer bias (highest coefficient 0.32), followed by planning (0.18), then idea (0.08).
+The rendered `scoreboard.toml` also emits `i_adj`, `p_adj`, and `b_adj` fields under `[models.scores]`. These are TOML-only aliases of `i_raw`, `p_raw`, and `b_raw` retained so existing API consumers keep parsing; the previous reviewer-reservation adjustment was removed and these fields are now always equal to their raw counterparts.
 
 ---
 
-## 7. Alias Matching
+## 6. Alias Matching
 
 Model names vary across sources. The alias matcher normalizes names and fuzzy-matches against canonical IDs loaded from `data/required_aliases.toml`.
 
-### 7.1 Normalization Steps
+### 6.1 Normalization Steps
 
 1. HTML-unescape, lowercase, strip whitespace.
 2. Replace vendor-colon prefixes (`openai:`, `anthropic:`, etc.) with vendor-space.
@@ -339,11 +285,11 @@ Model names vary across sources. The alias matcher normalizes names and fuzzy-ma
 5. Collapse whitespace.
 6. Apply organization aliases: `moonshot ai` → `moonshot`, `z ai` → `zai`.
 
-### 7.2 Compact Key
+### 6.2 Compact Key
 
 `compact_key(s)` = normalized name with all non-alphanumeric removed (no spaces, no dots). Used for fuzzy matching.
 
-### 7.3 Matching Pipeline
+### 6.3 Matching Pipeline
 
 1. **Exact lookup**: Try `normalize_name(input)`, `compact_key(input)`, and vendor-prefixed variants against the alias index.
 2. **Fuzzy fallback**: For each candidate, compute substring match score. Add +20 vendor bonus if the vendor matches. Accept best match if score ≥ `max(12, len(input_ck) / 2)`.
@@ -353,7 +299,7 @@ Model names vary across sources. The alias matcher normalizes names and fuzzy-ma
 
 ---
 
-## 8. Thinking Effort
+## 7. Thinking Effort
 
 Models with vendor-exposed reasoning levels (OpenAI `reasoning_effort`, Anthropic extended thinking budgets, Gemini "thinking") get separate canonical IDs with a `+thinking-{low|medium|high}` suffix when a source provides distinguishable per-effort scores.
 
@@ -361,7 +307,7 @@ By default, we **only split** when at least one source provides measurable diffe
 
 ---
 
-## 9. Determinism
+## 8. Determinism
 
 With `--offline --cache <fixtures> --now <timestamp>`:
 - All source responses are read from fixtures (no network variance).
@@ -373,7 +319,7 @@ This guarantees byte-for-byte deterministic output for testing.
 
 ---
 
-## 10. Coefficient Overrides
+## 9. Coefficient Overrides
 
 The CLI accepts `--coefficients path/to/file.toml` to override the embedded coefficients. The *effective* coefficients (after overrides) are echoed to `out/coefficients.toml` so the scoreboard is self-describing.
 
@@ -458,13 +404,6 @@ tail-penalty curve so only genuinely slow models lose meaningful score).
 | P_raw | PLAN 0.46, GEN 0.31, A_P 0.15, OPS_precision 0.08 |
 | B_raw | BUILD 0.70, PLAN 0.07, A_B 0.15, OPS_precision 0.08 |
 | R | LM_ARENA_REVIEW_PROXY 0.15, BUILD 0.30, PLAN 0.32, A_R 0.15, OPS_review 0.08 |
-
-### Reviewer-Reservation Penalties
-| Role | Coefficient |
-|------|-------------|
-| I_adj | 0.08 |
-| P_adj | 0.18 |
-| B_adj | 0.32 |
 
 ### Synthesis Penalty
 | Constant | Value |

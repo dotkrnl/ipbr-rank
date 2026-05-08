@@ -102,9 +102,10 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         out.push_str(&format!("p_raw = {}\n", format_float(model.scores.p_raw)));
         out.push_str(&format!("b_raw = {}\n", format_float(model.scores.b_raw)));
         out.push_str(&format!("r = {}\n", format_float(model.scores.r)));
-        out.push_str(&format!("i_adj = {}\n", format_float(model.scores.i_adj)));
-        out.push_str(&format!("p_adj = {}\n", format_float(model.scores.p_adj)));
-        out.push_str(&format!("b_adj = {}\n\n", format_float(model.scores.b_adj)));
+        // i_adj/p_adj/b_adj retained as raw aliases for API back-compat.
+        out.push_str(&format!("i_adj = {}\n", format_float(model.scores.i_raw)));
+        out.push_str(&format!("p_adj = {}\n", format_float(model.scores.p_raw)));
+        out.push_str(&format!("b_adj = {}\n\n", format_float(model.scores.b_raw)));
 
         out.push_str("[models.groups]\n");
         for (group, score) in &model.groups {

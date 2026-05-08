@@ -130,7 +130,6 @@ pub struct Coefficients {
     pub ai_stupid_perspective_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub group_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub final_score_weights: BTreeMap<String, BTreeMap<String, f64>>,
-    pub reviewer_reservation: BTreeMap<String, f64>,
     pub metrics: BTreeMap<String, MetricDef>,
     /// Composite metrics combine several already-normalized input metrics
     /// into a single derived metric using the same missing-safe weighted
@@ -171,7 +170,6 @@ mod tests {
         assert_eq!(c.ai_stupid_perspective_weights.len(), 4);
         assert_eq!(c.group_weights.len(), 8);
         assert_eq!(c.final_score_weights.len(), 4);
-        assert_eq!(c.reviewer_reservation.len(), 3);
         assert!(
             c.metrics.len() >= 20,
             "expected >=20 metrics, got {}",

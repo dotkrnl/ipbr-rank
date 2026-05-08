@@ -20,17 +20,8 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Idea</strong> — open-ended creativity, general intelligence, breadth. Driven by LM Arena Text, AI Stupid Level idea-shaped axes, and reasoning blends.</li>
 <li><strong>Plan</strong> — structured reasoning, function-calling, multi-step task decomposition. Driven by Terminal-Bench, tau2-bench, IFBench, MCP-Atlas, and AISL plan axes.</li>
 <li><strong>Build</strong> — actually writing code that runs. Driven by SWE-bench (Verified + Multilingual + Pro), SWE-rebench, GSO, Sonar code quality, and AISL build axes.</li>
-<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar code-quality metrics, and AISL review axes. <em>Review has no adjusted variant.</em></li>
+<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar code-quality metrics, and AISL review axes.</li>
 </ul>
-
-<h2>Raw vs adjusted</h2>
-<p>The raw score is the benchmark composite, normalized. The adjusted score subtracts a <strong>reviewer-reservation</strong> penalty: when one vendor's models lead the direct LM Arena search/document review proxy, that proxy lead gets discounted from their other scores.</p>
-<pre><code>Q_m   = LMArenaSearchDocument_m
-L_v   = max(0, max(Q_all) - max(Q_outside_v))
-I_adj = I_raw - 0.08 × L_v × share_m
-P_adj = P_raw - 0.18 × L_v × share_m
-B_adj = B_raw - 0.32 × L_v × share_m</code></pre>
-<p>Coefficients reflect how easy each role is to game with biased preference evaluations. Build is hardest hit; Idea is barely touched; Plan sits in between.</p>
 
 <h2>How scores are built</h2>
 <ol>

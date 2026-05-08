@@ -121,15 +121,15 @@ groups_shrunk = ["PLAN"]
 
 All scores are floats in the range [0.0, 100.0].
 
-- **`i_raw`**: Idea score (raw, before reviewer-reservation penalty)
-- **`p_raw`**: Planning score (raw)
-- **`b_raw`**: Building score (raw)
-- **`r`**: Reviewing score (not adjusted — used to compute the penalty for others)
-- **`i_adj`**: Idea score (adjusted for reviewer-reservation penalty)
-- **`p_adj`**: Planning score (adjusted)
-- **`b_adj`**: Building score (adjusted)
+- **`i_raw`**: Idea score
+- **`p_raw`**: Planning score
+- **`b_raw`**: Building score
+- **`r`**: Reviewing score
+- **`i_adj`**: Alias of `i_raw` retained for API back-compat (always equals `i_raw`)
+- **`p_adj`**: Alias of `p_raw` retained for API back-compat (always equals `p_raw`)
+- **`b_adj`**: Alias of `b_raw` retained for API back-compat (always equals `b_raw`)
 
-**Why R is not adjusted**: The reviewing score is the penalty *source*, not a penalty *target*. Applying the penalty to R would create circular dependency.
+**Note**: The previous reviewer-reservation adjustment that produced distinct `_adj` scores was removed. The `_adj` keys are retained as raw aliases so existing consumers keep parsing.
 
 #### `[models.groups]` Table
 
@@ -233,11 +233,6 @@ OPS_long = 0.08
 [final_score_weights.P_raw]
 # ... same structure for P_raw, B_raw, R
 
-[reviewer_reservation]
-I_adj = 0.08
-P_adj = 0.18
-B_adj = 0.32
-
 [metrics.LMArenaText]
 higher_better = true
 log_scale = false
@@ -267,7 +262,7 @@ with open("out/scoreboard.toml", "rb") as f:
     scoreboard = tomllib.load(f)
 
 for model in scoreboard["models"]:
-    print(f"{model['canonical_id']}: I={model['scores']['i_adj']:.1f}")
+    print(f"{model['canonical_id']}: I={model['scores']['i_raw']:.1f}")
 ```
 
 ### Rust
@@ -330,7 +325,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let scoreboard: Scoreboard = toml::from_str(&raw)?;
 
     for model in scoreboard.models {
-        println!("{}: I={:.1}", model.canonical_id, model.scores.i_adj);
+        println!("{}: I={:.1}", model.canonical_id, model.scores.i_raw);
     }
 
     Ok(())
@@ -347,7 +342,7 @@ const raw = fs.readFileSync('out/scoreboard.toml', 'utf8');
 const scoreboard = toml.parse(raw);
 
 for (const model of scoreboard.models) {
-    console.log(`${model.canonical_id}: I=${model.scores.i_adj.toFixed(1)}`);
+    console.log(`${model.canonical_id}: I=${model.scores.i_raw.toFixed(1)}`);
 }
 ```
 
@@ -427,7 +422,7 @@ This enables golden testing and reproducible builds.
 
 ### 1.0.0 (Initial)
 - First stable schema
-- All four role scores (I_raw, P_raw, B_raw, R) plus adjusted (I_adj, P_adj, B_adj)
+- All four role scores (I_raw, P_raw, B_raw, R), plus `i_adj`, `p_adj`, `b_adj` retained as raw aliases for API back-compat
 - 12 groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*)
 - Metrics defined in `data/coefficients.toml`
 - Missing-data tracking via `models.missing`

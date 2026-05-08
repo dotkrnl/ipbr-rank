@@ -87,9 +87,6 @@ pub struct RoleScores {
     pub p_raw: f64,
     pub b_raw: f64,
     pub r: f64,
-    pub i_adj: f64,
-    pub p_adj: f64,
-    pub b_adj: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

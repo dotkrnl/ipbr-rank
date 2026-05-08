@@ -1,11 +1,10 @@
 use crate::aggregate::missing_safe_avg;
 use crate::coefficients::{Coefficients, MetricTransform, PenaltiesConfig};
-use crate::model::{ModelRecord, Vendor};
+use crate::model::ModelRecord;
 use crate::normalize::{as_score_0_100, robust_norm, tail_penalty_norm};
 use std::collections::BTreeMap;
 
 const ROLE_KEYS: &[&str] = &["I_raw", "P_raw", "B_raw", "R"];
-const REVIEWER_RESERVATION_METRIC: &str = "LMArenaSearchDocument";
 
 pub fn compute_scores(records: &mut [ModelRecord]) {
     let coef = Coefficients::load_embedded().expect("embedded coefficients are valid");
@@ -21,7 +20,6 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     aggregate_groups(records, coef, &aggregation);
     compute_role_scores(records, coef, &aggregation);
     apply_canary_health_penalty(records, &penalties);
-    apply_reviewer_reservation(records, coef);
 }
 
 /// Compute the AI Stupid Level perspective groups (A_I / A_P / A_B / A_R)
@@ -208,93 +206,10 @@ fn apply_canary_health_penalty(records: &mut [ModelRecord], penalties: &Penaltie
     }
 }
 
-fn apply_reviewer_reservation(records: &mut [ModelRecord], coef: &Coefficients) {
-    let i_w = coef
-        .reviewer_reservation
-        .get("I_adj")
-        .copied()
-        .unwrap_or(0.0);
-    let p_w = coef
-        .reviewer_reservation
-        .get("P_adj")
-        .copied()
-        .unwrap_or(0.0);
-    let b_w = coef
-        .reviewer_reservation
-        .get("B_adj")
-        .copied()
-        .unwrap_or(0.0);
-
-    let max_reservation_all = records
-        .iter()
-        .filter_map(reviewer_reservation_value)
-        .fold(f64::NEG_INFINITY, f64::max);
-
-    // Per-vendor "max reviewer-reservation signal among other vendors".
-    // This deliberately uses the direct LM Arena review proxy metric rather
-    // than the public R score, because R also contains BUILD/PLAN/AISL
-    // capability evidence that should not create a vendor-bias reservation.
-    let mut max_reservation_outside: BTreeMap<String, f64> = BTreeMap::new();
-    for r in records.iter() {
-        let outside = records
-            .iter()
-            .filter(|other| !same_vendor(&other.vendor, &r.vendor))
-            .filter_map(reviewer_reservation_value)
-            .fold(f64::NEG_INFINITY, f64::max);
-        max_reservation_outside
-            .entry(r.vendor.as_str().to_string())
-            .or_insert(outside);
-    }
-
-    for r in records.iter_mut() {
-        let outside = max_reservation_outside
-            .get(r.vendor.as_str())
-            .copied()
-            .unwrap_or(f64::NEG_INFINITY);
-        let own_reservation = reviewer_reservation_value(r);
-        // Vendor-level lead (only positive when this vendor's direct review
-        // proxy sits strictly above every other vendor's direct review proxy).
-        let vendor_lead = if outside.is_finite() && max_reservation_all.is_finite() {
-            (max_reservation_all - outside).max(0.0)
-        } else {
-            0.0
-        };
-        // Per-model share of that lead: 1.0 for the actual top proxy model
-        // in the vendor, 0.0 for siblings tied with the outside maximum, and
-        // proportional in between. Stops the reservation tax from hitting
-        // every model that happens to share a vendor with a strong reviewer.
-        let model_share = if vendor_lead > 0.0 {
-            own_reservation
-                .map(|v| ((v - outside) / vendor_lead).clamp(0.0, 1.0))
-                .unwrap_or(0.0)
-        } else {
-            0.0
-        };
-        let l_v = vendor_lead * model_share;
-        r.scores.i_adj = (r.scores.i_raw - i_w * l_v).clamp(0.0, 100.0);
-        r.scores.p_adj = (r.scores.p_raw - p_w * l_v).clamp(0.0, 100.0);
-        r.scores.b_adj = (r.scores.b_raw - b_w * l_v).clamp(0.0, 100.0);
-    }
-}
-
-fn reviewer_reservation_value(r: &ModelRecord) -> Option<f64> {
-    if r.synthesized.contains_key(REVIEWER_RESERVATION_METRIC) {
-        return None;
-    }
-    r.metrics
-        .get(REVIEWER_RESERVATION_METRIC)
-        .copied()
-        .filter(|v| v.is_finite())
-}
-
-fn same_vendor(a: &Vendor, b: &Vendor) -> bool {
-    a.as_str() == b.as_str()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::ModelRecord;
+    use crate::model::{ModelRecord, Vendor};
 
     fn make_record(id: &str, vendor: Vendor, raw: &[(&str, f64)]) -> ModelRecord {
         let mut r = ModelRecord::new(id.to_string(), id.to_string(), vendor);
@@ -574,185 +489,7 @@ mod tests {
             assert!((r.scores.p_raw - 50.0).abs() < 1e-9);
             assert!((r.scores.b_raw - 50.0).abs() < 1e-9);
             assert!((r.scores.r - 50.0).abs() < 1e-9);
-            assert!((r.scores.i_adj - 50.0).abs() < 1e-9);
-            assert!((r.scores.p_adj - 50.0).abs() < 1e-9);
-            assert!((r.scores.b_adj - 50.0).abs() < 1e-9);
         }
-    }
-
-    #[test]
-    fn reviewer_reservation_zero_when_top_vendor_ties() {
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "a/x",
-                Vendor::Other("a".into()),
-                &[("AI_correctness", 100.0)],
-            ),
-            make_record(
-                "b/y",
-                Vendor::Other("b".into()),
-                &[("AI_correctness", 100.0)],
-            ),
-        ];
-        compute_scores_with(&mut records, &coef);
-        for r in &records {
-            assert!(
-                (r.scores.i_raw - r.scores.i_adj).abs() < 1e-6,
-                "tied top should leave i_adj == i_raw"
-            );
-            assert!((r.scores.b_raw - r.scores.b_adj).abs() < 1e-6);
-        }
-    }
-
-    #[test]
-    fn reviewer_reservation_penalises_sole_top_vendor() {
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "a/x",
-                Vendor::Other("a".into()),
-                &[
-                    ("AI_correctness", 100.0),
-                    ("AI_spec", 100.0),
-                    ("AI_code", 100.0),
-                    ("AI_efficiency", 100.0),
-                    ("AI_stability", 100.0),
-                    ("AI_refusal", 100.0),
-                    ("AI_recovery", 100.0),
-                    ("LMArenaSearchDocument", 100.0),
-                ],
-            ),
-            make_record(
-                "b/y",
-                Vendor::Other("b".into()),
-                &[
-                    ("AI_correctness", 0.0),
-                    ("AI_spec", 0.0),
-                    ("AI_code", 0.0),
-                    ("AI_efficiency", 0.0),
-                    ("AI_stability", 0.0),
-                    ("AI_refusal", 0.0),
-                    ("AI_recovery", 0.0),
-                    ("LMArenaSearchDocument", 0.0),
-                ],
-            ),
-        ];
-        compute_scores_with(&mut records, &coef);
-        let top = &records[0];
-        let l_v =
-            top.metrics["LMArenaSearchDocument"] - records[1].metrics["LMArenaSearchDocument"];
-        assert!(l_v > 0.0, "vendor a is sole top reviewer, got l_v={l_v}");
-        let expected_b_adj = (top.scores.b_raw - 0.32 * l_v).max(0.0);
-        assert!(
-            (top.scores.b_adj - expected_b_adj).abs() < 1e-6,
-            "b_adj mismatch: {} vs {}",
-            top.scores.b_adj,
-            expected_b_adj
-        );
-    }
-
-    #[test]
-    fn reviewer_reservation_ignores_non_proxy_review_strength() {
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "a/x",
-                Vendor::Other("a".into()),
-                &[
-                    ("AI_correctness", 100.0),
-                    ("AI_spec", 100.0),
-                    ("AI_code", 100.0),
-                    ("AI_efficiency", 100.0),
-                    ("AI_stability", 100.0),
-                    ("AI_recovery", 100.0),
-                    ("TerminalBench", 100.0),
-                ],
-            ),
-            make_record(
-                "b/y",
-                Vendor::Other("b".into()),
-                &[
-                    ("AI_correctness", 0.0),
-                    ("AI_spec", 0.0),
-                    ("AI_code", 0.0),
-                    ("AI_efficiency", 0.0),
-                    ("AI_stability", 0.0),
-                    ("AI_recovery", 0.0),
-                    ("TerminalBench", 0.0),
-                ],
-            ),
-        ];
-        compute_scores_with(&mut records, &coef);
-
-        let top = &records[0];
-        assert!(
-            top.scores.r > records[1].scores.r,
-            "test setup should make vendor a lead on public R"
-        );
-        assert!(
-            (top.scores.i_raw - top.scores.i_adj).abs() < 1e-6,
-            "non-proxy review strength should not reserve I: raw={}, adj={}",
-            top.scores.i_raw,
-            top.scores.i_adj
-        );
-        assert!(
-            (top.scores.p_raw - top.scores.p_adj).abs() < 1e-6,
-            "non-proxy review strength should not reserve P: raw={}, adj={}",
-            top.scores.p_raw,
-            top.scores.p_adj
-        );
-        assert!(
-            (top.scores.b_raw - top.scores.b_adj).abs() < 1e-6,
-            "non-proxy review strength should not reserve B: raw={}, adj={}",
-            top.scores.b_raw,
-            top.scores.b_adj
-        );
-    }
-
-    #[test]
-    fn reviewer_reservation_ignores_synthesized_proxy_values() {
-        use crate::model::SynthesisProvenance;
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "a/x",
-                Vendor::Other("a".into()),
-                &[("LMArenaSearchDocument", 100.0)],
-            ),
-            make_record(
-                "b/y",
-                Vendor::Other("b".into()),
-                &[("LMArenaSearchDocument", 0.0)],
-            ),
-        ];
-        records[0].synthesized.insert(
-            "LMArenaSearchDocument".to_string(),
-            SynthesisProvenance {
-                source_id: "lmarena".to_string(),
-                from: "a/donor".to_string(),
-            },
-        );
-
-        compute_scores_with(&mut records, &coef);
-
-        let synth = &records[0];
-        assert!(
-            synth.metrics["LMArenaSearchDocument"] > records[1].metrics["LMArenaSearchDocument"],
-            "test setup should make synthesized proxy lead"
-        );
-        assert!(
-            (synth.scores.i_raw - synth.scores.i_adj).abs() < 1e-6,
-            "synthesized proxy should not reserve I"
-        );
-        assert!(
-            (synth.scores.p_raw - synth.scores.p_adj).abs() < 1e-6,
-            "synthesized proxy should not reserve P"
-        );
-        assert!(
-            (synth.scores.b_raw - synth.scores.b_adj).abs() < 1e-6,
-            "synthesized proxy should not reserve B"
-        );
     }
 
     #[test]

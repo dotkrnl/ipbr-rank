@@ -57,29 +57,6 @@ header {
 nav a { margin-left: 14px; color: var(--muted); }
 nav a:hover { color: var(--text-strong); }
 
-/* === Mode toggle === */
-.mode-toggle {
-  display: inline-flex; gap: 0; border: 1px solid var(--line);
-  border-radius: 4px; overflow: hidden; margin: 6px 0 22px;
-}
-.mode-toggle button {
-  font: inherit; color: var(--muted); background: transparent;
-  border: 0; padding: 7px 14px; cursor: pointer;
-}
-.mode-toggle [data-mode-value]::before {
-  content: "○ "; color: var(--muted);
-}
-body[data-mode="raw"] .mode-toggle [data-mode-value="raw"]::before,
-body[data-mode="adjusted"] .mode-toggle [data-mode-value="adjusted"]::before {
-  content: "● "; color: var(--accent);
-}
-body[data-mode="raw"] .mode-toggle [data-mode-value="raw"],
-body[data-mode="adjusted"] .mode-toggle [data-mode-value="adjusted"] {
-  background: var(--panel); color: var(--text-strong);
-}
-.mode-toggle [data-mode-value="raw"] { border-right: 1px solid var(--line); }
-.mode-toggle .mode-short { display: none; }
-
 /* === Hero === */
 .hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin: 8px 0 28px; }
 .hero .role-head { font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
@@ -95,9 +72,7 @@ body[data-mode="adjusted"] .mode-toggle [data-mode-value="adjusted"] {
 .hero .row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hero .row .score { font-variant-numeric: tabular-nums; }
 
-/* Mode-driven score swap (hero) */
-body[data-mode="raw"] .hero .score-adjusted,
-body[data-mode="adjusted"] .hero .score-raw { display: none; }
+.hero .score[data-tier="low"] { color: var(--muted); }
 
 @media (max-width: 760px) { .hero { grid-template-columns: 1fr 1fr; } }
 
@@ -153,19 +128,12 @@ table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibili
 table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.leaderboard td.num[data-tier="high"] { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] { color: var(--muted); }
-.hero .score-raw[data-tier="low"], .hero .score-adjusted[data-tier="low"] { color: var(--muted); }
 table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
 table.leaderboard tr.expand.open { display: table-row; background: var(--panel); }
 table.leaderboard tr.expand td { padding: 14px 18px 18px; border-bottom: 1px solid var(--line); }
 table.leaderboard tr.row td.expand-toggle { width: 24px; text-align: center; cursor: pointer; color: var(--muted); }
 table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); }
-
-/* Mode-driven score swap (leaderboard) */
-body[data-mode="raw"] td.score-adjusted,
-body[data-mode="raw"] th.score-adjusted,
-body[data-mode="adjusted"] td.score-raw,
-body[data-mode="adjusted"] th.score-raw { display: none; }
 
 /* Inline expansion contents */
 .expand .exp-block { margin-bottom: 16px; }
@@ -215,11 +183,6 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
   header { flex-wrap: wrap; gap: 8px; }
   .brand { font-size: inherit; }
   nav a { margin-left: 0; margin-right: 14px; }
-
-  /* Mode toggle stays inline with short labels */
-  .mode-toggle .mode-long { display: none; }
-  .mode-toggle .mode-short { display: inline; }
-  .mode-toggle [data-mode-value] { padding: 6px 12px; }
 
   .toolbar input { min-width: 0; flex: 1 1 auto; width: 100%; }
   .toolbar { flex-direction: column; align-items: stretch; }

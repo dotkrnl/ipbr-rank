@@ -157,9 +157,6 @@ fn model(fixture: ModelFixture<'_>) -> ModelRecord {
     record.scores.p_raw = 81.0;
     record.scores.b_raw = 82.0;
     record.scores.r = 83.0;
-    record.scores.i_adj = 78.0;
-    record.scores.p_adj = 77.0;
-    record.scores.b_adj = 76.0;
     record
 }
 
@@ -179,10 +176,6 @@ fn style_css_contains_d2_theme_tokens() {
     assert!(
         css.contains("ui-monospace"),
         "expected monospace font stack"
-    );
-    assert!(
-        css.contains("data-mode=\"raw\""),
-        "expected mode-toggle CSS selector"
     );
     assert!(
         css.contains("prefers-color-scheme: light"),
@@ -237,13 +230,8 @@ fn leaderboard_has_row_and_expansion_per_model() {
     assert!(index.contains("class=\"vendor-chips\""));
     assert!(index.contains("data-filter-input"));
 
-    // Table with raw + adjusted columns
+    // Leaderboard table with one numeric column per role.
     assert!(index.contains("class=\"leaderboard\""));
-    assert!(index.contains("class=\"score-raw num\"") || index.contains("class=\"num score-raw\""));
-    assert!(
-        index.contains("class=\"score-adjusted num\"")
-            || index.contains("class=\"num score-adjusted\"")
-    );
 
     // One row + one hidden expansion per model — three models in fixture
     let row_count = index.matches("<tr class=\"row\"").count();
@@ -276,12 +264,6 @@ fn app_js_implements_required_features() {
     render_site(&scoreboard, &site_dir).expect("site should render");
 
     let js = read(site_dir.join("assets/app.js"));
-    // Mode toggle
-    assert!(js.contains("data-mode-value"), "missing mode toggle wiring");
-    assert!(
-        js.contains("localStorage"),
-        "missing localStorage persistence"
-    );
     // Sort
     assert!(js.contains("data-sort"), "missing sort wiring");
     assert!(
@@ -369,7 +351,6 @@ fn about_page_has_required_sections_and_sources_table() {
     let about = read(site_dir.join("about.html"));
     assert!(about.contains("What this is"));
     assert!(about.contains("The four roles"));
-    assert!(about.contains("Raw vs adjusted"));
     assert!(about.contains("How scores are built"));
     assert!(about.contains("Sources"));
     // Sources table reflects fixture
@@ -398,8 +379,6 @@ fn scoring_panel_has_role_definitions_and_link() {
     for role in ["Idea", "Plan", "Build", "Review"] {
         assert!(index.contains(role), "scoring panel missing role {role}");
     }
-    // Mentions raw vs adjusted explanation
-    assert!(index.contains("reviewer-reservation"));
     // Link to full methodology page
     assert!(index.contains("href=\"about.html\""));
     // Trust transition note
@@ -441,9 +420,8 @@ fn hero_renders_top_three_per_role_with_dual_scores() {
         "hero should have at least 12 rows (3 per role x 4), got {idea_rows}"
     );
 
-    // Both raw and adjusted score spans are emitted for each model in the hero.
-    assert!(index.contains("score-raw"));
-    assert!(index.contains("score-adjusted"));
+    // A score span is emitted for each model in the hero.
+    assert!(index.contains("class=\"score\""));
 
     // Display names appear in the hero.
     assert!(index.contains("Gemini 3.1 Pro"));
@@ -452,7 +430,7 @@ fn hero_renders_top_three_per_role_with_dual_scores() {
 }
 
 #[test]
-fn index_has_body_shell_and_mode_toggle() {
+fn index_has_body_shell() {
     let scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
     let site_dir = tmp.path().join("site");
@@ -460,22 +438,6 @@ fn index_has_body_shell_and_mode_toggle() {
     render_site(&scoreboard, &site_dir).expect("site should render");
 
     let index = read(site_dir.join("index.html"));
-    assert!(
-        index.contains("data-mode=\"raw\""),
-        "body should default to data-mode=\"raw\""
-    );
-    assert!(
-        index.contains("class=\"mode-toggle\""),
-        "mode toggle UI should be present"
-    );
-    assert!(
-        index.contains("data-mode-value=\"raw\""),
-        "raw mode button missing"
-    );
-    assert!(
-        index.contains("data-mode-value=\"adjusted\""),
-        "adjusted mode button missing"
-    );
     assert!(
         index.contains("ipbr-rank"),
         "header should mention the project name"
