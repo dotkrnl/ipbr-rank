@@ -41,12 +41,33 @@ jobs:
       - name: Build CLI
         run: cargo build --release -p ipbr-rank-cli
 
+      # Best-effort: pull the currently-published scoreboard so the next
+      # render can compute per-role deltas vs. the live site. continue-on-
+      # error keeps a network blip from failing the whole refresh; the
+      # pipeline simply omits delta chips when no prev file is supplied.
+      - name: Fetch prior scoreboard for deltas
+        id: prev-fetch
+        continue-on-error: true
+        run: |
+          mkdir -p cache
+          if curl -fsS --max-time 10 \
+              https://ipbr.pages.dev/scoreboard.toml \
+              -o cache/prev_scoreboard.toml; then
+            echo "fetched prior scoreboard ($(wc -c < cache/prev_scoreboard.toml) bytes)"
+            echo "prev_arg=--prev cache/prev_scoreboard.toml" >> "$GITHUB_OUTPUT"
+          else
+            # Drop any stale file restored from the upstream-cache so we
+            # never accidentally use a many-runs-old prior.
+            rm -f cache/prev_scoreboard.toml
+            echo "note: prev fetch failed; deltas will be omitted this run"
+          fi
+
       - name: Run pipeline
         env:
           AA_API_KEY: ${{ secrets.AA_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: ./target/release/ipbr-rank --cache cache --out out all
+        run: ./target/release/ipbr-rank --cache cache --out out all ${{ steps.prev-fetch.outputs.prev_arg }}
 
       - name: Save upstream response cache
         if: always()

@@ -1,6 +1,9 @@
-# ipbr-rank — Public LLM Building-Role Scoreboard
+# ipbr
 
-A Rust workspace that fetches public LLM benchmarks from verified sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a beautifully rendered static website.
+> **Models drift. Agents battle. Math decides.**
+> Live LLM coding scoreboard — site at <https://ipbr.pages.dev>.
+
+A Rust workspace that fetches public LLM benchmarks from verified sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a static website. (CLI binary and crate names stay `ipbr-rank`.)
 
 > **Fully vibe-coded.** No human wrote the scoring weights — Claude, Gemini,
 > GPT, and Kimi argued over every coefficient, every group composition, and

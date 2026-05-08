@@ -49,11 +49,26 @@ done
 echo "==> building ipbr-rank-cli (release)"
 cargo build --release -p ipbr-rank-cli
 
+# Best-effort: pull the currently-published scoreboard so the new run can
+# render per-role deltas ("▲+1.2 since last refresh"). Failure is harmless;
+# the renderer just omits the chips when no prior file is present.
+mkdir -p cache
+prev_args=()
+if curl -fsS --max-time 10 \
+    "https://ipbr.pages.dev/scoreboard.toml" \
+    -o cache/prev_scoreboard.toml 2>/dev/null; then
+  prev_args=(--prev cache/prev_scoreboard.toml)
+else
+  rm -f cache/prev_scoreboard.toml
+  echo "note: prior scoreboard fetch failed; deltas will be omitted this run"
+fi
+
 echo "==> running pipeline"
 ./target/release/ipbr-rank \
   --cache cache \
   --out out \
   all \
+  ${prev_args[@]+"${prev_args[@]}"} \
   ${forwarded[@]+"${forwarded[@]}"}
 
 echo

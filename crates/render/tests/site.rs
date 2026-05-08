@@ -111,6 +111,7 @@ fn sample_scoreboard() -> Scoreboard {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary,
+        prev_scores: None,
     }
 }
 
@@ -386,7 +387,7 @@ fn scoring_panel_has_role_definitions_and_link() {
 }
 
 #[test]
-fn hero_renders_top_three_per_role_with_dual_scores() {
+fn hero_renders_title_tagline_radar_and_per_role_leaders() {
     let scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
     let site_dir = tmp.path().join("site");
@@ -395,38 +396,110 @@ fn hero_renders_top_three_per_role_with_dual_scores() {
 
     let index = read(site_dir.join("index.html"));
 
-    // Four role columns, in order Idea, Plan, Build, Review.
+    // Tagline beats with `Models drift` carrying the lead emphasis class.
     assert!(
-        index.contains("class=\"role idea\""),
-        "hero missing idea column"
+        index.contains(r#"class="beat beat-lead">Models drift."#),
+        "tagline lead beat (Models drift) should carry .beat-lead"
     );
+    assert!(index.contains("Agents battle."), "tagline beat 2 missing");
+    assert!(index.contains("Math decides."), "tagline beat 3 missing");
+
+    // Brand wordmark only appears in the persistent header — not duplicated
+    // in the hero.
     assert!(
-        index.contains("class=\"role plan\""),
-        "hero missing plan column"
-    );
-    assert!(
-        index.contains("class=\"role build\""),
-        "hero missing build column"
-    );
-    assert!(
-        index.contains("class=\"role review\""),
-        "hero missing review column"
+        !index.contains("class=\"hero-title\""),
+        "hero must not duplicate the brand h1"
     );
 
-    // The fixture has three models — hero shows three rows per role.
-    let idea_rows = index.matches("class=\"row").count();
+    // Live status block.
+    assert!(index.contains("live-dot"), "missing live indicator");
+
+    // Hero radar SVG with single-letter axis labels (one per role class).
     assert!(
-        idea_rows >= 12,
-        "hero should have at least 12 rows (3 per role x 4), got {idea_rows}"
+        index.contains("class=\"radar radar-hero\""),
+        "missing hero radar SVG"
     );
+    for (role, letter) in [
+        ("idea", "I"),
+        ("plan", "P"),
+        ("build", "B"),
+        ("review", "R"),
+    ] {
+        let needle = format!(r#"class="radar-label {role}""#);
+        assert!(
+            index.contains(&needle),
+            "hero radar missing {role} axis label class"
+        );
+        let text = format!(">{letter}</text>");
+        assert!(
+            index.contains(&text),
+            "hero radar missing single-letter axis label {letter}"
+        );
+    }
 
-    // A score span is emitted for each model in the hero.
-    assert!(index.contains("class=\"score\""));
+    // Four per-role leader columns.
+    for role in ["idea", "plan", "build", "review"] {
+        let cls = format!("class=\"role {role}\"");
+        assert!(index.contains(&cls), "leaders sidebar missing {role}");
+    }
 
-    // Display names appear in the hero.
+    // Display names from the fixture appear in the leaders sidebar
+    // (top-1 always renders, regardless of which role).
     assert!(index.contains("Gemini 3.1 Pro"));
     assert!(index.contains("Claude Opus 4.7"));
     assert!(index.contains("GPT-5.5 High"));
+}
+
+#[test]
+fn expansion_includes_mini_radar() {
+    let scoreboard = sample_scoreboard();
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+
+    let index = read(site_dir.join("index.html"));
+    let mini_count = index.matches("class=\"radar radar-mini\"").count();
+    assert_eq!(
+        mini_count, 3,
+        "expected one mini radar per model row, got {mini_count}"
+    );
+}
+
+#[test]
+fn deltas_render_only_when_prev_scores_are_supplied() {
+    use std::collections::BTreeMap;
+
+    let mut scoreboard = sample_scoreboard();
+    let tmp = tempdir().expect("tempdir should be created");
+
+    // Without prev_scores, no delta chips.
+    render_site(&scoreboard, &tmp.path().join("site_a")).expect("site should render");
+    let index_no_prev = read(tmp.path().join("site_a/index.html"));
+    assert!(
+        !index_no_prev.contains("class=\"delta"),
+        "no deltas should render without --prev"
+    );
+
+    // With prev_scores, at least one delta chip appears.
+    let mut prev = BTreeMap::new();
+    prev.insert(
+        "anthropic/claude-opus-4.7".to_string(),
+        ipbr_core::RoleScores {
+            i_raw: 78.0, // current 80.0 → delta +2.0
+            p_raw: 81.0,
+            b_raw: 82.0,
+            r: 83.0,
+        },
+    );
+    scoreboard.prev_scores = Some(prev);
+
+    render_site(&scoreboard, &tmp.path().join("site_b")).expect("site should render");
+    let index_with_prev = read(tmp.path().join("site_b/index.html"));
+    assert!(
+        index_with_prev.contains("delta-up"),
+        "expected at least one ▲ delta chip when --prev provided"
+    );
 }
 
 #[test]
@@ -439,16 +512,12 @@ fn index_has_body_shell() {
 
     let index = read(site_dir.join("index.html"));
     assert!(
-        index.contains("ipbr-rank"),
-        "header should mention the project name"
+        index.contains(">$</span>ipbr<") || index.contains("ipbr</a>"),
+        "header should show the `ipbr` brand"
     );
     assert!(
-        index.contains("live llm coding-role score"),
-        "header/title should use the live coding-role score label"
-    );
-    assert!(
-        !index.contains("models ·"),
-        "header meta should not include a model-count segment"
+        index.contains("live llm coding scoreboard"),
+        "<title> should use the new tagline-aligned label"
     );
     assert!(
         index.contains("about.html"),

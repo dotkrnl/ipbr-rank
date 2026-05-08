@@ -7,8 +7,10 @@ use super::{html_escape, layout};
 pub fn render_about(scoreboard: &Scoreboard) -> String {
     let mut body = String::from(r#"<div class="doc">"#);
 
-    body.push_str(r#"<h2>What this is</h2>
-<p>ipbr-rank is a public-LLM coding-role scoreboard. It pulls model performance from public benchmarks, normalizes them onto a common 0-100 scale, and produces four role scores: Idea, Plan, Build, Review.</p>
+    body.push_str(r#"<p class="about-tagline"><strong>Models drift. Agents battle. Math decides.</strong></p>
+
+<h2>What this is</h2>
+<p>ipbr is a public-LLM coding-role scoreboard. It pulls model performance from public benchmarks, normalizes them onto a common 0-100 scale, and produces four role scores: Idea, Plan, Build, Review.</p>
 <p>All inputs come from public, verifiable sources. Weights and aggregation rules are explicit and versioned. A small number of vendor-published metrics that haven't yet appeared on public leaderboards are recorded as overrides. There is no manual reranking.</p>
 
 <h2>Fully vibe-coded</h2>
@@ -60,5 +62,5 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <p><a href="index.html">← back to scoreboard</a></p>
 </div>"#);
 
-    layout("ipbr-rank · about", scoreboard, &body)
+    layout("ipbr · about", scoreboard, &body)
 }

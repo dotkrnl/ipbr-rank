@@ -66,8 +66,18 @@ struct Cli {
 enum Command {
     Fetch,
     Score,
-    Render,
-    All,
+    Render {
+        /// Optional prior scoreboard.toml to compute per-role deltas from.
+        /// Render-only; never persisted. Missing/unreadable file → no deltas.
+        #[arg(long)]
+        prev: Option<PathBuf>,
+    },
+    All {
+        /// Optional prior scoreboard.toml to compute per-role deltas from.
+        /// Render-only; never persisted. Missing/unreadable file → no deltas.
+        #[arg(long)]
+        prev: Option<PathBuf>,
+    },
     VerifySources,
     ListModels,
     Triage {
@@ -84,13 +94,13 @@ async fn main() -> anyhow::Result<()> {
 
 async fn run(cli: Cli) -> anyhow::Result<()> {
     let secrets = resolve_secrets(&cli)?;
-    let command = cli.command.clone().unwrap_or(Command::All);
+    let command = cli.command.clone().unwrap_or(Command::All { prev: None });
 
     match command {
         Command::Fetch => cmd_fetch(&cli, &secrets).await,
         Command::Score => cmd_score(&cli, &secrets).await,
-        Command::Render => cmd_render(&cli).await,
-        Command::All => cmd_all(&cli, &secrets).await,
+        Command::Render { prev } => cmd_render(&cli, prev).await,
+        Command::All { prev } => cmd_all(&cli, &secrets, prev).await,
         Command::VerifySources => cmd_verify_sources(&cli, &secrets).await,
         Command::ListModels => cmd_list_models(&cli).await,
         Command::Triage { min_count } => cmd_triage(&cli, &secrets, min_count).await,
@@ -281,7 +291,7 @@ async fn cmd_score(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn cmd_render(cli: &Cli) -> anyhow::Result<()> {
+async fn cmd_render(cli: &Cli, prev: Option<PathBuf>) -> anyhow::Result<()> {
     let scoreboard_path = cli.out.join("scoreboard.toml");
     let raw = std::fs::read_to_string(&scoreboard_path)
         .with_context(|| format!("failed reading {}", scoreboard_path.display()))?;
@@ -313,6 +323,7 @@ async fn cmd_render(cli: &Cli) -> anyhow::Result<()> {
             .into_iter()
             .map(|(source, summary)| (source, summary.into_source_summary()))
             .collect(),
+        prev_scores: load_prev_scores(prev.as_deref()),
     };
 
     let site_dir = cli.out.join("site");
@@ -320,19 +331,56 @@ async fn cmd_render(cli: &Cli) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn cmd_all(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
+async fn cmd_all(cli: &Cli, secrets: &SecretStore, prev: Option<PathBuf>) -> anyhow::Result<()> {
     let mode = if cli.offline {
         FetchMode::Offline
     } else {
         FetchMode::Online
     };
 
-    let (scoreboard, coefficients) = build_scoreboard(cli, secrets, mode).await?;
+    let (mut scoreboard, coefficients) = build_scoreboard(cli, secrets, mode).await?;
+    scoreboard.prev_scores = load_prev_scores(prev.as_deref());
     write_scoreboard(&scoreboard, &cli.out)?;
     write_missing(&scoreboard, &cli.out)?;
     write_coefficients(&coefficients, &cli.out)?;
     render_site(&scoreboard, &cli.out.join("site"))?;
     Ok(())
+}
+
+/// Best-effort load of prior role scores from a `scoreboard.toml` file.
+/// On any error (missing file, parse failure), logs a warning to stderr
+/// and returns `None` — the renderer treats absence as "no deltas to show".
+fn load_prev_scores(path: Option<&Path>) -> Option<BTreeMap<String, ipbr_core::RoleScores>> {
+    let path = path?;
+    if !path.exists() {
+        return None;
+    }
+    let raw = match std::fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(err) => {
+            eprintln!(
+                "warning: --prev {} unreadable ({err}); deltas will be omitted",
+                path.display()
+            );
+            return None;
+        }
+    };
+    let parsed: ScoreboardToml = match toml::from_str(&raw) {
+        Ok(v) => v,
+        Err(err) => {
+            eprintln!(
+                "warning: --prev {} did not parse ({err}); deltas will be omitted",
+                path.display()
+            );
+            return None;
+        }
+    };
+    let map: BTreeMap<String, ipbr_core::RoleScores> = parsed
+        .models
+        .into_iter()
+        .map(|m| (m.canonical_id.clone(), m.scores))
+        .collect();
+    Some(map)
 }
 
 async fn cmd_verify_sources(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
@@ -528,6 +576,7 @@ async fn build_scoreboard(
             generator: format!("ipbr-rank {}", env!("CARGO_PKG_VERSION")),
             methodology: "v1".to_string(),
             source_summary,
+            prev_scores: None,
         },
         coefficients,
     ))

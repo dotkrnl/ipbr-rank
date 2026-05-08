@@ -101,6 +101,7 @@ fn missing_output_marks_groups_shrunk_at_actual_threshold() {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary: BTreeMap::new(),
+        prev_scores: None,
     };
     let tmp = tempdir().expect("tempdir should be created");
 
@@ -141,6 +142,7 @@ fn missing_output_uses_configured_transition_ceiling() {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary: BTreeMap::new(),
+        prev_scores: None,
     };
     let tmp = tempdir().expect("tempdir should be created");
 
@@ -221,6 +223,7 @@ fn sample_scoreboard() -> Scoreboard {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary: BTreeMap::new(),
+        prev_scores: None,
     }
 }
 
@@ -290,6 +293,7 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary,
+        prev_scores: None,
     })
 }
 

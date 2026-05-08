@@ -134,6 +134,7 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
         generator: "ipbr-rank 0.1.0".to_string(),
         methodology: "v1".to_string(),
         source_summary: BTreeMap::new(),
+        prev_scores: None,
     };
 
     let tmp = tempdir().expect("tempdir should be created");
