@@ -214,13 +214,14 @@ BlendedCost = 0.20
 ContextWindow = 0.25
 
 # Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
-# carry weight 0.24 (down from 0.30 in 2026-04 after multi-agent review):
-# AISL is one source family with correlated noise, and the previous 0.30
-# block effectively anchored every role on a single re-projection of the
-# same 17 capability axes. Role-specific public-leaderboard groups now
-# carry 0.68 between them. Codex's review pushed back on a one-shot drop
-# to 0.22 because public PLAN/R coverage is still thin relative to AISL,
-# so 0.24 is the conservative phase-one cut; revisit after coverage grows.
+# carry weight 0.15: AISL is one source family with correlated noise re-
+# projected onto four role-shaped views, so it gets a deliberately modest
+# slot rather than dominating any role. Role-specific public-leaderboard
+# groups carry 0.77 between them. The 0.15 weight keeps AISL meaningfully
+# above the OPS floor (0.08) — the unique signals it carries
+# (hallucination resistance, plan coherence, canary health) aren't
+# measured by any other source — without letting one correlated source
+# family overshadow direct public-benchmark evidence.
 #
 # Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
 # the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
@@ -234,36 +235,36 @@ ContextWindow = 0.25
 # vs "very fast." Use the OPS_* groups directly for a pure speed/cost
 # view of the population.
 [final_score_weights.I_raw]
-CRE = 0.46
-GEN = 0.22
-A_I = 0.24
+CRE = 0.52
+GEN = 0.25
+A_I = 0.15
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
-# A_P is still a major behavioral signal, but PLAN/GEN now carry enough
+# A_P remains a meaningful behavioral signal, but PLAN/GEN now carry enough
 # weight that direct public benchmark evidence can override AISL outliers
 # or synthesized AISL gaps.
-PLAN = 0.41
-GEN = 0.27
-A_P = 0.24
+PLAN = 0.46
+GEN = 0.31
+A_P = 0.15
 OPS_precision = 0.08
 
 [final_score_weights.B_raw]
-BUILD = 0.62
-PLAN = 0.06
-A_B = 0.24
+BUILD = 0.70
+PLAN = 0.07
+A_B = 0.15
 OPS_precision = 0.08
 
-# R-axis: A_R remains a major review-specific signal, while the renamed LM
-# Arena proxy is deliberately lighter than the old JUDGE slot. BUILD/PLAN
-# absorb the freed weight so reviewing stays anchored in code-reading
+# R-axis: A_R remains a meaningful review-specific signal, while the renamed
+# LM Arena proxy is deliberately lighter than the old JUDGE slot. BUILD/PLAN
+# absorb most of the freed weight so reviewing stays anchored in code-reading
 # capability and task decomposition rather than a search/document
 # preference proxy.
 [final_score_weights.R]
-LM_ARENA_REVIEW_PROXY = 0.13
-BUILD = 0.27
-PLAN = 0.28
-A_R = 0.24
+LM_ARENA_REVIEW_PROXY = 0.15
+BUILD = 0.30
+PLAN = 0.32
+A_R = 0.15
 OPS_review = 0.08
 
 [reviewer_reservation]

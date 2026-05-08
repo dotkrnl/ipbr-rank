@@ -36,7 +36,7 @@ B_adj = B_raw - 0.32 × L_v × share_m</code></pre>
 <ol>
 <li><strong>Normalize</strong> — each metric is percentile-mapped within the active model population (5th/95th boundaries; log-scaled for cost/speed/latency). Operational metrics use a tail-penalty curve — the top 80% maps into 70-100 with mild differentiation; only the bottom 20% drops sharply.</li>
 <li><strong>Aggregate</strong> — metrics roll up into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_I/A_P/A_B/A_R). Scores blend from shrink-to-50 to trusting the present metrics across 60-80% group coverage.</li>
-<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL's role-shaped perspective (A_*) carries 0.24 in every formula. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
+<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL's role-shaped perspective (A_*) carries 0.15 in every formula. Role-specific public-leaderboard groups collectively carry 0.77. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
 <li><strong>Canary health</strong> — AISL canary drift is a penalty-only signal. Healthy or missing canary data adds nothing; degraded canary data can subtract up to 6 points from raw role scores.</li>
 <li><strong>Synthesize last</strong> — when a known sibling pair has a metric on one model but not the other, the missing field is filled from the sibling and softened toward 50 by 15% so it reads as a softer signal.</li>
 </ol>

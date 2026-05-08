@@ -104,17 +104,17 @@ Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIE
 
 ### Final Scores
 Each role score is a weighted average of groups. AISL's role-shaped
-perspective (`A_*`) carries 0.24 in every formula (down from 0.30 after
-the 2026-04 multi-agent review — AISL is one correlated source family,
-not a population of independent leaderboards), leaving role-specific
-public benchmark groups collectively dominant at 0.68.
-Operational metrics (speed, cost, context window) carry 0.08 — paired
-with the tail-penalty curve, this means "fast enough" models cluster
-within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.46×CRE + 0.22×GEN + 0.24×A_I + 0.08×OPS_long
-- **P_raw** = 0.41×PLAN + 0.27×GEN + 0.24×A_P + 0.08×OPS_precision
-- **B_raw** = 0.62×BUILD + 0.06×PLAN + 0.24×A_B + 0.08×OPS_precision
-- **R** = 0.13×LM_ARENA_REVIEW_PROXY + 0.27×BUILD + 0.28×PLAN + 0.24×A_R + 0.08×OPS_review
+perspective (`A_*`) carries 0.15 in every formula — AISL is one
+correlated source family re-projected onto four role-shaped views,
+so it gets a modest slot rather than dominating any role. Role-specific
+public benchmark groups collectively carry 0.77. Operational metrics
+(speed, cost, context window) carry 0.08 — paired with the tail-penalty
+curve, this means "fast enough" models cluster within a 1-2 point
+spread but genuinely slow models lose 4-6 points:
+- **I_raw** = 0.52×CRE + 0.25×GEN + 0.15×A_I + 0.08×OPS_long
+- **P_raw** = 0.46×PLAN + 0.31×GEN + 0.15×A_P + 0.08×OPS_precision
+- **B_raw** = 0.70×BUILD + 0.07×PLAN + 0.15×A_B + 0.08×OPS_precision
+- **R** = 0.15×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.32×PLAN + 0.15×A_R + 0.08×OPS_review
 
 ### Reviewer-Reservation Penalty
 For each vendor **v**, compute the reservation gap from the direct LM Arena

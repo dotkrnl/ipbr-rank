@@ -214,49 +214,46 @@ Each of the four roles (I_raw, P_raw, B_raw, R) is a weighted average of groups.
 
 From `[final_score_weights.*]` in `data/coefficients.toml`:
 
-All four role formulas put **A_\* at 0.24** — down from 0.30 in 2026-04
-after multi-agent review pointed out that the AISL perspective groups all
-re-project the same 17-axis capability suite from one source family,
-which had been driving 30 % of every role with correlated noise. The
-freed weight (0.06 per role) was redistributed to the role-specific
-public-leaderboard groups so direct-evidence portfolios collectively
-carry 0.68. OPS_* stays at 0.08.
-
-Codex's review pushed back on a one-shot drop to 0.22 because public
-PLAN/R coverage is still thinner than AISL's; 0.24 is the conservative
-phase-one cut, with a follow-up review planned once direct-evidence
-coverage grows.
+All four role formulas put **A_\* at 0.15**. The AISL perspective groups
+all re-project the same 17-axis capability suite from one source family,
+so they carry correlated noise and get a deliberately modest slot rather
+than dominating any role. Role-specific public-leaderboard groups
+collectively carry 0.77; OPS_* contributes 0.08. The 0.15 weight keeps
+AISL meaningfully above the OPS floor — its unique signals
+(hallucination resistance, plan coherence, canary health) aren't
+measured by any other source — without letting one correlated source
+family overshadow direct public-benchmark evidence.
 
 **I_raw** (Idea):
 ```
-I_raw = 0.46×CRE + 0.22×GEN + 0.24×A_I + 0.08×OPS_long
+I_raw = 0.52×CRE + 0.25×GEN + 0.15×A_I + 0.08×OPS_long
 ```
 
 **P_raw** (Planning):
 ```
-P_raw = 0.41×PLAN + 0.27×GEN + 0.24×A_P + 0.08×OPS_precision
+P_raw = 0.46×PLAN + 0.31×GEN + 0.15×A_P + 0.08×OPS_precision
 ```
 
 PLAN's basket of TerminalBench / Tau2Bench / AAReasoning / MCPAtlas can
 favor any of the top-3 vendors depending on which gets a strong value
-in each — A_P captures planning behavior more directly than the
-leaderboard mix.
+in each — A_P still captures planning behavior more directly than any
+single leaderboard, just no longer dominantly.
 
 **B_raw** (Building):
 ```
-B_raw = 0.62×BUILD + 0.06×PLAN + 0.24×A_B + 0.08×OPS_precision
+B_raw = 0.70×BUILD + 0.07×PLAN + 0.15×A_B + 0.08×OPS_precision
 ```
 
 **R** (Reviewing):
 ```
-R = 0.13×LM_ARENA_REVIEW_PROXY + 0.27×BUILD + 0.28×PLAN + 0.24×A_R + 0.08×OPS_review
+R = 0.15×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.32×PLAN + 0.15×A_R + 0.08×OPS_review
 ```
 
-A_R remains a major review-specific behavioral signal.
-LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.13:
+A_R remains a meaningful review-specific behavioral signal.
+LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.15:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.27 keeps reviewing tied to "you can read the
-code." PLAN 0.28 captures review-as-planning.
+code-review benchmark. BUILD 0.30 keeps reviewing tied to "you can read the
+code." PLAN 0.32 captures review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -451,16 +448,16 @@ Removing it keeps the coefficient surface honest.
 All coefficients are verbatim from `data/coefficients.toml`. This table is for quick reference; the TOML file is authoritative.
 
 ### Final Score Weights
-All four roles weight the AISL perspective at 0.24. Role-specific public
-benchmark groups sum to 0.68, and OPS_* contributes 0.08 (paired with the
+All four roles weight the AISL perspective at 0.15. Role-specific public
+benchmark groups sum to 0.77, and OPS_* contributes 0.08 (paired with the
 tail-penalty curve so only genuinely slow models lose meaningful score).
 
 | Role | Group Contributions |
 |------|---------------------|
-| I_raw | CRE 0.46, GEN 0.22, A_I 0.24, OPS_long 0.08 |
-| P_raw | PLAN 0.41, GEN 0.27, A_P 0.24, OPS_precision 0.08 |
-| B_raw | BUILD 0.62, PLAN 0.06, A_B 0.24, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.13, BUILD 0.27, PLAN 0.28, A_R 0.24, OPS_review 0.08 |
+| I_raw | CRE 0.52, GEN 0.25, A_I 0.15, OPS_long 0.08 |
+| P_raw | PLAN 0.46, GEN 0.31, A_P 0.15, OPS_precision 0.08 |
+| B_raw | BUILD 0.70, PLAN 0.07, A_B 0.15, OPS_precision 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.15, BUILD 0.30, PLAN 0.32, A_R 0.15, OPS_review 0.08 |
 
 ### Reviewer-Reservation Penalties
 | Role | Coefficient |
