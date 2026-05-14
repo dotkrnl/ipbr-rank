@@ -60,8 +60,6 @@ impl Source for LmArenaSource {
             return parse_rows(&payload);
         }
 
-        let mut wrapper = serde_json::Map::new();
-        let mut configs = serde_json::Map::new();
         let auth_header = secrets
             .get(crate::SecretRef::HfToken)
             .map(|token| format!("Bearer {token}"));
@@ -69,54 +67,83 @@ impl Source for LmArenaSource {
             .as_ref()
             .map(|value| vec![("Authorization", value.as_str())])
             .unwrap_or_default();
-        for config in CONFIGS {
-            let mut pages = Vec::new();
-            let mut offset = 0usize;
-            loop {
-                let url = format!(
-                    "https://datasets-server.huggingface.co/rows?dataset={DATASET}&config={config}&split=latest&offset={offset}&length=100"
-                );
-                let page = match http.get_json(&url, &headers).await {
-                    Ok(page) => page,
-                    Err(err) if offset == 0 && is_locked_dataset_error(&err) => {
-                        let fallback_url = format!(
-                            "https://datasets-server.huggingface.co/first-rows?dataset={DATASET}&config={config}&split=latest"
-                        );
-                        let page = http.get_json(&fallback_url, &headers).await?;
-                        pages.push(page);
-                        break;
-                    }
-                    Err(err) => return Err(err),
+        let (payload, refresh_cache) = match fetch_live_payload(http, &headers).await {
+            Ok(payload) => (payload, true),
+            Err(err) => {
+                let Some(dir) = opts.cache_dir else {
+                    return Err(err);
                 };
-                let rows = page.get("rows").and_then(Value::as_array).ok_or_else(|| {
-                    SourceError::Parse(format!("LMArena {config} payload missing rows[]"))
-                })?;
-                let page_len = rows.len();
-                pages.push(page.clone());
-                let total = page
-                    .get("num_rows_total")
-                    .and_then(Value::as_u64)
-                    .or_else(|| page.get("num_rows").and_then(Value::as_u64))
-                    .unwrap_or(page_len as u64);
-                if page_len == 0 {
-                    break;
+                let path = cache_json_path(dir, self.cache_key());
+                if !path.exists() {
+                    return Err(err);
                 }
-                offset += page_len;
-                if offset as u64 >= total {
-                    break;
-                }
+                eprintln!(
+                    "warning: {} live fetch failed ({err}); using stale cache {}",
+                    self.id(),
+                    path.display()
+                );
+                (
+                    serde_json::from_slice::<Value>(&read_cached_bytes(&path)?)?,
+                    false,
+                )
             }
-            configs.insert((*config).to_string(), Value::Array(pages));
-        }
-        wrapper.insert("dataset".to_string(), Value::String(DATASET.to_string()));
-        wrapper.insert("split".to_string(), Value::String("latest".to_string()));
-        wrapper.insert("configs".to_string(), Value::Object(configs));
-        let payload = Value::Object(wrapper);
-        if let Some(dir) = opts.cache_dir {
+        };
+        if let (true, Some(dir)) = (refresh_cache, opts.cache_dir) {
             write_cache_json(dir, self.cache_key(), &payload)?;
         }
         parse_rows(&payload)
     }
+}
+
+async fn fetch_live_payload(
+    http: &dyn Http,
+    headers: &[(&str, &str)],
+) -> Result<Value, SourceError> {
+    let mut wrapper = serde_json::Map::new();
+    let mut configs = serde_json::Map::new();
+    for config in CONFIGS {
+        let mut pages = Vec::new();
+        let mut offset = 0usize;
+        loop {
+            let url = format!(
+                "https://datasets-server.huggingface.co/rows?dataset={DATASET}&config={config}&split=latest&offset={offset}&length=100"
+            );
+            let page = match http.get_json(&url, headers).await {
+                Ok(page) => page,
+                Err(err) if offset == 0 && is_locked_dataset_error(&err) => {
+                    let fallback_url = format!(
+                        "https://datasets-server.huggingface.co/first-rows?dataset={DATASET}&config={config}&split=latest"
+                    );
+                    let page = http.get_json(&fallback_url, headers).await?;
+                    pages.push(page);
+                    break;
+                }
+                Err(err) => return Err(err),
+            };
+            let rows = page.get("rows").and_then(Value::as_array).ok_or_else(|| {
+                SourceError::Parse(format!("LMArena {config} payload missing rows[]"))
+            })?;
+            let page_len = rows.len();
+            pages.push(page.clone());
+            let total = page
+                .get("num_rows_total")
+                .and_then(Value::as_u64)
+                .or_else(|| page.get("num_rows").and_then(Value::as_u64))
+                .unwrap_or(page_len as u64);
+            if page_len == 0 {
+                break;
+            }
+            offset += page_len;
+            if offset as u64 >= total {
+                break;
+            }
+        }
+        configs.insert((*config).to_string(), Value::Array(pages));
+    }
+    wrapper.insert("dataset".to_string(), Value::String(DATASET.to_string()));
+    wrapper.insert("split".to_string(), Value::String("latest".to_string()));
+    wrapper.insert("configs".to_string(), Value::Object(configs));
+    Ok(Value::Object(wrapper))
 }
 
 fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
@@ -362,6 +389,82 @@ mod tests {
         assert_eq!(
             row.fields.get("LMArenaText").and_then(number_like),
             Some(1499.4)
+        );
+    }
+
+    struct FailingRowsHttp;
+
+    #[async_trait::async_trait]
+    impl Http for FailingRowsHttp {
+        async fn get_json(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<Value, SourceError> {
+            Err(SourceError::Http(
+                "HTTP status server error (500 Internal Server Error)".to_string(),
+            ))
+        }
+
+        async fn get_text(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<String, SourceError> {
+            panic!("lmarena fetch should not request text")
+        }
+    }
+
+    #[tokio::test]
+    async fn online_fetch_uses_stale_cache_when_upstream_fails() {
+        let tmp = tempfile::tempdir().expect("tempdir");
+        let payload = json!({
+            "configs": {
+                "text": [{
+                    "rows": [
+                        {"row": {
+                            "model_name": "cached-model",
+                            "organization": "cached-vendor",
+                            "rating": 1234.0,
+                            "category": "overall"
+                        }}
+                    ],
+                    "num_rows_total": 1
+                }]
+            }
+        });
+        write_cache_json(tmp.path(), CACHE_KEY, &payload).expect("cache should write");
+        let cache_path = cache_json_path(tmp.path(), CACHE_KEY);
+        let status = std::process::Command::new("touch")
+            .args(["-t", "202001010000"])
+            .arg(&cache_path)
+            .status()
+            .expect("touch should run");
+        assert!(status.success(), "touch should mark fixture cache stale");
+
+        let rows = LmArenaSource
+            .fetch(
+                &FailingRowsHttp,
+                FetchOptions {
+                    cache_dir: Some(tmp.path()),
+                    offline: false,
+                },
+                &SecretStore::default(),
+            )
+            .await
+            .expect("stale cache should be used when online refresh fails");
+
+        let row = rows
+            .iter()
+            .find(|row| row.model_name == "cached-model")
+            .expect("cached row should be parsed");
+        assert_eq!(
+            row.fields.get("LMArenaText").and_then(number_like),
+            Some(1234.0)
+        );
+        assert!(
+            !crate::cache_is_fresh(&cache_path, LmArenaSource.cache_ttl()),
+            "stale fallback should not refresh cache metadata"
         );
     }
 
