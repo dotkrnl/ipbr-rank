@@ -8,10 +8,16 @@
 //! to capture "is the generated code actually well-written" instead of
 //! just "does it pass tests."
 //!
-//! The page is a client-rendered SPA that fetches its data from a static
+//! The page is a client-rendered SPA. Older revisions fetched a single flat
 //! JSON file:
 //!
 //!   `…/leaderboard/data.json`
+//!
+//! Current revisions fetch a model registry and then one metrics file per
+//! model:
+//!
+//!   `…/leaderboard/data/models.json`
+//!   `…/leaderboard/data/<org>/<model>-metrics.json`
 //!
 //! Schema (relevant fields):
 //!
@@ -44,7 +50,7 @@ use std::collections::BTreeMap;
 use std::time::Duration;
 
 use ipbr_core::RawRow;
-use serde_json::Value;
+use serde_json::{Map, Value, json};
 
 use crate::{
     FetchOptions, Http, SecretStore, Source, SourceError, VerificationStatus, cache_json_path,
@@ -53,8 +59,10 @@ use crate::{
 
 const SOURCE_ID: &str = "sonar";
 const CACHE_KEY: &str = "sonar";
-const URL: &str =
-    "https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/data.json";
+const DATA_BASE_URL: &str =
+    "https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/data/";
+const REGISTRY_URL: &str = "https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/data/models.json";
+const LANG_PRIORITY: &[&str] = &["java", "typescript", "python"];
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct SonarSource;
@@ -101,13 +109,130 @@ impl Source for SonarSource {
                 self.cache_key(),
             ))?)?
         } else {
-            let payload = http.get_json(URL, &[("User-Agent", "ipbr-rank")]).await?;
+            let payload = fetch_live_payload(http).await?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &payload)?;
             }
             payload
         };
         parse_rows(&payload)
+    }
+}
+
+async fn fetch_live_payload(http: &dyn Http) -> Result<Value, SourceError> {
+    let registry = http
+        .get_json(REGISTRY_URL, &[("User-Agent", "ipbr-rank")])
+        .await?;
+
+    // Back-compat guard for mirrors/tests that may still expose the legacy
+    // flat shape at the registry URL.
+    if registry.get("models").and_then(Value::as_array).is_some() {
+        return Ok(registry);
+    }
+
+    let registry_obj = registry
+        .as_object()
+        .ok_or_else(|| SourceError::Parse("Sonar registry payload is not an object".into()))?;
+
+    let mut models = Vec::with_capacity(registry_obj.len());
+    for (model_id, entry) in registry_obj {
+        if entry
+            .get("disabled")
+            .and_then(Value::as_bool)
+            .unwrap_or(false)
+        {
+            continue;
+        }
+
+        let meta = entry.get("meta").and_then(Value::as_object);
+        let name = meta
+            .and_then(|m| m.get("name"))
+            .and_then(Value::as_str)
+            .unwrap_or(model_id);
+        let organization = meta
+            .and_then(|m| m.get("organization"))
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+
+        let Some(metrics_path) = choose_metrics_path(entry) else {
+            continue;
+        };
+        let metrics_url =
+            if metrics_path.starts_with("http://") || metrics_path.starts_with("https://") {
+                metrics_path.to_string()
+            } else {
+                format!("{}{}", DATA_BASE_URL, metrics_path.trim_start_matches('/'))
+            };
+        let raw_metrics = http
+            .get_json(&metrics_url, &[("User-Agent", "ipbr-rank")])
+            .await?;
+        if let Some(flat) = flatten_registry_metrics(name, organization, &raw_metrics) {
+            models.push(flat);
+        }
+    }
+
+    if models.is_empty() {
+        return Err(SourceError::Parse(
+            "Sonar registry yielded no model metrics".into(),
+        ));
+    }
+
+    Ok(json!({ "models": models }))
+}
+
+fn choose_metrics_path(entry: &Value) -> Option<&str> {
+    let files = entry.get("files").and_then(Value::as_object)?;
+    for lang in LANG_PRIORITY {
+        if let Some(path) = files
+            .get(*lang)
+            .and_then(|lang_entry| lang_entry.get("metrics"))
+            .and_then(Value::as_str)
+        {
+            return Some(path);
+        }
+    }
+    files
+        .values()
+        .find_map(|lang_entry| lang_entry.get("metrics").and_then(Value::as_str))
+}
+
+fn flatten_registry_metrics(name: &str, organization: &str, raw: &Value) -> Option<Value> {
+    let models = raw.get("models").and_then(Value::as_object)?;
+    let entry = models.get(name).or_else(|| models.values().next())?;
+    let metrics = entry.get("metrics").and_then(Value::as_object)?;
+
+    let mut item = Map::new();
+    item.insert("name".to_string(), Value::String(name.to_string()));
+    if !organization.trim().is_empty() {
+        item.insert(
+            "organization".to_string(),
+            Value::String(organization.trim().to_string()),
+        );
+    }
+
+    insert_metric(&mut item, metrics, "functionalSkill", "passing_tests_pct");
+    insert_metric(&mut item, metrics, "issueDensity", "issues_per_kloc");
+    insert_metric(&mut item, metrics, "bugDensityPerKloc", "bugs_per_kloc");
+    insert_metric(
+        &mut item,
+        metrics,
+        "vulnerabilityDensityPerKloc",
+        "vulnerabilities_per_kloc",
+    );
+
+    Some(Value::Object(item))
+}
+
+fn insert_metric(
+    item: &mut Map<String, Value>,
+    metrics: &Map<String, Value>,
+    to: &str,
+    from: &str,
+) {
+    if let Some(value) = metrics.get(from).and_then(number_like)
+        && value.is_finite()
+    {
+        item.insert(to.to_string(), Value::from(value));
     }
 }
 
@@ -258,5 +383,43 @@ mod tests {
         let rows = parse_rows(&payload).expect("should parse");
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].model_name, "Bar");
+    }
+
+    #[test]
+    fn flattens_registry_metrics_shape() {
+        let raw = json!({
+            "models": {
+                "GPT-Codex 5.3 High": {
+                    "metrics": {
+                        "passing_tests_pct": 78.4,
+                        "issues_per_kloc": 18.2,
+                        "bugs_per_kloc": 0.3,
+                        "vulnerabilities_per_kloc": 0.1
+                    }
+                }
+            }
+        });
+
+        let flat = flatten_registry_metrics("GPT-Codex 5.3 High", "OpenAI", &raw)
+            .expect("registry metrics should flatten");
+        let rows = parse_rows(&json!({ "models": [flat] })).expect("flat payload should parse");
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "GPT-Codex 5.3 High");
+        assert_eq!(rows[0].vendor_hint.as_deref(), Some("openai"));
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SonarFunctionalSkill")
+                .and_then(Value::as_f64),
+            Some(78.4)
+        );
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SonarVulnerabilityDensity")
+                .and_then(Value::as_f64),
+            Some(0.1)
+        );
     }
 }

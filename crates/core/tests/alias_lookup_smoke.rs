@@ -26,3 +26,23 @@ fn lookup_new_2026_05_07_models() {
         );
     }
 }
+
+#[test]
+fn lookup_refreshed_source_spellings() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        ("GPT Codex 5.3 High", Some("openai"), "openai/gpt-5.3-codex"),
+        ("GLM-4.6 (T=1)", None, "z-ai/glm-4.6"),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}

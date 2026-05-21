@@ -66,8 +66,8 @@ n_rows_unmatched = 35
 [sources."swebench"]
 status = "verified"
 n_rows_ingested = 194
-n_rows_matched = 75
-n_rows_unmatched = 163
+n_rows_matched = 76
+n_rows_unmatched = 162
 
 [sources."swebench_pro"]
 status = "verified"
@@ -1739,7 +1739,7 @@ canonical_id = "openai/gpt-5.3-codex"
 display_name = "gpt-5.3-codex"
 vendor = "openai"
 thinking_effort = "default"
-aliases = ["gpt 5.3 codex", "gpt-5-3-codex", "gpt-5.3-codex", "gpt-5.3-codex-high", "openai/gpt-5.3-codex"]
+aliases = ["gpt 5.3 codex", "gpt codex 5.3", "gpt-5-3-codex", "gpt-5.3-codex", "gpt-5.3-codex-high", "gpt-codex-5-3", "gpt-codex-5.3", "gpt-codex-5.3-high", "openai/gpt-5.3-codex"]
 sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
@@ -2379,24 +2379,24 @@ canonical_id = "z-ai/glm-4.6"
 display_name = "glm-4.6"
 vendor = "zai"
 thinking_effort = "default"
-aliases = ["glm 4.6", "glm-4-6", "glm-4.6", "glm-4p6", "z-ai/glm-4.6", "zai/glm-4.6"]
+aliases = ["GLM-4.6 (T=1)", "glm 4.6", "glm-4-6", "glm-4.6", "glm-4.6-t-1", "glm-4p6", "z-ai/glm-4.6", "zai/glm-4.6"]
 sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
 i_raw = 28.255779
 p_raw = 24.702706
-b_raw = 29.667723
-r = 33.567434
+b_raw = 27.819519
+r = 32.775347
 i_adj = 28.255779
 p_adj = 24.702706
-b_adj = 29.667723
+b_adj = 27.819519
 
 [models.groups]
 A_B = 55.989483
 A_I = 55.000000
 A_P = 46.984225
 A_R = 58.500000
-BUILD = 19.470964
+BUILD = 16.830674
 CRE = 21.713732
 GEN = 12.108884
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -2429,8 +2429,8 @@ MCPAtlas = 7.500000
 OutputSpeed = 55.879156
 SWEBenchMultilingual = 5.000000
 SWEBenchPro = 0.000000
-SWEBenchVerified = 77.239717
-SWEComposite = 27.003558
+SWEBenchVerified = 38.906608
+SWEComposite = 21.253592
 SWERebench = 37.294002
 SciCode = 6.652007
 SonarBugDensity = 19.628308
