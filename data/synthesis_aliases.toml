@@ -15,15 +15,6 @@
 target = "google/gemini-3.1-pro-preview"
 from = "google/gemini-3-pro"
 
-# gemini-3-flash previously synthesized from gemini-2.5-flash, which is
-# two generations removed and chronically weak on AISL — that pulled
-# 3-flash's perspective scores down sharply for no good reason. Use
-# gemini-3-pro as the donor instead: same generation, different size
-# tier, but a far closer capability profile than the 2.5 sibling.
-[[pair]]
-target = "google/gemini-3-flash"
-from = "google/gemini-3-pro"
-
 [[pair]]
 target = "openai/gpt-5.3-codex"
 from = "openai/gpt-5.4"

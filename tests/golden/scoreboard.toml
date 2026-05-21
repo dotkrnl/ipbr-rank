@@ -6,25 +6,25 @@ methodology = "v1"
 [sources."aistupidlevel"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 63
+n_rows_matched = 61
 n_rows_unmatched = 2
 
 [sources."arc_agi"]
 status = "verified"
 n_rows_ingested = 149
-n_rows_matched = 101
+n_rows_matched = 99
 n_rows_unmatched = 105
 
 [sources."artificial_analysis"]
 status = "verified"
 n_rows_ingested = 513
-n_rows_matched = 265
+n_rows_matched = 261
 n_rows_unmatched = 417
 
 [sources."gso"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 28
+n_rows_matched = 26
 n_rows_unmatched = 12
 
 [sources."livecodebench"]
@@ -36,55 +36,55 @@ n_rows_unmatched = 24
 [sources."lmarena"]
 status = "verified"
 n_rows_ingested = 394
-n_rows_matched = 211
+n_rows_matched = 207
 n_rows_unmatched = 309
 
 [sources."mcp_atlas"]
 status = "verified"
 n_rows_ingested = 20
-n_rows_matched = 46
+n_rows_matched = 44
 n_rows_unmatched = 6
 
 [sources."openrouter"]
 status = "verified"
 n_rows_ingested = 369
-n_rows_matched = 149
+n_rows_matched = 147
 n_rows_unmatched = 310
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 64
-n_rows_matched = 228
+n_rows_ingested = 62
+n_rows_matched = 224
 n_rows_unmatched = 0
 
 [sources."sonar"]
 status = "verified"
 n_rows_ingested = 60
-n_rows_matched = 72
+n_rows_matched = 68
 n_rows_unmatched = 35
 
 [sources."swebench"]
 status = "verified"
 n_rows_ingested = 194
-n_rows_matched = 76
+n_rows_matched = 68
 n_rows_unmatched = 162
 
 [sources."swebench_pro"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 26
+n_rows_matched = 24
 n_rows_unmatched = 14
 
 [sources."swerebench"]
 status = "verified"
 n_rows_ingested = 91
-n_rows_matched = 56
+n_rows_matched = 54
 n_rows_unmatched = 69
 
 [sources."terminal_bench"]
 status = "verified"
 n_rows_ingested = 124
-n_rows_matched = 189
+n_rows_matched = 175
 n_rows_unmatched = 49
 
 [[models]]
@@ -351,26 +351,26 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "lmarena", 
 
 [models.scores]
 i_raw = 90.690599
-p_raw = 82.017003
-b_raw = 81.060934
-r = 83.281517
+p_raw = 83.096415
+b_raw = 81.964354
+r = 84.349196
 i_adj = 90.690599
-p_adj = 82.017003
-b_adj = 81.060934
+p_adj = 83.096415
+b_adj = 81.964354
 
 [models.groups]
 A_B = 55.847216
 A_I = 72.263449
 A_P = 61.166271
 A_R = 67.830902
-BUILD = 88.214955
+BUILD = 89.270901
 CRE = 95.528747
 GEN = 97.451792
 LM_ARENA_REVIEW_PROXY = 100.000000
 OPS_long = 72.664822
 OPS_precision = 65.548577
 OPS_review = 70.415846
-PLAN = 81.278523
+PLAN = 83.625070
 
 [models.metrics]
 AI_code = 24.167027
@@ -419,7 +419,7 @@ SonarIssueDensity = 8.093656
 SonarVulnerabilityDensity = 24.157765
 TTFT = 50.546812
 Tau2Bench = 79.516038
-TerminalBench = 78.196931
+TerminalBench = 89.929668
 
 [models.missing]
 metrics = []
@@ -847,18 +847,18 @@ sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "livecodebench", "
 [models.scores]
 i_raw = 40.080247
 p_raw = 24.319247
-b_raw = 33.718030
-r = 39.596996
+b_raw = 33.069135
+r = 39.318898
 i_adj = 40.080247
 p_adj = 24.319247
-b_adj = 33.718030
+b_adj = 33.069135
 
 [models.groups]
 A_B = 34.250689
 A_I = 38.364715
 A_P = 38.258383
 A_R = 44.731949
-BUILD = 29.044309
+BUILD = 28.117316
 CRE = 44.704164
 GEN = 14.155931
 LM_ARENA_REVIEW_PROXY = 79.411902
@@ -908,11 +908,7 @@ SWEBenchVerified = 0.000000
 SWEComposite = 27.639637
 SWERebench = 0.000000
 SciCode = 18.196811
-SonarBugDensity = 64.993737
-SonarComposite = 59.269932
-SonarFunctionalSkill = 78.943966
-SonarIssueDensity = 25.191404
-SonarVulnerabilityDensity = 55.971652
+SonarComposite = 50.000000
 TTFT = 74.569939
 Tau2Bench = 0.000000
 TerminalBench = 0.090266
@@ -1014,20 +1010,20 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 80.201870
-p_raw = 64.773397
-b_raw = 65.433238
-r = 61.666976
-i_adj = 80.201870
-p_adj = 64.773397
-b_adj = 65.433238
+i_raw = 76.267571
+p_raw = 63.334396
+b_raw = 60.551791
+r = 55.890112
+i_adj = 76.267571
+p_adj = 63.334396
+b_adj = 60.551791
 
 [models.groups]
-A_B = 78.217010
-A_I = 76.228664
-A_P = 59.593339
-A_R = 86.658440
-BUILD = 59.957392
+A_B = 50.000000
+A_I = 50.000000
+A_P = 50.000000
+A_R = 50.000000
+BUILD = 59.030399
 CRE = 87.664345
 GEN = 62.346879
 LM_ARENA_REVIEW_PROXY = 19.389748
@@ -1037,22 +1033,6 @@ OPS_review = 93.040200
 PLAN = 63.529108
 
 [models.metrics]
-AI_code = 69.708645
-AI_complexity = 62.437741
-AI_context_awareness = 21.113313
-AI_correctness = 92.500000
-AI_edge_cases = 92.500000
-AI_efficiency = 92.340922
-AI_hallucination_resistance = 92.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 58.742198
-AI_plan_coherence = 16.974951
-AI_recovery = 92.500000
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 56.875759
-AI_task_completion = 83.718682
-AI_tool_selection = 59.354383
 ARC_AGI_2 = 3.059570
 ArtificialAnalysisCoding = 60.124288
 ArtificialAnalysisIntelligence = 59.303444
@@ -1076,18 +1056,14 @@ SWEBenchVerified = 100.000000
 SWEComposite = 73.963932
 SWERebench = 76.043250
 SciCode = 73.721825
-SonarBugDensity = 64.993737
-SonarComposite = 59.269932
-SonarFunctionalSkill = 78.943966
-SonarIssueDensity = 25.191404
-SonarVulnerabilityDensity = 55.971652
+SonarComposite = 50.000000
 TTFT = 80.010592
 Tau2Bench = 61.057963
 TerminalBench = 48.232285
 
 [models.missing]
 metrics = []
-groups_shrunk = []
+groups_shrunk = ["A_B", "A_I", "A_P", "A_R"]
 
 [[models]]
 canonical_id = "google/gemini-3-pro"
@@ -1346,26 +1322,26 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "swerebe
 
 [models.scores]
 i_raw = 47.665792
-p_raw = 61.980204
-b_raw = 67.856192
-r = 71.220173
+p_raw = 63.063076
+b_raw = 68.777642
+r = 72.297761
 i_adj = 47.665792
-p_adj = 61.980204
-b_adj = 67.856192
+p_adj = 63.063076
+b_adj = 68.777642
 
 [models.groups]
 A_B = 54.378068
 A_I = 69.909772
 A_P = 56.721843
 A_R = 65.711983
-BUILD = 68.923304
+BUILD = 70.004254
 CRE = 34.210442
 GEN = 52.060063
 LM_ARENA_REVIEW_PROXY = 85.326294
 OPS_long = 79.686010
 OPS_precision = 85.100196
 OPS_review = 83.155689
-PLAN = 66.359330
+PLAN = 68.713400
 
 [models.metrics]
 AI_code = 28.041973
@@ -1409,7 +1385,7 @@ SciCode = 53.930731
 SonarComposite = 50.000000
 TTFT = 92.644820
 Tau2Bench = 70.962296
-TerminalBench = 61.407402
+TerminalBench = 73.177749
 
 [models.missing]
 metrics = []

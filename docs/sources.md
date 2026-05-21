@@ -191,6 +191,6 @@ authoritative list with rationale comments):
 
 - OpenAI: `gpt-5.5 ← gpt-5.4`, `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`
 - Anthropic: `claude-opus-4.7 ← claude-opus-4.6`, `claude-opus-4.5 ← claude-opus-4.6`, `claude-sonnet-4.6 ← claude-sonnet-4.5`, `claude-sonnet-4 ← claude-sonnet-4.5`
-- Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-3-flash ← gemini-3-pro`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
+- Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
 - z.ai / Moonshot: `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric), `z-ai/glm-4.6 ← z-ai/glm-4.7`
 - xAI: `xai/grok-code-fast-1 ← xai/grok-4-latest`

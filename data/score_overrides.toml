@@ -100,12 +100,6 @@ note = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6 (figure also 
 # ---------------------------------------------------------------------
 
 [[entries]]
-canonical_id = "anthropic/claude-opus-4.7"
-metric = "TerminalBench"
-value = 69.4
-note = "Anthropic Claude Opus 4.7 launch comparison numbers, 2026-04-16"
-
-[[entries]]
 canonical_id = "moonshotai/kimi-k2.6"
 metric = "TerminalBench"
 value = 66.7
@@ -140,12 +134,6 @@ canonical_id = "xiaomi/mimo-v2.5-pro"
 metric = "TerminalBench"
 value = 68.4
 note = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
-
-[[entries]]
-canonical_id = "minimax/minimax-m2.7"
-metric = "TerminalBench"
-value = 57.0
-note = "MiniMax M2.7 launch announcement (Terminal Bench 2), https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
 
 [[entries]]
 canonical_id = "qwen/qwen3.6-plus"
