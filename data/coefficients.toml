@@ -108,11 +108,13 @@ SonarBugDensity = 0.20
 SonarVulnerabilityDensity = 0.15
 
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
-# benchmark. It coalesces LM Arena search/document preference ratings. That
-# is useful review-adjacent evidence, but not direct code-review capability,
-# so the R-axis weights it lightly.
+# benchmark. It combines LM Arena search and document preference ratings
+# after each config is normalized on its own raw Elo scale. That is useful
+# review-adjacent evidence, but not direct code-review capability, so the
+# R-axis weights it lightly.
 [group_weights.LM_ARENA_REVIEW_PROXY]
-LMArenaSearchDocument = 1.00
+LMArenaSearch = 0.50
+LMArenaDocument = 0.50
 
 [group_weights.OPS_long]
 OutputSpeed = 0.55
@@ -210,7 +212,13 @@ log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
-[metrics.LMArenaSearchDocument]
+[metrics.LMArenaSearch]
+higher_better = true
+log_scale = false
+groups = ["LM_ARENA_REVIEW_PROXY"]
+transform = "percentile"
+
+[metrics.LMArenaDocument]
 higher_better = true
 log_scale = false
 groups = ["LM_ARENA_REVIEW_PROXY"]

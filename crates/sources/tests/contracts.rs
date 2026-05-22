@@ -145,8 +145,8 @@ async fn lmarena_fixture_contract() {
         "expected the text fixture page to contain many rows"
     );
     // The fixture now spans all four configs (text / webdev / search / document),
-    // and a row that only appears in search/document carries
-    // LMArenaSearchDocument but no LMArenaText. So assert most-rows-text
+    // and a row that only appears in search/document carries search/document
+    // review-proxy fields but no LMArenaText. So assert most-rows-text
     // rather than every-row.
     let text_rows = rows
         .iter()
@@ -161,8 +161,13 @@ async fn lmarena_fixture_contract() {
     }));
     assert!(
         rows.iter()
-            .any(|row| row.fields.contains_key("LMArenaSearchDocument")),
-        "expected at least one search/document row in the fixture",
+            .any(|row| row.fields.contains_key("LMArenaSearch")),
+        "expected at least one search row in the fixture",
+    );
+    assert!(
+        rows.iter()
+            .any(|row| row.fields.contains_key("LMArenaDocument")),
+        "expected at least one document row in the fixture",
     );
 
     let (records, matched) = ingest_fixture_rows(rows);

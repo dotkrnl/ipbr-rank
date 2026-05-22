@@ -115,7 +115,7 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.34), LMArenaText (0.22), GPQA_HLE_Reasoning (0.15), ARC_AGI_2 (0.12), ArtificialAnalysisMath (0.09), MMLUPro (0.08) |
 | **PLAN** (Planning) | TerminalBench (0.16), TerminalBenchHard (0.08), BFCL (0.08), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.18), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.10) |
 | **BUILD** (Building) | SWEComposite (0.32), SWEAtlasComposite (0.16), MCPAtlas (0.07), TerminalBench (0.06), TerminalBenchHard (0.05), BFCL (0.03), GSO (0.02), ArtificialAnalysisCoding (0.04), SciCode (0.04), AALiveCodeBench (0.04), GDPval (0.05), SonarComposite (0.07), LongContextRecall (0.03), CopilotArenaOrLMArenaCode (0.02) |
-| **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
+| **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
 | **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.25), BlendedCost (0.20), ContextWindow (0.25) |
@@ -229,8 +229,10 @@ R = 0.18×LM_ARENA_REVIEW_PROXY + 0.36×BUILD + 0.38×PLAN + 0.08×OPS_review
 
 LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.18:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.36 keeps reviewing tied to "you can read the
-code." PLAN 0.38 captures review-as-planning.
+code-review benchmark. Search and document are normalized as separate metrics
+before the proxy combines them, because their raw LMArena Elo scales differ.
+BUILD 0.36 keeps reviewing tied to "you can read the code." PLAN 0.38 captures
+review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -310,7 +312,8 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | LMArenaText | higher | no | percentile | LMArena | CRE, GEN |
 | LMArenaCreativeOrOpenEnded | higher | no | percentile | LMArena | CRE |
 | CopilotArenaOrLMArenaCode | higher | no | percentile | LMArena | BUILD |
-| LMArenaSearchDocument | higher | no | percentile | LMArena search/document | LM_ARENA_REVIEW_PROXY |
+| LMArenaSearch | higher | no | percentile | LMArena search | LM_ARENA_REVIEW_PROXY |
+| LMArenaDocument | higher | no | percentile | LMArena document | LM_ARENA_REVIEW_PROXY |
 | ArtificialAnalysisIntelligence | higher | no | percentile | Artificial Analysis | GEN |
 | ArtificialAnalysisCoding | higher | no | percentile | Artificial Analysis | BUILD |
 | ArtificialAnalysisReasoning | higher | no | percentile | Artificial Analysis (gpqa+hle blend) | PLAN |

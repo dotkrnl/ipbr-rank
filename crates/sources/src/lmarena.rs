@@ -357,21 +357,14 @@ fn map_rating(config: &str, rating: f64, fields: &mut BTreeMap<String, Value>) {
         "webdev" => {
             fields.insert("CopilotArenaOrLMArenaCode".to_string(), Value::from(rating));
         }
-        "search" | "document" => {
-            // Search/document are coalesced into a single LM Arena
-            // review-style preference proxy.
-            merge_max(fields, "LMArenaSearchDocument", rating);
+        "search" => {
+            fields.insert("LMArenaSearch".to_string(), Value::from(rating));
+        }
+        "document" => {
+            fields.insert("LMArenaDocument".to_string(), Value::from(rating));
         }
         _ => {}
     }
-}
-
-fn merge_max(fields: &mut BTreeMap<String, Value>, key: &str, rating: f64) {
-    let next = match fields.get(key).and_then(number_like) {
-        Some(existing) => existing.max(rating),
-        None => rating,
-    };
-    fields.insert(key.to_string(), Value::from(next));
 }
 
 fn number_like(value: &Value) -> Option<f64> {
@@ -852,10 +845,11 @@ mod tests {
             Some(990.0)
         );
         assert_eq!(
-            model_a
-                .fields
-                .get("LMArenaSearchDocument")
-                .and_then(number_like),
+            model_a.fields.get("LMArenaSearch").and_then(number_like),
+            Some(980.0)
+        );
+        assert_eq!(
+            model_a.fields.get("LMArenaDocument").and_then(number_like),
             Some(995.0)
         );
     }

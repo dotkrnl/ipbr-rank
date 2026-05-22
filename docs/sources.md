@@ -21,6 +21,7 @@ fail the run.
 - **API**: LMArena leaderboard via HuggingFace datasets-server `/rows` (paginated, configs `text`, `webdev`, `search`, `document`)
 - **Secret**: None required; if `HF_TOKEN` is set, the fetcher sends it as a HuggingFace bearer token to reduce datasets-server 429s.
 - **Cache TTL**: 24 h
+- **Metrics emitted**: `LMArenaText`, `LMArenaCreativeOrOpenEnded`, `CopilotArenaOrLMArenaCode`, `LMArenaSearch`, and `LMArenaDocument`. Search and document stay separate because their raw Elo scales are not comparable; `LM_ARENA_REVIEW_PROXY` combines them after normalization.
 - **429 handling**: The HuggingFace datasets-server rate-limits aggressively on deep pagination. The fetcher sleeps 5 s between successful pages, writes `lmarena_overall.partial.json` after every page, resumes from that partial file on the next run, and only promotes a complete payload to `lmarena_overall.json`. If a stale full cache exists and live refresh still fails, scoring falls back to the stale full cache.
 - **Fixture**: `data/fixtures/lmarena_overall.json`
 
