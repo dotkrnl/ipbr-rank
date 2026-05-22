@@ -252,3 +252,37 @@ from = "z-ai/glm-5.1"
 [[pair]]
 target = "qwen/qwen3.6-plus"
 from = "z-ai/glm-5"
+
+# ------------------------------------------------------------------
+# Synthesis for newly-added models (2026-05-22, AA/LMArena/OpenRouter refresh)
+# ------------------------------------------------------------------
+
+# Gemini 3.5 Flash has direct AA, LMArena, OpenRouter, SWE-Pro, MCP-Atlas,
+# and GDPval coverage. Its remaining public-leaderboard gaps are best filled
+# from Gemini 3 Flash: same vendor, same Flash tier, direct predecessor.
+[[pair]]
+target = "google/gemini-3.5-flash"
+from = "google/gemini-3-flash"
+
+# Qwen3.7-Max is Alibaba's direct successor to Qwen3.6-Plus. The vendor
+# published the key SWE/Terminal/MCP/BFCL values for 3.7-Max, while 3.6-Plus
+# still has broader public-source coverage through its GLM-5 tier proxy above.
+[[pair]]
+target = "qwen/qwen3.7-max"
+from = "qwen/qwen3.6-plus"
+
+# Grok 4.3 is the same-family successor to Grok 4. Direct AA/LMArena/OpenRouter
+# rows and the GDPval override win wherever present; Grok 4 fills the older
+# public leaderboard gaps that have not yet added 4.3.
+[[pair]]
+target = "xai/grok-4.3"
+from = "xai/grok-4-latest"
+
+# Muse Spark has direct AA, LMArena, and SWE Atlas rows, but no official
+# SWE-Bench/GDPval/OpenRouter-style operational data yet. Gemini 3.5 Flash is
+# a contemporary frontier consumer/agentic model with similar AA/LMArena tier
+# placement and unusually broad coverage, so it is the least-bad temporary
+# donor. Treat the filled operational and SWE/GDP values as broad tier proxies.
+[[pair]]
+target = "meta/muse-spark"
+from = "google/gemini-3.5-flash"

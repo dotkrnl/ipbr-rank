@@ -79,6 +79,32 @@ fn lookup_refreshed_source_spellings() {
 }
 
 #[test]
+fn lookup_2026_05_22_models() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        (
+            "gemini-3-5-flash",
+            Some("google"),
+            "google/gemini-3.5-flash",
+        ),
+        ("qwen3.7-max-preview", Some("alibaba"), "qwen/qwen3.7-max"),
+        ("grok-4-3", Some("xai"), "xai/grok-4.3"),
+        ("muse-spark", Some("meta"), "meta/muse-spark"),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);

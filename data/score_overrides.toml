@@ -95,6 +95,12 @@ metric = "SWEBenchVerified"
 value = 78.8
 note = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6 (figure also reproduced in apidog.com coverage), 2026-03-31"
 
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "SWEBenchVerified"
+value = 80.4
+note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
+
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.0 — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -140,6 +146,12 @@ canonical_id = "qwen/qwen3.6-plus"
 metric = "TerminalBench"
 value = 61.6
 note = "Alibaba Qwen3.6-Plus blog, Terminal-Bench 2.0 (Harbor/Terminus-2 harness, 5-run avg), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "TerminalBench"
+value = 69.7
+note = "Alibaba Cloud Qwen3.7 blog, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
@@ -210,6 +222,12 @@ value = 1208
 note = "GDPval-AA Elo (Reasoning), 2026-04-27"
 
 [[entries]]
+canonical_id = "google/gemini-3.5-flash"
+metric = "GDPval"
+value = 1656
+note = "Google Gemini 3.5 announcement, GDPval-AA Elo, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
+
+[[entries]]
 canonical_id = "google/gemini-3-pro"
 metric = "GDPval"
 value = 1189
@@ -232,6 +250,12 @@ canonical_id = "xai/grok-4-latest"
 metric = "GDPval"
 value = 983
 note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok 4 standard), 2026-04-27"
+
+[[entries]]
+canonical_id = "xai/grok-4.3"
+metric = "GDPval"
+value = 1500
+note = "Artificial Analysis Grok 4.3 analysis, https://artificialanalysis.ai/articles/xai-launches-grok-4-3-with-improved-agentic-performance-and-lower-pricing, 2026-04-30"
 
 [[entries]]
 canonical_id = "xai/grok-code-fast-1"
@@ -335,6 +359,18 @@ metric = "SWEBenchPro"
 value = 56.6
 note = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
+[[entries]]
+canonical_id = "google/gemini-3.5-flash"
+metric = "SWEBenchPro"
+value = 55.1
+note = "Google Gemini 3.5 announcement, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "SWEBenchPro"
+value = 60.6
+note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
+
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -399,6 +435,12 @@ metric = "SWEBenchMultilingual"
 value = 76.5
 note = "MiniMax M2.7 launch announcement (SWE Multilingual), https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
 
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "SWEBenchMultilingual"
+value = 78.3
+note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
+
 # ---------------------------------------------------------------------
 # MCP-Atlas — vendor-reported figures missing from Scale Labs leaderboard.
 # Scale Labs only carries 19-20 models on its public dataset; vendors
@@ -416,3 +458,25 @@ canonical_id = "qwen/qwen3.6-plus"
 metric = "MCPAtlas"
 value = 74.1
 note = "Alibaba Qwen3.6-Plus blog (Public Set, gemini-2.5-pro judger), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
+
+[[entries]]
+canonical_id = "google/gemini-3.5-flash"
+metric = "MCPAtlas"
+value = 83.6
+note = "Google Gemini 3.5 announcement, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "MCPAtlas"
+value = 76.4
+note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
+
+# ---------------------------------------------------------------------
+# BFCL — vendor-reported BFCL V4 figures not yet present in the public CSV.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-max"
+metric = "BFCL"
+value = 75.0
+note = "Alibaba Cloud Qwen3.7 blog, BFCL-V4, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"

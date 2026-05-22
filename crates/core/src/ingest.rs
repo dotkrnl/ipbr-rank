@@ -219,7 +219,12 @@ impl EffortPreference {
 ///    without a lower-effort companion. Treat the submitted result as the
 ///    benchmark observation, mirroring the existing MCP-Atlas exception.
 ///
-/// Both carve-outs are *single-source-and-canonical-scoped* by design — they
+/// 4. **Qwen Max product tier** — Qwen3.7-Max uses "Max" as the model tier,
+///    not as an effort/scaffolding marker. High-effort suffixes such as
+///    `-high` still resolve to `High` and remain blocked unless explicitly
+///    carved out.
+///
+/// These carve-outs are *single-source-and-canonical-scoped* by design — they
 /// do not weaken the global "no high/xhigh/max" policy for any other model
 /// or any other source. If a vendor ever ships a non-max variant for the
 /// same endpoint, the existing `metric_choices` last-write-wins-by-effort
@@ -231,6 +236,9 @@ fn is_scoring_allowed_for(
     vendor: &Vendor,
 ) -> bool {
     if preference.is_scoring_allowed() {
+        return true;
+    }
+    if canonical_id == "qwen/qwen3.7-max" && matches!(preference, EffortPreference::Max) {
         return true;
     }
     if source_id == "mcp_atlas"
@@ -279,11 +287,14 @@ fn ingest_synthesized_row(
                 .clone()
                 .expect("synthesized rows must carry synthesized_from");
             let preference = EffortPreference::from_row(&row);
+            let source_id = row.source_id.clone();
+            let canonical_id = record.canonical_id.clone();
+            let vendor = record.vendor.clone();
             for (key, value) in row.fields {
                 if NON_SYNTHESIZED_METRICS.contains(&key.as_str()) {
                     continue;
                 }
-                if !preference.is_scoring_allowed() {
+                if !is_scoring_allowed_for(preference, &source_id, &canonical_id, &vendor) {
                     continue;
                 }
                 if record.raw_metrics.contains_key(&key) {
@@ -641,6 +652,45 @@ mod tests {
                 .raw_metrics
                 .contains_key("ArtificialAnalysisIntelligence")
         );
+    }
+
+    #[test]
+    fn qwen_max_product_tier_is_not_treated_as_effort() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "qwen/qwen3.7-max".to_string(),
+                "qwen3.7-max".to_string(),
+                Vendor::Alibaba,
+            );
+            r.aliases.insert("qwen/qwen3.7-max".to_string());
+            r.aliases.insert("qwen3.7-max-preview".to_string());
+            r.aliases.insert("qwen3.7-max".to_string());
+            r
+        }];
+        let mut synthesized = raw("swerebench", "qwen3.7-max", &[("SWERebench", json!(72.0))]);
+        synthesized.synthesized_from = Some("qwen/qwen3.6-plus".to_string());
+        let rows = vec![
+            raw(
+                "overrides",
+                "qwen/qwen3.7-max",
+                &[("SWEBenchPro", json!(60.6))],
+            ),
+            raw(
+                "lmarena",
+                "qwen3.7-max-preview",
+                &[("LMArenaText", json!(91.0))],
+            ),
+            synthesized,
+        ];
+
+        let stats = ingest_rows(&mut records, rows);
+
+        assert_eq!(stats.matched, 3);
+        assert_eq!(records[0].raw_metrics.get("SWEBenchPro"), Some(&60.6));
+        assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&91.0));
+        assert_eq!(records[0].raw_metrics.get("SWERebench"), Some(&72.0));
+        assert!(records[0].override_reported.contains("SWEBenchPro"));
+        assert!(records[0].synthesized.contains_key("SWERebench"));
     }
 
     #[test]
