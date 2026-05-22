@@ -98,6 +98,12 @@ def write_html(key, html):
     print(f"  wrote {p} ({p.stat().st_size} bytes)")
 
 
+def write_csv(key, csv_text):
+    p = CACHE_DIR / f"{key}.csv"
+    p.write_text(csv_text)
+    print(f"  wrote {p} ({p.stat().st_size} bytes)")
+
+
 def fetch_swebench():
     print("[swebench]")
     payload = get_json("https://raw.githubusercontent.com/swe-bench/swe-bench.github.io/master/data/leaderboards.json")
@@ -226,6 +232,11 @@ def fetch_html(key, url):
     write_html(key, get_text(url))
 
 
+def fetch_csv(key, url):
+    print(f"[{key}]")
+    write_csv(key, get_text(url))
+
+
 FETCHERS = {
     "swebench": fetch_swebench,
     "openrouter": fetch_openrouter,
@@ -233,7 +244,10 @@ FETCHERS = {
     "aistupidlevel": fetch_aistupidlevel,
     "lmarena": fetch_lmarena,
     "openevals": fetch_openevals,
-    "bfcl": lambda: fetch_html("bfcl", "https://gorilla.cs.berkeley.edu/leaderboard.html"),
+    "bfcl": lambda: fetch_csv("bfcl", "https://gorilla.cs.berkeley.edu/data_overall.csv"),
+    "sweatlas_qna": lambda: fetch_html("sweatlas_qna", "https://labs.scale.com/leaderboard/sweatlas-qna"),
+    "sweatlas_test_writing": lambda: fetch_html("sweatlas_test_writing", "https://labs.scale.com/leaderboard/sweatlas-tw"),
+    "sweatlas_refactoring": lambda: fetch_html("sweatlas_refactoring", "https://labs.scale.com/leaderboard/sweatlas-refactoring"),
     "terminal_bench": lambda: fetch_html("terminal_bench", "https://www.tbench.ai/leaderboard/terminal-bench/2.0"),
     "livecodebench": lambda: fetch_html("livecodebench", "https://livecodebench.github.io/leaderboard.html"),
     "aider_polyglot": lambda: fetch_html("aider_polyglot", "https://aider.chat/docs/leaderboards/"),

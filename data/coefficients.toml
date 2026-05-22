@@ -85,63 +85,50 @@ LMArenaCreativeOrOpenEnded = 0.65
 LMArenaText = 0.35
 
 [group_weights.GEN]
-ArtificialAnalysisIntelligence = 0.42
-LMArenaText = 0.25
-GPQA_HLE_Reasoning = 0.18
-ARC_AGI_2 = 0.15        # novel pattern induction — orthogonal to knowledge benchmarks
+ArtificialAnalysisIntelligence = 0.34
+LMArenaText = 0.22
+GPQA_HLE_Reasoning = 0.15
+ARC_AGI_2 = 0.12        # novel pattern induction — orthogonal to knowledge benchmarks
+ArtificialAnalysisMath = 0.09
+MMLUPro = 0.08
 
 [group_weights.PLAN]
 # PLAN composition reflects "structured multi-step decomposition" measured
-# end-to-end. TerminalBench remains important, but it is now capped at 0.20
-# because the public leaderboard measures agent scaffold + model + execution
-# policy, not pure model planning. The freed weight moves into model-leaning
-# reasoning/tool-use signals so PLAN is less dominated by any one agent harness.
-TerminalBench = 0.20
-Tau2Bench = 0.22
-ArtificialAnalysisReasoning = 0.22
-IFBench = 0.14
-LongContextRecall = 0.10
-MCPAtlas = 0.12
-
-# BUILD rebalanced: AACoding capped 0.18 → 0.12 (it's a meta-aggregate that
-# overlaps SWE-bench, LCB, Terminal — the prior weight double-counted that
-# overlap). Freed weight redistributed across the SWE composite (which is
-# the closest direct measure of real-world software work), GDPval (real-
-# world economic-value tasks), and SciCode (which measures correctness on
-# scientific code, an underweighted axis for research/data work).
-[group_weights.BUILD]
-# BUILD rebalanced toward "real engineering work" — SWE composite + tool
-# orchestration. SWEComposite carries 0.45 (rolled forward through the
-# 0.40→0.42→0.45 path: first absorbing the 0.02 freed when MCPAtlas was
-# trimmed, then the 0.03 freed when LiveCodeBench was retired in favor of
-# GSO at 0.02). Once SWERebench / SWEBenchPro / SWEBenchVerified /
-# SWEBenchMultilingual all flow through one normalized signal, that signal
-# IS the headline building measurement.
-# MCPAtlas trimmed back from 0.12 → 0.10 (Codex review pushback: MCP
-# coverage is too sparse to justify the larger weight; the missing-data
-# shrinkage already handles per-vendor gaps without a coefficient bump).
-# Sonar's four submetrics collapsed into a single SonarComposite weight of
-# 0.10 — same total influence, but cleaner missing-data accounting (one
-# upstream payload should mark one missing entry, not four) and the three
-# density submetrics are highly correlated.
-# LiveCodeBench retired 2026-04 — its public JSON had been frozen at mid-
-# 2025 frontier (no GPT-5/5.x, no Opus 4.5+, no Gemini 3, etc.) for ~12
-# months and was contributing zero signal to current top models. Replaced
-# by GSO at 0.02: same livecodebench.github.io operators, but GSO is the
-# active "Generalized Software Optimization" track with frontier coverage
-# and a contamination-resistant `score_hack_control` field (which we
-# ingest in preference to raw `score`, mirroring our portfolio's bias
-# toward contamination-resistant SWE signals like SWERebench).
-SWEComposite = 0.45
+# end-to-end. BFCL and TerminalBenchHard broaden tool-use / terminal-task
+# coverage while keeping any single agent harness from dominating PLAN.
+TerminalBench = 0.16
+TerminalBenchHard = 0.08
+BFCL = 0.08
+Tau2Bench = 0.18
+ArtificialAnalysisReasoning = 0.20
+IFBench = 0.12
+LongContextRecall = 0.08
 MCPAtlas = 0.10
-TerminalBench = 0.09
+
+# BUILD rebalanced around direct software-work evidence. SWEComposite remains
+# the largest single input, but Scale SWE Atlas now carries a separate
+# composite for codebase Q&A / test-writing / refactoring. BFCL and AA's
+# TerminalBenchHard/AALiveCodeBench fields add live tool/terminal/coding
+# coverage without giving any one harness a dominant coefficient.
+[group_weights.BUILD]
+# Sonar stays collapsed into one SonarComposite input so issue/bug/vuln
+# densities do not triple-count one upstream payload. The legacy
+# LiveCodeBench JSON remains ingested but unweighted; AA's current
+# livecodebench field is carried separately as AALiveCodeBench.
+SWEComposite = 0.32
+SWEAtlasComposite = 0.16
+MCPAtlas = 0.07
+TerminalBench = 0.06
+TerminalBenchHard = 0.05
+BFCL = 0.03
 GSO = 0.02
-ArtificialAnalysisCoding = 0.05
-SciCode = 0.05
+ArtificialAnalysisCoding = 0.04
+SciCode = 0.04
+AALiveCodeBench = 0.04
 GDPval = 0.05
-SonarComposite = 0.10
-LongContextRecall = 0.05
-CopilotArenaOrLMArenaCode = 0.04
+SonarComposite = 0.07
+LongContextRecall = 0.03
+CopilotArenaOrLMArenaCode = 0.02
 
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
@@ -175,6 +162,14 @@ SWERebench = 0.40            # contamination-resistant rolling-window signal
 SWEBenchVerified = 0.15      # widely reported, but saturated/contaminated
 SWEBenchPro = 0.35           # hardest, multi-file (1.8k tasks, 4.1 files avg)
 SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
+
+# Scale SWE Atlas splits real software-engineering work into codebase Q&A,
+# test writing, and refactoring. Keep the three correlated Scale signals as
+# one BUILD input rather than stacking them independently.
+[composite_metrics.SWEAtlasComposite]
+SWEAtlasQnA = 0.30
+SWEAtlasTestWriting = 0.30
+SWEAtlasRefactoring = 0.40
 
 # SonarComposite collapses Sonar's four submetrics (functional pass rate +
 # three correlated density metrics) into one signal so that BUILD treats
@@ -390,6 +385,18 @@ log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
+[metrics.TerminalBenchHard]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+[metrics.BFCL]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
 [metrics.SWEBenchMultilingual]
 higher_better = true
 log_scale = false
@@ -405,6 +412,24 @@ transform = "percentile"
 # Scale's harder, multi-file SWE-Bench. Frontier scores 50-65% (vs Verified
 # saturating near 90), so it differentiates better at the top.
 [metrics.SWEBenchPro]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.SWEAtlasQnA]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.SWEAtlasTestWriting]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+[metrics.SWEAtlasRefactoring]
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
@@ -442,10 +467,28 @@ log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
+[metrics.AALiveCodeBench]
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
 [metrics.IFBench]
 higher_better = true
 log_scale = false
 groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.ArtificialAnalysisMath]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.MMLUPro]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
 transform = "percentile"
 
 [metrics.LongContextRecall]

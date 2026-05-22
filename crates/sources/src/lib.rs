@@ -6,6 +6,7 @@ use ipbr_core::RawRow;
 pub mod aistupidlevel;
 pub mod arc_agi;
 pub mod artificial_analysis;
+pub mod bfcl;
 pub mod gso;
 pub mod http;
 pub mod livecodebench;
@@ -14,6 +15,7 @@ pub mod mcp_atlas;
 pub mod openrouter;
 pub mod overrides;
 pub mod registry;
+pub mod scale_swe_atlas;
 pub mod sonar;
 pub mod swebench;
 pub mod swebench_pro;
@@ -23,6 +25,7 @@ pub mod terminal_bench;
 pub use aistupidlevel::AiStupidLevelSource;
 pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
+pub use bfcl::BfclSource;
 pub use gso::GsoSource;
 pub use http::ReqwestHttp;
 pub use livecodebench::LiveCodeBenchSource;
@@ -30,6 +33,9 @@ pub use lmarena::LmArenaSource;
 pub use mcp_atlas::McpAtlasSource;
 pub use openrouter::OpenRouterSource;
 pub use overrides::OverridesSource;
+pub use scale_swe_atlas::{
+    SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource,
+};
 pub use sonar::SonarSource;
 pub use swebench::SweBenchSource;
 pub use swebench_pro::SweBenchProSource;
@@ -143,6 +149,15 @@ pub(crate) fn use_cached_html(opts: FetchOptions<'_>, key: &str, ttl: Duration) 
         .unwrap_or(false)
 }
 
+pub(crate) fn use_cached_csv(opts: FetchOptions<'_>, key: &str, ttl: Duration) -> bool {
+    if opts.offline {
+        return true;
+    }
+    opts.cache_dir
+        .map(|d| cache_is_fresh(&cache_csv_path(d, key), ttl))
+        .unwrap_or(false)
+}
+
 pub fn cache_is_fresh(path: &Path, ttl: Duration) -> bool {
     let Ok(meta) = std::fs::metadata(path) else {
         return false;
@@ -216,5 +231,15 @@ pub(crate) fn write_cache_html(
 ) -> Result<(), SourceError> {
     std::fs::create_dir_all(cache_dir)?;
     std::fs::write(cache_html_path(cache_dir, key), payload)?;
+    Ok(())
+}
+
+pub(crate) fn write_cache_csv(
+    cache_dir: &Path,
+    key: &str,
+    payload: &str,
+) -> Result<(), SourceError> {
+    std::fs::create_dir_all(cache_dir)?;
+    std::fs::write(cache_csv_path(cache_dir, key), payload)?;
     Ok(())
 }

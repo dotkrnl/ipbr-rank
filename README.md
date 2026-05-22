@@ -64,7 +64,7 @@ intervention.
 
 - **I** (Idea): Creativity, general intelligence, open-ended generation
 - **P** (Planning): Structured reasoning, function calling, multi-step task decomposition
-- **B** (Building): Implementation, benchmarks (SWE-bench, LiveCodeBench, etc.)
+- **B** (Building): Implementation, SWE-style work, terminal tasks, and code-quality benchmarks
 - **R** (Reviewing): Judging code quality, correctness, preference evaluation
 
 Each role has a single **raw** score (0–100, based on public benchmarks).
@@ -76,14 +76,16 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 **Verified sources** (always run):
 - OpenRouter API — model discovery, pricing, context windows
 - LM Arena — preference ratings across text, code, and hard prompts
-- Artificial Analysis — intelligence/coding/reasoning indices, plus tau2-bench, scicode, ifbench, lcr, and gpqa+hle reasoning blend
+- Artificial Analysis — intelligence/coding/reasoning/math indices, plus tau2-bench, scicode, ifbench, terminalbench-hard, livecodebench, mmlu-pro, lcr, and gpqa+hle reasoning blend
 - AI Stupid Level — 17 capability axes across hourly + deep + tooling suites, plus a dedicated canary health signal used only as a fast degradation penalty (tooling-suite errorHandling dropped due to upstream measurement quirk — see `docs/sources.md` AISL entry)
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
+- SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
 - SWE-rebench — continuously-refreshed agentic SWE leaderboard, rolling-window resolved rate
 - LiveCodeBench — competitive-programming pass@1 (ingested for back-compat; *retired* from BUILD weighting after the upstream JSON froze at mid-2025 frontier — see `docs/sources.md`)
 - GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
+- BFCL V4 — Berkeley function/tool-calling leaderboard
 - Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)

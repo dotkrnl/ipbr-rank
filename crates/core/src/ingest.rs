@@ -209,11 +209,15 @@ impl EffortPreference {
 ///    upstream). Without this carve-out opus-4.5/4.6/4.7 silently lose all
 ///    MCP-Atlas signal, which is a heavily-weighted PLAN/BUILD metric.
 ///
-/// 2. **gemini-3-pro on AA** — Artificial Analysis ships only the
-///    `gemini-3-pro-preview (high)` variant for that endpoint; there's no
-///    medium/thinking row. Without this carve-out gemini-3-pro loses 8 AA
-///    metrics (Intelligence, Coding, Reasoning, GPQA/HLE, Tau2, SciCode,
-///    IFBench, LCR) and ranks well below its actual capability tier.
+/// 2. **high-only AA endpoint rows** — Artificial Analysis sometimes ships
+///    only a `(high)` row for a model endpoint; there's no medium/thinking
+///    alternative to prefer. Without this carve-out those models lose the
+///    whole AA metric bundle despite AA being the only live source for them.
+///
+/// 3. **Scale SWE Atlas harness submissions** — the public Scale rows are
+///    harness+model submissions and often include xHigh/Max effort labels
+///    without a lower-effort companion. Treat the submitted result as the
+///    benchmark observation, mirroring the existing MCP-Atlas exception.
 ///
 /// Both carve-outs are *single-source-and-canonical-scoped* by design — they
 /// do not weaken the global "no high/xhigh/max" policy for any other model
@@ -237,7 +241,18 @@ fn is_scoring_allowed_for(
     }
     if source_id == "artificial_analysis"
         && matches!(preference, EffortPreference::High)
-        && canonical_id == "google/gemini-3-pro"
+        && matches!(
+            canonical_id,
+            "google/gemini-3-pro" | "google/gemini-3.5-flash" | "xai/grok-4.3"
+        )
+    {
+        return true;
+    }
+    if source_id.starts_with("sweatlas_")
+        && matches!(
+            preference,
+            EffortPreference::Max | EffortPreference::High | EffortPreference::Thinking
+        )
     {
         return true;
     }

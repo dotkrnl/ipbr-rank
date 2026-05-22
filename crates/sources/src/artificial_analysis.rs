@@ -181,6 +181,42 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         if let Some(ifbench) = number_at_paths(item, &[&["evaluations", "ifbench"], &["ifbench"]]) {
             fields.insert("IFBench".to_string(), Value::from(ifbench * 100.0));
         }
+        if let Some(terminalbench_hard) = number_at_paths(
+            item,
+            &[
+                &["evaluations", "terminalbench_hard"],
+                &["terminalbench_hard"],
+            ],
+        ) {
+            fields.insert(
+                "TerminalBenchHard".to_string(),
+                Value::from(terminalbench_hard * 100.0),
+            );
+        }
+        if let Some(livecodebench) = number_at_paths(
+            item,
+            &[&["evaluations", "livecodebench"], &["livecodebench"]],
+        ) {
+            fields.insert(
+                "AALiveCodeBench".to_string(),
+                Value::from(livecodebench * 100.0),
+            );
+        }
+        if let Some(math) = number_at_paths(
+            item,
+            &[
+                &["evaluations", "artificial_analysis_math_index"],
+                &["evaluations", "math_index"],
+                &["evaluations", "math"],
+            ],
+        ) {
+            fields.insert("ArtificialAnalysisMath".to_string(), Value::from(math));
+        }
+        if let Some(mmlu_pro) =
+            number_at_paths(item, &[&["evaluations", "mmlu_pro"], &["mmlu_pro"]])
+        {
+            fields.insert("MMLUPro".to_string(), Value::from(mmlu_pro * 100.0));
+        }
 
         // Long Context Recall — AA's needle-in-haystack-style measurement of
         // how well a model retrieves information from large input windows.
@@ -356,7 +392,11 @@ mod tests {
                     "intelligence_index": 60.24,
                     "coding_index": 59.12,
                     "gpqa": 0.93,
-                    "hle": 0.40
+                    "hle": 0.40,
+                    "terminalbench_hard": 0.50,
+                    "livecodebench": 0.80,
+                    "artificial_analysis_math_index": 71.25,
+                    "mmlu_pro": 0.88
                 },
                 "pricing": {
                     "input_price_per_million": 5.0,
@@ -397,6 +437,21 @@ mod tests {
             row.fields.get("GPQA_HLE_Reasoning").and_then(number_like),
             Some(66.5)
         );
+        assert_eq!(
+            row.fields.get("TerminalBenchHard").and_then(number_like),
+            Some(50.0)
+        );
+        assert_eq!(
+            row.fields.get("AALiveCodeBench").and_then(number_like),
+            Some(80.0)
+        );
+        assert_eq!(
+            row.fields
+                .get("ArtificialAnalysisMath")
+                .and_then(number_like),
+            Some(71.25)
+        );
+        assert_eq!(row.fields.get("MMLUPro").and_then(number_like), Some(88.0));
         assert_eq!(
             row.fields.get("OutputSpeed").and_then(number_like),
             Some(90.37)

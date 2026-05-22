@@ -98,6 +98,15 @@ pub(crate) fn parse_rows(
     metric: &str,
     source_id: &str,
 ) -> Result<Vec<RawRow>, SourceError> {
+    parse_rows_with_model_map(html, metric, source_id, |model| model.to_string())
+}
+
+pub(crate) fn parse_rows_with_model_map(
+    html: &str,
+    metric: &str,
+    source_id: &str,
+    map_model_name: impl Fn(&str) -> String,
+) -> Result<Vec<RawRow>, SourceError> {
     const MODEL_ANCHOR: &str = r#"\"model\":\""#;
     const SCORE_ANCHOR: &str = r#"\"score\":"#;
     const WINDOW: usize = 600;
@@ -116,6 +125,11 @@ pub(crate) fn parse_rows(
         let model_name = html[name_start..name_end].trim();
         cursor = name_end + 2; // skip past `\"`
 
+        if model_name.is_empty() {
+            continue;
+        }
+        let model_name = map_model_name(model_name);
+        let model_name = model_name.trim();
         if model_name.is_empty() {
             continue;
         }

@@ -2,8 +2,9 @@ use std::path::Path;
 
 use ipbr_core::{ModelRecord, ingest_rows, required_aliases};
 use ipbr_sources::{
-    AiStupidLevelSource, ArtificialAnalysisSource, FetchOptions, Http, LiveCodeBenchSource,
-    LmArenaSource, OpenRouterSource, SecretStore, Source, SourceError, SweBenchSource,
+    AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, FetchOptions, Http,
+    LiveCodeBenchSource, LmArenaSource, OpenRouterSource, SecretStore, Source, SourceError,
+    SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource,
     SweRebenchSource, VerificationStatus, registry::registry,
 };
 
@@ -414,11 +415,26 @@ fn registry_exposes_verified_sources() {
         None,
     )));
     assert!(meta.contains(&("swerebench".to_string(), VerificationStatus::Verified, None,)));
+    assert!(meta.contains(&("bfcl".to_string(), VerificationStatus::Verified, None,)));
+    assert!(meta.contains(&(
+        "sweatlas_qna".to_string(),
+        VerificationStatus::Verified,
+        None,
+    )));
+    assert!(meta.contains(&(
+        "sweatlas_test_writing".to_string(),
+        VerificationStatus::Verified,
+        None,
+    )));
+    assert!(meta.contains(&(
+        "sweatlas_refactoring".to_string(),
+        VerificationStatus::Verified,
+        None,
+    )));
     assert!(meta.contains(&("overrides".to_string(), VerificationStatus::Verified, None,)));
     for dropped in [
         "bigcodebench",
         "openevals",
-        "bfcl",
         "aider_polyglot",
         "metr_horizons",
     ] {
@@ -470,6 +486,89 @@ async fn swerebench_fixture_contract() {
         hits >= 3,
         "expected >=3 flagship SWE-rebench matches, got {hits}/14"
     );
+}
+
+async fn assert_sweatlas_fixture<S: Source>(
+    source: S,
+    metric: &str,
+    min_rows: usize,
+    min_matches: usize,
+) {
+    let rows = source
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("SWE Atlas fixture should parse");
+
+    assert!(
+        rows.len() >= min_rows,
+        "expected at least {min_rows} {metric} rows, got {}",
+        rows.len()
+    );
+    assert!(rows.iter().all(|row| row.fields.contains_key(metric)));
+    let (records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= min_matches,
+        "expected at least {min_matches} {metric} alias matches, got {matched}"
+    );
+    assert!(
+        records
+            .iter()
+            .any(|record| record.raw_metrics.contains_key(metric))
+    );
+}
+
+#[tokio::test]
+async fn sweatlas_qna_fixture_contract() {
+    assert_sweatlas_fixture(SweAtlasQnaSource, "SWEAtlasQnA", 10, 5).await;
+}
+
+#[tokio::test]
+async fn sweatlas_test_writing_fixture_contract() {
+    assert_sweatlas_fixture(SweAtlasTestWritingSource, "SWEAtlasTestWriting", 10, 5).await;
+}
+
+#[tokio::test]
+async fn sweatlas_refactoring_fixture_contract() {
+    assert_sweatlas_fixture(SweAtlasRefactoringSource, "SWEAtlasRefactoring", 10, 5).await;
+}
+
+#[tokio::test]
+async fn bfcl_fixture_contract() {
+    let source = BfclSource;
+    let rows = source
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("BFCL fixture should parse");
+
+    assert!(
+        rows.len() >= 50,
+        "expected at least 50 BFCL rows, got {}",
+        rows.len()
+    );
+    assert!(rows.iter().all(|row| row.fields.contains_key("BFCL")));
+    let (records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= 15,
+        "expected at least 15 BFCL alias matches, got {matched}"
+    );
+    assert!(records.iter().any(|record| {
+        record.canonical_id == "anthropic/claude-opus-4.5"
+            && record.raw_metrics.contains_key("BFCL")
+    }));
 }
 
 #[tokio::test]

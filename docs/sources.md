@@ -30,7 +30,7 @@ fail the run.
 - **API**: Artificial Analysis `/api/v2/data/llms/models`, `x-api-key` header
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
 - **Cache TTL**: 24 h
-- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `Tau2Bench`, `SciCode`, `IFBench`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `TTFT` / `BlendedCost`.
+- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `Tau2Bench`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `TTFT` / `BlendedCost`.
 - **Multi-row dedup**: AA ships several rows per logical model (e.g. "Claude Opus 4.7 (Adaptive Reasoning, Max Effort)" and "(Non-reasoning, High Effort)"). The fetcher sorts ascending by intelligence index so the highest-effort row appears last and wins the last-write merge; speed/ttft sentinel zeros are skipped.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
@@ -57,17 +57,13 @@ Removed because of zero overlap with the flagship model set — none of the 14 r
 canonical IDs appeared in its leaderboard — so it contributed no coverage while adding
 fetch latency.
 
-## bigcodebench, bfcl, aider_polyglot, metr_horizons (removed)
+## bigcodebench, aider_polyglot, metr_horizons (removed)
 
-All four were removed during audit passes. `bigcodebench` (HuggingFace
-dataset) stopped covering 2026-class models; `bfcl` and `aider_polyglot`
-upstreams went stale on the frontier; `metr_horizons` produced sparse
-measurements that warped scores. Code-axis coverage is now provided by
-`swebench` (Verified + Multilingual), `swerebench`, `livecodebench`,
-`terminal_bench`, `sonar`, and `artificial_analysis` (which surfaces
-`tau2-bench`, `scicode`, `ifbench`, and the gpqa+hle reasoning blend
-from its existing payload). Long-context and tool-use signal comes from
-the AISL deep + tooling suites instead.
+These were removed during audit passes. `bigcodebench` (HuggingFace
+dataset) stopped covering 2026-class models; `aider_polyglot` went stale
+on the frontier; `metr_horizons` produced sparse measurements that warped
+scores. BFCL was restored once the V4 CSV exposed current frontier rows
+and agentic tool-use categories.
 
 ## swebench
 
@@ -124,6 +120,15 @@ the AISL deep + tooling suites instead.
 - **Fragility note**: Depends on Scale's RSC embedding. If field names change (`model` → `name`, `score` → `passRate`), the parser will need updating.
 - **Fixture**: `data/fixtures/swebench_pro.html`
 
+## sweatlas
+
+- **Status**: Verified
+- **APIs**: Scale Labs `labs.scale.com/leaderboard/sweatlas-qna`, `/sweatlas-tw`, and `/sweatlas-refactoring` (same RSC pattern as `swebench_pro` / `mcp_atlas`).
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metrics**: `SWEAtlasQnA`, `SWEAtlasTestWriting`, `SWEAtlasRefactoring`. These feed the derived `SWEAtlasComposite` BUILD input so the three correlated Scale SWE Atlas tracks do not stack as independent BUILD weights.
+- **Fixtures**: `data/fixtures/sweatlas_qna.html`, `data/fixtures/sweatlas_test_writing.html`, `data/fixtures/sweatlas_refactoring.html`
+
 ## mcp_atlas
 
 - **Status**: Verified
@@ -134,6 +139,15 @@ the AISL deep + tooling suites instead.
 - **Coverage**: 19 models, all 14 flagships matched directly (opus-4.7 max=79.1%, gemini-3.1-pro=78.2%, glm-5.1=75.6%, gpt-5.4=70.6%, …, haiku-4.5=40.2%).
 - **Fragility note**: Same as `swebench_pro` — RSC field names.
 - **Fixture**: `data/fixtures/mcp_atlas.html`
+
+## bfcl
+
+- **Status**: Verified
+- **API**: Berkeley Function Calling Leaderboard V4 `data_overall.csv`
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metric**: `BFCL` — overall accuracy across BFCL V4's function/tool-calling categories, including live, multi-turn, web-search, memory, and relevance-detection tasks. Feeds PLAN and BUILD as a tool-use / agentic-calling signal.
+- **Fixture**: `data/fixtures/bfcl.csv`
 
 ## arc_agi
 

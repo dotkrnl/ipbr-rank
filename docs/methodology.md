@@ -130,24 +130,27 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | Group Key | Member Metrics (with weights from `[group_weights.*]`) |
 |-----------|-------------------------------------------------------|
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
-| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.42), LMArenaText (0.25), GPQA_HLE_Reasoning (0.18), ARC_AGI_2 (0.15) |
-| **PLAN** (Planning) | TerminalBench (0.20), ArtificialAnalysisReasoning (0.22), Tau2Bench (0.22), IFBench (0.14), LongContextRecall (0.10), MCPAtlas (0.12) |
-| **BUILD** (Building) | SWEComposite (0.45), MCPAtlas (0.10), TerminalBench (0.09), GSO (0.02), ArtificialAnalysisCoding (0.05), SciCode (0.05), GDPval (0.05), SonarComposite (0.10), LongContextRecall (0.05), CopilotArenaOrLMArenaCode (0.04) |
+| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.34), LMArenaText (0.22), GPQA_HLE_Reasoning (0.15), ARC_AGI_2 (0.12), ArtificialAnalysisMath (0.09), MMLUPro (0.08) |
+| **PLAN** (Planning) | TerminalBench (0.16), TerminalBenchHard (0.08), BFCL (0.08), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.18), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.10) |
+| **BUILD** (Building) | SWEComposite (0.32), SWEAtlasComposite (0.16), MCPAtlas (0.07), TerminalBench (0.06), TerminalBenchHard (0.05), BFCL (0.03), GSO (0.02), ArtificialAnalysisCoding (0.04), SciCode (0.04), AALiveCodeBench (0.04), GDPval (0.05), SonarComposite (0.07), LongContextRecall (0.03), CopilotArenaOrLMArenaCode (0.02) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearchDocument (1.00) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
-| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.35), TTFT (0.35), BlendedCost (0.15), ContextWindow (0.15) |
-| **OPS_review** (Ops for reviewing) | OutputSpeed (0.35), TTFT (0.30), BlendedCost (0.20), ContextWindow (0.15) |
+| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
+| **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.25), BlendedCost (0.20), ContextWindow (0.25) |
 | **A_I** (AIStupid Idea) | AI_correctness (0.18), AI_spec (0.18), AI_efficiency (0.08), AI_stability (0.16), AI_recovery (0.12), AI_complexity (0.10), AI_edge_cases (0.08), AI_plan_coherence (0.10) — `AI_refusal` and `AI_code` removed (safety/code-quality signals that don't measure idea quality) |
 | **A_P** (AIStupid Planning) | AI_correctness, AI_spec, AI_efficiency, AI_stability, AI_recovery, AI_plan_coherence, AI_memory_retention, AI_context_awareness, AI_task_completion, AI_tool_selection, AI_parameter_accuracy |
 | **A_B** (AIStupid Building) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_recovery, AI_complexity, AI_edge_cases, AI_hallucination_resistance, AI_memory_retention |
 | **A_R** (AIStupid Reviewing) | AI_correctness, AI_spec, AI_code, AI_stability, AI_recovery, AI_hallucination_resistance, AI_edge_cases (`AI_error_handling` was dropped — see `docs/sources.md` AISL entry for the upstream measurement quirk that motivated it; the freed 0.08 weight folded into `AI_recovery`) |
 
 `SWEComposite` is a derived metric defined in `[composite_metrics.SWEComposite]`,
-computed as a missing-safe weighted average of `SWERebench` (0.30),
-`SWEBenchVerified` (0.25), `SWEBenchPro` (0.35), and `SWEBenchMultilingual`
+computed as a missing-safe weighted average of `SWERebench` (0.40),
+`SWEBenchVerified` (0.15), `SWEBenchPro` (0.35), and `SWEBenchMultilingual`
 (0.10). All four inputs use percentile normalization so they're on a
 comparable scale before the composite collapses them. See the source-level
 scoreboard for the raw input values when diagnosing per-model performance.
+
+`SWEAtlasComposite` similarly collapses Scale's SWE Atlas Q&A, test-writing,
+and refactoring tracks into one BUILD signal with weights 0.30 / 0.30 / 0.40.
 
 `SonarComposite` is the same pattern applied to the four Sonar code-quality
 submetrics (functional pass rate plus issue / bug / vulnerability density).
@@ -343,12 +346,20 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | SWEBenchMultilingual | higher | no | percentile | SWE-bench JSON | (input to SWEComposite) |
 | SWERebench | higher | no | percentile | SWE-rebench HTML | (input to SWEComposite) |
 | SWEBenchPro | higher | no | percentile | Scale Labs (RSC HTML) | (input to SWEComposite) |
+| SWEAtlasQnA | higher | no | percentile | Scale SWE Atlas Q&A | (input to SWEAtlasComposite) |
+| SWEAtlasTestWriting | higher | no | percentile | Scale SWE Atlas Test Writing | (input to SWEAtlasComposite) |
+| SWEAtlasRefactoring | higher | no | percentile | Scale SWE Atlas Refactoring | (input to SWEAtlasComposite) |
 | MCPAtlas | higher | no | percentile | Scale Labs (RSC HTML) | PLAN, BUILD |
 | ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN |
 | TerminalBench | higher | no | percentile | Terminal-Bench HTML | PLAN, BUILD |
+| TerminalBenchHard | higher | no | percentile | Artificial Analysis (`terminalbench_hard` field) | PLAN, BUILD |
+| BFCL | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | PLAN, BUILD |
 | Tau2Bench | higher | no | percentile | Artificial Analysis (tau2 field) | PLAN |
 | SciCode | higher | no | percentile | Artificial Analysis (scicode field) | BUILD |
+| AALiveCodeBench | higher | no | percentile | Artificial Analysis (livecodebench field) | BUILD |
 | IFBench | higher | no | percentile | Artificial Analysis (ifbench field) | PLAN |
+| ArtificialAnalysisMath | higher | no | percentile | Artificial Analysis math index | GEN |
+| MMLUPro | higher | no | percentile | Artificial Analysis (mmlu_pro field) | GEN |
 | GDPval | higher | no | percentile | overrides table (GDPval-AA Elo) | BUILD |
 | LongContextRecall | higher | no | percentile | Artificial Analysis (lcr field) | BUILD, PLAN |
 | SonarFunctionalSkill | higher | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
