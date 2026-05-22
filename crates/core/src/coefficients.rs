@@ -85,12 +85,6 @@ pub struct PenaltiesConfig {
     pub synthesis: f64,
     #[serde(default = "default_override_penalty")]
     pub override_reported: f64,
-    #[serde(default = "default_canary_deadband")]
-    pub canary_health_deadband: f64,
-    #[serde(default = "default_canary_floor")]
-    pub canary_health_floor: f64,
-    #[serde(default = "default_canary_max")]
-    pub canary_max_role_penalty: f64,
 }
 
 fn default_synthesis_penalty() -> f64 {
@@ -101,32 +95,18 @@ fn default_override_penalty() -> f64 {
     0.10
 }
 
-fn default_canary_deadband() -> f64 {
-    60.0
-}
-
-fn default_canary_floor() -> f64 {
-    20.0
-}
-
-fn default_canary_max() -> f64 {
-    6.0
-}
-
 impl Default for PenaltiesConfig {
     fn default() -> Self {
         Self {
             synthesis: default_synthesis_penalty(),
             override_reported: default_override_penalty(),
-            canary_health_deadband: default_canary_deadband(),
-            canary_health_floor: default_canary_floor(),
-            canary_max_role_penalty: default_canary_max(),
         }
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Coefficients {
+    #[serde(default)]
     pub ai_stupid_perspective_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub group_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub final_score_weights: BTreeMap<String, BTreeMap<String, f64>>,
@@ -167,7 +147,10 @@ mod tests {
     #[test]
     fn embedded_coefficients_parse() {
         let c = Coefficients::load_embedded().expect("coefficients.toml must parse");
-        assert_eq!(c.ai_stupid_perspective_weights.len(), 4);
+        assert!(
+            c.ai_stupid_perspective_weights.is_empty(),
+            "AISL perspective weights should remain retired from active scoring"
+        );
         assert_eq!(c.group_weights.len(), 8);
         assert_eq!(c.final_score_weights.len(), 4);
         assert!(

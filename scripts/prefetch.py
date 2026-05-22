@@ -133,26 +133,6 @@ def fetch_artificial_analysis():
     write_json("artificial_analysis_llms", payload)
 
 
-def fetch_aistupidlevel():
-    print("[aistupidlevel]")
-    candidates = [
-        "https://aistupidlevel.info/api/dashboard/cached",
-        "https://aistupidlevel.info/dashboard/cached",
-        "https://aistupidlevel.info/api/dashboard",
-    ]
-    last_err = None
-    for url in candidates:
-        try:
-            payload = get_json(url)
-            print(f"  using {url}")
-            write_json("aistupidlevel_dashboard", payload)
-            return
-        except Exception as e:
-            last_err = e
-            continue
-    raise RuntimeError(f"all aistupidlevel endpoints failed: {last_err}")
-
-
 def fetch_lmarena():
     print("[lmarena]")
     dataset = "lmarena-ai/leaderboard-dataset"
@@ -241,7 +221,6 @@ FETCHERS = {
     "swebench": fetch_swebench,
     "openrouter": fetch_openrouter,
     "artificial_analysis": fetch_artificial_analysis,
-    "aistupidlevel": fetch_aistupidlevel,
     "lmarena": fetch_lmarena,
     "openevals": fetch_openevals,
     "bfcl": lambda: fetch_csv("bfcl", "https://gorilla.cs.berkeley.edu/data_overall.csv"),

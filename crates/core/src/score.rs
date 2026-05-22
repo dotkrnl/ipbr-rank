@@ -16,42 +16,8 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     let aggregation = coef.aggregation.clone().unwrap_or_default();
     normalize_population(records, coef, &penalties);
     compute_composite_metrics(records, coef, &aggregation);
-    compute_aisl_perspectives(records, coef, &aggregation);
     aggregate_groups(records, coef, &aggregation);
     compute_role_scores(records, coef, &aggregation);
-    apply_canary_health_penalty(records, &penalties);
-}
-
-/// Compute the AI Stupid Level perspective groups (A_I / A_P / A_B / A_R)
-/// from the AISL capability-axis metrics. The resulting values are written
-/// directly into `r.groups` so role aggregation can consume them as if
-/// they were aggregated from `[group_weights.A_X]` tables. We keep them
-/// in their own config block (`ai_stupid_perspective_weights`) instead of
-/// folding into `group_weights` because they aren't conceptually weighted
-/// averages of independent leaderboards — they're a fixed re-projection
-/// of one source's capability suite output. `AI_canary_health` is excluded
-/// and applied later as a penalty-only drift signal.
-fn compute_aisl_perspectives(
-    records: &mut [ModelRecord],
-    coef: &Coefficients,
-    aggregation: &crate::coefficients::AggregationConfig,
-) {
-    // AISL synthesis discounting is applied once, at the metric level
-    // (see `[penalties].synthesis` in `normalize_population`). The previous
-    // implementation also pulled the entire perspective toward 50 a second
-    // time; that double-pull made AISL synthesis uniquely harsh compared
-    // with synthesis on any other source family.
-    for r in records.iter_mut() {
-        for (perspective, weights) in &coef.ai_stupid_perspective_weights {
-            let prefix = format!("{perspective}/");
-            let (value, shrunk) =
-                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
-            r.groups.insert(perspective.clone(), value);
-            if shrunk {
-                r.missing.groups_shrunk.insert(perspective.clone());
-            }
-        }
-    }
 }
 
 /// Compute each composite metric as a missing-safe weighted average of its
@@ -74,8 +40,6 @@ fn compute_composite_metrics(
         }
     }
 }
-
-const CANARY_HEALTH_METRIC: &str = "AI_canary_health";
 
 fn normalize_population(
     records: &mut [ModelRecord],
@@ -180,32 +144,6 @@ fn compute_role_scores(
     }
 }
 
-fn apply_canary_health_penalty(records: &mut [ModelRecord], penalties: &PenaltiesConfig) {
-    for r in records.iter_mut() {
-        if r.synthesized.contains_key(CANARY_HEALTH_METRIC) {
-            continue;
-        }
-        let Some(health) = r.metrics.get(CANARY_HEALTH_METRIC).copied() else {
-            continue;
-        };
-        // Deadband: healthy canaries (>= 60) get no penalty. Below the
-        // deadband, ramp linearly to the full penalty at `CANARY_HEALTH_FLOOR`.
-        let span = penalties.canary_health_deadband - penalties.canary_health_floor;
-        if span <= 0.0 {
-            continue;
-        }
-        let degradation = ((penalties.canary_health_deadband - health) / span).clamp(0.0, 1.0);
-        let penalty = degradation * penalties.canary_max_role_penalty;
-        if penalty <= 0.0 {
-            continue;
-        }
-        r.scores.i_raw = (r.scores.i_raw - penalty).clamp(0.0, 100.0);
-        r.scores.p_raw = (r.scores.p_raw - penalty).clamp(0.0, 100.0);
-        r.scores.b_raw = (r.scores.b_raw - penalty).clamp(0.0, 100.0);
-        r.scores.r = (r.scores.r - penalty).clamp(0.0, 100.0);
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,36 +168,36 @@ mod tests {
             make_record(
                 "l/low",
                 Vendor::Other("l".into()),
-                &[("AI_correctness", 0.0)],
+                &[("TerminalBench", 0.0)],
             ),
             make_record(
                 "d/direct",
                 Vendor::Other("d".into()),
-                &[("AI_correctness", 100.0)],
+                &[("TerminalBench", 100.0)],
             ),
             make_record(
                 "s/synth",
                 Vendor::Other("s".into()),
-                &[("AI_correctness", 100.0)],
+                &[("TerminalBench", 100.0)],
             ),
         ];
         records[2].synthesized.insert(
-            "AI_correctness".to_string(),
+            "TerminalBench".to_string(),
             SynthesisProvenance {
-                source_id: "aistupidlevel".to_string(),
+                source_id: "terminal_bench".to_string(),
                 from: "d/direct".to_string(),
             },
         );
         compute_scores_with(&mut records, &coef);
 
-        let direct = records[1].metrics.get("AI_correctness").copied().unwrap();
-        let synth = records[2].metrics.get("AI_correctness").copied().unwrap();
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
         // Direct value should percentile-normalize to ~100 (top of pop).
         assert!(direct > 95.0, "direct={direct}");
         // Synthesized value should be 100 * 0.85 + 50 * 0.15 = 92.5.
         assert!(
             (synth - 92.5).abs() < 0.5,
-            "synthesized AI_correctness should pull toward 50, got {synth} (direct={direct})"
+            "synthesized TerminalBench should pull toward 50, got {synth} (direct={direct})"
         );
     }
 
@@ -306,30 +244,30 @@ mod tests {
             make_record(
                 "l/low",
                 Vendor::Other("l".into()),
-                &[("AI_correctness", 0.0)],
+                &[("TerminalBench", 0.0)],
             ),
             make_record(
                 "d/direct",
                 Vendor::Other("d".into()),
-                &[("AI_correctness", 50.0)],
+                &[("TerminalBench", 50.0)],
             ),
             make_record(
                 "s/synth",
                 Vendor::Other("s".into()),
-                &[("AI_correctness", 1000.0)],
+                &[("TerminalBench", 1000.0)],
             ),
         ];
         records[2].synthesized.insert(
-            "AI_correctness".to_string(),
+            "TerminalBench".to_string(),
             SynthesisProvenance {
-                source_id: "aistupidlevel".to_string(),
+                source_id: "terminal_bench".to_string(),
                 from: "d/direct".to_string(),
             },
         );
 
         compute_scores_with(&mut records, &coef);
 
-        let direct = records[1].metrics.get("AI_correctness").copied().unwrap();
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
         assert!(
             direct > 95.0,
             "synthesized outlier should not stretch direct normalization baseline, got {direct}"
@@ -366,113 +304,6 @@ mod tests {
         assert!(
             direct > 95.0,
             "override outlier should not stretch direct normalization baseline, got {direct}"
-        );
-    }
-
-    #[test]
-    fn canary_health_is_penalty_only() {
-        let coef = Coefficients::load_embedded().unwrap();
-        let base_metrics = [
-            ("AI_correctness", 100.0),
-            ("AI_spec", 100.0),
-            ("AI_code", 100.0),
-            ("AI_efficiency", 100.0),
-            ("AI_stability", 100.0),
-            ("AI_refusal", 100.0),
-            ("AI_recovery", 100.0),
-        ];
-        let mut good_raw = base_metrics.to_vec();
-        good_raw.push(("AI_canary_health", 100.0));
-        let mut bad_raw = base_metrics.to_vec();
-        bad_raw.push(("AI_canary_health", 25.0));
-        let mut records = vec![
-            make_record("missing/x", Vendor::Other("a".into()), &base_metrics),
-            make_record("good/y", Vendor::Other("b".into()), &good_raw),
-            make_record("bad/z", Vendor::Other("c".into()), &bad_raw),
-        ];
-
-        compute_scores_with(&mut records, &coef);
-
-        let missing = records[0].scores.i_raw;
-        let good = records[1].scores.i_raw;
-        let bad = records[2].scores.i_raw;
-        assert!(
-            (good - missing).abs() < 1e-6,
-            "healthy canary should not boost role scores: good={good}, missing={missing}"
-        );
-        assert!(
-            bad < missing - 5.0,
-            "bad canary should apply a visible penalty: bad={bad}, missing={missing}"
-        );
-    }
-
-    #[test]
-    fn canary_health_survives_deadband_leq_floor() {
-        let mut coef = Coefficients::load_embedded().unwrap();
-        let mut penalties = coef.penalties.clone().unwrap_or_default();
-        penalties.canary_health_deadband = 20.0;
-        penalties.canary_health_floor = 20.0;
-        coef.penalties = Some(penalties);
-
-        let mut records = vec![make_record(
-            "a/x",
-            Vendor::Other("a".into()),
-            &[("AI_canary_health", 10.0)],
-        )];
-        compute_scores_with(&mut records, &coef);
-        assert!(
-            records[0].scores.i_raw.is_finite(),
-            "span <= 0 must not produce NaN"
-        );
-    }
-
-    #[test]
-    fn all_synthesized_aisl_perspective_gets_partial_uncertainty_pull() {
-        use crate::model::SynthesisProvenance;
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "l/low",
-                Vendor::Other("l".into()),
-                &[("AI_correctness", 0.0)],
-            ),
-            make_record(
-                "d/direct",
-                Vendor::Other("d".into()),
-                &[("AI_correctness", 100.0)],
-            ),
-            make_record(
-                "s/synth",
-                Vendor::Other("s".into()),
-                &[("AI_correctness", 100.0)],
-            ),
-        ];
-        records[2].synthesized.insert(
-            "AI_correctness".to_string(),
-            SynthesisProvenance {
-                source_id: "aistupidlevel".to_string(),
-                from: "d/direct".to_string(),
-            },
-        );
-
-        compute_scores_with(&mut records, &coef);
-
-        let synth_ai = records[2].groups.get("A_I").copied().unwrap();
-        // AI_correctness weight in A_I = 0.18, total A_I weight = 1.0.
-        // Synth metric value = 92.5 (after metric-level `[penalties].synthesis`).
-        // Group missing-safe avg with present_weight 0.18 < 0.60 → full shrink:
-        //   92.5 * 0.18 + 50 * 0.82 = 57.65.
-        // Group-level synth pull was removed (single-layer discounting now);
-        // the group value should equal the shrink result directly.
-        let expected = 92.5 * 0.18 + 50.0 * 0.82;
-        assert!(
-            (synth_ai - expected).abs() < 1e-4,
-            "synthesized AISL perspective should reflect metric-level pull only, got {synth_ai}"
-        );
-        let direct_ai = records[1].groups.get("A_I").copied().unwrap();
-        assert!(
-            direct_ai > 50.0,
-            "direct AISL evidence should still score, got {direct_ai}"
         );
     }
 

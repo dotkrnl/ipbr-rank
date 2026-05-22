@@ -398,11 +398,6 @@ fn registry_exposes_verified_sources() {
         VerificationStatus::Verified,
         Some(ipbr_sources::SecretRef::AaApiKey),
     )));
-    assert!(meta.contains(&(
-        "aistupidlevel".to_string(),
-        VerificationStatus::Verified,
-        None,
-    )));
     assert!(meta.contains(&("swebench".to_string(), VerificationStatus::Verified, None,)));
     assert!(meta.contains(&(
         "livecodebench".to_string(),

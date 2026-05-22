@@ -87,16 +87,11 @@ LM_ARENA_REVIEW_PROXY = 84.5
 OPS_long = 71.0
 OPS_precision = 68.5
 OPS_review = 69.2
-A_I = 77.8
-A_P = 76.5
-A_B = 81.2
-A_R = 83.0
 
 [models.metrics]
 LMArenaText = 82.5
 SWEBenchVerified = 76.0
 ArtificialAnalysisIntelligence = 78.0
-AI_correctness = 75.0
 # ... all normalized metrics populated for this model
 
 [models.missing]
@@ -144,10 +139,6 @@ Possible group keys:
 - **`OPS_long`** (Ops for long generation)
 - **`OPS_precision`** (Ops for precise tasks)
 - **`OPS_review`** (Ops for reviewing)
-- **`A_I`** (AI Stupid Level: Idea perspective)
-- **`A_P`** (AI Stupid Level: Planning perspective)
-- **`A_B`** (AI Stupid Level: Building perspective)
-- **`A_R`** (AI Stupid Level: Reviewing perspective)
 
 Groups where `present_weight / total_weight` is below the configured transition ceiling are marked as "shrunk" in `models.missing.groups_shrunk`; with the default coefficients, the scoring math blends from shrink-to-50 to trusting the present mean across 0.60-0.80 coverage.
 
@@ -159,7 +150,7 @@ Metric keys are defined in `data/coefficients.toml` under `[metrics.*]`. See `do
 
 Only metrics that are *present* for this model appear in this table. Missing metrics are listed in `models.missing.metrics`.
 
-Some metric values are filled from a sibling model when the source did not directly cover this model (sibling synthesis, see methodology §4.5). Synthesis is an internal scoring detail used to compute the final score and is **not** surfaced in the rendered scoreboard — synthesized values appear in `[models.metrics]` indistinguishably from directly-measured values.
+Some metric values are filled from a sibling model when the source did not directly cover this model (sibling synthesis, see methodology §3.4). Synthesis is an internal scoring detail used to compute the final score and is **not** surfaced in the rendered scoreboard — synthesized values appear in `[models.metrics]` indistinguishably from directly-measured values.
 
 #### `[models.missing]` Table
 
@@ -203,20 +194,6 @@ A verbatim echo of the *effective* coefficients used in the run. When `--coeffic
 Same as `data/coefficients.toml`:
 
 ```toml
-[ai_stupid_perspective_weights.A_I]
-AI_correctness = 0.18
-AI_spec = 0.18
-AI_efficiency = 0.08
-AI_stability = 0.16
-AI_recovery = 0.12
-AI_complexity = 0.10
-AI_edge_cases = 0.08
-AI_plan_coherence = 0.10
-
-[ai_stupid_perspective_weights.A_P]
-# ... same structure for A_P, A_B, A_R (each pulls a tailored slice
-# of the 17 AISL axes — see data/coefficients.toml for full weights)
-
 [group_weights.CRE]
 LMArenaCreativeOrOpenEnded = 0.65
 LMArenaText = 0.35
@@ -225,9 +202,8 @@ LMArenaText = 0.35
 # ... same structure for other groups
 
 [final_score_weights.I_raw]
-CRE = 0.52
-GEN = 0.25
-A_I = 0.15
+CRE = 0.62
+GEN = 0.30
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
@@ -423,7 +399,7 @@ This enables golden testing and reproducible builds.
 ### 1.0.0 (Initial)
 - First stable schema
 - All four role scores (I_raw, P_raw, B_raw, R), plus `i_adj`, `p_adj`, `b_adj` retained as raw aliases for API back-compat
-- 12 groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*)
+- 8 groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*)
 - Metrics defined in `data/coefficients.toml`
 - Missing-data tracking via `models.missing`
 

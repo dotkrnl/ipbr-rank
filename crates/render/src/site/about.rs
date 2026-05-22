@@ -19,18 +19,17 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 
 <h2>The four roles</h2>
 <ul>
-<li><strong>Idea</strong> — open-ended creativity, general intelligence, breadth. Driven by LM Arena Text, AI Stupid Level idea-shaped axes, and reasoning blends.</li>
-<li><strong>Plan</strong> — structured reasoning, function-calling, multi-step task decomposition. Driven by Terminal-Bench, tau2-bench, IFBench, MCP-Atlas, and AISL plan axes.</li>
-<li><strong>Build</strong> — actually writing code that runs. Driven by SWE-bench (Verified + Multilingual + Pro), SWE-rebench, GSO, Sonar code quality, and AISL build axes.</li>
-<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar code-quality metrics, and AISL review axes.</li>
+<li><strong>Idea</strong> — open-ended creativity, general intelligence, breadth. Driven by LM Arena Text, Artificial Analysis, reasoning blends, and ARC-AGI.</li>
+<li><strong>Plan</strong> — structured reasoning, function-calling, multi-step task decomposition. Driven by Terminal-Bench, tau2-bench, IFBench, MCP-Atlas, and BFCL.</li>
+<li><strong>Build</strong> — actually writing code that runs. Driven by SWE-bench (Verified + Multilingual + Pro), SWE-rebench, SWE Atlas, GSO, Sonar code quality, and GDPval.</li>
+<li><strong>Review</strong> — judging code quality, correctness, and preference. Driven by LM Arena, Sonar code-quality metrics, BUILD, and PLAN.</li>
 </ul>
 
 <h2>How scores are built</h2>
 <ol>
 <li><strong>Normalize</strong> — each metric is percentile-mapped within the active model population (5th/95th boundaries; log-scaled for cost/speed/latency). Operational metrics use a tail-penalty curve — the top 80% maps into 70-100 with mild differentiation; only the bottom 20% drops sharply.</li>
-<li><strong>Aggregate</strong> — metrics roll up into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_I/A_P/A_B/A_R). Scores blend from shrink-to-50 to trusting the present metrics across 60-80% group coverage.</li>
-<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL's role-shaped perspective (A_*) carries 0.15 in every formula. Role-specific public-leaderboard groups collectively carry 0.77. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
-<li><strong>Canary health</strong> — AISL canary drift is a penalty-only signal. Healthy or missing canary data adds nothing; degraded canary data can subtract up to 6 points from raw role scores.</li>
+<li><strong>Aggregate</strong> — metrics roll up into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*). Scores blend from shrink-to-50 to trusting the present metrics across 60-80% group coverage.</li>
+<li><strong>Combine</strong> — each role score is a weighted average of groups. AISL was removed after local reproduction found it not representative enough and too noise-prone; its former weight now goes to the remaining public benchmark groups. Operational metrics carry 0.08 — fast-enough models cluster within a 1-2 point spread, but genuinely slow models lose 4-6 points.</li>
 <li><strong>Synthesize last</strong> — when a known sibling pair has a metric on one model but not the other, the missing field is filled from the sibling and softened toward 50 by 15% so it reads as a softer signal.</li>
 </ol>
 
@@ -56,7 +55,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <ul>
 <li><strong>Trust transition</strong> — the 60-80% group-coverage band where sparse groups move from shrink-to-50 toward the present-weight mean.</li>
 <li><strong>Composite</strong> — a metric that is itself a weighted blend of related sub-metrics (currently SWEComposite).</li>
-<li><strong>A_* perspective</strong> — AISL's 17 capability axes weighted four ways (one weighting per role). Canary health is separate and penalty-only.</li>
+<li><strong>Retired source</strong> — AISL source code and fixture data remain for audit history, but AISL is no longer registered or scored.</li>
 </ul>
 
 <p><a href="index.html">← back to scoreboard</a></p>

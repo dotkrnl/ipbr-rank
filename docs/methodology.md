@@ -19,8 +19,8 @@ The scoring pipeline has six stages:
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
 3. **Uncertainty penalties**: Values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Values from manual overrides are pulled toward 50 by 10 %.
 4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (`SWEComposite` and `SonarComposite`).
-5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*, A_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
-6. **Final scoring**: Role scores are weighted averages of groups. AISL canary drift is consumed as `AI_canary_health`, outside all groups, and can subtract up to 6 points from each role score; healthy or missing canary data adds no points.
+5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
+6. **Final scoring**: Role scores are weighted averages of groups. AISL was removed from active scoring after local reproduction showed the benchmark surface was not representative enough of real model quality and was too noise-prone.
 
 ---
 
@@ -60,29 +60,11 @@ This is the default transform for nearly every metric — passthrough was retire
 
 Used for operational metrics (OutputSpeed, TTFT, BlendedCost, ContextWindow). Linear/percentile normalization scaled every speed difference equally — meaning a 30 % slower model looked 30 % worse, even though users perceive operational speed in tiers. The new curve squeezes the top 80 % of the population into a 70-100 band (mild differentiation) and stretches the bottom 20 % across 0-70 (sharp penalty for extremely slow models). Net effect: fast and "fast enough" models look similar; only models that are genuinely sluggish stand out.
 
-### 3.3 Canary Health Penalty
-
-`AI_canary_health` is an AISL drift-detection signal, not a normal
-capability benchmark. It has `groups = []` in `data/coefficients.toml`
-and is consumed directly after role aggregation:
-
-```text
-canary_penalty = clamp((60 - AI_canary_health) / 40, 0, 1) × 6
-role_raw = max(0, role_raw - canary_penalty)
-```
-
-A canary deadband of `60` means healthy or mildly degraded canaries
-(`>= 60`) attract no penalty at all; below the deadband the penalty ramps
-linearly to the full 6-point cap once health falls to `20`. Missing
-canary data is also a no-op. Synthesized canary values are ignored for
-this penalty, because sibling health should not stand in for a model's
-own drift signal.
-
-### 3.4 As-Score Passthrough (`transform = "as_score"`)
+### 3.3 As-Score Passthrough (`transform = "as_score"`)
 
 Default for metrics that come in already calibrated to 0-100. Currently only used as a no-op fallback; the active scoring portfolio percentile-normalizes everything for cross-leaderboard comparability.
 
-### 3.5 Synthesis Penalty
+### 3.4 Synthesis Penalty
 
 Synthesis is **field-level and last-priority**. The synthesis layer
 emits a donor row whenever a `(target, from)` pair appears in
@@ -104,7 +86,7 @@ This reflects genuine uncertainty about whether a sibling's score
 transfers cleanly. Synthesized values still count, just slightly more
 conservatively than direct measurements.
 
-### 3.6 Manual Override Penalty
+### 3.5 Manual Override Penalty
 
 Manual overrides from `data/score_overrides.toml` are public, cited
 measurements used to fill gaps before a source lands on the ingested
@@ -137,10 +119,11 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
 | **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.25), BlendedCost (0.20), ContextWindow (0.25) |
-| **A_I** (AIStupid Idea) | AI_correctness (0.18), AI_spec (0.18), AI_efficiency (0.08), AI_stability (0.16), AI_recovery (0.12), AI_complexity (0.10), AI_edge_cases (0.08), AI_plan_coherence (0.10) — `AI_refusal` and `AI_code` removed (safety/code-quality signals that don't measure idea quality) |
-| **A_P** (AIStupid Planning) | AI_correctness, AI_spec, AI_efficiency, AI_stability, AI_recovery, AI_plan_coherence, AI_memory_retention, AI_context_awareness, AI_task_completion, AI_tool_selection, AI_parameter_accuracy |
-| **A_B** (AIStupid Building) | AI_correctness, AI_spec, AI_code, AI_efficiency, AI_stability, AI_recovery, AI_complexity, AI_edge_cases, AI_hallucination_resistance, AI_memory_retention |
-| **A_R** (AIStupid Reviewing) | AI_correctness, AI_spec, AI_code, AI_stability, AI_recovery, AI_hallucination_resistance, AI_edge_cases (`AI_error_handling` was dropped — see `docs/sources.md` AISL entry for the upstream measurement quirk that motivated it; the freed 0.08 weight folded into `AI_recovery`) |
+
+AISL's former `A_*` perspective groups were removed from active scoring on
+2026-05-21. We reproduced the benchmark locally and found the tasks not
+representative enough of real model quality and too noise-prone for this
+scoreboard.
 
 `SWEComposite` is a derived metric defined in `[composite_metrics.SWEComposite]`,
 computed as a missing-safe weighted average of `SWERebench` (0.40),
@@ -216,46 +199,38 @@ Each of the four roles (I_raw, P_raw, B_raw, R) is a weighted average of groups.
 
 From `[final_score_weights.*]` in `data/coefficients.toml`:
 
-All four role formulas put **A_\* at 0.15**. The AISL perspective groups
-all re-project the same 17-axis capability suite from one source family,
-so they carry correlated noise and get a deliberately modest slot rather
-than dominating any role. Role-specific public-leaderboard groups
-collectively carry 0.77; OPS_* contributes 0.08. The 0.15 weight keeps
-AISL meaningfully above the OPS floor — its unique signals
-(hallucination resistance, plan coherence, canary health) aren't
-measured by any other source — without letting one correlated source
-family overshadow direct public-benchmark evidence.
+AISL's former 0.15 role slot is redistributed into the remaining
+non-operational public benchmark groups for each role. OPS_* stays fixed
+at 0.08 so speed/cost/context keep the same influence as before.
 
 **I_raw** (Idea):
 ```
-I_raw = 0.52×CRE + 0.25×GEN + 0.15×A_I + 0.08×OPS_long
+I_raw = 0.62×CRE + 0.30×GEN + 0.08×OPS_long
 ```
 
 **P_raw** (Planning):
 ```
-P_raw = 0.46×PLAN + 0.31×GEN + 0.15×A_P + 0.08×OPS_precision
+P_raw = 0.55×PLAN + 0.37×GEN + 0.08×OPS_precision
 ```
 
 PLAN's basket of TerminalBench / Tau2Bench / AAReasoning / MCPAtlas can
 favor any of the top-3 vendors depending on which gets a strong value
-in each — A_P still captures planning behavior more directly than any
-single leaderboard, just no longer dominantly.
+in each.
 
 **B_raw** (Building):
 ```
-B_raw = 0.70×BUILD + 0.07×PLAN + 0.15×A_B + 0.08×OPS_precision
+B_raw = 0.84×BUILD + 0.08×PLAN + 0.08×OPS_precision
 ```
 
 **R** (Reviewing):
 ```
-R = 0.15×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.32×PLAN + 0.15×A_R + 0.08×OPS_review
+R = 0.18×LM_ARENA_REVIEW_PROXY + 0.36×BUILD + 0.38×PLAN + 0.08×OPS_review
 ```
 
-A_R remains a meaningful review-specific behavioral signal.
-LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.15:
+LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.18:
 useful review-adjacent evidence, but intentionally not treated as a direct
-code-review benchmark. BUILD 0.30 keeps reviewing tied to "you can read the
-code." PLAN 0.32 captures review-as-planning.
+code-review benchmark. BUILD 0.36 keeps reviewing tied to "you can read the
+code." PLAN 0.38 captures review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
 weight 0.08 in the role formulas, paired with the tail-penalty
@@ -370,33 +345,6 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | TTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
 | ContextWindow | higher | **yes** | tail_penalty | OpenRouter | OPS_* |
-| AI_correctness | higher | no | percentile | AIStupidLevel (hourly suite) | A_I, A_P, A_B, A_R |
-| AI_spec | higher | no | percentile | AIStupidLevel (hourly suite, `format` axis) | A_I, A_P, A_B, A_R |
-| AI_code | higher | no | percentile | AIStupidLevel (`codeQuality` axis) | A_B, A_R (removed from A_I — code quality ≠ idea quality) |
-| AI_efficiency | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
-| AI_stability | higher | no | percentile | AIStupidLevel | A_I, A_P, A_B, A_R |
-| AI_refusal | higher | no | percentile | AIStupidLevel (`safety` axis) | none — retained as an ingested metric, excluded from role perspectives |
-| AI_recovery | higher | no | percentile | AIStupidLevel (`debugging` axis) | A_I, A_P, A_B, A_R |
-| AI_complexity | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B |
-| AI_edge_cases | higher | no | percentile | AIStupidLevel (hourly+deep) | A_I, A_B, A_R |
-| AI_plan_coherence | higher | no | percentile | AIStupidLevel (deep suite) | A_I, A_P |
-| AI_memory_retention | higher | no | percentile | AIStupidLevel (deep suite) | A_P, A_B |
-| AI_hallucination_resistance | higher | no | percentile | AIStupidLevel (deep suite, passthrough — upstream already returns `1 - rate`) | A_B, A_R |
-| AI_context_awareness | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-| AI_canary_health | higher | no | as_score | AIStupidLevel canary/drift incidents | penalty-only |
-| AI_task_completion | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-| AI_tool_selection | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-| AI_parameter_accuracy | higher | no | percentile | AIStupidLevel (tooling suite) | A_P |
-`AI_error_handling` was previously emitted from AISL's tooling suite but is
-now dropped from both the metric registry and `A_R` weights. Upstream
-defines it as `recoveredFromErrors / failedCalls.length`, with the
-`failedCalls = 0` branch returning 0 instead of 1 — so a model that never
-fails gets the same score as one that fails everything and recovers
-nothing. The freed weight in A_R folded into AI_recovery.
-
-`AI_safety_compliance` was also dropped: it was fetched but never
-referenced in any weight table, so it contributed nothing to scores.
-Removing it keeps the coefficient surface honest.
 
 ---
 
@@ -405,16 +353,16 @@ Removing it keeps the coefficient surface honest.
 All coefficients are verbatim from `data/coefficients.toml`. This table is for quick reference; the TOML file is authoritative.
 
 ### Final Score Weights
-All four roles weight the AISL perspective at 0.15. Role-specific public
-benchmark groups sum to 0.77, and OPS_* contributes 0.08 (paired with the
-tail-penalty curve so only genuinely slow models lose meaningful score).
+AISL's former 0.15 role slot is redistributed into non-operational public
+benchmark groups. OPS_* contributes 0.08 (paired with the tail-penalty
+curve so only genuinely slow models lose meaningful score).
 
 | Role | Group Contributions |
 |------|---------------------|
-| I_raw | CRE 0.52, GEN 0.25, A_I 0.15, OPS_long 0.08 |
-| P_raw | PLAN 0.46, GEN 0.31, A_P 0.15, OPS_precision 0.08 |
-| B_raw | BUILD 0.70, PLAN 0.07, A_B 0.15, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.15, BUILD 0.30, PLAN 0.32, A_R 0.15, OPS_review 0.08 |
+| I_raw | CRE 0.62, GEN 0.30, OPS_long 0.08 |
+| P_raw | PLAN 0.55, GEN 0.37, OPS_precision 0.08 |
+| B_raw | BUILD 0.84, PLAN 0.08, OPS_precision 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.18, BUILD 0.36, PLAN 0.38, OPS_review 0.08 |
 
 ### Synthesis Penalty
 | Constant | Value |
@@ -427,31 +375,8 @@ is blended toward 50: `final = score × 0.85 + 50 × 0.15`. Synthesized
 values still contribute, just slightly more conservatively than direct
 measurements.
 
-AISL perspective groups (`A_I`, `A_P`, `A_B`, `A_R`) are aggregated as
-plain missing-safe weighted averages of the AISL capability metrics — no
-extra group-level synthesis discount. The metric-level synthesis pull
-(`final = normalized × 0.85 + 50 × 0.15` in 3.5) already discounts each
-synthesised AISL axis before it enters the perspective average; stacking
-a second pull on top double-discounted AISL synthesis relative to every
-other source family without any documented justification, so the group-
-level pull was removed.
-
-### AI Stupid Level Perspective Weights
-See `[ai_stupid_perspective_weights.*]` in `data/coefficients.toml` for the
-full breakdown of how the 17 AISL axes (the 9 hourly-suite axes plus
-`plan_coherence`, `memory_retention`, `hallucination_resistance` from the
-deep suite, and `context_awareness`, `task_completion`, `tool_selection`,
-`parameter_accuracy` from the tooling suite) are
-weighted into A_I / A_P / A_B / A_R.
-
-`AI_canary_health` is intentionally excluded from these perspective weights.
-It is a fast degradation signal, so it can only subtract the canary health
-penalty described above; it cannot raise a model above what the full
-capability suites support.
-
-A_R was tuned in 2026-04 to lean into review-specific axes:
-`hallucination_resistance` 0.17, `edge_cases` 0.13, `recovery` 0.18 (which
-absorbed the dropped `error_handling` weight), `correctness` 0.18,
-`spec` 0.14, `code` 0.10, `stability` 0.10. The shift away from
-correctness/spec saturation reduced AISL's tendency to flatten reviewer
-rankings across already-saturated frontier models.
+### Removed AISL Surface
+AI Stupid Level (`aistupidlevel`) is retained only as historical source
+code and fixture data. It is not registered, its `AI_*` metrics are not in
+the coefficient registry, its `A_*` perspective groups are absent, and no
+canary-health penalty is applied.

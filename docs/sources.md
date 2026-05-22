@@ -37,19 +37,13 @@ fail the run.
 
 ## aistupidlevel
 
-- **Status**: Verified
-- **API**: `/api/dashboard/cached` (primary), `/dashboard/cached` as fallback. Both return the same payload shape; the legacy `/api/dashboard` endpoint now returns 404.
-- **Schema**: `data.modelScores[]` for the model list, `data.historyMap[id][]` for per-model time series, and `data.driftIncidents[]` for canary-drift alerts. AISL runs three capability suites — `hourly`, `deep`, `tooling` — that each contribute different axes. The fetcher reads each axis only from its intended suite so canary/tooling/deep rows cannot overwrite full-speed axes with overlapping keys. The `contextWindow` axis is dropped (overlaps OpenRouter's ContextWindow).
-- **`hallucinationRate` is NOT re-inverted**: upstream's `calculateHallucinationRate` already returns `Math.max(0, 1 - rate)` — the field name is misleading but the value is already a resistance score (higher = better). We pass it through as `AI_hallucination_resistance` directly. Earlier revisions did `1 - value` here and produced wildly wrong rankings; see commit history for the diagnosis.
-- **`errorHandling` is dropped**: upstream defines it as `recoveredFromErrors / failedCalls.length`, with the `failedCalls = 0` branch returning `0` instead of `1`. A model that never fails gets the same score as one that fails everything and recovers nothing — an upstream measurement quirk that the metric definition can't recover from. The freed weight in `A_R` was reabsorbed into `AI_recovery`.
-- **Secret**: None
-- **Cache TTL**: 1 h
-- **Axes emitted (17 total)**:
-  - **Hourly suite (9)**: `AI_correctness`, `AI_spec` (`format`), `AI_code` (`codeQuality`), `AI_efficiency`, `AI_stability`, `AI_refusal` (`safety`), `AI_recovery` (`debugging`), `AI_complexity`, `AI_edge_cases`
-  - **Deep suite (3)**: `AI_plan_coherence`, `AI_memory_retention`, `AI_hallucination_resistance`
-  - **Tooling suite (4)**: `AI_context_awareness`, `AI_task_completion`, `AI_tool_selection`, `AI_parameter_accuracy`
-- **Canary signal**: `AI_canary_health` is emitted separately from `suite=canary` correctness when present and from unresolved `driftIncidents` with `metadata.detectionMethod = "canary_drift"` (`100 - dropPercent`). If both exist, the lower health value wins. It is a penalty-only health signal in scoring, not part of the A_* capability perspectives.
-- **Fixture**: `data/fixtures/aistupidlevel_dashboard.json`
+Removed from active scoring on 2026-05-21. We reproduced the benchmark
+locally and found the tasks not representative enough of real model quality
+and too noise-prone for the role scores. The source implementation and
+fixture remain in the repo for audit/history, but `AiStupidLevelSource` is
+not registered, the `AI_*` metrics are no longer in `data/coefficients.toml`,
+the `A_*` perspective groups are gone, and the canary-health penalty is no
+longer applied.
 
 ## openevals (removed)
 
@@ -188,10 +182,9 @@ emitted carrying the donor (`from`) row's fields, tagged
 **Field-level fill, not row-level replace.** The ingest layer
 (`ingest_synthesized_row` in `crates/core/src/ingest.rs`) skips any field
 that the target already has a real value for. So a model with partial
-real coverage from a source — e.g. AISL's hourly-suite axes for a
-freshly-released model that hasn't been deep+tooling-evaluated yet —
-keeps its real values, and synthesis fills only the genuinely missing
-fields. Synthesis is the last-priority signal: real values always win.
+real coverage from a source keeps its real values, and synthesis fills
+only the genuinely missing fields. Synthesis is the last-priority signal:
+real values always win.
 
 The synthesis layer respects per-source caps (default 30 %) so a single
 donor can't dominate a model's signal across an entire source.

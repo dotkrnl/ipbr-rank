@@ -3,12 +3,6 @@ generated_at = "2026-01-01T00:00:00Z"
 generator = "ipbr-rank 0.1.0"
 methodology = "v1"
 
-[sources."aistupidlevel"]
-status = "verified"
-n_rows_ingested = 24
-n_rows_matched = 64
-n_rows_unmatched = 2
-
 [sources."arc_agi"]
 status = "verified"
 n_rows_ingested = 149
@@ -117,22 +111,18 @@ display_name = "claude-opus-4.1"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-opus-4.1", "claude opus 4.1", "claude-opus-4-1", "claude-opus-4-1-20250805", "claude-opus-4-1-non-reasoning", "claude-opus-4-1-search", "claude-opus-4-1-thinking", "claude-opus-4.1", "opus 4.1"]
-sources = ["aistupidlevel", "lmarena", "openrouter", "overrides", "swerebench", "terminal_bench"]
+sources = ["lmarena", "openrouter", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 57.156159
-p_raw = 64.470598
-b_raw = 66.005762
-r = 56.348766
-i_adj = 57.156159
-p_adj = 64.470598
-b_adj = 66.005762
+i_raw = 54.294537
+p_raw = 63.066277
+b_raw = 66.791407
+r = 52.378804
+i_adj = 54.294537
+p_adj = 63.066277
+b_adj = 66.791407
 
 [models.groups]
-A_B = 62.466839
-A_I = 72.533377
-A_P = 72.855993
-A_R = 78.158415
 BUILD = 68.189303
 CRE = 46.504151
 GEN = 67.359397
@@ -144,23 +134,6 @@ PLAN = 60.916824
 
 [models.metrics]
 AALiveCodeBench = 79.932629
-AI_canary_health = 78.800000
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 56.900201
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 64.754222
-AI_hallucination_resistance = 66.666667
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 64.113464
-AI_plan_coherence = 37.777778
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 65.511726
-AI_task_completion = 63.832239
-AI_tool_selection = 73.063761
 ARC_AGI_2 = 83.505640
 ArtificialAnalysisCoding = 74.791667
 ArtificialAnalysisIntelligence = 68.852396
@@ -211,22 +184,18 @@ display_name = "claude-opus-4.5"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-opus-4.5", "claude opus 4.5", "claude-opus-4-5", "claude-opus-4-5-20251101", "claude-opus-4-5-non-reasoning", "claude-opus-4-5-search", "claude-opus-4-5-thinking", "claude-opus-4.5", "opus 4.5"]
-sources = ["aistupidlevel", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench_pro", "swerebench", "terminal_bench"]
+sources = ["artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 72.879868
-p_raw = 67.750779
-b_raw = 71.492187
-r = 61.455538
-i_adj = 72.879868
-p_adj = 67.750779
-b_adj = 71.492187
+i_raw = 72.766826
+p_raw = 66.838826
+b_raw = 71.800315
+r = 56.842008
+i_adj = 72.766826
+p_adj = 66.838826
+b_adj = 71.800315
 
 [models.groups]
-A_B = 70.205891
-A_I = 73.515476
-A_P = 72.660748
-A_R = 86.432247
 BUILD = 73.093205
 CRE = 71.363665
 GEN = 75.558272
@@ -238,22 +207,6 @@ PLAN = 60.596261
 
 [models.metrics]
 AALiveCodeBench = 85.214858
-AI_code = 33.642646
-AI_complexity = 6.016852
-AI_context_awareness = 28.147589
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 85.505039
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 100.000000
-AI_plan_coherence = 4.444444
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 82.107768
-AI_task_completion = 99.988741
-AI_tool_selection = 97.583578
 ARC_AGI_2 = 85.507050
 ArtificialAnalysisCoding = 79.166667
 ArtificialAnalysisIntelligence = 72.179289
@@ -304,22 +257,18 @@ display_name = "claude-opus-4.6"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-opus-4.6", "claude opus 4.6", "claude-4-6-opus", "claude-4.6-opus", "claude-opus-4-6", "claude-opus-4-6-adaptive", "claude-opus-4-6-non-reasoning", "claude-opus-4-6-search", "claude-opus-4-6-thinking", "claude-opus-4.6", "opus 4.6"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 91.339409
-p_raw = 76.141870
-b_raw = 77.934451
-r = 71.829204
-i_adj = 91.339409
-p_adj = 76.141870
-b_adj = 77.934451
+i_raw = 94.955076
+p_raw = 79.366926
+b_raw = 80.824100
+r = 69.443866
+i_adj = 94.955076
+p_adj = 79.366926
+b_adj = 80.824100
 
 [models.groups]
-A_B = 62.543960
-A_I = 72.515749
-A_P = 58.506356
-A_R = 84.830902
 BUILD = 82.406203
 CRE = 100.000000
 GEN = 89.860579
@@ -330,23 +279,6 @@ OPS_review = 74.241649
 PLAN = 73.437494
 
 [models.metrics]
-AI_canary_health = 84.000000
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 72.195234
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 66.132724
-AI_plan_coherence = 15.555556
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 75.569933
-AI_task_completion = 51.000394
-AI_tool_selection = 96.809191
 ARC_AGI_2 = 91.773000
 ArtificialAnalysisCoding = 80.225989
 ArtificialAnalysisIntelligence = 84.544049
@@ -394,22 +326,18 @@ display_name = "claude-opus-4.7"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus 4.7", "anthropic/claude-opus-4.7", "claude 4.7", "claude opus 4.7", "claude-4-7", "claude-4-7-opus", "claude-4.7-opus", "claude-opus-4-7", "claude-opus-4-7-adaptive", "claude-opus-4-7-non-reasoning", "claude-opus-4-7-thinking", "claude-opus-4.7", "opus 4.7"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring"]
+sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring"]
 
 [models.scores]
-i_raw = 91.107863
-p_raw = 83.002285
-b_raw = 81.212710
-r = 83.817225
-i_adj = 91.107863
-p_adj = 83.002285
-b_adj = 81.212710
+i_raw = 94.737336
+p_raw = 87.089708
+b_raw = 85.928911
+r = 86.853942
+i_adj = 94.737336
+p_adj = 87.089708
+b_adj = 85.928911
 
 [models.groups]
-A_B = 55.847216
-A_I = 72.263449
-A_P = 61.166271
-A_R = 67.830902
 BUILD = 87.626089
 CRE = 96.092538
 GEN = 97.194727
@@ -420,22 +348,6 @@ OPS_review = 74.182092
 PLAN = 82.563112
 
 [models.metrics]
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 5.859422
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 88.485933
-AI_hallucination_resistance = 0.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 50.487843
-AI_plan_coherence = 0.000000
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 75.569933
-AI_task_completion = 97.567303
-AI_tool_selection = 100.000000
 ARC_AGI_2 = 93.535425
 ArtificialAnalysisCoding = 95.762712
 ArtificialAnalysisIntelligence = 100.000000
@@ -483,22 +395,18 @@ display_name = "claude-sonnet-4"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-sonnet-4", "claude sonnet 4", "claude-4-sonnet", "claude-4-sonnet-non-reasoning", "claude-4-sonnet-thinking", "claude-sonnet-4", "claude-sonnet-4-20250514", "claude-sonnet-4-search", "sonnet 4"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
+sources = ["arc_agi", "artificial_analysis", "gso", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 22.256065
-p_raw = 36.447775
-b_raw = 49.394451
-r = 55.650712
-i_adj = 22.256065
-p_adj = 36.447775
-b_adj = 49.394451
+i_raw = 11.834071
+p_raw = 29.409508
+b_raw = 46.333479
+r = 49.969094
+i_adj = 11.834071
+p_adj = 29.409508
+b_adj = 46.333479
 
 [models.groups]
-A_B = 64.165670
-A_I = 75.549374
-A_P = 72.003857
-A_R = 85.484685
 BUILD = 44.765947
 CRE = 0.000000
 GEN = 18.208252
@@ -510,22 +418,6 @@ PLAN = 29.664620
 
 [models.metrics]
 AALiveCodeBench = 6.554989
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 90.574103
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 85.928765
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 96.700055
-AI_plan_coherence = 24.444444
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 82.107768
-AI_task_completion = 54.727701
-AI_tool_selection = 99.680833
 ARC_AGI_2 = 0.155093
 ArtificialAnalysisCoding = 30.790960
 ArtificialAnalysisIntelligence = 29.675425
@@ -574,22 +466,18 @@ display_name = "claude-sonnet-4.5"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-sonnet-4.5", "claude sonnet 4.5", "claude-4-5-sonnet", "claude-4-5-sonnet-non-reasoning", "claude-4-5-sonnet-thinking", "claude-4.5-sonnet", "claude-sonnet-4-5", "claude-sonnet-4-5-20250929", "claude-sonnet-4-5-search", "claude-sonnet-4.5", "sonnet 4.5"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 58.550378
-p_raw = 45.680155
-b_raw = 49.993342
-r = 42.642156
-i_adj = 58.550378
-p_adj = 45.680155
-b_adj = 49.993342
+i_raw = 58.670458
+p_raw = 42.962629
+b_raw = 49.480272
+r = 37.158179
+i_adj = 58.670458
+p_adj = 42.962629
+b_adj = 49.480272
 
 [models.groups]
-A_B = 50.564895
-A_I = 55.954249
-A_P = 57.871875
-A_R = 69.825081
 BUILD = 48.051709
 CRE = 61.270281
 GEN = 47.723789
@@ -601,23 +489,6 @@ PLAN = 34.442534
 
 [models.metrics]
 AALiveCodeBench = 28.040787
-AI_canary_health = 89.100000
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 52.037640
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 82.515125
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 95.514873
-AI_plan_coherence = 37.777778
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 0.000000
-AI_stability = 65.511726
-AI_task_completion = 89.278917
-AI_tool_selection = 89.317139
 ARC_AGI_2 = 3.651745
 ArtificialAnalysisCoding = 46.680791
 ArtificialAnalysisIntelligence = 46.290572
@@ -665,22 +536,18 @@ display_name = "claude-sonnet-4.6"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["anthropic/claude-sonnet-4.6", "claude sonnet 4.6", "claude-sonnet-4-6", "claude-sonnet-4-6-non-reasoning", "claude-sonnet-4-6-search", "claude-sonnet-4-6-thinking", "claude-sonnet-4.6", "sonnet 4.6"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench"]
+sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench"]
 
 [models.scores]
-i_raw = 72.576314
-p_raw = 61.945320
-b_raw = 67.779893
-r = 61.822849
-i_adj = 72.576314
-p_adj = 61.945320
-b_adj = 67.779893
+i_raw = 72.426767
+p_raw = 62.423559
+b_raw = 68.632970
+r = 57.537276
+i_adj = 72.426767
+p_adj = 62.423559
+b_adj = 68.632970
 
 [models.groups]
-A_B = 64.437017
-A_I = 73.820721
-A_P = 59.952758
-A_R = 85.484685
 BUILD = 70.838559
 CRE = 75.401690
 GEN = 67.667844
@@ -692,22 +559,6 @@ PLAN = 60.123142
 
 [models.metrics]
 AALiveCodeBench = 31.334669
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 89.320610
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 100.000000
-AI_plan_coherence = 4.444444
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 82.107768
-AI_task_completion = 75.146389
-AI_tool_selection = 71.293683
 ARC_AGI_2 = 10.603983
 ArtificialAnalysisCoding = 90.112994
 ArtificialAnalysisIntelligence = 79.907264
@@ -758,22 +609,18 @@ display_name = "deepseek-v4-flash"
 vendor = "deepseek"
 thinking_effort = "default"
 aliases = ["deepseek chat", "deepseek v4 flash", "deepseek-chat", "deepseek-v4-flash", "deepseek/deepseek-chat", "deepseek/deepseek-v4-flash"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides"]
+sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 61.674403
-p_raw = 68.888253
-b_raw = 67.725495
-r = 74.244166
-i_adj = 61.674403
-p_adj = 68.888253
-b_adj = 67.725495
+i_raw = 59.506472
+p_raw = 70.145587
+b_raw = 69.589141
+r = 75.332354
+i_adj = 59.506472
+p_adj = 70.145587
+b_adj = 69.589141
 
 [models.groups]
-A_B = 55.328038
-A_I = 71.675074
-A_P = 60.139440
-A_R = 67.298862
 BUILD = 67.309003
 CRE = 55.650621
 GEN = 60.365353
@@ -784,23 +631,6 @@ OPS_review = 84.438317
 PLAN = 73.959206
 
 [models.metrics]
-AI_canary_health = 89.500000
-AI_code = 28.904836
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 79.025433
-AI_hallucination_resistance = 0.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 80.588889
-AI_plan_coherence = 17.777778
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 65.511726
-AI_task_completion = 75.160438
-AI_tool_selection = 76.313881
 ArtificialAnalysisCoding = 47.033898
 ArtificialAnalysisIntelligence = 59.814529
 ArtificialAnalysisReasoning = 75.430491
@@ -842,19 +672,15 @@ aliases = ["deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 71.989173
-p_raw = 75.587858
-b_raw = 72.301298
-r = 77.956043
-i_adj = 71.989173
-p_adj = 75.587858
-b_adj = 72.301298
+i_raw = 72.696448
+p_raw = 78.545178
+b_raw = 75.324046
+r = 80.271958
+i_adj = 72.696448
+p_adj = 78.545178
+b_adj = 75.324046
 
 [models.groups]
-A_B = 54.528832
-A_I = 68.423813
-A_P = 58.618524
-A_R = 64.704033
 BUILD = 74.227997
 CRE = 72.552409
 GEN = 74.312122
@@ -865,22 +691,6 @@ OPS_review = 81.531714
 PLAN = 81.015245
 
 [models.metrics]
-AI_code = 32.069111
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 74.671618
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 76.000556
-AI_plan_coherence = 22.611111
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 63.184967
-AI_task_completion = 71.386372
-AI_tool_selection = 72.366799
 ArtificialAnalysisCoding = 78.107345
 ArtificialAnalysisIntelligence = 79.134467
 ArtificialAnalysisReasoning = 82.150357
@@ -919,22 +729,18 @@ display_name = "gemini-2.5-flash"
 vendor = "google"
 thinking_effort = "default"
 aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2.5-flash", "google/gemini-2.5-flash"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "bfcl", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "bfcl", "livecodebench", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 37.745044
-p_raw = 26.319573
-b_raw = 30.513846
-r = 38.744782
-i_adj = 37.745044
-p_adj = 26.319573
-b_adj = 30.513846
+i_raw = 36.736863
+p_raw = 23.204564
+b_raw = 28.963882
+r = 36.909738
+i_adj = 36.736863
+p_adj = 23.204564
+b_adj = 28.963882
 
 [models.groups]
-A_B = 34.250689
-A_I = 38.364715
-A_P = 38.258383
-A_R = 44.731949
 BUILD = 24.445215
 CRE = 37.998832
 GEN = 18.932855
@@ -946,22 +752,6 @@ PLAN = 16.530866
 
 [models.metrics]
 AALiveCodeBench = 27.676621
-AI_code = 0.000000
-AI_complexity = 0.000000
-AI_context_awareness = 100.000000
-AI_correctness = 9.626352
-AI_edge_cases = 55.860366
-AI_efficiency = 100.000000
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 14.918544
-AI_parameter_accuracy = 51.572435
-AI_plan_coherence = 12.450837
-AI_recovery = 38.730528
-AI_refusal = 0.000000
-AI_spec = 12.613304
-AI_stability = 100.000000
-AI_task_completion = 11.342185
-AI_tool_selection = 74.793666
 ARC_AGI_2 = 0.747268
 ArtificialAnalysisCoding = 0.000000
 ArtificialAnalysisIntelligence = 0.309119
@@ -1012,19 +802,15 @@ aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 69.690722
-p_raw = 41.515059
-b_raw = 46.401132
-r = 40.366139
-i_adj = 69.690722
-p_adj = 41.515059
-b_adj = 46.401132
+i_raw = 68.240888
+p_raw = 37.701475
+b_raw = 40.235059
+r = 31.405385
+i_adj = 68.240888
+p_adj = 37.701475
+b_adj = 40.235059
 
 [models.groups]
-A_B = 78.217010
-A_I = 76.228664
-A_P = 59.593339
-A_R = 86.658440
 BUILD = 37.642126
 CRE = 79.376410
 GEN = 40.936503
@@ -1036,22 +822,6 @@ PLAN = 29.658076
 
 [models.metrics]
 AALiveCodeBench = 59.723234
-AI_code = 69.708645
-AI_complexity = 62.437741
-AI_context_awareness = 21.113313
-AI_correctness = 92.500000
-AI_edge_cases = 92.500000
-AI_efficiency = 92.340922
-AI_hallucination_resistance = 92.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 58.742198
-AI_plan_coherence = 16.974951
-AI_recovery = 92.500000
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 56.875759
-AI_task_completion = 83.718682
-AI_tool_selection = 59.354383
 ARC_AGI_2 = 3.651745
 ArtificialAnalysisCoding = 23.375706
 ArtificialAnalysisIntelligence = 13.833076
@@ -1102,19 +872,15 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 77.085027
-p_raw = 64.419171
-b_raw = 54.824823
-r = 52.551623
-i_adj = 77.085027
-p_adj = 64.419171
-b_adj = 54.824823
+i_raw = 81.658322
+p_raw = 66.595231
+b_raw = 55.099501
+r = 52.339974
+i_adj = 81.658322
+p_adj = 66.595231
+b_adj = 55.099501
 
 [models.groups]
-A_B = 50.000000
-A_I = 50.000000
-A_P = 50.000000
-A_R = 50.000000
 BUILD = 51.175583
 CRE = 85.856295
 GEN = 69.753314
@@ -1163,7 +929,7 @@ TerminalBenchHard = 54.460094
 
 [models.missing]
 metrics = []
-groups_shrunk = ["A_B", "A_I", "A_P", "A_R"]
+groups_shrunk = []
 
 [[models]]
 canonical_id = "google/gemini-3-pro"
@@ -1171,22 +937,18 @@ display_name = "gemini-3-pro"
 vendor = "google"
 thinking_effort = "default"
 aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-grounding", "gemini-3-pro-high", "gemini-3-pro-low", "gemini-3-pro-medium", "gemini-3-pro-preview", "google/gemini-3-pro"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 87.265862
-p_raw = 72.222432
-b_raw = 67.043688
-r = 64.007904
-i_adj = 87.265862
-p_adj = 72.222432
-b_adj = 67.043688
+i_raw = 88.749180
+p_raw = 74.471483
+b_raw = 64.323108
+r = 58.942058
+i_adj = 88.749180
+p_adj = 74.471483
+b_adj = 64.323108
 
 [models.groups]
-A_B = 83.196483
-A_I = 80.857252
-A_P = 61.286281
-A_R = 93.127577
 BUILD = 64.399992
 CRE = 96.486080
 GEN = 79.265966
@@ -1198,22 +960,6 @@ PLAN = 74.289280
 
 [models.metrics]
 AALiveCodeBench = 100.000000
-AI_code = 73.186641
-AI_complexity = 64.632637
-AI_context_awareness = 16.015662
-AI_correctness = 100.000000
-AI_edge_cases = 100.000000
-AI_efficiency = 99.812849
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 60.284939
-AI_plan_coherence = 11.147001
-AI_recovery = 100.000000
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 58.089128
-AI_task_completion = 89.669038
-AI_tool_selection = 61.005156
 ARC_AGI_2 = 42.227705
 ArtificialAnalysisCoding = 74.576271
 ArtificialAnalysisIntelligence = 67.156105
@@ -1264,19 +1010,15 @@ aliases = ["gemini 3.1 pro", "gemini pro 3.1", "gemini-3-1-pro", "gemini-3-1-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 94.706845
-p_raw = 87.915687
-b_raw = 74.924300
-r = 84.422118
-i_adj = 94.706845
-p_adj = 87.915687
-b_adj = 74.924300
+i_raw = 98.172295
+p_raw = 93.141568
+b_raw = 74.217418
+r = 84.028048
+i_adj = 98.172295
+p_adj = 93.141568
+b_adj = 74.217418
 
 [models.groups]
-A_B = 78.217010
-A_I = 76.228664
-A_P = 59.593339
-A_R = 86.658440
 BUILD = 72.263550
 CRE = 99.114807
 GEN = 99.765371
@@ -1287,22 +1029,6 @@ OPS_review = 82.279102
 PLAN = 90.877330
 
 [models.metrics]
-AI_code = 69.708645
-AI_complexity = 62.437741
-AI_context_awareness = 21.113313
-AI_correctness = 92.500000
-AI_edge_cases = 92.500000
-AI_efficiency = 92.340922
-AI_hallucination_resistance = 92.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 58.742198
-AI_plan_coherence = 16.974951
-AI_recovery = 92.500000
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 56.875759
-AI_task_completion = 83.718682
-AI_tool_selection = 59.354383
 ARC_AGI_2 = 100.000000
 ArtificialAnalysisCoding = 100.000000
 ArtificialAnalysisIntelligence = 100.000000
@@ -1353,19 +1079,15 @@ aliases = ["gemini 3.5 flash", "gemini flash 3.5", "gemini-3-5-flash", "gemini-3
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 88.597934
-p_raw = 81.235219
-b_raw = 68.670748
-r = 75.124620
-i_adj = 88.597934
-p_adj = 81.235219
-b_adj = 68.670748
+i_raw = 95.433575
+p_raw = 86.744601
+b_raw = 71.667181
+r = 79.371940
+i_adj = 95.433575
+p_adj = 86.744601
+b_adj = 71.667181
 
 [models.groups]
-A_B = 50.000000
-A_I = 50.000000
-A_P = 50.000000
-A_R = 50.000000
 BUILD = 68.778799
 CRE = 100.000000
 GEN = 86.712830
@@ -1414,7 +1136,7 @@ TerminalBenchHard = 61.502347
 
 [models.missing]
 metrics = []
-groups_shrunk = ["A_B", "A_I", "A_P", "A_R"]
+groups_shrunk = []
 
 [[models]]
 canonical_id = "meta/muse-spark"
@@ -1425,19 +1147,15 @@ aliases = ["Meta Muse Spark", "meta/muse-spark", "muse spark", "muse-spark"]
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro"]
 
 [models.scores]
-i_raw = 82.241456
-p_raw = 77.157394
-b_raw = 73.158644
-r = 78.629407
-i_adj = 82.241456
-p_adj = 77.157394
-b_adj = 73.158644
+i_raw = 87.917720
+p_raw = 81.914477
+b_raw = 77.103137
+r = 83.634384
+i_adj = 87.917720
+p_adj = 81.914477
+b_adj = 77.103137
 
 [models.groups]
-A_B = 50.000000
-A_I = 50.000000
-A_P = 50.000000
-A_R = 50.000000
 BUILD = 75.726222
 CRE = 92.831864
 GEN = 77.861553
@@ -1488,7 +1206,7 @@ TerminalBenchHard = 75.586854
 
 [models.missing]
 metrics = []
-groups_shrunk = ["A_B", "A_I", "A_P", "A_R"]
+groups_shrunk = []
 
 [[models]]
 canonical_id = "minimax/minimax-m2.5"
@@ -1499,19 +1217,15 @@ aliases = ["MiniMax M2.5", "MiniMax-M2.5", "minimax 2.5", "minimax m2.5", "minim
 sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 25.215040
-p_raw = 49.534901
-b_raw = 53.636726
-r = 62.429992
-i_adj = 25.215040
-p_adj = 49.534901
-b_adj = 53.636726
+i_raw = 16.278974
+p_raw = 47.631353
+b_raw = 52.914116
+r = 61.464454
+i_adj = 16.278974
+p_adj = 47.631353
+b_adj = 52.914116
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 49.079804
 CRE = 2.684187
 GEN = 25.639617
@@ -1522,22 +1236,6 @@ OPS_review = 87.388028
 PLAN = 56.292795
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 5.216778
 ArtificialAnalysisCoding = 42.443503
 ArtificialAnalysisIntelligence = 42.040185
@@ -1583,19 +1281,15 @@ aliases = ["MiniMax M2.7", "MiniMax-M2.7", "minimax 2.7", "minimax m2.7", "minim
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 44.560612
-p_raw = 61.137874
-b_raw = 61.033486
-r = 68.149606
-i_adj = 44.560612
-p_adj = 61.137874
-b_adj = 61.033486
+i_raw = 39.475886
+p_raw = 61.543318
+b_raw = 61.809048
+r = 68.344771
+i_adj = 39.475886
+p_adj = 61.543318
+b_adj = 61.809048
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 59.116123
 CRE = 28.937535
 GEN = 50.159715
@@ -1606,22 +1300,6 @@ OPS_review = 84.012080
 PLAN = 65.601529
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 11.934262
 ArtificialAnalysisCoding = 58.333333
 ArtificialAnalysisIntelligence = 71.792890
@@ -1664,22 +1342,18 @@ display_name = "kimi-k2-0905"
 vendor = "moonshot"
 thinking_effort = "default"
 aliases = ["kimi k2 0905", "kimi k2 turbo", "kimi-k2-0905", "kimi-k2-0905-preview", "kimi-k2-turbo", "kimi-k2-turbo-preview", "moonshot/kimi-k2-0905", "moonshotai/kimi-k2-0905"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides"]
+sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 15.695080
-p_raw = 21.874697
-b_raw = 45.405770
-r = 45.052508
-i_adj = 15.695080
-p_adj = 21.874697
-b_adj = 45.405770
+i_raw = 14.773006
+p_raw = 19.966456
+b_raw = 49.007995
+r = 47.930633
+i_adj = 14.773006
+p_adj = 19.966456
+b_adj = 49.007995
 
 [models.groups]
-A_B = 24.460536
-A_I = 18.768139
-A_P = 29.115619
-A_R = 28.223817
 BUILD = 50.285967
 CRE = 15.784141
 GEN = 6.294664
@@ -1691,23 +1365,6 @@ PLAN = 23.126912
 
 [models.metrics]
 AALiveCodeBench = 0.000000
-AI_canary_health = 89.300000
-AI_code = 28.904836
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 0.000000
-AI_edge_cases = 0.000000
-AI_efficiency = 2.080667
-AI_hallucination_resistance = 66.666667
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 78.888889
-AI_plan_coherence = 0.000000
-AI_recovery = 0.000000
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 0.000000
-AI_task_completion = 75.160438
-AI_tool_selection = 72.679887
 ArtificialAnalysisCoding = 1.836158
 ArtificialAnalysisIntelligence = 0.000000
 ArtificialAnalysisMath = 12.411348
@@ -1751,19 +1408,15 @@ aliases = ["kimi 2.5", "kimi k2.5", "kimi-k2-5", "kimi-k2-5-non-reasoning", "kim
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 55.192324
-p_raw = 59.781602
-b_raw = 54.717847
-r = 65.178363
-i_adj = 55.192324
-p_adj = 59.781602
-b_adj = 54.717847
+i_raw = 52.229240
+p_raw = 59.966456
+b_raw = 54.292678
+r = 64.834905
+i_adj = 52.229240
+p_adj = 59.966456
+b_adj = 54.292678
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 50.812101
 CRE = 49.129561
 GEN = 52.208522
@@ -1774,22 +1427,6 @@ OPS_review = 81.489729
 PLAN = 61.784660
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 15.015862
 ArtificialAnalysisCoding = 50.211864
 ArtificialAnalysisIntelligence = 60.973725
@@ -1832,22 +1469,18 @@ display_name = "kimi-k2.6"
 vendor = "moonshot"
 thinking_effort = "default"
 aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "kimi-latest", "moonshot/kimi-k2.6", "moonshotai/kimi-k2.6"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides"]
+sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 72.322877
-p_raw = 72.893097
-b_raw = 68.221331
-r = 75.090355
-i_adj = 72.322877
-p_adj = 72.893097
-b_adj = 68.221331
+i_raw = 79.147670
+p_raw = 82.551526
+b_raw = 77.436083
+r = 83.308846
+i_adj = 79.147670
+p_adj = 82.551526
+b_adj = 77.436083
 
 [models.groups]
-A_B = 55.150669
-A_I = 73.423262
-A_P = 57.908051
-A_R = 68.484685
 BUILD = 76.093374
 CRE = 78.081851
 GEN = 80.601946
@@ -1858,23 +1491,6 @@ OPS_review = 83.664055
 PLAN = 83.427994
 
 [models.metrics]
-AI_canary_health = 0.000000
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 73.241253
-AI_hallucination_resistance = 0.000000
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 77.777778
-AI_plan_coherence = 13.333333
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 82.107768
-AI_task_completion = 62.633698
-AI_tool_selection = 56.937424
 ArtificialAnalysisCoding = 76.694915
 ArtificialAnalysisIntelligence = 88.408037
 ArtificialAnalysisReasoning = 86.980260
@@ -1913,22 +1529,18 @@ display_name = "gpt-5.2"
 vendor = "openai"
 thinking_effort = "default"
 aliases = ["gpt 5.2", "gpt-5-2", "gpt-5-2-high", "gpt-5-2-low", "gpt-5-2-medium", "gpt-5-2-non-reasoning", "gpt-5.2", "gpt-5.2-search", "gpt-5.2-search-non-reasoning", "openai/gpt-5.2"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.004052
-p_raw = 55.859373
-b_raw = 58.880728
-r = 53.965663
-i_adj = 63.004052
-p_adj = 55.859373
-b_adj = 58.880728
+i_raw = 61.490986
+p_raw = 54.254201
+b_raw = 59.328792
+r = 50.006812
+i_adj = 61.490986
+p_adj = 54.254201
+b_adj = 59.328792
 
 [models.groups]
-A_B = 56.444537
-A_I = 71.865212
-A_P = 64.446323
-A_R = 75.168835
 BUILD = 59.961293
 CRE = 64.497999
 GEN = 56.338317
@@ -1940,22 +1552,6 @@ PLAN = 52.016421
 
 [models.metrics]
 AALiveCodeBench = 93.590677
-AI_code = 14.691407
-AI_complexity = 6.016852
-AI_context_awareness = 13.947406
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 77.413810
-AI_hallucination_resistance = 54.654797
-AI_memory_retention = 0.000000
-AI_parameter_accuracy = 93.958284
-AI_plan_coherence = 20.968458
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 65.511726
-AI_task_completion = 100.000000
-AI_tool_selection = 66.039758
 ARC_AGI_2 = 0.000000
 ArtificialAnalysisCoding = 66.454802
 ArtificialAnalysisIntelligence = 60.200927
@@ -2002,22 +1598,18 @@ display_name = "gpt-5.3-codex"
 vendor = "openai"
 thinking_effort = "default"
 aliases = ["gpt 5.3 codex", "gpt codex 5.3", "gpt-5-3-codex", "gpt-5.3-codex", "gpt-5.3-codex (codex-harness)", "gpt-5.3-codex-high", "gpt-codex-5-3", "gpt-codex-5.3", "gpt-codex-5.3-high", "openai/gpt-5.3-codex"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_test_writing", "swerebench", "terminal_bench"]
+sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 67.320157
-p_raw = 56.377284
-b_raw = 71.357661
-r = 71.736551
-i_adj = 67.320157
-p_adj = 56.377284
-b_adj = 71.357661
+i_raw = 66.730146
+p_raw = 55.752692
+b_raw = 73.822653
+r = 69.926367
+i_adj = 66.730146
+p_adj = 55.752692
+b_adj = 73.822653
 
 [models.groups]
-A_B = 59.061197
-A_I = 71.358757
-A_P = 59.539197
-A_R = 82.935778
 BUILD = 77.038268
 CRE = 72.330046
 GEN = 57.615952
@@ -2028,22 +1620,6 @@ OPS_review = 63.345497
 PLAN = 53.881450
 
 [models.metrics]
-AI_code = 5.215788
-AI_complexity = 6.016852
-AI_context_awareness = 15.280224
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 72.955716
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 15.641757
-AI_parameter_accuracy = 93.490785
-AI_plan_coherence = 3.377253
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 75.569933
-AI_task_completion = 62.979359
-AI_tool_selection = 70.738676
 ARC_AGI_2 = 72.527846
 BlendedCost = 74.907603
 ContextWindow = 83.455906
@@ -2078,22 +1654,18 @@ display_name = "gpt-5.4"
 vendor = "openai"
 thinking_effort = "default"
 aliases = ["gpt 5.4", "gpt-5-4", "gpt-5-4-high", "gpt-5-4-low", "gpt-5-4-medium", "gpt-5-4-non-reasoning", "gpt-5.4", "gpt-5.4-high", "gpt-5.4-high (codex-harness)", "gpt-5.4-medium (codex-harness)", "gpt-5.4-search", "openai/gpt-5.4"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 70.067340
-p_raw = 59.501806
-b_raw = 76.236319
-r = 63.898870
-i_adj = 70.067340
-p_adj = 59.501806
-b_adj = 76.236319
+i_raw = 69.761949
+p_raw = 58.873403
+b_raw = 78.790156
+r = 60.101263
+i_adj = 69.761949
+p_adj = 58.873403
+b_adj = 78.790156
 
 [models.groups]
-A_B = 63.697823
-A_I = 72.536351
-A_P = 62.776122
-A_R = 84.830902
 BUILD = 82.322362
 CRE = 76.270643
 GEN = 58.959943
@@ -2104,22 +1676,6 @@ OPS_review = 67.154177
 PLAN = 58.337982
 
 [models.metrics]
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 7.675928
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 77.241159
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 18.754711
-AI_parameter_accuracy = 88.672350
-AI_plan_coherence = 11.724835
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 75.569933
-AI_task_completion = 77.689480
-AI_tool_selection = 85.044009
 ARC_AGI_2 = 76.503349
 BlendedCost = 73.270884
 ContextWindow = 100.000000
@@ -2155,22 +1711,18 @@ display_name = "gpt-5.5"
 vendor = "openai"
 thinking_effort = "default"
 aliases = ["gpt 5.5", "gpt-5-5", "gpt-5-5-high", "gpt-5-5-low", "gpt-5-5-medium", "gpt-5-5-non-reasoning", "gpt-5.5", "gpt-5.5 (codex-harness)", "gpt-5.5-high (codex-harness)", "gpt-5.5-search", "gpt-5.5-xhigh (codex-harness)", "openai/gpt-5.5", "openai:gpt-5.5"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "terminal_bench"]
 
 [models.scores]
-i_raw = 85.341149
-p_raw = 86.185044
-b_raw = 83.959510
-r = 77.960176
-i_adj = 85.341149
-p_adj = 86.185044
-b_adj = 83.959510
+i_raw = 87.296311
+p_raw = 89.748314
+b_raw = 87.075058
+r = 76.606791
+i_adj = 87.296311
+p_adj = 89.748314
+b_adj = 87.075058
 
 [models.groups]
-A_B = 67.487588
-A_I = 75.196529
-A_P = 67.396440
-A_R = 85.484685
 BUILD = 88.248245
 CRE = 84.701865
 GEN = 95.289100
@@ -2181,22 +1733,6 @@ OPS_review = 75.287741
 PLAN = 88.393224
 
 [models.metrics]
-AI_code = 24.167027
-AI_complexity = 6.016852
-AI_context_awareness = 0.000000
-AI_correctness = 95.316687
-AI_edge_cases = 69.815792
-AI_efficiency = 77.452746
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 100.000000
-AI_parameter_accuracy = 32.102599
-AI_plan_coherence = 27.696818
-AI_recovery = 97.911941
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 82.107768
-AI_task_completion = 71.852309
-AI_tool_selection = 84.264897
 ARC_AGI_2 = 97.652450
 ArtificialAnalysisCoding = 100.000000
 ArtificialAnalysisIntelligence = 99.227202
@@ -2246,19 +1782,15 @@ aliases = ["Qwen3.6-Plus", "alibaba/qwen3.6-plus", "qwen 3.6 plus", "qwen/qwen3.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 64.773122
-p_raw = 69.108423
-b_raw = 68.295566
-r = 75.434532
-i_adj = 64.773122
-p_adj = 69.108423
-b_adj = 68.295566
+i_raw = 63.535570
+p_raw = 71.023578
+b_raw = 70.435686
+r = 76.951826
+i_adj = 63.535570
+p_adj = 71.023578
+b_adj = 70.435686
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 68.094632
 CRE = 62.895820
 GEN = 59.186625
@@ -2269,22 +1801,6 @@ OPS_review = 89.751401
 PLAN = 76.358153
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 11.934262
 ArtificialAnalysisCoding = 61.864407
 ArtificialAnalysisIntelligence = 73.338485
@@ -2334,19 +1850,15 @@ aliases = ["Qwen3.7 Max", "Qwen3.7-Max", "alibaba/qwen3.7-max", "qwen 3.7 max", 
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 86.203159
-p_raw = 82.066699
-b_raw = 74.337284
-r = 81.450250
-i_adj = 86.203159
-p_adj = 82.066699
-b_adj = 74.337284
+i_raw = 89.213630
+p_raw = 86.608247
+b_raw = 77.744440
+r = 84.219159
+i_adj = 89.213630
+p_adj = 86.608247
+b_adj = 77.744440
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 76.236430
 CRE = 93.028269
 GEN = 83.882195
@@ -2357,22 +1869,6 @@ OPS_review = 83.542393
 PLAN = 89.076588
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 11.934262
 ArtificialAnalysisCoding = 87.288136
 ArtificialAnalysisIntelligence = 98.840804
@@ -2418,22 +1914,18 @@ display_name = "grok-4-latest"
 vendor = "xai"
 thinking_effort = "default"
 aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", "x-ai/grok-4", "xai/grok-4"]
-sources = ["aistupidlevel", "arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
+sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 68.807294
-p_raw = 49.722558
-b_raw = 51.527689
-r = 48.131588
-i_adj = 68.807294
-p_adj = 49.722558
-b_adj = 51.527689
+i_raw = 67.509348
+p_raw = 48.084395
+b_raw = 45.933002
+r = 40.886114
+i_adj = 67.509348
+p_adj = 48.084395
+b_adj = 45.933002
 
 [models.groups]
-A_B = 83.133170
-A_I = 76.193225
-A_P = 59.033763
-A_R = 88.214915
 BUILD = 45.963201
 CRE = 74.202555
 GEN = 54.215651
@@ -2445,22 +1937,6 @@ PLAN = 44.044022
 
 [models.metrics]
 AALiveCodeBench = 66.278223
-AI_code = 100.000000
-AI_complexity = 100.000000
-AI_context_awareness = 0.000000
-AI_correctness = 100.000000
-AI_edge_cases = 76.176869
-AI_efficiency = 0.000000
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 0.000000
-AI_plan_coherence = 100.000000
-AI_recovery = 100.000000
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 13.119221
-AI_task_completion = 0.000000
-AI_tool_selection = 0.000000
 ARC_AGI_2 = 20.888262
 ArtificialAnalysisCoding = 53.389831
 ArtificialAnalysisIntelligence = 40.494590
@@ -2501,19 +1977,15 @@ aliases = ["grok 4.3", "grok-4-3", "grok-4-3-high", "grok-4-3-low", "grok-4-3-no
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 59.474866
-p_raw = 70.262043
-b_raw = 59.757919
-r = 60.884422
-i_adj = 59.474866
-p_adj = 70.262043
-b_adj = 59.757919
+i_raw = 54.770049
+p_raw = 71.260409
+b_raw = 55.027552
+r = 55.340355
+i_adj = 54.770049
+p_adj = 71.260409
+b_adj = 55.027552
 
 [models.groups]
-A_B = 83.655538
-A_I = 83.664477
-A_P = 63.586591
-A_R = 89.192276
 BUILD = 50.603899
 CRE = 45.651950
 GEN = 65.593204
@@ -2525,22 +1997,6 @@ PLAN = 73.341801
 
 [models.metrics]
 AALiveCodeBench = 67.860524
-AI_code = 92.500000
-AI_complexity = 92.500000
-AI_context_awareness = 7.500000
-AI_correctness = 92.500000
-AI_edge_cases = 67.055967
-AI_efficiency = 7.500000
-AI_hallucination_resistance = 92.500000
-AI_memory_retention = 92.276519
-AI_parameter_accuracy = 7.500000
-AI_plan_coherence = 92.500000
-AI_recovery = 92.500000
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 92.500000
-AI_task_completion = 7.500000
-AI_tool_selection = 7.500000
 ARC_AGI_2 = 25.255023
 ArtificialAnalysisCoding = 55.155367
 ArtificialAnalysisIntelligence = 85.703246
@@ -2579,22 +2035,18 @@ display_name = "grok-code-fast-1"
 vendor = "xai"
 thinking_effort = "default"
 aliases = ["grok code fast 1", "grok-code-fast", "grok-code-fast-1", "x-ai/grok-code-fast-1", "xai/grok-code-fast-1"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "overrides", "swerebench", "terminal_bench"]
+sources = ["artificial_analysis", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 44.402776
-p_raw = 25.412192
-b_raw = 42.029902
-r = 36.205851
-i_adj = 44.402776
-p_adj = 25.412192
-b_adj = 42.029902
+i_raw = 34.680906
+p_raw = 17.308457
+b_raw = 32.186253
+r = 24.555162
+i_adj = 34.680906
+p_adj = 17.308457
+b_adj = 32.186253
 
 [models.groups]
-A_B = 96.707394
-A_I = 96.724380
-A_P = 68.621130
-A_R = 99.997060
 BUILD = 32.147429
 CRE = 41.759074
 GEN = 12.217599
@@ -2606,22 +2058,6 @@ PLAN = 16.181984
 
 [models.metrics]
 AALiveCodeBench = 7.283321
-AI_code = 99.970597
-AI_complexity = 94.505700
-AI_context_awareness = 0.000000
-AI_correctness = 100.000000
-AI_edge_cases = 100.000000
-AI_efficiency = 65.922620
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 0.000000
-AI_plan_coherence = 100.000000
-AI_recovery = 100.000000
-AI_refusal = 100.000000
-AI_spec = 100.000000
-AI_stability = 100.000000
-AI_task_completion = 0.000000
-AI_tool_selection = 0.000000
 ARC_AGI_2 = 25.255023
 ArtificialAnalysisCoding = 0.000000
 ArtificialAnalysisIntelligence = 0.000000
@@ -2662,19 +2098,15 @@ aliases = ["MiMo-V2.5", "XiaomiMiMo/MiMo-V2.5", "mimo v2.5", "mimo-v2-5", "mimo-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 57.143352
-p_raw = 60.606676
-b_raw = 60.147172
-r = 66.943354
-i_adj = 57.143352
-p_adj = 60.606676
-b_adj = 60.147172
+i_raw = 54.363630
+p_raw = 60.841683
+b_raw = 60.697761
+r = 66.795083
+i_adj = 54.363630
+p_adj = 60.841683
+b_adj = 60.697761
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 57.825862
 CRE = 50.082632
 GEN = 53.969604
@@ -2685,22 +2117,6 @@ OPS_review = 91.507096
 PLAN = 61.167857
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 20.263483
 ArtificialAnalysisCoding = 59.039548
 ArtificialAnalysisIntelligence = 69.474498
@@ -2746,19 +2162,15 @@ aliases = ["MiMo-V2.5-Pro", "XiaomiMiMo/MiMo-V2.5-Pro", "mimo v2.5 pro", "mimo-v
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 78.043260
-p_raw = 74.114866
-b_raw = 64.494162
-r = 73.452503
-i_adj = 78.043260
-p_adj = 74.114866
-b_adj = 64.494162
+i_raw = 79.399820
+p_raw = 77.034501
+b_raw = 65.903617
+r = 74.597289
+i_adj = 79.399820
+p_adj = 77.034501
+b_adj = 65.903617
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 62.774755
 CRE = 81.525088
 GEN = 73.810331
@@ -2769,22 +2181,6 @@ OPS_review = 87.904907
 PLAN = 77.769908
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 20.263483
 ArtificialAnalysisCoding = 71.045198
 ArtificialAnalysisIntelligence = 88.021638
@@ -2827,22 +2223,18 @@ display_name = "glm-4.6"
 vendor = "zai"
 thinking_effort = "default"
 aliases = ["GLM-4.6 (T=1)", "glm 4.6", "glm-4-6", "glm-4.6", "glm-4.6-t-1", "glm-4p6", "z-ai/glm-4.6", "zai/glm-4.6"]
-sources = ["aistupidlevel", "artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
+sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 55.929175
-p_raw = 32.277682
-b_raw = 33.345994
-r = 36.362050
-i_adj = 55.929175
-p_adj = 32.277682
-b_adj = 33.345994
+i_raw = 55.695734
+p_raw = 28.830315
+b_raw = 28.512641
+r = 31.714856
+i_adj = 55.695734
+p_adj = 28.830315
+b_adj = 28.512641
 
 [models.groups]
-A_B = 55.989483
-A_I = 55.000000
-A_P = 46.984225
-A_R = 58.500000
 BUILD = 24.054631
 CRE = 64.969975
 GEN = 30.391234
@@ -2854,13 +2246,6 @@ PLAN = 19.742144
 
 [models.metrics]
 AALiveCodeBench = 21.121631
-AI_context_awareness = 0.000000
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 0.000000
-AI_plan_coherence = 100.000000
-AI_task_completion = 0.000000
-AI_tool_selection = 0.000000
 ArtificialAnalysisCoding = 14.548023
 ArtificialAnalysisIntelligence = 5.718702
 ArtificialAnalysisMath = 76.019504
@@ -2897,7 +2282,7 @@ TerminalBenchHard = 12.206573
 
 [models.missing]
 metrics = []
-groups_shrunk = ["A_B", "A_I", "A_P", "A_R", "LM_ARENA_REVIEW_PROXY"]
+groups_shrunk = ["LM_ARENA_REVIEW_PROXY"]
 
 [[models]]
 canonical_id = "z-ai/glm-4.7"
@@ -2905,22 +2290,18 @@ display_name = "glm-4.7"
 vendor = "zai"
 thinking_effort = "default"
 aliases = ["glm 4.7", "glm-4-7", "glm-4.7", "glm-4p7", "z-ai/glm-4.7", "zai/glm-4.7"]
-sources = ["aistupidlevel", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
+sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 25.323460
-p_raw = 50.370653
-b_raw = 51.666688
-r = 53.599479
-i_adj = 25.323460
-p_adj = 50.370653
-b_adj = 51.666688
+i_raw = 19.092169
+p_raw = 50.363563
+b_raw = 50.275983
+r = 52.186605
+i_adj = 19.092169
+p_adj = 50.363563
+b_adj = 50.275983
 
 [models.groups]
-A_B = 55.989483
-A_I = 55.000000
-A_P = 46.984225
-A_R = 58.500000
 BUILD = 46.389968
 CRE = 0.000000
 GEN = 40.374192
@@ -2932,13 +2313,6 @@ PLAN = 51.312132
 
 [models.metrics]
 AALiveCodeBench = 93.590677
-AI_context_awareness = 0.000000
-AI_hallucination_resistance = 100.000000
-AI_memory_retention = 99.737081
-AI_parameter_accuracy = 0.000000
-AI_plan_coherence = 100.000000
-AI_task_completion = 0.000000
-AI_tool_selection = 0.000000
 ArtificialAnalysisCoding = 38.559322
 ArtificialAnalysisIntelligence = 42.812983
 ArtificialAnalysisMath = 95.966312
@@ -2973,7 +2347,7 @@ TerminalBenchHard = 33.333333
 
 [models.missing]
 metrics = []
-groups_shrunk = ["A_B", "A_I", "A_P", "A_R", "LM_ARENA_REVIEW_PROXY"]
+groups_shrunk = ["LM_ARENA_REVIEW_PROXY"]
 
 [[models]]
 canonical_id = "z-ai/glm-5"
@@ -2984,19 +2358,15 @@ aliases = ["glm 5", "glm-5", "glm-5-20260211", "glm-5-non-reasoning", "glm-5-thi
 sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 66.306580
-p_raw = 60.662580
-b_raw = 61.620592
-r = 68.136318
-i_adj = 66.306580
-p_adj = 60.662580
-b_adj = 61.620592
+i_raw = 65.364126
+p_raw = 60.944868
+b_raw = 62.498596
+r = 68.321495
+i_adj = 65.364126
+p_adj = 60.944868
+b_adj = 62.498596
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 60.093888
 CRE = 68.803122
 GEN = 53.273991
@@ -3007,22 +2377,6 @@ OPS_review = 85.331376
 PLAN = 62.156939
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ARC_AGI_2 = 5.216778
 ArtificialAnalysisCoding = 40.324859
 ArtificialAnalysisIntelligence = 60.973725
@@ -3072,19 +2426,15 @@ aliases = ["glm 5.1", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "glm-5p1", 
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 81.328284
-p_raw = 73.248158
-b_raw = 71.576034
-r = 76.200564
-i_adj = 81.328284
-p_adj = 73.248158
-b_adj = 71.576034
+i_raw = 83.355171
+p_raw = 76.010630
+b_raw = 74.423727
+r = 77.978028
+i_adj = 83.355171
+p_adj = 76.010630
+b_adj = 74.423727
 
 [models.groups]
-A_B = 54.378068
-A_I = 69.909772
-A_P = 56.721843
-A_R = 65.711983
 BUILD = 73.203954
 CRE = 87.899357
 GEN = 74.468338
@@ -3095,22 +2445,6 @@ OPS_review = 83.259547
 PLAN = 75.584978
 
 [models.metrics]
-AI_code = 28.041973
-AI_complexity = 12.614324
-AI_context_awareness = 7.500000
-AI_correctness = 88.519184
-AI_edge_cases = 66.843423
-AI_efficiency = 69.755065
-AI_hallucination_resistance = 7.500000
-AI_memory_retention = 7.500000
-AI_parameter_accuracy = 73.611111
-AI_plan_coherence = 18.833333
-AI_recovery = 90.725150
-AI_refusal = 92.500000
-AI_spec = 92.500000
-AI_stability = 77.291602
-AI_task_completion = 60.738644
-AI_tool_selection = 55.896810
 ArtificialAnalysisCoding = 63.629944
 ArtificialAnalysisIntelligence = 78.748068
 ArtificialAnalysisReasoning = 61.360773

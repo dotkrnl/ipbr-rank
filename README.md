@@ -77,7 +77,6 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - OpenRouter API — model discovery, pricing, context windows
 - LM Arena — preference ratings across text, code, and hard prompts
 - Artificial Analysis — intelligence/coding/reasoning/math indices, plus tau2-bench, scicode, ifbench, terminalbench-hard, livecodebench, mmlu-pro, lcr, and gpqa+hle reasoning blend
-- AI Stupid Level — 17 capability axes across hourly + deep + tooling suites, plus a dedicated canary health signal used only as a fast degradation penalty (tooling-suite errorHandling dropped due to upstream measurement quirk — see `docs/sources.md` AISL entry)
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
@@ -97,7 +96,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 Each benchmark metric is **percentile-normalized** within the active model population (5th/95th boundaries, log-scaled for cost/speed/latency). Operational metrics (speed/cost/TTFT/context window) use a **tail-penalty** curve instead — top 80 % of the population maps into 70-100 (mild differentiation) and only the bottom 20 % drops sharply, because users perceive operational speed in tiers, not linearly.
 
 ### Synthesis Penalty
-Values that came in via sibling synthesis (e.g. GLM-5.1 borrowing from Kimi K2.6 on AISL) are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Synthesized metrics still contribute, just slightly more conservatively.
+Values that came in via sibling synthesis are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Synthesized metrics still contribute, just slightly more conservatively.
 
 Manual overrides from `data/score_overrides.toml` are also softened after
 normalization, but less aggressively: `final = score × 0.90 + 50 × 0.10`.
@@ -105,21 +104,20 @@ They are public, cited values, yet still hand-curated rather than directly
 ingested leaderboard rows.
 
 ### Group Aggregation
-Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, **OPS_review**, and **A_I / A_P / A_B / A_R** (AI Stupid Level perspectives across the 17 AISL capability axes). Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator blends smoothly from shrink-to-50 to trusting the present-weight mean across **60-80 %** group coverage; at **≥80 %** coverage, peripheral missing metrics no longer penalize otherwise well-covered models. AISL canary health is kept outside the groups and can only subtract a small penalty from role scores.
+Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, and **OPS_review**. Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator blends smoothly from shrink-to-50 to trusting the present-weight mean across **60-80 %** group coverage; at **≥80 %** coverage, peripheral missing metrics no longer penalize otherwise well-covered models.
 
 ### Final Scores
-Each role score is a weighted average of groups. AISL's role-shaped
-perspective (`A_*`) carries 0.15 in every formula — AISL is one
-correlated source family re-projected onto four role-shaped views,
-so it gets a modest slot rather than dominating any role. Role-specific
-public benchmark groups collectively carry 0.77. Operational metrics
-(speed, cost, context window) carry 0.08 — paired with the tail-penalty
-curve, this means "fast enough" models cluster within a 1-2 point
-spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.52×CRE + 0.25×GEN + 0.15×A_I + 0.08×OPS_long
-- **P_raw** = 0.46×PLAN + 0.31×GEN + 0.15×A_P + 0.08×OPS_precision
-- **B_raw** = 0.70×BUILD + 0.07×PLAN + 0.15×A_B + 0.08×OPS_precision
-- **R** = 0.15×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.32×PLAN + 0.15×A_R + 0.08×OPS_review
+Each role score is a weighted average of groups. AISL was removed from
+scoring after local reproduction showed its benchmark surface was not
+representative enough and was too noise-prone. Its former weight is
+redistributed into the remaining non-operational public benchmark groups.
+Operational metrics (speed, cost, context window) carry 0.08 — paired
+with the tail-penalty curve, this means "fast enough" models cluster
+within a 1-2 point spread but genuinely slow models lose 4-6 points:
+- **I_raw** = 0.62×CRE + 0.30×GEN + 0.08×OPS_long
+- **P_raw** = 0.55×PLAN + 0.37×GEN + 0.08×OPS_precision
+- **B_raw** = 0.84×BUILD + 0.08×PLAN + 0.08×OPS_precision
+- **R** = 0.18×LM_ARENA_REVIEW_PROXY + 0.36×BUILD + 0.38×PLAN + 0.08×OPS_review
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 
@@ -202,7 +200,6 @@ cache regardless of mtime.
 
 | source | TTL | rationale |
 |---|---|---|
-| aistupidlevel | 1h | hourly stupidity dashboard |
 | openrouter, lmarena, artificial_analysis | 24h | daily refresh |
 | livecodebench, gso | 2d | weekly-ish leaderboard refreshes |
 | swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |

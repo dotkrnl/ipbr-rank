@@ -1,77 +1,6 @@
 # Coefficients for ipbr-rank scoring.
 # This file is the authoritative source of truth; the CLI embeds it verbatim.
 
-# AI Stupid Level perspective composites — role-shaped views over AISL's
-# capability-axis surface. AISL ships three capability suites (hourly,
-# deep, tooling) which jointly cover 17 axes; canary health is registered
-# separately below and consumed only as a penalty signal.
-#
-# Each role pulls a tailored slice:
-#   * A_I (Idea): broad correctness + creative-flexibility axes
-#   * A_P (Planning): planCoherence + tooling suite axes (taskCompletion,
-#     contextAwareness, toolSelection) heavily weighted
-#   * A_B (Building): codeQuality, complexity, edgeCases, hallucination-
-#     resistance, plus the basic building axes
-#   * A_R (Reviewing): correctness + hallucination-resistance + spec
-#     adherence — the qualities that make a model a good code reviewer
-[ai_stupid_perspective_weights.A_I]
-# AI_refusal (safety axis) and AI_code removed — neither measures idea quality.
-# Freed weight redistributed across correctness, spec, stability, recovery,
-# complexity, edge_cases, and plan_coherence.
-AI_correctness = 0.18
-AI_spec = 0.18
-AI_efficiency = 0.08
-AI_stability = 0.16
-AI_recovery = 0.12
-AI_complexity = 0.10
-AI_edge_cases = 0.08
-AI_plan_coherence = 0.10
-
-[ai_stupid_perspective_weights.A_P]
-AI_correctness = 0.14
-AI_spec = 0.14
-AI_efficiency = 0.04
-AI_stability = 0.08
-AI_recovery = 0.06
-AI_plan_coherence = 0.18
-AI_memory_retention = 0.06
-AI_context_awareness = 0.10
-AI_task_completion = 0.10
-AI_tool_selection = 0.06
-AI_parameter_accuracy = 0.04
-
-[ai_stupid_perspective_weights.A_B]
-AI_correctness = 0.14
-AI_spec = 0.12
-AI_code = 0.22
-AI_efficiency = 0.08
-AI_stability = 0.08
-AI_recovery = 0.06
-AI_complexity = 0.10
-AI_edge_cases = 0.08
-AI_hallucination_resistance = 0.08
-AI_memory_retention = 0.04
-
-[ai_stupid_perspective_weights.A_R]
-# Tuned to lean into review-specific axes while keeping the most thinly-
-# covered ones (hallucination_resistance, error_handling — many AISL rows
-# don't carry these) under the 0.30 missing-weight ceiling so models avoid
-# the sparse-coverage side of the 0.60-0.80 shrink transition.
-#
-# hallucinationResistance up to 0.17 (the biggest review-specific signal —
-# does the model invent issues that aren't there?), edgeCases up to 0.13
-# (review = catching what implementers missed), recovery up to 0.10 (a
-# good reviewer recovers from a wrong initial read). correctness/spec
-# down because they saturate across frontier models and stop
-# differentiating; stability down for the same reason.
-AI_correctness = 0.18
-AI_spec = 0.14
-AI_code = 0.10
-AI_stability = 0.10
-AI_recovery = 0.18         # absorbed AI_error_handling's 0.08 (see DROPPED_AXIS_KEYS comment in aistupidlevel.rs)
-AI_hallucination_resistance = 0.17
-AI_edge_cases = 0.13
-
 # Group weights only reference metrics we actually source. Earlier revisions
 # carried NoveltyBench, EQWritingOrLongform, LiveBenchGeneral, NaturalPlan,
 # PlanBench, TravelPlanner, JudgeBench, CodeJudgeBench, RewardBench2,
@@ -139,17 +68,13 @@ CopilotArenaOrLMArenaCode = 0.02
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
 [synthesis]
-# Default 0.50 is too tight for gemini-2.5-pro, which needs the full
-# aistupidlevel source (~17 metrics) from its 3-pro sibling. Raising to
-# 0.55 keeps the safeguard while allowing large but justified gap-fills.
+# Default 0.50 is too tight for the current number of sparse frontier
+# fill-pairs across Scale, Sonar, SWE-Rebench, and operational sources.
+# 0.55 keeps the safeguard while allowing justified temporary gap-fills.
 per_model_cap = 0.55
-# With 32 ranked models and ~24 AISL endpoints, the natural ceiling on
-# AISL synthesis is just above 0.50; current-generation orphan targets
-# (kimi-k2.5, minimax-m2.5) need AISL fills to avoid the 50-baseline
-# default on four perspective groups, and those fills must run after
-# the existing 18 AISL-targeting pairs in synthesis_aliases.toml. 0.55
-# accommodates the orphan fills without letting synthesis dominate any
-# single source.
+# Several public sources have narrower coverage than the ranked model
+# set. 0.55 prevents a single source from dominating through synthesis
+# while still letting the curated frontier-model fills run.
 per_source_cap = 0.55
 
 [composite_metrics.SWEComposite]
@@ -212,15 +137,11 @@ TTFT = 0.25
 BlendedCost = 0.20
 ContextWindow = 0.25
 
-# Role weights — capability scores. AISL perspective groups (A_I/A_P/A_B/A_R)
-# carry weight 0.15: AISL is one source family with correlated noise re-
-# projected onto four role-shaped views, so it gets a deliberately modest
-# slot rather than dominating any role. Role-specific public-leaderboard
-# groups carry 0.77 between them. The 0.15 weight keeps AISL meaningfully
-# above the OPS floor (0.08) — the unique signals it carries
-# (hallucination resistance, plan coherence, canary health) aren't
-# measured by any other source — without letting one correlated source
-# family overshadow direct public-benchmark evidence.
+# Role weights — capability scores. AISL was removed from active scoring
+# after local reproduction showed the benchmark surface was not
+# representative enough of real model quality and was too noise-prone.
+# Its former 0.15 slot is redistributed into the non-operational public
+# benchmark groups for each role; OPS remains fixed at 0.08.
 #
 # Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
 # the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
@@ -234,36 +155,24 @@ ContextWindow = 0.25
 # vs "very fast." Use the OPS_* groups directly for a pure speed/cost
 # view of the population.
 [final_score_weights.I_raw]
-CRE = 0.52
-GEN = 0.25
-A_I = 0.15
+CRE = 0.62
+GEN = 0.30
 OPS_long = 0.08
 
 [final_score_weights.P_raw]
-# A_P remains a meaningful behavioral signal, but PLAN/GEN now carry enough
-# weight that direct public benchmark evidence can override AISL outliers
-# or synthesized AISL gaps.
-PLAN = 0.46
-GEN = 0.31
-A_P = 0.15
+PLAN = 0.55
+GEN = 0.37
 OPS_precision = 0.08
 
 [final_score_weights.B_raw]
-BUILD = 0.70
-PLAN = 0.07
-A_B = 0.15
+BUILD = 0.84
+PLAN = 0.08
 OPS_precision = 0.08
 
-# R-axis: A_R remains a meaningful review-specific signal, while the renamed
-# LM Arena proxy is deliberately lighter than the old JUDGE slot. BUILD/PLAN
-# absorb most of the freed weight so reviewing stays anchored in code-reading
-# capability and task decomposition rather than a search/document
-# preference proxy.
 [final_score_weights.R]
-LM_ARENA_REVIEW_PROXY = 0.15
-BUILD = 0.30
-PLAN = 0.32
-A_R = 0.15
+LM_ARENA_REVIEW_PROXY = 0.18
+BUILD = 0.36
+PLAN = 0.38
 OPS_review = 0.08
 
 [aggregation]
@@ -282,12 +191,6 @@ synthesis = 0.15
 # Manual overrides are public but hand-curated. Making them slightly
 # softer than a directly ingested leaderboard row (10% pull toward 50).
 override_reported = 0.10
-# Canary health deadband: health above this threshold attracts no penalty;
-# below it the penalty ramps linearly to `canary_max_role_penalty` at
-# `canary_health_floor`.
-canary_health_deadband = 60.0
-canary_health_floor = 20.0
-canary_max_role_penalty = 6.0
 
 [metrics.LMArenaText]
 higher_better = true
@@ -565,113 +468,3 @@ higher_better = true
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
 transform = "tail_penalty"
-
-[metrics.AI_correctness]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P", "A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_spec]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P", "A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_code]
-higher_better = true
-log_scale = false
-groups = ["A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_efficiency]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P", "A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_stability]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P", "A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_refusal]
-higher_better = true
-log_scale = false
-groups = []
-transform = "percentile"
-
-[metrics.AI_recovery]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P", "A_B", "A_R"]
-transform = "percentile"
-
-# Newly-wired AISL axes from the deep + tooling suites — surfaced via the
-# merged-history parser. Each axis flows into the role perspectives that
-# care about it (defined in [ai_stupid_perspective_weights.*]).
-[metrics.AI_complexity]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_B"]
-transform = "percentile"
-
-[metrics.AI_edge_cases]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_plan_coherence]
-higher_better = true
-log_scale = false
-groups = ["A_I", "A_P"]
-transform = "percentile"
-
-[metrics.AI_memory_retention]
-higher_better = true
-log_scale = false
-groups = ["A_P", "A_B"]
-transform = "percentile"
-
-# Lower hallucination rate is better — the AISL fetcher inverts the raw
-# rate so this metric scores higher_better.
-[metrics.AI_hallucination_resistance]
-higher_better = true
-log_scale = false
-groups = ["A_B", "A_R"]
-transform = "percentile"
-
-[metrics.AI_context_awareness]
-higher_better = true
-log_scale = false
-groups = ["A_P"]
-transform = "percentile"
-
-[metrics.AI_task_completion]
-higher_better = true
-log_scale = false
-groups = ["A_P"]
-transform = "percentile"
-
-[metrics.AI_tool_selection]
-higher_better = true
-log_scale = false
-groups = ["A_P"]
-transform = "percentile"
-
-[metrics.AI_parameter_accuracy]
-higher_better = true
-log_scale = false
-groups = ["A_P"]
-transform = "percentile"
-
-# AISL canary is a fast drift-detection signal, not a full capability
-# benchmark. It intentionally has no group membership; score.rs consumes
-# it as a penalty-only health adjustment after role aggregation.
-[metrics.AI_canary_health]
-higher_better = true
-log_scale = false
-groups = []
-transform = "as_score"
