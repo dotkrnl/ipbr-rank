@@ -60,12 +60,6 @@ value = 79.4
 note = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
 
 [[entries]]
-canonical_id = "anthropic/claude-opus-4.1"
-metric = "SWEBenchVerified"
-value = 74.5
-note = "Anthropic Claude Opus 4.1 launch announcement, anthropic.com/news/claude-opus-4-1, 2025-08-05 (only variant Anthropic published in the launch post)"
-
-[[entries]]
 canonical_id = "moonshotai/kimi-k2-0905"
 metric = "SWEBenchVerified"
 value = 69.2

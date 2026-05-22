@@ -34,8 +34,7 @@ from = "anthropic/claude-sonnet-4.5"
 # capability tier — typical gap is 1-3 points on most coding evals.
 # When one is missing from a leaderboard the other is a defensible
 # stand-in. The pair is symmetrical so each can borrow from the other
-# for coverage gaps (AISL covers Kimi but not GLM; some leaderboards
-# cover GLM but not Kimi).
+# for coverage gaps where public leaderboards cover only one of them.
 [[pair]]
 target = "z-ai/glm-5.1"
 from = "moonshotai/kimi-k2.6"
@@ -57,17 +56,16 @@ from = "anthropic/claude-opus-4.6"
 target = "google/gemini-2.5-flash"
 from = "google/gemini-3-flash"
 
-# Gemini 2.5-pro has no AISL coverage at all, which collapses all four
-# A_* perspective groups to the 50 baseline. The 3-pro donor is same-tier
-# and adjacent-generation; it fills the AISL gap plus mcp_atlas, overrides,
-# sonar, and swebench_pro. This pushes synthesis ratio to ~51%, so the
-# per_model_cap in coefficients.toml is raised slightly to accommodate it.
+# Gemini 2.5-pro has no SWE Atlas coverage and is sparse on several
+# current public coding sources. The 3-pro donor is same-tier and
+# adjacent-generation; it fills mcp_atlas, overrides, sonar, and
+# swebench_pro while leaving direct 2.5-pro values untouched.
 [[pair]]
 target = "google/gemini-2.5-pro"
 from = "google/gemini-3-pro"
 
 # ------------------------------------------------------------------
-# Synthesis for newly-added AISL models (2026-04-27)
+# Synthesis for models added in the 2026-04-27 source refresh
 # ------------------------------------------------------------------
 
 # Claude Sonnet 4.6 is the current-generation Sonnet; 4.5 is its direct
@@ -116,17 +114,6 @@ from = "openai/gpt-5.4"
 target = "xai/grok-code-fast-1"
 from = "xai/grok-4-latest"
 
-# Opus 4.1 (Aug 2025) is the oldest Opus we track and predates Anthropic's
-# adoption of SWE-bench Multilingual / SWE-Bench Pro / GDPval-AA in their
-# system cards. Opus 4.5 is the closest forward-sibling with full coverage.
-# Synthesis is mildly optimistic since 4.5 > 4.1 in capability, but better
-# than leaving 4.1 anchored at the 50-baseline on three of five SWE/agentic
-# metrics — currently 4.1 ranks below Sonnet 4, which contradicts release
-# ordering.
-[[pair]]
-target = "anthropic/claude-opus-4.1"
-from = "anthropic/claude-opus-4.5"
-
 # Kimi K2-0905 (Sept 2025) lacks SWE-Bench Pro; Moonshot only began reporting
 # Pro with K2.6. Use K2.6 as the donor for that single-metric gap. Mildly
 # optimistic but defensible within the same family.
@@ -142,30 +129,25 @@ from = "moonshotai/kimi-k2.6"
 # (V4-Flash 284B/13B-active vs K2.6 mid-size MoE), and editorial consensus
 # puts them in the same capability band. The per-field filter in
 # `ingest_synthesized_row` ensures Kimi only writes to fields V4-Flash
-# is missing — V4-Flash's real `deepseek-chat` AISL data is preserved
-# untouched, and Kimi only fills SWERebench (and any other Flash-missing
-# fields where Kimi has data). Remove this pair once V4-Flash appears on
-# swerebench.com directly.
+# is missing — V4-Flash's real rows are preserved untouched, and Kimi
+# only fills SWERebench plus other Flash-missing fields where Kimi has
+# data. Remove this pair once V4-Flash appears on swerebench.com directly.
 [[pair]]
 target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
 
 # DeepSeek V4-Pro (1.6T/49B-active, released 2026-04-24) borrows from its
-# same-generation sibling V4-Flash for AISL — AISL only tracks DeepSeek
-# under the `deepseek-chat` API endpoint (aliased to V4-Flash), so V4-Pro
-# has no direct AISL row of its own. Same vendor, same generation, same
-# training pipeline; only parameter scale differs. Pro > Flash on
-# capability so the AISL synthesis is mildly *conservative* — V4-Pro's
-# borrowed scores understate real strength rather than overstate.
+# same-generation sibling V4-Flash for public leaderboard gaps. Same
+# vendor, same generation, same training pipeline; only parameter scale
+# differs. Pro > Flash on capability, so same-family synthesis should be
+# mildly conservative where V4-Pro lacks a direct row.
 #
 # Pair ordering: this pair is declared *after* V4-Flash ← Kimi K2.6 above
 # so V4-Pro's donor pool from V4-Flash includes both the real
-# `deepseek-chat` row and the Kimi-derived synth row that fills V4-Flash's
+# V4-Flash rows and the Kimi-derived synth row that fills V4-Flash's
 # SWERebench. At V4-Pro's `ingest_synthesized_row`, first-write-wins
-# means the chat-derived clone wins on AISL fields (it was pushed before
-# the Kimi pair ran), while the Kimi-derived clone fills SWERebench (no
-# competing chat row). Net effect: V4-Pro's AISL = deepseek-chat data
-# (consistent with V4-Flash); V4-Pro's SWERebench = Kimi-tier proxy.
+# preserves V4-Flash's own rows while the Kimi-derived clone fills
+# SWERebench where no competing V4-Flash row exists.
 [[pair]]
 target = "deepseek/deepseek-v4-pro"
 from = "deepseek/deepseek-v4-flash"
@@ -174,16 +156,12 @@ from = "deepseek/deepseek-v4-flash"
 # Synthesis for newly-added models (2026-05-07, post AA fixture refresh)
 # ------------------------------------------------------------------
 
-# Kimi K2.5 ← Kimi K2.6. Same vendor, direct successor. K2.5 has no
-# AISL row (Moonshot's API endpoints moved to K2.6), so all four A_*
-# perspective groups default to the 50 baseline without this pair. K2.6
-# tracks `kimi-latest` / `kimi-k2-turbo-preview` on AISL, which fills
-# K2.5's AISL gap. Per Moonshot's own K2.6 launch numbers K2.6 ≥ K2.5
-# (SWE-Verified 80.2 vs 76.8, SWE-Pro 58.6 vs 50.7), so the synthesis is
-# mildly optimistic; the 15% synthesis penalty + 30% per-source cap keep
-# the bias bounded. Pair declared first so chained downstream pairs
-# (mimo-v2.5-pro ← K2.5 and minimax-m2.5 ← K2.5) see the AISL-filled
-# K2.5 row.
+# Kimi K2.5 ← Kimi K2.6. Same vendor, direct successor. Per Moonshot's
+# own K2.6 launch numbers K2.6 ≥ K2.5 (SWE-Verified 80.2 vs 76.8,
+# SWE-Pro 58.6 vs 50.7), so the synthesis is mildly optimistic; the 15%
+# synthesis penalty + 30% per-source cap keep the bias bounded. Pair
+# declared first so chained downstream pairs (mimo-v2.5-pro ← K2.5 and
+# minimax-m2.5 ← K2.5) see the K2.6-derived K2.5 rows.
 [[pair]]
 target = "moonshotai/kimi-k2.5"
 from = "moonshotai/kimi-k2.6"
@@ -205,14 +183,12 @@ target = "xiaomi/mimo-v2.5"
 from = "xiaomi/mimo-v2.5-pro"
 
 # MiniMax M2.5 ← Kimi K2.5. Cross-vendor tier proxy. M2.5 is an orphan
-# target — first MiniMax model in the rank, no same-vendor sibling, and
-# AA tracks no Tencent/MiniMax models on AISL. Kimi K2.5 was selected
-# over GLM-5 because K2.5 carries direct mcp_atlas data (`kimi-k2p5` on
-# Scale Labs) which fills M2.5's biggest single capability gap; the
-# already-declared K2.5 ← K2.6 pair above also bubbles AISL through the
-# chain. AA Coding scores cluster closely (m2.5 37.4 vs k2.5 39.5) so
-# the tier proxy is defensible. Pair must follow K2.5's own pair so the
-# K2.6-derived AISL rows are visible.
+# target — first MiniMax model in the rank, with no same-vendor sibling.
+# Kimi K2.5 was selected over GLM-5 because K2.5 carries direct mcp_atlas
+# data (`kimi-k2p5` on Scale Labs) which fills M2.5's biggest single
+# capability gap. AA Coding scores cluster closely (m2.5 37.4 vs k2.5
+# 39.5) so the tier proxy is defensible. Pair must follow K2.5's own
+# pair so the K2.6-derived K2.5 rows are visible.
 [[pair]]
 target = "minimax/minimax-m2.5"
 from = "moonshotai/kimi-k2.5"
@@ -223,7 +199,7 @@ from = "moonshotai/kimi-k2.5"
 # gap — they emphasized SWE-Pro / Multilingual / TB instead). Synthesis
 # from M2.5 is conservative since M2.7 ≥ M2.5 in capability per launch
 # numbers (SWE-Pro 56.22 vs 55.4). Pair must follow M2.5's pair so M2.7
-# inherits the K2.5-derived AISL/MCP-Atlas fills indirectly.
+# inherits the K2.5-derived MCP-Atlas fills indirectly.
 [[pair]]
 target = "minimax/minimax-m2.7"
 from = "minimax/minimax-m2.5"
