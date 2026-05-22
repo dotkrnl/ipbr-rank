@@ -26,6 +26,8 @@ const KNOWN_SUFFIXES: &[&str] = &[
     "xhigh",
 ];
 
+const DISTINCT_VARIANT_TOKENS: &[&str] = &["codex", "instant", "lite", "mini", "minimal", "nano"];
+
 fn html_unescape(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let bytes = s.as_bytes();
@@ -257,6 +259,9 @@ impl<'a> AliasIndex<'a> {
                 if alias_ck.is_empty() {
                     continue;
                 }
+                if alias_ck != input_ck && !fuzzy_variant_match_allowed(input, cand) {
+                    continue;
+                }
                 let score = if alias_ck == input_ck {
                     100 + vendor_bonus
                 } else if alias_ck.contains(&input_ck) || input_ck.contains(&alias_ck) {
@@ -271,6 +276,58 @@ impl<'a> AliasIndex<'a> {
         }
         best.map(|(_, idx)| idx)
     }
+}
+
+fn fuzzy_variant_match_allowed(input: &str, candidate: &str) -> bool {
+    let input_ck = compact_key(input);
+    let candidate_ck = compact_key(candidate);
+    if input_ck.is_empty() || candidate_ck.is_empty() {
+        return false;
+    }
+
+    if !input_ck.contains(&candidate_ck) {
+        if candidate_extends_input_with_digit(&input_ck, &candidate_ck) {
+            // `minimax-m2` is not `minimax-m2.5`, and `gemini-pro` is not a
+            // dated/generation-specific Gemini Pro entry.
+            return false;
+        }
+        return candidate_ck.contains(&input_ck);
+    }
+
+    // Vision-style suffixes such as `glm-4.6v` are distinct models, not
+    // harmless effort or endpoint tags for `glm-4.6`.
+    if input_ck == format!("{candidate_ck}v") {
+        return false;
+    }
+
+    let input_norm = normalize_name(input);
+    let candidate_norm = normalize_name(candidate);
+    for token in DISTINCT_VARIANT_TOKENS {
+        if has_token(&input_norm, token) && !has_token(&candidate_norm, token) {
+            return false;
+        }
+    }
+    true
+}
+
+fn has_token(normalized: &str, token: &str) -> bool {
+    normalized.split_whitespace().any(|part| part == token)
+}
+
+fn candidate_extends_input_with_digit(input_ck: &str, candidate_ck: &str) -> bool {
+    let mut offset = 0;
+    while let Some(found) = candidate_ck[offset..].find(input_ck) {
+        let end = offset + found + input_ck.len();
+        if candidate_ck[end..]
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_digit())
+        {
+            return true;
+        }
+        offset = end;
+    }
+    false
 }
 
 pub fn match_record(
@@ -448,12 +505,40 @@ mod tests {
     #[test]
     fn match_record_falls_through_to_fuzzy_when_stripped_form_misses() {
         let recs = vec![rec(
-            "example/mystery-preview-x",
+            "example/mystery-preview",
             Vendor::Other("example".into()),
-            &["acme mystery preview x"],
+            &["mystery preview"],
         )];
         let idx = AliasIndex::build(&recs);
-        assert_eq!(idx.match_record("mystery-preview", None), Some(0));
+        assert_eq!(idx.match_record("acme-mystery-preview", None), Some(0));
+    }
+
+    #[test]
+    fn match_record_rejects_distinct_variants_without_explicit_alias() {
+        let recs = vec![
+            rec("openai/gpt-5.4", Vendor::Openai, &["gpt-5.4"]),
+            rec("openai/gpt-5.2", Vendor::Openai, &["gpt-5.2"]),
+            rec(
+                "minimax/minimax-m2.5",
+                Vendor::Other("minimax".into()),
+                &["minimax-m2.5"],
+            ),
+            rec("z-ai/glm-4.6", Vendor::Zai, &["glm-4.6"]),
+        ];
+        let idx = AliasIndex::build(&recs);
+        for (input, vendor) in [
+            ("gpt-5.4-mini-high", Some("openai")),
+            ("gpt-5.4-nano-high", Some("openai")),
+            ("gpt-5.4-instant", Some("openai")),
+            ("gpt-5.2-codex", Some("openai")),
+            ("minimax-m2", Some("minimax")),
+            ("glm-4.6v", Some("zai")),
+        ] {
+            assert!(
+                idx.match_record(input, vendor).is_none(),
+                "{input} should require an explicit alias"
+            );
+        }
     }
 
     #[test]
