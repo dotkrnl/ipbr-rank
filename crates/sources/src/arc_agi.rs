@@ -18,7 +18,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow, normalize_name};
 use serde_json::Value;
 
 use crate::{
@@ -115,8 +115,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         }
     }
 
-    let mut rows: Vec<RawRow> = Vec::new();
-    let mut seen: BTreeMap<String, ()> = BTreeMap::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<(String, ArcVariantPreference), (f64, RawRow)> =
+        BTreeMap::new();
     for e in evals {
         if e.get("datasetId").and_then(Value::as_str) != Some(PRIMARY_DATASET) {
             continue;
@@ -133,21 +135,31 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             continue;
         }
         let display_name = display.get(model_id).copied().unwrap_or(model_id);
-        if seen.contains_key(display_name) {
-            continue;
-        }
-        seen.insert(display_name.to_string(), ());
         let mut fields = BTreeMap::new();
         fields.insert("ARC_AGI_2".to_string(), Value::from(score_raw * 100.0));
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: display_name.to_string(),
             vendor_hint: None,
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(&alias_records, &alias_index, display_name, None);
+        let preference = ArcVariantPreference::from_text(display_name);
+        let score = score_raw * 100.0;
+        match best_by_model.get_mut(&(key.clone(), preference)) {
+            Some((best_score, best_row)) if score > *best_score => {
+                *best_score = score;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert((key, preference), (score, row));
+            }
+        }
     }
 
+    let rows: Vec<RawRow> = best_by_model.into_values().map(|(_, row)| row).collect();
     if rows.is_empty() {
         return Err(SourceError::Parse(
             "ARC-AGI evaluations yielded no v2 semi-private rows".into(),
@@ -156,11 +168,54 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     Ok(rows)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ArcVariantPreference {
+    Default,
+    Medium,
+    Thinking,
+    Low,
+    High,
+    Max,
+    Other,
+}
+
+impl ArcVariantPreference {
+    fn from_text(text: &str) -> Self {
+        let normalized = normalize_name(text);
+        let contains = |phrase: &str| contains_phrase(&normalized, phrase);
+        let has_effort_marker = ["medium", "low", "high", "thinking", "max", "xhigh"]
+            .iter()
+            .any(|phrase| contains(phrase));
+        if !has_effort_marker {
+            Self::Default
+        } else if contains("medium") {
+            Self::Medium
+        } else if contains("low") {
+            Self::Low
+        } else if contains("thinking") {
+            Self::Thinking
+        } else if contains("high") {
+            Self::High
+        } else if contains("max") || contains("xhigh") {
+            Self::Max
+        } else {
+            Self::Other
+        }
+    }
+}
+
+fn contains_phrase(normalized_text: &str, phrase: &str) -> bool {
+    let haystack = format!(" {normalized_text} ");
+    let needle = format!(" {phrase} ");
+    haystack.contains(&needle)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use ipbr_core::alias::AliasIndex;
     use ipbr_core::required_aliases::load_embedded;
+    use serde_json::json;
 
     #[test]
     fn parses_arc_fixture_and_resolves_flagships() {
@@ -181,6 +236,27 @@ mod tests {
         assert!(
             hits >= 3,
             "expected ≥3 ARC rows to resolve to canonical IDs, got {hits}"
+        );
+    }
+
+    #[test]
+    fn keeps_best_same_effort_budget_per_canonical_model() {
+        let payload = json!({
+            "models": [
+                {"id": "a", "displayName": "Claude Sonnet 4 (Thinking 1K)"},
+                {"id": "b", "displayName": "Claude Sonnet 4 (Thinking 16K)"}
+            ],
+            "evaluations": [
+                {"modelId": "a", "datasetId": PRIMARY_DATASET, "score": 0.01},
+                {"modelId": "b", "datasetId": PRIMARY_DATASET, "score": 0.05}
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "Claude Sonnet 4 (Thinking 16K)");
+        assert_eq!(
+            rows[0].fields.get("ARC_AGI_2").and_then(Value::as_f64),
+            Some(5.0)
         );
     }
 }

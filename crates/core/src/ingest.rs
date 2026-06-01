@@ -120,6 +120,12 @@ fn ingest_real_row(
                     {
                         continue;
                     }
+                    if let Some(existing) = record.raw_metrics.get(&key)
+                        && !record.synthesized.contains_key(&key)
+                        && !should_replace_metric_value(&key, *existing, num)
+                    {
+                        continue;
+                    }
                     metric_choices.insert(choice_key, preference);
                     record.raw_metrics.insert(key.clone(), num);
                     record.synthesized.remove(&key);
@@ -271,6 +277,25 @@ fn contains_phrase(normalized_text: &str, phrase: &str) -> bool {
     let haystack = format!(" {normalized_text} ");
     let needle = format!(" {phrase} ");
     haystack.contains(&needle)
+}
+
+fn should_replace_metric_value(metric: &str, existing: f64, incoming: f64) -> bool {
+    match metric {
+        "BlendedCost" | "PromptPricePerMillion" | "CompletionPricePerMillion" | "TTFT" => {
+            incoming.is_finite()
+                && incoming > 0.0
+                && (!existing.is_finite() || existing <= 0.0 || incoming < existing)
+        }
+        "ContextWindow"
+        | "MaxCompletionTokens"
+        | "SupportedParametersCount"
+        | "SupportsTools"
+        | "SupportsStructuredOutputs"
+        | "SupportsReasoning" => {
+            incoming.is_finite() && (!existing.is_finite() || incoming > existing)
+        }
+        _ => true,
+    }
 }
 
 fn ingest_synthesized_row(
@@ -516,6 +541,84 @@ mod tests {
 
         assert_eq!(stats.matched, 2);
         assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&80.0));
+    }
+
+    #[test]
+    fn real_rows_keep_lower_blended_cost_across_source_ingests() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "openai/gpt-5.5".to_string(),
+                "gpt-5.5".to_string(),
+                Vendor::Openai,
+            );
+            r.aliases.insert("gpt-5.5".to_string());
+            r
+        }];
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "openrouter",
+                "gpt-5.5",
+                &[("BlendedCost", json!(1.25))],
+            )],
+        );
+        assert_eq!(stats.matched, 1);
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "artificial_analysis",
+                "gpt-5.5",
+                &[("BlendedCost", json!(1.75))],
+            )],
+        );
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&1.25));
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "artificial_analysis",
+                "gpt-5.5",
+                &[("BlendedCost", json!(0.95))],
+            )],
+        );
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&0.95));
+    }
+
+    #[test]
+    fn real_rows_replace_synthesized_operational_values() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "openai/gpt-5.5".to_string(),
+                "gpt-5.5".to_string(),
+                Vendor::Openai,
+            );
+            r.aliases.insert("gpt-5.5".to_string());
+            r
+        }];
+        let mut synthesized = raw("openrouter", "gpt-5.5", &[("BlendedCost", json!(0.50))]);
+        synthesized.synthesized_from = Some("openai/gpt-5.4".to_string());
+
+        let stats = ingest_rows(&mut records, vec![synthesized]);
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&0.50));
+        assert!(records[0].synthesized.contains_key("BlendedCost"));
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "artificial_analysis",
+                "gpt-5.5",
+                &[("BlendedCost", json!(0.90))],
+            )],
+        );
+
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&0.90));
+        assert!(!records[0].synthesized.contains_key("BlendedCost"));
     }
 
     #[test]

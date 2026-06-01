@@ -49,7 +49,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use serde_json::{Map, Value, json};
 
 use crate::{
@@ -242,7 +242,9 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         .and_then(Value::as_array)
         .ok_or_else(|| SourceError::Parse("Sonar payload missing models[]".into()))?;
 
-    let mut rows = Vec::with_capacity(models.len());
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<String, (f64, RawRow)> = BTreeMap::new();
     for item in models {
         let Some(name) = item.get("name").and_then(Value::as_str) else {
             continue;
@@ -290,21 +292,52 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             .and_then(Value::as_str)
             .map(|s| s.trim().to_ascii_lowercase())
             .filter(|s| !s.is_empty());
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: trimmed.to_string(),
-            vendor_hint,
+            vendor_hint: vendor_hint.clone(),
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(
+            &alias_records,
+            &alias_index,
+            trimmed,
+            vendor_hint.as_deref(),
+        );
+        let score = sonar_row_priority(&row);
+        match best_by_model.get_mut(&key) {
+            Some((best_score, best_row)) if score > *best_score => {
+                *best_score = score;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert(key, (score, row));
+            }
+        }
     }
 
+    let rows: Vec<RawRow> = best_by_model.into_values().map(|(_, row)| row).collect();
     if rows.is_empty() {
         return Err(SourceError::Parse(
             "Sonar payload yielded no model rows".into(),
         ));
     }
     Ok(rows)
+}
+
+fn sonar_row_priority(row: &RawRow) -> f64 {
+    row.fields
+        .get("SonarFunctionalSkill")
+        .and_then(number_like)
+        .or_else(|| {
+            row.fields
+                .get("SonarIssueDensity")
+                .and_then(number_like)
+                .map(|value| -value)
+        })
+        .unwrap_or(f64::NEG_INFINITY)
 }
 
 fn number_like(value: &Value) -> Option<f64> {
@@ -420,6 +453,35 @@ mod tests {
                 .get("SonarVulnerabilityDensity")
                 .and_then(Value::as_f64),
             Some(0.1)
+        );
+    }
+
+    #[test]
+    fn keeps_best_functional_skill_per_canonical_model() {
+        let payload = json!({
+            "models": [
+                {
+                    "name": "Claude Sonnet 4.5",
+                    "organization": "Anthropic",
+                    "functionalSkill": 76.29,
+                    "issueDensity": 20.09
+                },
+                {
+                    "name": "Claude Sonnet 4.5 Thinking",
+                    "organization": "Anthropic",
+                    "functionalSkill": 80.53,
+                    "issueDensity": 19.25
+                }
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SonarFunctionalSkill")
+                .and_then(Value::as_f64),
+            Some(80.53)
         );
     }
 }

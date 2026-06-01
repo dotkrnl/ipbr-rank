@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use serde_json::Value;
 
 use crate::{
@@ -72,7 +72,9 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         .and_then(Value::as_array)
         .ok_or_else(|| SourceError::Parse("OpenRouter payload missing data[]".into()))?;
 
-    let mut rows = Vec::with_capacity(data.len());
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut rows_by_model: BTreeMap<String, RawRow> = BTreeMap::new();
     for item in data {
         let model_id = item
             .get("id")
@@ -152,15 +154,58 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             );
         }
 
-        rows.push(RawRow {
+        let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_id, vendor_hint);
+        let output_name = key
+            .strip_prefix("canonical:")
+            .unwrap_or(model_id)
+            .to_string();
+        let row = rows_by_model.entry(key).or_insert_with(|| RawRow {
             source_id: SOURCE_ID.to_string(),
-            model_name: model_id.to_string(),
+            model_name: output_name,
             vendor_hint: vendor_hint.map(ToOwned::to_owned),
-            fields,
+            fields: BTreeMap::new(),
             synthesized_from: None,
         });
+        for (key, value) in fields {
+            merge_openrouter_field(&mut row.fields, key, value);
+        }
     }
-    Ok(rows)
+    Ok(rows_by_model.into_values().collect())
+}
+
+fn merge_openrouter_field(fields: &mut BTreeMap<String, Value>, key: String, value: Value) {
+    let Some(existing) = fields.get(&key) else {
+        fields.insert(key, value);
+        return;
+    };
+    let replace = match key.as_str() {
+        "BlendedCost" | "PromptPricePerMillion" | "CompletionPricePerMillion" => {
+            numeric_value(&value)
+                .zip(numeric_value(existing))
+                .is_some_and(|(new, old)| {
+                    new.is_finite() && old.is_finite() && new > 0.0 && new < old
+                })
+        }
+        "ContextWindow"
+        | "MaxCompletionTokens"
+        | "SupportedParametersCount"
+        | "SupportsTools"
+        | "SupportsStructuredOutputs"
+        | "SupportsReasoning" => numeric_value(&value)
+            .zip(numeric_value(existing))
+            .is_some_and(|(new, old)| new.is_finite() && old.is_finite() && new > old),
+        _ => false,
+    };
+    if replace {
+        fields.insert(key, value);
+    }
+}
+
+fn numeric_value(value: &Value) -> Option<f64> {
+    match value {
+        Value::Bool(value) => Some(if *value { 1.0 } else { 0.0 }),
+        _ => number_like(value),
+    }
 }
 
 fn number_like(value: &Value) -> Option<f64> {
@@ -220,5 +265,39 @@ mod tests {
             row.fields.get("SupportsReasoning"),
             Some(&Value::Bool(true))
         );
+    }
+
+    #[test]
+    fn merges_duplicate_canonical_operational_fields_by_direction() {
+        let payload = json!({
+            "data": [
+                {
+                    "id": "deepseek/deepseek-chat",
+                    "context_length": 163840,
+                    "pricing": { "prompt": "0.00000025", "completion": "0.0000011" }
+                },
+                {
+                    "id": "deepseek/deepseek-v4-flash",
+                    "context_length": 1048576,
+                    "pricing": { "prompt": "0.00000007", "completion": "0.00000035" }
+                }
+            ]
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        let row = rows
+            .iter()
+            .find(|row| row.model_name == "deepseek/deepseek-v4-flash")
+            .expect("canonical row should be present");
+        assert_eq!(
+            row.fields.get("ContextWindow").and_then(number_like),
+            Some(1048576.0)
+        );
+        let blended = row
+            .fields
+            .get("BlendedCost")
+            .and_then(number_like)
+            .expect("blended cost should be present");
+        assert!((blended - 0.14).abs() < 1e-9, "blended={blended}");
     }
 }

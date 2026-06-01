@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use scraper::{ElementRef, Html, Selector};
 
 use crate::{
@@ -84,7 +84,9 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
         .expect("valid selector");
     let td_sel = Selector::parse(r#"td[data-slot="table-cell"]"#).expect("valid selector");
 
-    let mut rows = Vec::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<String, (f64, RawRow)> = BTreeMap::new();
     for tr in document.select(&row_sel) {
         let cells: Vec<String> = tr.select(&td_sel).map(cell_text).collect();
         if cells.len() < 8 {
@@ -102,15 +104,26 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
 
         let mut fields = BTreeMap::new();
         fields.insert("TerminalBench".to_string(), serde_json::Value::from(score));
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: model_name.to_string(),
             vendor_hint: None,
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
+        match best_by_model.get_mut(&key) {
+            Some((best_score, best_row)) if score > *best_score => {
+                *best_score = score;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert(key, (score, row));
+            }
+        }
     }
-    Ok(rows)
+    Ok(best_by_model.into_values().map(|(_, row)| row).collect())
 }
 
 fn parse_accuracy(s: &str) -> Option<f64> {
@@ -160,5 +173,34 @@ mod tests {
         assert_eq!(parse_accuracy("82.0 % ± 2.2"), Some(82.0));
         assert_eq!(parse_accuracy("78.4%"), Some(78.4));
         assert_eq!(parse_accuracy("n/a"), None);
+    }
+
+    #[test]
+    fn keeps_best_score_per_canonical_model() {
+        let html = r#"
+        <table data-slot="table"><tbody>
+          <tr data-slot="table-row">
+            <td data-slot="table-cell"></td><td data-slot="table-cell">1</td>
+            <td data-slot="table-cell">agent-a</td><td data-slot="table-cell">GPT-5.3-Codex</td>
+            <td data-slot="table-cell"></td><td data-slot="table-cell"></td>
+            <td data-slot="table-cell"></td><td data-slot="table-cell">78.4% ± 2.0</td>
+          </tr>
+          <tr data-slot="table-row">
+            <td data-slot="table-cell"></td><td data-slot="table-cell">2</td>
+            <td data-slot="table-cell">agent-b</td><td data-slot="table-cell">GPT-5.3-Codex</td>
+            <td data-slot="table-cell"></td><td data-slot="table-cell"></td>
+            <td data-slot="table-cell"></td><td data-slot="table-cell">64.7% ± 2.0</td>
+          </tr>
+        </tbody></table>
+        "#;
+        let rows = parse_rows(html).expect("fixture should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("TerminalBench")
+                .and_then(serde_json::Value::as_f64),
+            Some(78.4)
+        );
     }
 }

@@ -26,7 +26,10 @@ const KNOWN_SUFFIXES: &[&str] = &[
     "xhigh",
 ];
 
-const DISTINCT_VARIANT_TOKENS: &[&str] = &["codex", "instant", "lite", "mini", "minimal", "nano"];
+const DISTINCT_VARIANT_TOKENS: &[&str] = &[
+    "beta", "chat", "codex", "fast", "flash", "image", "instant", "lite", "mini", "minimal",
+    "nano", "preview", "pro", "turbo", "vision",
+];
 
 fn html_unescape(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
@@ -294,14 +297,20 @@ fn fuzzy_variant_match_allowed(input: &str, candidate: &str) -> bool {
         return candidate_ck.contains(&input_ck);
     }
 
-    // Vision-style suffixes such as `glm-4.6v` are distinct models, not
-    // harmless effort or endpoint tags for `glm-4.6`.
-    if input_ck == format!("{candidate_ck}v") {
+    // Vision-style suffixes such as `glm-4.6v`/`glm-4-6v-reasoning` are
+    // distinct models, not harmless effort or endpoint tags for `glm-4.6`.
+    if input_extends_candidate_with_char(&input_ck, &candidate_ck, 'v') {
+        return false;
+    }
+    if input_extends_candidate_with_digit(&input_ck, &candidate_ck) {
         return false;
     }
 
     let input_norm = normalize_name(input);
     let candidate_norm = normalize_name(candidate);
+    if has_attached_v_variant(&input_norm, &candidate_norm) {
+        return false;
+    }
     for token in DISTINCT_VARIANT_TOKENS {
         if has_token(&input_norm, token) && !has_token(&candidate_norm, token) {
             return false;
@@ -314,6 +323,18 @@ fn has_token(normalized: &str, token: &str) -> bool {
     normalized.split_whitespace().any(|part| part == token)
 }
 
+fn has_attached_v_variant(input: &str, candidate: &str) -> bool {
+    input
+        .split_whitespace()
+        .zip(candidate.split_whitespace())
+        .any(|(input_token, candidate_token)| {
+            input_token.len() == candidate_token.len() + 1
+                && input_token
+                    .strip_suffix('v')
+                    .is_some_and(|base| base == candidate_token)
+        })
+}
+
 fn candidate_extends_input_with_digit(input_ck: &str, candidate_ck: &str) -> bool {
     let mut offset = 0;
     while let Some(found) = candidate_ck[offset..].find(input_ck) {
@@ -323,6 +344,34 @@ fn candidate_extends_input_with_digit(input_ck: &str, candidate_ck: &str) -> boo
             .next()
             .is_some_and(|c| c.is_ascii_digit())
         {
+            return true;
+        }
+        offset = end;
+    }
+    false
+}
+
+fn input_extends_candidate_with_digit(input_ck: &str, candidate_ck: &str) -> bool {
+    let mut offset = 0;
+    while let Some(found) = input_ck[offset..].find(candidate_ck) {
+        let end = offset + found + candidate_ck.len();
+        if input_ck[end..]
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_digit())
+        {
+            return true;
+        }
+        offset = end;
+    }
+    false
+}
+
+fn input_extends_candidate_with_char(input_ck: &str, candidate_ck: &str, suffix: char) -> bool {
+    let mut offset = 0;
+    while let Some(found) = input_ck[offset..].find(candidate_ck) {
+        let end = offset + found + candidate_ck.len();
+        if input_ck[end..].starts_with(suffix) {
             return true;
         }
         offset = end;
@@ -527,12 +576,22 @@ mod tests {
         ];
         let idx = AliasIndex::build(&recs);
         for (input, vendor) in [
+            ("gpt-5.4-chat", Some("openai")),
+            ("gpt-5.4-pro-high", Some("openai")),
             ("gpt-5.4-mini-high", Some("openai")),
             ("gpt-5.4-nano-high", Some("openai")),
             ("gpt-5.4-instant", Some("openai")),
+            ("gpt-5.4-preview-2026-01-01", Some("openai")),
             ("gpt-5.2-codex", Some("openai")),
+            ("gpt-5.2-turbo", Some("openai")),
             ("minimax-m2", Some("minimax")),
+            ("grok-4.1", Some("xai")),
+            ("grok-4.20-beta1", Some("xai")),
+            ("glm-4.6-flash", Some("zai")),
+            ("glm-4.6-image", Some("zai")),
             ("glm-4.6v", Some("zai")),
+            ("glm-4-6v-reasoning", Some("zai")),
+            ("glm-4.6v-turbo", Some("zai")),
         ] {
             assert!(
                 idx.match_record(input, vendor).is_none(),
@@ -578,9 +637,16 @@ mod tests {
             })
             .collect();
 
+        let allowed_distinct_variant_drops =
+            BTreeSet::from([("openrouter".to_string(), "google/gemini-3-pro".to_string())]);
+        let dropped: Vec<_> = legacy
+            .difference(&current)
+            .filter(|pair| !allowed_distinct_variant_drops.contains(*pair))
+            .cloned()
+            .collect();
         assert!(
-            current.is_superset(&legacy),
-            "suffix stripping must not reroute or drop existing cache matches"
+            dropped.is_empty(),
+            "suffix stripping must not reroute or drop non-variant cache matches: {dropped:?}"
         );
         let legacy_exact = legacy_exact_pairs(&records, &rows);
         let current_exact: BTreeSet<(String, String)> = rows

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name, required_aliases};
 
 pub mod aistupidlevel;
 pub mod arc_agi;
@@ -211,6 +211,26 @@ pub(crate) fn read_cached_string(path: &Path) -> Result<String, SourceError> {
         return Err(SourceError::CacheMiss(path.display().to_string()));
     }
     Ok(std::fs::read_to_string(path)?)
+}
+
+pub(crate) fn embedded_alias_records() -> Vec<ModelRecord> {
+    required_aliases::load_embedded().unwrap_or_default()
+}
+
+pub(crate) fn alias_dedupe_key(
+    records: &[ModelRecord],
+    index: &AliasIndex<'_>,
+    model_name: &str,
+    vendor_hint: Option<&str>,
+) -> String {
+    if let Some(i) = index.match_record(model_name, vendor_hint) {
+        return format!("canonical:{}", records[i].canonical_id);
+    }
+    format!(
+        "raw:{}:{}",
+        vendor_hint.map(normalize_name).unwrap_or_default(),
+        normalize_name(model_name)
+    )
 }
 
 pub(crate) fn write_cache_json(

@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use serde_json::Value;
 
 use std::time::Duration;
@@ -122,6 +122,9 @@ fn extract_board(
             ))
         })?;
 
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<String, (f64, String)> = BTreeMap::new();
     for entry in results {
         let model_name = match entry.get("name").and_then(Value::as_str) {
             Some(value) if !value.trim().is_empty() => extract_model(value),
@@ -132,11 +135,25 @@ fn extract_board(
             _ => continue,
         };
 
+        let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
+        match best_by_model.get_mut(&key) {
+            Some((best_resolved, best_name)) if resolved > *best_resolved => {
+                *best_resolved = resolved;
+                *best_name = model_name.to_string();
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert(key, (resolved, model_name.to_string()));
+            }
+        }
+    }
+
+    for (_key, (resolved, model_name)) in best_by_model {
         let mut fields = BTreeMap::new();
         fields.insert(metric.to_string(), Value::from(resolved));
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
-            model_name: model_name.to_string(),
+            model_name,
             vendor_hint: None,
             fields,
             synthesized_from: None,
@@ -305,5 +322,25 @@ mod tests {
         assert_eq!(rows[0].model_name, "Claude Opus 4.7");
         assert_eq!(rows[1].model_name, "Claude 4 Sonnet");
         assert_eq!(rows[2].model_name, "bare-model");
+    }
+
+    #[test]
+    fn extract_board_keeps_best_canonical_submission() {
+        let payload = json!({
+            "leaderboards": [{
+                "name": "Verified",
+                "results": [
+                    {"name": "agent-a + Gemini 2.5 Pro", "resolved": 53.6},
+                    {"name": "agent-b + Gemini 2.5 Pro", "resolved": 75.2}
+                ]
+            }]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "Gemini 2.5 Pro");
+        assert_eq!(
+            rows[0].fields.get("SWEBenchVerified").and_then(number_like),
+            Some(75.2)
+        );
     }
 }

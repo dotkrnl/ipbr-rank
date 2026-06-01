@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow, normalize_name};
 use serde_json::Value;
 
 use crate::{
@@ -98,7 +98,9 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             .unwrap_or(std::cmp::Ordering::Equal)
     });
 
-    let mut rows = Vec::with_capacity(sorted.len());
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<(String, AaVariantPreference), (f64, RawRow)> = BTreeMap::new();
     for item in sorted {
         // AA's `id` is a UUID; use the human-readable `slug` (e.g.
         // "claude-opus-4-7") for alias matching, then fall back to `name`,
@@ -305,20 +307,111 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             ],
         )
         .or_else(|| blend_cost(prompt, completion))
+        .filter(|value| *value > 0.0)
         {
             fields.insert("BlendedCost".to_string(), Value::from(blended));
         }
 
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: model_name.to_string(),
             vendor_hint: vendor_hint.map(ToOwned::to_owned),
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(
+            &alias_records,
+            &alias_index,
+            &row.model_name,
+            row.vendor_hint.as_deref(),
+        );
+        let preference = AaVariantPreference::from_row(&row);
+        let priority = row
+            .fields
+            .get("ArtificialAnalysisIntelligence")
+            .and_then(number_like)
+            .unwrap_or(0.0);
+        match best_by_model.get_mut(&(key.clone(), preference)) {
+            Some((best_priority, best_row)) if priority > *best_priority => {
+                *best_priority = priority;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert((key, preference), (priority, row));
+            }
+        }
     }
 
-    Ok(rows)
+    Ok(best_by_model.into_values().map(|(_, row)| row).collect())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum AaVariantPreference {
+    Default,
+    Medium,
+    Thinking,
+    NonReasoning,
+    Low,
+    High,
+    Max,
+    Other,
+}
+
+impl AaVariantPreference {
+    fn from_row(row: &RawRow) -> Self {
+        let mut text = row.model_name.clone();
+        for value in row.fields.values() {
+            if let Some(s) = value.as_str() {
+                text.push(' ');
+                text.push_str(s);
+            }
+        }
+        Self::from_text(&text)
+    }
+
+    fn from_text(text: &str) -> Self {
+        let normalized = normalize_name(text);
+        let contains = |phrase: &str| contains_phrase(&normalized, phrase);
+        let has_effort_marker = [
+            "default",
+            "medium",
+            "non reasoning",
+            "low",
+            "high",
+            "thinking",
+            "reasoning",
+            "adaptive",
+            "max",
+            "xhigh",
+        ]
+        .iter()
+        .any(|phrase| contains(phrase));
+
+        if contains("default") || !has_effort_marker {
+            Self::Default
+        } else if contains("medium") {
+            Self::Medium
+        } else if contains("non reasoning") {
+            Self::NonReasoning
+        } else if contains("low") {
+            Self::Low
+        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
+            Self::Thinking
+        } else if contains("high") {
+            Self::High
+        } else if contains("max") || contains("xhigh") {
+            Self::Max
+        } else {
+            Self::Other
+        }
+    }
+}
+
+fn contains_phrase(normalized_text: &str, phrase: &str) -> bool {
+    let haystack = format!(" {normalized_text} ");
+    let needle = format!(" {phrase} ");
+    haystack.contains(&needle)
 }
 
 fn blend_cost(prompt: Option<f64>, completion: Option<f64>) -> Option<f64> {
@@ -477,5 +570,57 @@ mod tests {
             .await
             .expect_err("missing secret should error before any network call");
         assert!(matches!(err, crate::SourceError::MissingSecret(_)));
+    }
+
+    #[test]
+    fn skips_zero_blended_cost_sentinel() {
+        let payload = json!({
+            "data": [{
+                "slug": "glm-5-turbo",
+                "model_creator": {"slug": "zai"},
+                "pricing": {
+                    "price_1m_blended_3_to_1": 0.0,
+                    "price_1m_input_tokens": 0.0,
+                    "price_1m_output_tokens": 0.0
+                }
+            }]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert!(!rows[0].fields.contains_key("BlendedCost"));
+    }
+
+    #[test]
+    fn collapses_equal_effort_variants_by_intelligence() {
+        let payload = json!({
+            "data": [
+                {
+                    "slug": "gpt-5-2-medium",
+                    "model_creator": {"slug": "openai"},
+                    "evaluations": {
+                        "intelligence_index": 30.3,
+                        "coding_index": 46.7
+                    }
+                },
+                {
+                    "slug": "gpt-5.2-medium",
+                    "model_creator": {"slug": "openai"},
+                    "evaluations": {
+                        "intelligence_index": 34.6,
+                        "coding_index": 32.0
+                    }
+                }
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "gpt-5.2-medium");
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("ArtificialAnalysisIntelligence")
+                .and_then(number_like),
+            Some(34.6)
+        );
     }
 }

@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use serde_json::Value;
 
 use crate::{
@@ -83,7 +83,9 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
     let score_idx = find_column(header, "Overall Acc")?;
     let org_idx = header.iter().position(|name| name == "Organization");
 
-    let mut rows = Vec::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<String, (f64, RawRow)> = BTreeMap::new();
     for record in table.iter().skip(1) {
         let Some(model_name) = record.get(model_idx) else {
             continue;
@@ -104,14 +106,32 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
 
         let mut fields = BTreeMap::new();
         fields.insert("BFCL".to_string(), Value::from(score));
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: SOURCE_ID.to_string(),
-            model_name,
-            vendor_hint,
+            model_name: model_name.clone(),
+            vendor_hint: vendor_hint.clone(),
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(
+            &alias_records,
+            &alias_index,
+            &model_name,
+            vendor_hint.as_deref(),
+        );
+        match best_by_model.get_mut(&key) {
+            Some((best_score, best_row)) if score > *best_score => {
+                *best_score = score;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert(key, (score, row));
+            }
+        }
     }
+
+    let rows: Vec<RawRow> = best_by_model.into_values().map(|(_, row)| row).collect();
 
     if rows.is_empty() {
         return Err(SourceError::Parse("BFCL CSV yielded no model rows".into()));
@@ -237,5 +257,16 @@ mod tests {
         let rows = parse_csv("Model,Note\n\"a,b\",\"quoted \"\"value\"\"\"\n").unwrap();
         assert_eq!(rows[1][0], "a,b");
         assert_eq!(rows[1][1], "quoted \"value\"");
+    }
+
+    #[test]
+    fn keeps_best_mode_per_canonical_model() {
+        let csv = "Rank,Overall Acc,Model,Organization\n1,77.47%,Claude-Opus-4-5-20251101 (FC),Anthropic\n2,33.47%,Claude-Opus-4-5-20251101 (Prompt),Anthropic\n";
+        let rows = parse_rows(csv).expect("CSV should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0].fields.get("BFCL").and_then(Value::as_f64),
+            Some(77.47)
+        );
     }
 }

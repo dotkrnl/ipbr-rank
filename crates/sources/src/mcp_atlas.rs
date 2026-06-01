@@ -18,11 +18,11 @@
 //! If the field names change (`model` → `name`, `score` → `passRate`), the
 //! parser will need updating.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow};
 use serde_json::Value;
 
 use crate::{
@@ -111,8 +111,10 @@ pub(crate) fn parse_rows_with_model_map(
     const SCORE_ANCHOR: &str = r#"\"score\":"#;
     const WINDOW: usize = 600;
 
-    let mut rows: Vec<RawRow> = Vec::new();
-    let mut seen: BTreeMap<String, f64> = BTreeMap::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut best_by_model: BTreeMap<String, (f64, RawRow)> = BTreeMap::new();
+    let mut seen_raw: BTreeSet<String> = BTreeSet::new();
     let bytes = html.as_bytes();
     let mut cursor = 0usize;
 
@@ -167,25 +169,38 @@ pub(crate) fn parse_rows_with_model_map(
             continue;
         }
 
-        // The same model can appear multiple times in the streamed chunks
-        // (header card + table row). Keep the first occurrence to lock onto
-        // the headline value rather than chasing a sub-score.
-        if seen.contains_key(model_name) {
+        // The same raw model can appear multiple times in the streamed chunks
+        // (header card + table row). Keep the first raw occurrence to lock
+        // onto the headline value rather than chasing a sub-score. Then reduce
+        // canonical spelling/case variants by best headline score.
+        if seen_raw.contains(model_name) {
             continue;
         }
-        seen.insert(model_name.to_string(), score);
+        seen_raw.insert(model_name.to_string());
 
         let mut fields = BTreeMap::new();
         fields.insert(metric.to_string(), Value::from(score));
-        rows.push(RawRow {
+        let row = RawRow {
             source_id: source_id.to_string(),
             model_name: model_name.to_string(),
             vendor_hint: None,
             fields,
             synthesized_from: None,
-        });
+        };
+        let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
+        match best_by_model.get_mut(&key) {
+            Some((best_score, best_row)) if score > *best_score => {
+                *best_score = score;
+                *best_row = row;
+            }
+            Some(_) => {}
+            None => {
+                best_by_model.insert(key, (score, row));
+            }
+        }
     }
 
+    let rows: Vec<RawRow> = best_by_model.into_values().map(|(_, row)| row).collect();
     if rows.is_empty() {
         return Err(SourceError::Parse(format!(
             "{source_id} HTML yielded no model rows"
@@ -234,5 +249,20 @@ mod tests {
         assert_eq!(by["Gemini 3.1 Pro"], 78.2);
         assert_eq!(by["glm-5p1"], 75.6);
         assert!(!by.contains_key("Bad Entry"));
+    }
+
+    #[test]
+    fn keeps_best_canonical_spelling_variant() {
+        let html = r#"<html>self.__next_f.push([1,"{\"model\":\"Gpt-5.4-xHigh\",\"score\":44.36},{\"model\":\"Gpt-5.4-xhigh\",\"score\":40.0}"])</html>"#;
+        let rows =
+            parse_rows(html, "SWEAtlasTestWriting", "sweatlas_test_writing").expect("fixture");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SWEAtlasTestWriting")
+                .and_then(Value::as_f64),
+            Some(44.36)
+        );
     }
 }
