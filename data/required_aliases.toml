@@ -233,7 +233,7 @@ aliases = [
 vendor = "xai"
 aliases = [
     "grok-4-latest", "grok 4 latest", "grok-4", "grok 4",
-    "x-ai/grok-4", "xai/grok-4", "grok-4-0709",
+    "x-ai/grok-4", "xai/grok-4", "grok-4-0709", "grok-4-search",
 ]
 
 [models."xai/grok-4.3"]
