@@ -1865,7 +1865,7 @@ canonical_id = "xai/grok-4-latest"
 display_name = "grok-4-latest"
 vendor = "xai"
 thinking_effort = "default"
-aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", "x-ai/grok-4", "xai/grok-4"]
+aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", "grok-4-search", "x-ai/grok-4", "xai/grok-4"]
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
