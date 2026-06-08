@@ -53,8 +53,8 @@ n_rows_unmatched = 322
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 83
-n_rows_matched = 285
+n_rows_ingested = 88
+n_rows_matched = 290
 n_rows_unmatched = 0
 
 [sources."sonar"]
@@ -116,14 +116,14 @@ sources = ["artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openro
 [models.scores]
 i_raw = 68.115924
 p_raw = 68.684215
-b_raw = 73.552562
-r = 65.650549
+b_raw = 73.526776
+r = 65.639498
 i_adj = 68.115924
 p_adj = 68.684215
-b_adj = 73.552562
+b_adj = 73.526776
 
 [models.groups]
-BUILD = 76.008654
+BUILD = 75.977956
 CRE = 67.892326
 GEN = 71.010176
 LM_ARENA_REVIEW_PROXY = 46.158459
@@ -143,7 +143,7 @@ BFCL = 100.000000
 BlendedCost = 9.780559
 ContextWindow = 0.000000
 CopilotArenaOrLMArenaCode = 74.404035
-GDPval = 78.258049
+GDPval = 77.644097
 GPQA_HLE_Reasoning = 61.780764
 GSO = 59.309932
 IFBench = 40.727273
@@ -190,14 +190,14 @@ sources = ["artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "
 [models.scores]
 i_raw = 93.189360
 p_raw = 80.065250
-b_raw = 81.640605
-r = 83.486539
+b_raw = 81.611247
+r = 83.473957
 i_adj = 93.189360
 p_adj = 80.065250
-b_adj = 81.640605
+b_adj = 81.611247
 
 [models.groups]
-BUILD = 83.510259
+BUILD = 83.475309
 CRE = 100.000000
 GEN = 84.902902
 LM_ARENA_REVIEW_PROXY = 100.000000
@@ -213,7 +213,7 @@ ArtificialAnalysisReasoning = 85.510290
 BlendedCost = 9.780559
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 100.000000
-GDPval = 79.920288
+GDPval = 79.270220
 GPQA_HLE_Reasoning = 85.510290
 GSO = 75.330822
 IFBench = 27.818182
@@ -259,14 +259,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "ope
 [models.scores]
 i_raw = 94.023219
 p_raw = 86.409854
-b_raw = 85.007793
-r = 85.507738
+b_raw = 84.972526
+r = 85.492624
 i_adj = 94.023219
 p_adj = 86.409854
-b_adj = 85.007793
+b_adj = 84.972526
 
 [models.groups]
-BUILD = 87.203980
+BUILD = 87.161996
 CRE = 95.496970
 GEN = 96.973977
 LM_ARENA_REVIEW_PROXY = 96.620197
@@ -283,7 +283,7 @@ ArtificialAnalysisReasoning = 95.380092
 BlendedCost = 9.780559
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 100.000000
-GDPval = 95.000000
+GDPval = 94.219089
 GPQA_HLE_Reasoning = 95.380092
 GSO = 100.000000
 IFBench = 42.545455
@@ -324,26 +324,26 @@ display_name = "claude-opus-4.8"
 vendor = "anthropic"
 thinking_effort = "default"
 aliases = ["Opus 4.8 Claude Code (xHigh thinking)", "anthropic/claude-opus-4.8", "claude 4.8", "claude opus 4.8", "claude opus 4.8 high", "claude opus 4.8 low", "claude opus 4.8 medium", "claude opus 4.8 xhigh", "claude-4-8", "claude-4-8-opus", "claude-4.8-opus", "claude-opus-4-8", "claude-opus-4-8 (max)", "claude-opus-4-8-high", "claude-opus-4-8-low", "claude-opus-4-8-max", "claude-opus-4-8-medium", "claude-opus-4-8-xhigh", "claude-opus-4.8", "claude-opus-4.8-high", "claude-opus-4.8-low", "claude-opus-4.8-medium", "claude-opus-4.8-xhigh", "opus 4.8"]
-sources = []
+sources = ["overrides"]
 
 [models.scores]
 i_raw = 87.362068
-p_raw = 81.400391
-b_raw = 81.800898
-r = 81.348409
+p_raw = 80.851866
+b_raw = 81.956787
+r = 81.070431
 i_adj = 87.362068
-p_adj = 81.400391
-b_adj = 81.800898
+p_adj = 80.851866
+b_adj = 81.956787
 
 [models.groups]
-BUILD = 84.096106
+BUILD = 84.376671
 CRE = 88.672424
 GEN = 89.927881
 LM_ARENA_REVIEW_PROXY = 89.627167
 OPS_long = 67.585004
 OPS_precision = 60.849120
 OPS_review = 63.159799
-PLAN = 78.652992
+PLAN = 77.655673
 
 [models.metrics]
 ARC_AGI_2 = 86.635382
@@ -353,7 +353,7 @@ ArtificialAnalysisReasoning = 88.573079
 BlendedCost = 8.604911
 ContextWindow = 91.557479
 CopilotArenaOrLMArenaCode = 92.500000
-GDPval = 92.500000
+GDPval = 95.000000
 GPQA_HLE_Reasoning = 88.573079
 GSO = 92.500000
 IFBench = 43.663636
@@ -368,10 +368,10 @@ SWEAtlasComposite = 76.858860
 SWEAtlasQnA = 67.531724
 SWEAtlasRefactoring = 92.500000
 SWEAtlasTestWriting = 65.331141
-SWEBenchMultilingual = 92.500000
-SWEBenchPro = 92.500000
-SWEBenchVerified = 92.500000
-SWEComposite = 89.638241
+SWEBenchMultilingual = 95.000000
+SWEBenchPro = 95.000000
+SWEBenchVerified = 95.000000
+SWEComposite = 91.138241
 SWERebench = 85.345603
 SciCode = 89.412599
 SonarBugDensity = 42.065619
@@ -381,7 +381,7 @@ SonarIssueDensity = 14.703390
 SonarVulnerabilityDensity = 24.048673
 TTFT = 68.450691
 Tau2Bench = 71.817111
-TerminalBench = 89.542714
+TerminalBench = 83.808130
 TerminalBenchHard = 87.711268
 
 [models.missing]
@@ -399,14 +399,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "livecodebench", "lmarena", 
 [models.scores]
 i_raw = 11.983548
 p_raw = 28.374787
-b_raw = 46.441760
-r = 37.931712
+b_raw = 46.413728
+r = 37.919698
 i_adj = 11.983548
 p_adj = 28.374787
-b_adj = 46.441760
+b_adj = 46.413728
 
 [models.groups]
-BUILD = 45.376062
+BUILD = 45.342690
 CRE = 0.000000
 GEN = 19.101385
 LM_ARENA_REVIEW_PROXY = 26.732322
@@ -426,7 +426,7 @@ BFCL = 80.052671
 BlendedCost = 58.099130
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 45.513727
-GDPval = 84.422476
+GDPval = 83.755036
 GPQA_HLE_Reasoning = 3.611928
 GSO = 5.997634
 IFBench = 32.000000
@@ -471,14 +471,14 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atla
 [models.scores]
 i_raw = 55.569867
 p_raw = 46.520306
-b_raw = 53.855211
-r = 45.194620
+b_raw = 53.825530
+r = 45.181899
 i_adj = 55.569867
 p_adj = 46.520306
-b_adj = 53.855211
+b_adj = 53.825530
 
 [models.groups]
-BUILD = 52.866692
+BUILD = 52.831357
 CRE = 56.625163
 GEN = 47.382744
 LM_ARENA_REVIEW_PROXY = 22.626261
@@ -498,7 +498,7 @@ BFCL = 85.356083
 BlendedCost = 58.099130
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 44.722032
-GDPval = 86.447327
+GDPval = 85.740626
 GPQA_HLE_Reasoning = 31.751365
 GSO = 27.322553
 IFBench = 38.909091
@@ -542,14 +542,14 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter
 [models.scores]
 i_raw = 70.329170
 p_raw = 60.916302
-b_raw = 67.364683
-r = 66.385633
+b_raw = 67.336651
+r = 66.373619
 i_adj = 70.329170
 p_adj = 60.916302
-b_adj = 67.364683
+b_adj = 67.336651
 
 [models.groups]
-BUILD = 69.800675
+BUILD = 69.767303
 CRE = 72.399942
 GEN = 67.262902
 LM_ARENA_REVIEW_PROXY = 79.503243
@@ -569,7 +569,7 @@ BFCL = 80.052671
 BlendedCost = 58.099130
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 95.213956
-GDPval = 84.422476
+GDPval = 83.755036
 GPQA_HLE_Reasoning = 67.030659
 GSO = 30.724170
 IFBench = 37.090909
@@ -616,14 +616,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 56.980069
 p_raw = 68.537322
-b_raw = 67.268683
-r = 65.564859
+b_raw = 67.245923
+r = 65.555104
 i_adj = 56.980069
 p_adj = 68.537322
-b_adj = 67.268683
+b_adj = 67.245923
 
 [models.groups]
-BUILD = 64.278660
+BUILD = 64.251564
 CRE = 50.351982
 GEN = 60.984102
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -639,7 +639,7 @@ ArtificialAnalysisReasoning = 75.430491
 BlendedCost = 100.000000
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 86.969441
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 75.430491
 IFBench = 97.454545
 LMArenaCreativeOrOpenEnded = 50.351982
@@ -677,14 +677,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 71.239731
 p_raw = 78.603285
-b_raw = 74.546470
-r = 71.570059
+b_raw = 74.523710
+r = 71.560304
 i_adj = 71.239731
 p_adj = 78.603285
-b_adj = 74.546470
+b_adj = 74.523710
 
 [models.groups]
-BUILD = 73.451927
+BUILD = 73.424832
 CRE = 69.219312
 GEN = 76.224837
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -700,7 +700,7 @@ ArtificialAnalysisReasoning = 82.150357
 BlendedCost = 93.058226
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 71.610042
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 82.150357
 IFBench = 90.181818
 LMArenaCreativeOrOpenEnded = 69.219312
@@ -738,14 +738,14 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "s
 [models.scores]
 i_raw = 37.410767
 p_raw = 18.615043
-b_raw = 26.029477
-r = 25.181463
+b_raw = 26.019610
+r = 25.177234
 i_adj = 37.410767
 p_adj = 18.615043
-b_adj = 26.029477
+b_adj = 26.019610
 
 [models.groups]
-BUILD = 21.695369
+BUILD = 21.683622
 CRE = 40.185236
 GEN = 16.802950
 LM_ARENA_REVIEW_PROXY = 35.600847
@@ -765,7 +765,7 @@ BFCL = 1.280910
 BlendedCost = 88.530647
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 61.408417
-GDPval = 34.575649
+GDPval = 34.340719
 GPQA_HLE_Reasoning = 9.491810
 GSO = 19.395307
 IFBench = 20.181818
@@ -808,14 +808,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "openrouter", "sw
 [models.scores]
 i_raw = 66.731886
 p_raw = 38.240003
-b_raw = 42.810593
-r = 33.943017
+b_raw = 42.801462
+r = 33.939104
 i_adj = 66.731886
 p_adj = 38.240003
-b_adj = 42.810593
+b_adj = 42.801462
 
 [models.groups]
-BUILD = 40.827553
+BUILD = 40.816683
 CRE = 76.836890
 GEN = 41.469239
 LM_ARENA_REVIEW_PROXY = 6.541550
@@ -835,7 +835,7 @@ BFCL = 76.983927
 BlendedCost = 74.370005
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 0.000000
-GDPval = 32.556268
+GDPval = 32.338860
 GPQA_HLE_Reasoning = 41.831163
 GSO = 0.000000
 IFBench = 16.000000
@@ -879,14 +879,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "ope
 [models.scores]
 i_raw = 80.545285
 p_raw = 68.623758
-b_raw = 56.019653
-r = 56.596782
+b_raw = 56.008882
+r = 56.592166
 i_adj = 80.545285
 p_adj = 68.623758
-b_adj = 56.019653
+b_adj = 56.008882
 
 [models.groups]
-BUILD = 52.007474
+BUILD = 51.994652
 CRE = 84.070334
 GEN = 69.867501
 LM_ARENA_REVIEW_PROXY = 33.059821
@@ -905,7 +905,7 @@ ArtificialAnalysisReasoning = 81.730365
 BlendedCost = 85.689911
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 63.421667
-GDPval = 33.668334
+GDPval = 33.419585
 GPQA_HLE_Reasoning = 81.730365
 GSO = 13.994478
 IFBench = 94.181818
@@ -948,14 +948,14 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atla
 [models.scores]
 i_raw = 89.281704
 p_raw = 76.142780
-b_raw = 66.345474
-r = 65.978560
+b_raw = 66.335806
+r = 65.974416
 i_adj = 89.281704
 p_adj = 76.142780
-b_adj = 66.345474
+b_adj = 66.335806
 
 [models.groups]
-BUILD = 65.986623
+BUILD = 65.975113
 CRE = 95.936277
 GEN = 79.538913
 LM_ARENA_REVIEW_PROXY = 45.247432
@@ -974,7 +974,7 @@ ArtificialAnalysisReasoning = 89.080218
 BFCL = 81.745796
 BlendedCost = 71.640436
 CopilotArenaOrLMArenaCode = 63.913393
-GDPval = 31.530166
+GDPval = 31.299969
 GPQA_HLE_Reasoning = 89.080218
 GSO = 40.677828
 IFBench = 74.000000
@@ -1018,14 +1018,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "ope
 [models.scores]
 i_raw = 97.907820
 p_raw = 92.943660
-b_raw = 73.796214
-r = 76.068014
+b_raw = 73.780803
+r = 76.061410
 i_adj = 97.907820
 p_adj = 92.943660
-b_adj = 73.796214
+b_adj = 73.780803
 
 [models.groups]
-BUILD = 71.969030
+BUILD = 71.950684
 CRE = 98.870704
 GEN = 99.700669
 LM_ARENA_REVIEW_PROXY = 51.031478
@@ -1043,7 +1043,7 @@ BFCL = 76.983927
 BlendedCost = 71.640436
 ContextWindow = 99.973058
 CopilotArenaOrLMArenaCode = 68.119743
-GDPval = 45.597062
+GDPval = 45.244809
 GPQA_HLE_Reasoning = 100.000000
 GSO = 51.340288
 IFBench = 92.000000
@@ -1088,14 +1088,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 95.416979
 p_raw = 81.898213
-b_raw = 65.610273
-r = 65.630829
+b_raw = 65.580561
+r = 65.618095
 i_adj = 95.416979
 p_adj = 81.898213
-b_adj = 65.610273
+b_adj = 65.580561
 
 [models.groups]
-BUILD = 62.488370
+BUILD = 62.452999
 CRE = 100.000000
 GEN = 86.785855
 LM_ARENA_REVIEW_PROXY = 35.600847
@@ -1114,7 +1114,7 @@ ArtificialAnalysisReasoning = 100.000000
 BlendedCost = 74.555966
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 89.136865
-GDPval = 84.084089
+GDPval = 83.397893
 GPQA_HLE_Reasoning = 100.000000
 GSO = 19.395307
 IFBench = 89.818182
@@ -1157,14 +1157,14 @@ sources = ["artificial_analysis", "lmarena", "mcp_atlas", "sweatlas_qna", "sweat
 [models.scores]
 i_raw = 87.752565
 p_raw = 82.148925
-b_raw = 76.234008
-r = 74.550654
+b_raw = 76.205947
+r = 74.538628
 i_adj = 87.752565
 p_adj = 82.148925
-b_adj = 76.234008
+b_adj = 76.205947
 
 [models.groups]
-BUILD = 74.830237
+BUILD = 74.796831
 CRE = 91.857106
 GEN = 79.529818
 LM_ARENA_REVIEW_PROXY = 49.911399
@@ -1183,7 +1183,7 @@ ArtificialAnalysisReasoning = 89.710206
 BlendedCost = 80.336425
 ContextWindow = 92.473784
 CopilotArenaOrLMArenaCode = 89.721436
-GDPval = 82.190528
+GDPval = 81.542454
 GPQA_HLE_Reasoning = 89.710206
 GSO = 19.395307
 IFBench = 88.727273
@@ -1229,14 +1229,14 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides
 [models.scores]
 i_raw = 14.928147
 p_raw = 47.438866
-b_raw = 51.162735
-r = 50.700843
+b_raw = 51.139975
+r = 50.691088
 i_adj = 14.928147
 p_adj = 47.438866
-b_adj = 51.162735
+b_adj = 51.139975
 
 [models.groups]
-BUILD = 48.177655
+BUILD = 48.150559
 CRE = 0.000000
 GEN = 29.525171
 LM_ARENA_REVIEW_PROXY = 38.464056
@@ -1253,7 +1253,7 @@ ArtificialAnalysisReasoning = 38.471231
 BlendedCost = 96.169788
 ContextWindow = 3.291388
 CopilotArenaOrLMArenaCode = 43.282631
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 38.471231
 IFBench = 77.272727
 LMArenaCreativeOrOpenEnded = 0.000000
@@ -1294,14 +1294,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "swerebe
 [models.scores]
 i_raw = 33.387082
 p_raw = 60.350364
-b_raw = 60.658148
-r = 58.129781
+b_raw = 60.633733
+r = 58.119317
 i_adj = 33.387082
 p_adj = 60.350364
-b_adj = 60.658148
+b_adj = 60.633733
 
 [models.groups]
-BUILD = 58.862987
+BUILD = 58.833922
 CRE = 20.532378
 GEN = 50.092911
 LM_ARENA_REVIEW_PROXY = 38.464056
@@ -1318,7 +1318,7 @@ ArtificialAnalysisReasoning = 62.830743
 BlendedCost = 93.722551
 ContextWindow = 3.291388
 CopilotArenaOrLMArenaCode = 51.588104
-GDPval = 65.965927
+GDPval = 65.436938
 GPQA_HLE_Reasoning = 62.830743
 IFBench = 88.181818
 LMArenaCreativeOrOpenEnded = 20.532378
@@ -1422,14 +1422,14 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter
 [models.scores]
 i_raw = 48.425507
 p_raw = 59.081709
-b_raw = 52.829179
-r = 53.386061
+b_raw = 52.806418
+r = 53.376307
 i_adj = 48.425507
 p_adj = 59.081709
-b_adj = 52.829179
+b_adj = 52.806418
 
 [models.groups]
-BUILD = 49.548549
+BUILD = 49.521453
 CRE = 43.072574
 GEN = 52.766669
 LM_ARENA_REVIEW_PROXY = 36.428301
@@ -1446,7 +1446,7 @@ ArtificialAnalysisReasoning = 66.610668
 BlendedCost = 89.466809
 ContextWindow = 55.654747
 CopilotArenaOrLMArenaCode = 52.717734
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 66.610668
 IFBench = 73.454545
 LMArenaCreativeOrOpenEnded = 43.072574
@@ -1487,14 +1487,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 77.037312
 p_raw = 81.747261
-b_raw = 76.713174
-r = 73.107485
+b_raw = 76.689075
+r = 73.097157
 i_adj = 77.037312
 p_adj = 81.747261
-b_adj = 76.713174
+b_adj = 76.689075
 
 [models.groups]
-BUILD = 75.658217
+BUILD = 75.629527
 CRE = 75.391784
 GEN = 80.052244
 LM_ARENA_REVIEW_PROXY = 45.285853
@@ -1510,7 +1510,7 @@ ArtificialAnalysisReasoning = 86.980260
 BlendedCost = 83.329839
 ContextWindow = 55.654747
 CopilotArenaOrLMArenaCode = 93.493460
-GDPval = 65.178181
+GDPval = 64.656027
 GPQA_HLE_Reasoning = 86.980260
 IFBench = 88.909091
 LMArenaCreativeOrOpenEnded = 75.391784
@@ -1547,14 +1547,14 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atla
 [models.scores]
 i_raw = 41.771457
 p_raw = 51.213519
-b_raw = 63.542101
-r = 53.676294
+b_raw = 63.519446
+r = 53.666584
 i_adj = 41.771457
 p_adj = 51.213519
-b_adj = 63.542101
+b_adj = 63.519446
 
 [models.groups]
-BUILD = 65.259657
+BUILD = 65.232687
 CRE = 35.672487
 GEN = 50.500115
 LM_ARENA_REVIEW_PROXY = 33.555226
@@ -1574,7 +1574,7 @@ BFCL = 0.000000
 BlendedCost = 70.960009
 ContextWindow = 78.066720
 CopilotArenaOrLMArenaCode = 51.430769
-GDPval = 62.814942
+GDPval = 62.313294
 GPQA_HLE_Reasoning = 54.010920
 GSO = 64.668362
 IFBench = 60.181818
@@ -1618,14 +1618,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar",
 [models.scores]
 i_raw = 64.931785
 p_raw = 57.157789
-b_raw = 74.500449
-r = 64.837031
+b_raw = 74.474018
+r = 64.825704
 i_adj = 64.931785
 p_adj = 57.157789
-b_adj = 74.500449
+b_adj = 74.474018
 
 [models.groups]
-BUILD = 77.694864
+BUILD = 77.663399
 CRE = 69.864455
 GEN = 57.037806
 LM_ARENA_REVIEW_PROXY = 57.157363
@@ -1639,7 +1639,7 @@ ARC_AGI_2 = 72.230219
 BlendedCost = 70.960009
 ContextWindow = 78.066720
 CopilotArenaOrLMArenaCode = 39.794592
-GDPval = 64.728040
+GDPval = 64.209792
 GSO = 53.405017
 LMArenaCreativeOrOpenEnded = 69.864455
 LMArenaDocument = 59.592044
@@ -1675,14 +1675,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "ope
 [models.scores]
 i_raw = 67.686929
 p_raw = 58.474959
-b_raw = 78.816414
-r = 67.619775
+b_raw = 78.778563
+r = 67.603553
 i_adj = 67.686929
 p_adj = 58.474959
-b_adj = 78.816414
+b_adj = 78.778563
 
 [models.groups]
-BUILD = 82.526623
+BUILD = 82.481562
 CRE = 73.369947
 GEN = 58.279772
 LM_ARENA_REVIEW_PROXY = 58.420427
@@ -1696,7 +1696,7 @@ ARC_AGI_2 = 76.153199
 BlendedCost = 64.203776
 ContextWindow = 100.000000
 CopilotArenaOrLMArenaCode = 44.730787
-GDPval = 86.109722
+GDPval = 85.405950
 GSO = 54.005902
 LMArenaCreativeOrOpenEnded = 73.369947
 LMArenaDocument = 61.284758
@@ -1802,14 +1802,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 61.165781
 p_raw = 71.095306
-b_raw = 69.711322
-r = 68.393972
+b_raw = 69.686561
+r = 68.383360
 i_adj = 61.165781
 p_adj = 71.095306
-b_adj = 69.711322
+b_adj = 69.686561
 
 [models.groups]
-BUILD = 67.389873
+BUILD = 67.360395
 CRE = 58.439739
 GEN = 60.617305
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -1826,7 +1826,7 @@ ArtificialAnalysisReasoning = 59.470811
 BlendedCost = 90.055704
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 72.327672
-GDPval = 69.330259
+GDPval = 68.793771
 GPQA_HLE_Reasoning = 59.470811
 IFBench = 86.727273
 LMArenaCreativeOrOpenEnded = 58.439739
@@ -1871,14 +1871,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 88.467908
 p_raw = 85.942804
-b_raw = 77.665920
-r = 75.902456
+b_raw = 77.641949
+r = 75.892182
 i_adj = 88.467908
 p_adj = 85.942804
-b_adj = 77.665920
+b_adj = 77.641949
 
 [models.groups]
-BUILD = 76.300701
+BUILD = 76.272164
 CRE = 92.076351
 GEN = 83.470938
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -1896,7 +1896,7 @@ BFCL = 89.654303
 BlendedCost = 73.488184
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 68.978521
-GDPval = 69.330259
+GDPval = 68.793771
 GPQA_HLE_Reasoning = 94.120118
 IFBench = 100.000000
 LMArenaCreativeOrOpenEnded = 92.076351
@@ -1938,14 +1938,14 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "sw
 [models.scores]
 i_raw = 37.986605
 p_raw = 41.764283
-b_raw = 43.431815
-r = 38.496716
+b_raw = 43.430445
+r = 38.496128
 i_adj = 37.986605
 p_adj = 41.764283
-b_adj = 43.431815
+b_adj = 43.430445
 
 [models.groups]
-BUILD = 44.148345
+BUILD = 44.146713
 CRE = 33.221557
 GEN = 45.943724
 LM_ARENA_REVIEW_PROXY = 25.000000
@@ -1963,7 +1963,7 @@ ArtificialAnalysisMath = 90.868794
 ArtificialAnalysisReasoning = 54.640907
 BFCL = 34.564787
 BlendedCost = 0.765248
-GDPval = 8.347921
+GDPval = 8.318872
 GPQA_HLE_Reasoning = 54.640907
 IFBench = 29.272727
 LMArenaCreativeOrOpenEnded = 33.221557
@@ -1995,14 +1995,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 50.874134
 p_raw = 67.801712
-b_raw = 52.122026
-r = 58.079695
+b_raw = 52.097386
+r = 58.069135
 i_adj = 50.874134
 p_adj = 67.801712
-b_adj = 52.122026
+b_adj = 52.097386
 
 [models.groups]
-BUILD = 47.858854
+BUILD = 47.829520
 CRE = 39.190545
 GEN = 66.095722
 LM_ARENA_REVIEW_PROXY = 48.101258
@@ -2022,7 +2022,7 @@ BFCL = 36.880069
 BlendedCost = 82.360669
 ContextWindow = 98.891152
 CopilotArenaOrLMArenaCode = 44.346689
-GDPval = 66.528603
+GDPval = 65.994732
 GPQA_HLE_Reasoning = 82.990340
 IFBench = 100.000000
 LMArenaCreativeOrOpenEnded = 39.190545
@@ -2115,14 +2115,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 49.052666
 p_raw = 58.511333
-b_raw = 60.201471
-r = 57.870277
+b_raw = 60.178711
+r = 57.860523
 i_adj = 49.052666
 p_adj = 58.511333
-b_adj = 60.201471
+b_adj = 60.178711
 
 [models.groups]
-BUILD = 57.357480
+BUILD = 57.330384
 CRE = 44.136480
 GEN = 48.646428
 LM_ARENA_REVIEW_PROXY = 38.464056
@@ -2139,7 +2139,7 @@ ArtificialAnalysisReasoning = 51.490970
 BlendedCost = 90.212832
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 63.711173
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 51.490970
 IFBench = 65.272727
 LMArenaCreativeOrOpenEnded = 44.136480
@@ -2180,14 +2180,14 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 76.016157
 p_raw = 74.327364
-b_raw = 65.411281
-r = 65.697928
+b_raw = 65.388521
+r = 65.688173
 i_adj = 76.016157
 p_adj = 74.327364
-b_adj = 65.411281
+b_adj = 65.388521
 
 [models.groups]
-BUILD = 62.316782
+BUILD = 62.289686
 CRE = 79.235442
 GEN = 67.369104
 LM_ARENA_REVIEW_PROXY = 38.464056
@@ -2204,7 +2204,7 @@ ArtificialAnalysisReasoning = 73.120538
 BlendedCost = 82.774382
 ContextWindow = 99.969157
 CopilotArenaOrLMArenaCode = 75.849812
-GDPval = 64.334948
+GDPval = 63.841804
 GPQA_HLE_Reasoning = 73.120538
 IFBench = 99.272727
 LMArenaCreativeOrOpenEnded = 79.235442
@@ -2245,14 +2245,14 @@ sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", 
 [models.scores]
 i_raw = 52.293533
 p_raw = 26.089450
-b_raw = 28.543207
-r = 29.423148
+b_raw = 28.539995
+r = 29.421771
 i_adj = 52.293533
 p_adj = 26.089450
-b_adj = 28.543207
+b_adj = 28.539995
 
 [models.groups]
-BUILD = 25.521268
+BUILD = 25.517445
 CRE = 60.755102
 GEN = 30.692682
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -2271,7 +2271,7 @@ BFCL = 81.102868
 BlendedCost = 89.698277
 ContextWindow = 1.159536
 CopilotArenaOrLMArenaCode = 33.390356
-GDPval = 13.637074
+GDPval = 13.562132
 GPQA_HLE_Reasoning = 12.011760
 IFBench = 1.818182
 LMArenaCreativeOrOpenEnded = 60.755102
@@ -2312,14 +2312,14 @@ sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrid
 [models.scores]
 i_raw = 58.018649
 p_raw = 54.016290
-b_raw = 48.315877
-r = 49.629277
+b_raw = 48.305829
+r = 49.624971
 i_adj = 58.018649
 p_adj = 54.016290
-b_adj = 48.315877
+b_adj = 48.305829
 
 [models.groups]
-BUILD = 45.324853
+BUILD = 45.312892
 CRE = 56.923378
 GEN = 55.427023
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -2337,7 +2337,7 @@ ArtificialAnalysisReasoning = 53.380932
 BlendedCost = 89.969452
 ContextWindow = 1.159536
 CopilotArenaOrLMArenaCode = 64.565355
-GDPval = 31.192560
+GDPval = 30.965293
 GPQA_HLE_Reasoning = 53.380932
 IFBench = 67.272727
 LMArenaCreativeOrOpenEnded = 56.923378
@@ -2377,14 +2377,14 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides
 [models.scores]
 i_raw = 63.295658
 p_raw = 62.549264
-b_raw = 63.974474
-r = 60.597074
+b_raw = 63.949713
+r = 60.586462
 i_adj = 63.295658
 p_adj = 62.549264
-b_adj = 63.974474
+b_adj = 63.949713
 
 [models.groups]
-BUILD = 62.752293
+BUILD = 62.722816
 CRE = 65.034013
 GEN = 57.100697
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -2401,7 +2401,7 @@ ArtificialAnalysisReasoning = 49.601008
 BlendedCost = 87.619061
 ContextWindow = 1.159536
 CopilotArenaOrLMArenaCode = 62.769632
-GDPval = 69.330259
+GDPval = 68.793771
 GPQA_HLE_Reasoning = 49.601008
 IFBench = 79.090909
 LMArenaCreativeOrOpenEnded = 65.034013
@@ -2445,14 +2445,14 @@ sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrid
 [models.scores]
 i_raw = 81.491451
 p_raw = 74.434161
-b_raw = 72.834680
-r = 67.851019
+b_raw = 72.808462
+r = 67.839783
 i_adj = 81.491451
 p_adj = 74.434161
-b_adj = 72.834680
+b_adj = 72.808462
 
 [models.groups]
-BUILD = 72.510017
+BUILD = 72.478805
 CRE = 86.350987
 GEN = 74.379645
 LM_ARENA_REVIEW_PROXY = 45.992975
@@ -2468,7 +2468,7 @@ ArtificialAnalysisReasoning = 61.360773
 BlendedCost = 82.740656
 ContextWindow = 1.159536
 CopilotArenaOrLMArenaCode = 98.266189
-GDPval = 70.467334
+GDPval = 69.899287
 GPQA_HLE_Reasoning = 61.360773
 IFBench = 89.636364
 LMArenaCreativeOrOpenEnded = 86.350987

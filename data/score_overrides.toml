@@ -24,6 +24,12 @@ value = 87.6
 note = "Anthropic Claude Opus 4.7 launch announcement, 2026-04-16"
 
 [[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "SWEBenchVerified"
+value = 88.6
+note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
 canonical_id = "anthropic/claude-opus-4.5"
 metric = "SWEBenchVerified"
 value = 80.9
@@ -165,6 +171,12 @@ metric = "TerminalBench"
 value = 63.5
 note = "Z.ai GLM-5.1 Hugging Face model card, Terminal-Bench 2.0 (Terminus-2), https://huggingface.co/zai-org/GLM-5.1, accessed 2026-05-22"
 
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "TerminalBench"
+value = 74.6
+note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 with Terminus-2 public harness, high effort, 5 attempts over 89 tasks, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
 # Elo ratings from blind pairwise comparison on real-world knowledge-
@@ -184,6 +196,12 @@ canonical_id = "anthropic/claude-opus-4.7"
 metric = "GDPval"
 value = 1753
 note = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "GDPval"
+value = 1890
+note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.13.6, GDPval-AA Elo, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [[entries]]
 canonical_id = "openai/gpt-5.4"
@@ -306,6 +324,12 @@ value = 64.3
 note = "Anthropic-reported, Claude Opus 4.7 (Adaptive Reasoning, Max Effort), 2026-04-16"
 
 [[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "SWEBenchPro"
+value = 69.2
+note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
 canonical_id = "openai/gpt-5.5"
 metric = "SWEBenchPro"
 value = 58.6
@@ -416,6 +440,12 @@ canonical_id = "anthropic/claude-opus-4.7"
 metric = "SWEBenchMultilingual"
 value = 80.5
 note = "Anthropic Claude Opus 4.7 System Card Table 8.1.A, adaptive thinking max effort, 5-trial average, 2026-04-16"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "SWEBenchMultilingual"
+value = 84.4
+note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [[entries]]
 canonical_id = "anthropic/claude-sonnet-4.6"
