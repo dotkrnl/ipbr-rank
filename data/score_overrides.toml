@@ -118,18 +118,6 @@ value = 66.7
 note = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
 
 [[entries]]
-canonical_id = "anthropic/claude-opus-4.7"
-metric = "TerminalBench"
-value = 69.4
-note = "Anthropic Claude Opus 4.7 System Card Table 8.1.A, Terminal-Bench 2.0, adaptive thinking max effort, https://anthropic.com/claude-opus-4-7-system-card, accessed 2026-05-22"
-
-[[entries]]
-canonical_id = "anthropic/claude-sonnet-4.6"
-metric = "TerminalBench"
-value = 59.1
-note = "Anthropic Claude Sonnet 4.6 System Card comparison table, Terminal-Bench 2.0, https://anthropic.com/claude-sonnet-4-6-system-card, accessed 2026-05-22"
-
-[[entries]]
 canonical_id = "deepseek/deepseek-v4-flash"
 metric = "TerminalBench"
 value = 56.6
@@ -170,12 +158,6 @@ canonical_id = "qwen/qwen3.7-max"
 metric = "TerminalBench"
 value = 69.7
 note = "Alibaba Cloud Qwen3.7 blog, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
-
-[[entries]]
-canonical_id = "minimax/minimax-m2.7"
-metric = "TerminalBench"
-value = 57.0
-note = "MiniMax M2.7 Hugging Face model card, Terminal Bench 2, https://huggingface.co/MiniMaxAI/MiniMax-M2.7, accessed 2026-05-22"
 
 [[entries]]
 canonical_id = "z-ai/glm-5.1"
@@ -508,12 +490,6 @@ value = 74.1
 note = "Alibaba Qwen3.6-Plus blog (Public Set, gemini-2.5-pro judger), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
 [[entries]]
-canonical_id = "google/gemini-3.5-flash"
-metric = "MCPAtlas"
-value = 83.6
-note = "Google Gemini 3.5 announcement, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
-
-[[entries]]
 canonical_id = "qwen/qwen3.7-max"
 metric = "MCPAtlas"
 value = 76.4
@@ -538,12 +514,6 @@ canonical_id = "anthropic/claude-opus-4.5"
 metric = "ARC_AGI_2"
 value = 37.6
 note = "Anthropic Claude Opus 4.6 System Card comparison table, ARC-AGI-2 for Claude Opus 4.5, https://anthropic.com/claude-opus-4-6-system-card, accessed 2026-05-22"
-
-[[entries]]
-canonical_id = "google/gemini-3.5-flash"
-metric = "ARC_AGI_2"
-value = 72.1
-note = "Google DeepMind Gemini 3.5 Flash model page, ARC-AGI-2, https://deepmind.google/en/models/gemini/flash/, accessed 2026-05-22"
 
 # ---------------------------------------------------------------------
 # MMLU-Pro — vendor-reported figures missing from Artificial Analysis.
