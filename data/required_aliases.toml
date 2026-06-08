@@ -90,6 +90,23 @@ aliases = [
     "Agentless w/ Claude Opus 4.7",
 ]
 
+[models."anthropic/claude-opus-4.8"]
+vendor = "anthropic"
+aliases = [
+    "opus 4.8", "claude opus 4.8", "claude 4.8",
+    "claude-opus-4-8", "claude-opus-4.8", "claude-4-8",
+    "claude-4-8-opus", "claude-4.8-opus",
+    "anthropic/claude-opus-4.8",
+    # Reasoning/effort spellings observed in the 2026-06-08 refresh.
+    "claude opus 4.8 high", "claude-opus-4-8-high", "claude-opus-4.8-high",
+    "claude opus 4.8 medium", "claude-opus-4-8-medium", "claude-opus-4.8-medium",
+    "claude opus 4.8 low", "claude-opus-4-8-low", "claude-opus-4.8-low",
+    "claude opus 4.8 xhigh", "claude-opus-4-8-xhigh", "claude-opus-4.8-xhigh",
+    "claude-opus-4-8 (max)", "claude-opus-4-8-max",
+    # Scale SWE Atlas agent spelling.
+    "Opus 4.8 Claude Code (xHigh thinking)",
+]
+
 [models."google/gemini-3.1-pro-preview"]
 vendor = "google"
 aliases = [

@@ -50,6 +50,13 @@ from = "z-ai/glm-5.1"
 target = "anthropic/claude-opus-4.7"
 from = "anthropic/claude-opus-4.6"
 
+# Opus 4.8 is the next Opus generation after 4.7. The 2026-06-08 refresh
+# has direct AA/OpenRouter/ARC-AGI/MCP Atlas/SWE Atlas/SWERebench coverage;
+# use 4.7 as the conservative donor for sources that have not listed 4.8 yet.
+[[pair]]
+target = "anthropic/claude-opus-4.8"
+from = "anthropic/claude-opus-4.7"
+
 # Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
 # The 2.5-pro sibling lacks the same sources, so the next-generation
 # 3-flash (same tier, full coverage) is the closest defensible donor.
