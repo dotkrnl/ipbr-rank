@@ -113,6 +113,24 @@ metric = "SWEBenchVerified"
 value = 80.4
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "SWEBenchVerified"
+value = 95.0
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.2, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "minimax/minimax-m3"
+metric = "SWEBenchVerified"
+value = 80.5
+note = "MiniMax M3 model page benchmark card, https://www.minimax.io/models/text/m3, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "SWEBenchVerified"
+value = 77.7
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.0 — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -177,6 +195,24 @@ metric = "TerminalBench"
 value = 74.6
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 with Terminus-2 public harness, high effort, 5 attempts over 89 tasks, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "TerminalBench"
+value = 84.3
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 mini-SWE harness, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "minimax/minimax-m3"
+metric = "TerminalBench"
+value = 66.0
+note = "MiniMax M3 launch report, Terminal-Bench 2.1, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "TerminalBench"
+value = 70.3
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
 # Elo ratings from blind pairwise comparison on real-world knowledge-
@@ -202,6 +238,12 @@ canonical_id = "anthropic/claude-opus-4.8"
 metric = "GDPval"
 value = 1890
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.13.6, GDPval-AA Elo, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "GDPval"
+value = 1932
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.17.7, GDPval-AA Elo as of 2026-06-06, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
 
 [[entries]]
 canonical_id = "openai/gpt-5.4"
@@ -413,6 +455,24 @@ metric = "SWEBenchPro"
 value = 60.6
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "SWEBenchPro"
+value = 80.0
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.2, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "minimax/minimax-m3"
+metric = "SWEBenchPro"
+value = 59.0
+note = "MiniMax M3 launch report, SWE-Bench Pro, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "SWEBenchPro"
+value = 57.6
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, SWE-Pro, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures
 # ---------------------------------------------------------------------
@@ -489,6 +549,12 @@ metric = "SWEBenchMultilingual"
 value = 78.3
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "SWEBenchMultilingual"
+value = 75.8
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, SWE-Multilingual, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
 # ---------------------------------------------------------------------
 # MCP-Atlas — vendor-reported figures missing from Scale Labs leaderboard.
 # Scale Labs only carries a small public dataset; vendor self-reports are
@@ -525,6 +591,18 @@ metric = "MCPAtlas"
 value = 76.4
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
+[[entries]]
+canonical_id = "minimax/minimax-m3"
+metric = "MCPAtlas"
+value = 74.2
+note = "MiniMax M3 launch report, MCP Atlas, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "MCPAtlas"
+value = 73.2
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MCP-Atlas, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
 # ---------------------------------------------------------------------
 # BFCL — vendor-reported BFCL V4 figures not yet present in the public CSV.
 # ---------------------------------------------------------------------
@@ -534,6 +612,12 @@ canonical_id = "qwen/qwen3.7-max"
 metric = "BFCL"
 value = 75.0
 note = "Alibaba Cloud Qwen3.7 blog, BFCL-V4, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "BFCL"
+value = 72.9
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, BFCL-V4, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 # ---------------------------------------------------------------------
 # ARC-AGI-2 — vendor-reported semi-private scores not yet in arcprize.org.
@@ -572,6 +656,12 @@ canonical_id = "qwen/qwen3.6-plus"
 metric = "MMLUPro"
 value = 88.5
 note = "Alibaba Qwen3.6-Plus blog, MMLU-Pro, https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
+
+[[entries]]
+canonical_id = "qwen/qwen3.7-plus"
+metric = "MMLUPro"
+value = 88.5
+note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MMLU-Pro, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 [[entries]]
 canonical_id = "xiaomi/mimo-v2.5"

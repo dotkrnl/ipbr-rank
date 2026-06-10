@@ -57,6 +57,14 @@ from = "anthropic/claude-opus-4.6"
 target = "anthropic/claude-opus-4.8"
 from = "anthropic/claude-opus-4.7"
 
+# Claude Fable 5 is Anthropic's production Mythos-class model. Official
+# self-reports now cover the headline SWE/Terminal/MCP/GDP values, and the
+# live refresh adds AA/MCP/OpenRouter rows; Opus 4.8 is the closest broadly
+# covered public Claude donor for the remaining public-source gaps.
+[[pair]]
+target = "anthropic/claude-fable-5"
+from = "anthropic/claude-opus-4.8"
+
 # Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
 # The 2.5-pro sibling lacks the same sources, so the next-generation
 # 3-flash (same tier, full coverage) is the closest defensible donor.
@@ -144,22 +152,6 @@ from = "moonshotai/kimi-k2.6"
 target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
 
-# DeepSeek V4-Pro (1.6T/49B-active, released 2026-04-24) borrows from its
-# same-generation sibling V4-Flash for public leaderboard gaps. Same
-# vendor, same generation, same training pipeline; only parameter scale
-# differs. Pro > Flash on capability, so same-family synthesis should be
-# mildly conservative where V4-Pro lacks a direct row.
-#
-# Pair ordering: this pair is declared *after* V4-Flash ← Kimi K2.6 above
-# so V4-Pro's donor pool from V4-Flash includes both the real
-# V4-Flash rows and the Kimi-derived synth row that fills V4-Flash's
-# SWERebench. At V4-Pro's `ingest_synthesized_row`, first-write-wins
-# preserves V4-Flash's own rows while the Kimi-derived clone fills
-# SWERebench where no competing V4-Flash row exists.
-[[pair]]
-target = "deepseek/deepseek-v4-pro"
-from = "deepseek/deepseek-v4-flash"
-
 # ------------------------------------------------------------------
 # Synthesis for newly-added models (2026-05-07, post AA fixture refresh)
 # ------------------------------------------------------------------
@@ -213,6 +205,14 @@ from = "moonshotai/kimi-k2.5"
 target = "minimax/minimax-m2.7"
 from = "minimax/minimax-m2.5"
 
+# MiniMax M3 is M2.7's direct successor. The launch report covers current
+# SWE-Pro / Terminal-Bench / MCP-Atlas values, while the live refresh adds
+# AA/LMArena/OpenRouter rows. Use M2.7 as the nearest same-vendor donor for
+# older public leaderboard gaps that have not added M3 yet.
+[[pair]]
+target = "minimax/minimax-m3"
+from = "minimax/minimax-m2.7"
+
 # GLM-5 ← GLM-5.1. Same vendor, direct successor. Z.ai didn't publish
 # SWE-Bench Pro for the base GLM-5 (only for 5.1, where it claims SOTA
 # 58.4). 5.1 is a meaningful capability step over 5, so the synthesis is
@@ -255,6 +255,13 @@ from = "google/gemini-3-flash"
 # still has broader public-source coverage through its GLM-5 tier proxy above.
 [[pair]]
 target = "qwen/qwen3.7-max"
+from = "qwen/qwen3.6-plus"
+
+# Qwen3.7-Plus is the multimodal successor to Qwen3.6-Plus. Alibaba's
+# official table covers SWE/Terminal/MCP/BFCL/MMLU headline values; use the
+# prior Plus-tier model as the conservative donor for the remaining gaps.
+[[pair]]
+target = "qwen/qwen3.7-plus"
 from = "qwen/qwen3.6-plus"
 
 # Grok 4.3 is the same-family successor to Grok 4. Direct AA/LMArena/OpenRouter

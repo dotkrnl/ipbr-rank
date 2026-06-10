@@ -3579,6 +3579,62 @@
       "score": 0.6875
     },
     {
+      "costPerTask": 0.6711,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-low",
+      "resultsUrl": "",
+      "score": 0.88
+    },
+    {
+      "costPerTask": 0.9115,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-medium",
+      "resultsUrl": "",
+      "score": 0.915
+    },
+    {
+      "costPerTask": 1.0416,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-high",
+      "resultsUrl": "",
+      "score": 0.92
+    },
+    {
+      "costPerTask": 2.332,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-max",
+      "resultsUrl": "",
+      "score": 0.925
+    },
+    {
+      "costPerTask": 1.6818,
+      "datasetId": "v2_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-low",
+      "resultsUrl": "",
+      "score": 0.6222
+    },
+    {
+      "costPerTask": 2.3896,
+      "datasetId": "v2_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-medium",
+      "resultsUrl": "",
+      "score": 0.7167
+    },
+    {
+      "costPerTask": 2.7425,
+      "datasetId": "v2_Semi_Private",
+      "display": true,
+      "modelId": "anthropic-opus-4-8-high",
+      "resultsUrl": "",
+      "score": 0.7208
+    },
+    {
       "costPerTask": 7.171,
       "datasetId": "v1_Semi_Private",
       "display": true,
@@ -4615,6 +4671,80 @@
       "modelId": "anthropic-opus-4-7-high",
       "resultsUrl": "",
       "score": 0.0018
+    },
+    {
+      "cost": 10000,
+      "datasetId": "v3_Semi_Private",
+      "display": true,
+      "labelOffsetX": -100,
+      "labelOffsetY": -15,
+      "modelId": "anthropic-opus-4-8-high",
+      "resultsUrl": "",
+      "score": 0.0152
+    },
+    {
+      "costPerTask": 0.055,
+      "datasetId": "v1_Public_Eval",
+      "display": true,
+      "modelId": "gemini-3-5-flash-minimal",
+      "resultsUrl": "",
+      "score": 0.58
+    },
+    {
+      "costPerTask": 0.1001,
+      "datasetId": "v2_Public_Eval",
+      "display": true,
+      "modelId": "gemini-3-5-flash-minimal",
+      "resultsUrl": "",
+      "score": 0.0917
+    },
+    {
+      "costPerTask": 0.0645,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "gemini-3-5-flash-minimal",
+      "resultsUrl": "",
+      "score": 0.4883
+    },
+    {
+      "costPerTask": 0.1074,
+      "datasetId": "v2_Semi_Private",
+      "display": true,
+      "modelId": "gemini-3-5-flash-minimal",
+      "resultsUrl": "",
+      "score": 0.0889
+    },
+    {
+      "costPerTask": 0.3201,
+      "datasetId": "v1_Public_Eval",
+      "display": true,
+      "modelId": "gemini-3-5-flash-high",
+      "resultsUrl": "",
+      "score": 0.96
+    },
+    {
+      "costPerTask": 0.9001,
+      "datasetId": "v2_Public_Eval",
+      "display": true,
+      "modelId": "gemini-3-5-flash-high",
+      "resultsUrl": "",
+      "score": 0.7208
+    },
+    {
+      "costPerTask": 0.4278,
+      "datasetId": "v1_Semi_Private",
+      "display": true,
+      "modelId": "gemini-3-5-flash-high",
+      "resultsUrl": "",
+      "score": 0.925
+    },
+    {
+      "costPerTask": 0.8503,
+      "datasetId": "v2_Semi_Private",
+      "display": true,
+      "modelId": "gemini-3-5-flash-high",
+      "resultsUrl": "",
+      "score": 0.7208
     }
   ],
   "models": [
@@ -6353,6 +6483,58 @@
     {
       "codeUrl": "",
       "dataUrl": "",
+      "displayName": "Claude Opus 4.8 (Low)",
+      "featured": null,
+      "id": "anthropic-opus-4-8-low",
+      "modelGroup": "anthropic-opus-4-8",
+      "modelReleaseDate": "2026-06-01T00:00:00.000Z",
+      "modelType": "CoT",
+      "notes": "Evaluation conducted with 'low' output effort.",
+      "paperUrl": "",
+      "providerId": "Anthropic"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
+      "displayName": "Claude Opus 4.8 (Medium)",
+      "featured": null,
+      "id": "anthropic-opus-4-8-medium",
+      "modelGroup": "anthropic-opus-4-8",
+      "modelReleaseDate": "2026-06-01T00:00:00.000Z",
+      "modelType": "CoT",
+      "notes": "Evaluation conducted with 'medium' output effort.",
+      "paperUrl": "",
+      "providerId": "Anthropic"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
+      "displayName": "Claude Opus 4.8 (High)",
+      "featured": null,
+      "id": "anthropic-opus-4-8-high",
+      "modelGroup": "anthropic-opus-4-8",
+      "modelReleaseDate": "2026-06-01T00:00:00.000Z",
+      "modelType": "CoT",
+      "notes": "Evaluation conducted with 'high' output effort.",
+      "paperUrl": "",
+      "providerId": "Anthropic"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
+      "displayName": "Claude Opus 4.8 (Max)",
+      "featured": null,
+      "id": "anthropic-opus-4-8-max",
+      "modelGroup": "anthropic-opus-4-8",
+      "modelReleaseDate": "2026-06-01T00:00:00.000Z",
+      "modelType": "CoT",
+      "notes": "Evaluation conducted with 'max' output effort.",
+      "paperUrl": "",
+      "providerId": "Anthropic"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
       "displayName": "Gemini 3 Deep Think (2/26)",
       "featured": null,
       "id": "gemini_3_deep_think_022026",
@@ -6843,6 +7025,30 @@
       "modelType": "CoT",
       "paperUrl": "",
       "providerId": "Anthropic"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
+      "displayName": "Gemini 3.5 Flash (Minimal)",
+      "featured": null,
+      "id": "gemini-3-5-flash-minimal",
+      "modelGroup": "gemini-3-5-flash",
+      "modelReleaseDate": "2026-05-19T00:00:00.000Z",
+      "modelType": "CoT",
+      "paperUrl": "",
+      "providerId": "Google"
+    },
+    {
+      "codeUrl": "",
+      "dataUrl": "",
+      "displayName": "Gemini 3.5 Flash (High)",
+      "featured": null,
+      "id": "gemini-3-5-flash-high",
+      "modelGroup": "gemini-3-5-flash",
+      "modelReleaseDate": "2026-05-19T00:00:00.000Z",
+      "modelType": "CoT",
+      "paperUrl": "",
+      "providerId": "Google"
     }
   ]
 }

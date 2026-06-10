@@ -16,6 +16,11 @@ aliases = [
     # LMArena endpoint/harness spellings.
     "gpt-5.5-search", "gpt-5.5-xhigh (codex-harness)",
     "gpt-5.5-high (codex-harness)", "gpt-5.5 (codex-harness)",
+    # Scale/SWERebench Codex harness spellings from the 2026-06 refresh.
+    "GPT 5.5 (Codex) xHigh", "GPT-5.5 (Codex) xHigh",
+    "gpt-5.5 (codex) xhigh", "gpt-5-5-codex-xhigh",
+    "gpt-5.5-2026-04-23-medium", "gpt-5.5-2026-04-23-xhigh",
+    "gpt-5-5-2026-04-23-medium", "gpt-5-5-2026-04-23-xhigh",
 ]
 
 [models."openai/gpt-5.4"]
@@ -26,6 +31,11 @@ aliases = [
     # LMArena endpoint/harness spellings.
     "gpt-5.4-search", "gpt-5.4-high (codex-harness)",
     "gpt-5.4-medium (codex-harness)",
+    # Scale harness spellings from the 2026-06 refresh.
+    "GPT 5.4 (Codex) xHigh", "GPT-5.4 (Codex) xHigh",
+    "GPT-5.4 (Codex CLI) xHigh", "GPT-5.4 (Mini-SWE) xHigh",
+    "gpt-5.4 (codex) xhigh", "gpt-5.4 (codex cli) xhigh",
+    "gpt-5.4 (mini-swe) xhigh",
 ]
 
 [models."openai/gpt-5.3-codex"]
@@ -105,6 +115,17 @@ aliases = [
     "claude-opus-4-8 (max)", "claude-opus-4-8-max",
     # Scale SWE Atlas agent spelling.
     "Opus 4.8 Claude Code (xHigh thinking)",
+    "Opus 4.8 (Claude Code)", "opus 4.8 claude code",
+    "Opus 4.8 (Claude Code) xHigh",
+]
+
+[models."anthropic/claude-fable-5"]
+vendor = "anthropic"
+aliases = [
+    "fable 5", "claude fable 5", "claude-fable-5",
+    "anthropic/claude-fable-5", "Claude Fable 5",
+    "claude-fable-latest", "claude fable latest",
+    "anthropic/claude-fable-latest", "~anthropic/claude-fable-latest",
 ]
 
 [models."google/gemini-3.1-pro-preview"]
@@ -387,7 +408,17 @@ aliases = [
     "minimax-m2.7", "minimax m2.7", "minimax-m2-7",
     "minimax 2.7",
     "MiniMax-M2.7", "MiniMax M2.7",
+    "MiniMax M2.7 Highspeed", "minimax-m2.7-highspeed",
+    "minimax m2.7 highspeed",
     "minimax/minimax-m2.7",
+]
+
+[models."minimax/minimax-m3"]
+vendor = "minimax"
+aliases = [
+    "minimax-m3", "minimax m3",
+    "MiniMax-M3", "MiniMax M3",
+    "minimax/minimax-m3",
 ]
 
 # Qwen3.6-Plus — Alibaba's flagship "Plus" tier (always-on chain-of-
@@ -406,11 +437,21 @@ aliases = [
     "Qwen3.6-Plus",
 ]
 
+[models."qwen/qwen3.7-plus"]
+vendor = "alibaba"
+aliases = [
+    "qwen3.7-plus", "qwen3.7 plus", "qwen3-7-plus",
+    "qwen 3.7 plus",
+    "qwen/qwen3.7-plus", "alibaba/qwen3.7-plus",
+    "Qwen3.7 Plus", "Qwen3.7-Plus",
+]
+
 [models."qwen/qwen3.7-max"]
 vendor = "alibaba"
 aliases = [
     "qwen3.7-max", "qwen3.7 max", "qwen3-7-max",
     "qwen3.7-max-preview", "qwen3.7 max preview", "qwen3-7-max-preview",
+    "qwen3.7-max-20260517", "qwen3-7-max-20260517",
     "qwen 3.7 max",
     "qwen/qwen3.7-max", "alibaba/qwen3.7-max",
     "Qwen3.7 Max", "Qwen3.7-Max",
