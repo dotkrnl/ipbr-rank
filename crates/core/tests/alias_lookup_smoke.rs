@@ -110,14 +110,55 @@ fn lookup_2026_05_22_models() {
 }
 
 #[test]
+fn lookup_2026_06_12_models() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        ("gpt-5.2-codex", Some("openai"), "openai/gpt-5.2-codex"),
+        ("gpt-5.4-mini-high", Some("openai"), "openai/gpt-5.4-mini"),
+        ("gpt-5.4-pro-xhigh", Some("openai"), "openai/gpt-5.4-pro"),
+        ("gpt-5.5-pro-xhigh", Some("openai"), "openai/gpt-5.5-pro"),
+        (
+            "deepseek-v3-2-reasoning-0925",
+            Some("deepseek"),
+            "deepseek/deepseek-v3.2",
+        ),
+        (
+            "gemini-3-1-flash-lite",
+            Some("google"),
+            "google/gemini-3.1-flash-lite",
+        ),
+        ("grok-4.20-0309-reasoning", Some("xai"), "xai/grok-4.20"),
+        (
+            "qwen3-6-max-preview",
+            Some("alibaba"),
+            "qwen/qwen3.6-max-preview",
+        ),
+        (
+            "qwen3-5-397b-a17b",
+            Some("alibaba"),
+            "qwen/qwen3.5-397b-a17b",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
     let cases: &[(&str, Option<&str>)] = &[
-        ("gpt-5.4-mini-high", Some("openai")),
         ("gpt-5.4-nano-high", Some("openai")),
         ("gpt-5.5-instant", Some("openai")),
-        ("gpt-5.2-codex", Some("openai")),
         ("minimax-m2", Some("minimax")),
         ("glm-4.6v", Some("zai")),
     ];

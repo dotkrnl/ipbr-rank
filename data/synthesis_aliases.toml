@@ -27,6 +27,15 @@ target = "openai/gpt-5.3-codex"
 from = "openai/gpt-5.4"
 category = "conservative"
 
+# GPT-5.2-Codex is an older coding-specialist sibling. It has strong direct
+# coding coverage from AA/LMArena/Sonar/SWE/Terminal/OpenRouter; GPT-5.3-Codex
+# fills only remaining public-source gaps and is newer, so keep this
+# conservative rather than same-series-forward.
+[[pair]]
+target = "openai/gpt-5.2-codex"
+from = "openai/gpt-5.3-codex"
+category = "conservative"
+
 # Sonnet 4 was released May 2025 and never benchmarked by Anthropic on
 # Terminal-bench (only Opus 4 was) or by tbench.ai upstream, so it lacks
 # direct coverage on several agentic-coding leaderboards. Use Sonnet 4.5
@@ -151,9 +160,30 @@ target = "openai/gpt-5.4"
 from = "openai/gpt-5.3-codex"
 category = "conservative"
 
+# GPT-5.4 Pro and Mini are same-version tier variants, not version advances.
+# The official tables cover the headline Pro/Mini metrics; base GPT-5.4 fills
+# residual older-leaderboard gaps conservatively.
+[[pair]]
+target = "openai/gpt-5.4-pro"
+from = "openai/gpt-5.4"
+category = "conservative"
+
+[[pair]]
+target = "openai/gpt-5.4-mini"
+from = "openai/gpt-5.4"
+category = "conservative"
+
 [[pair]]
 target = "openai/gpt-5.5"
 from = "openai/gpt-5.4"
+category = "same_series_forward"
+
+# GPT-5.5 Pro is the direct Pro-line successor to GPT-5.4 Pro. Direct
+# ARC/OpenRouter plus official Browse/HLE rows win where available; the
+# remaining Pro-line gaps use version-advance synthesis with no penalty.
+[[pair]]
+target = "openai/gpt-5.5-pro"
+from = "openai/gpt-5.4-pro"
 category = "same_series_forward"
 
 # Grok-code-fast-1 lacks arc_agi; grok-4-latest has it. Same vendor, small
@@ -185,6 +215,14 @@ category = "conservative"
 [[pair]]
 target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
+category = "conservative"
+
+# DeepSeek V3.2 has broad direct public coverage but lacks several newer
+# official/agentic rows that V4-Flash carries. Because the target is an older
+# generation borrowing from a newer generation, keep the conservative penalty.
+[[pair]]
+target = "deepseek/deepseek-v3.2"
+from = "deepseek/deepseek-v4-flash"
 category = "conservative"
 
 # ------------------------------------------------------------------
@@ -294,6 +332,32 @@ target = "google/gemini-3.5-flash"
 from = "google/gemini-3-flash"
 category = "same_series_forward"
 
+# Gemini 3.1 Flash-Lite is an efficiency-tier model with direct OR/LMArena/
+# MCP/Sonar rows. Gemini 3.5 Flash is a newer Flash-family donor with broader
+# official and public coverage, so this older/lower-tier target remains
+# conservative.
+[[pair]]
+target = "google/gemini-3.1-flash-lite"
+from = "google/gemini-3.5-flash"
+category = "conservative"
+
+# Qwen3.5-397B-A17B is the prior open-weight flagship and has official
+# Qwen3.5 rows plus OR/LMArena/SWERebench coverage. Qwen3.6-Plus is a newer
+# hosted same-vendor donor for gaps that the older open model never published.
+[[pair]]
+target = "qwen/qwen3.5-397b-a17b"
+from = "qwen/qwen3.6-plus"
+category = "conservative"
+
+# Qwen3.6-Max-Preview is newer than the Qwen3.5-397B open flagship. Alibaba's
+# page reports relative/top-rank gains but not every exact score in text; the
+# older same-vendor Qwen3.x donor contributes public Sonar/SWE-Rebench-style
+# coverage and is a version-advance fill under the synthesis policy.
+[[pair]]
+target = "qwen/qwen3.6-max-preview"
+from = "qwen/qwen3.5-397b-a17b"
+category = "same_series_forward"
+
 # Qwen3.7-Max is Alibaba's direct successor to Qwen3.6-Plus. The vendor
 # published the key SWE/Terminal/MCP/BFCL values for 3.7-Max, while 3.6-Plus
 # still has broader public-source coverage through its GLM-5 tier proxy above.
@@ -317,6 +381,15 @@ category = "same_series_forward"
 target = "xai/grok-4.3"
 from = "xai/grok-4-latest"
 category = "same_series_forward"
+
+# Grok 4.20 has direct ARC/LMArena/Terminal/OpenRouter rows. xAI's docs expose
+# availability/pricing but no scored official eval table, so Grok 4.3 remains
+# the nearest same-vendor donor for residual gaps. Use conservative because the
+# version chronology/tier relationship is not a clean forward-version fill.
+[[pair]]
+target = "xai/grok-4.20"
+from = "xai/grok-4.3"
+category = "conservative"
 
 # Muse Spark has direct AA, LMArena, and SWE Atlas rows, but no official
 # SWE-Bench/GDPval/OpenRouter-style operational data yet. Gemini 3.5 Flash is
