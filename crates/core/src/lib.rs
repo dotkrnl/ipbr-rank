@@ -10,8 +10,11 @@ pub mod scoreboard;
 pub mod synthesize;
 
 pub use alias::{AliasIndex, normalize_name, normalize_vendor_hint};
-pub use coefficients::{Coefficients, MetricDef, MetricTransform, SynthesisConfig};
-pub use ingest::{IngestStats, ingest_rows, warn_stale_overrides};
+pub use coefficients::{
+    AggregationConfig, Coefficients, EffortException, EffortPolicy, MetricDef, MetricTransform,
+    PenaltiesConfig, SynthesisConfig,
+};
+pub use ingest::{IngestStats, ingest_rows, ingest_rows_with_policy, warn_stale_overrides};
 pub use model::{
     GroupKey, MetricKey, MissingInfo, ModelRecord, RawRow, RoleScores, SourceId, SynthesisCategory,
     SynthesisProvenance, ThinkingEffort, Vendor,

@@ -440,7 +440,7 @@ fn render_missing_pills(model: &ipbr_core::ModelRecord) -> String {
 const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <summary>how scoring works</summary>
 <div class="scoring-body">
-<p>Each model gets four role scores from public benchmarks. <strong>Idea</strong> measures open-ended creativity. <strong>Plan</strong> measures structured reasoning, function-calling, and multi-step decomposition. <strong>Build</strong> measures implementation skill — SWE-bench, LiveCodeBench, terminal tasks. <strong>Review</strong> measures preference judgment.</p>
+<p>Each model gets four role scores from public benchmarks. <strong>Idea</strong> measures open-ended creativity. <strong>Plan</strong> measures structured reasoning, function-calling, and multi-step decomposition. <strong>Build</strong> measures implementation skill — SWE-bench, LiveCodeBench, terminal tasks. <strong>Review</strong> is currently a proxy built from plan/build evidence plus LM Arena search/document preferences; a direct code-review benchmark is not yet ingested.</p>
 
 <h3>scoring</h3>
 <p>Each role score is the benchmark composite for that role, normalized to 0-100 and combined via weighted average of group scores. See the about page for the full math.</p>

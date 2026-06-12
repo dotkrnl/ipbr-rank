@@ -104,6 +104,61 @@ impl Default for PenaltiesConfig {
     }
 }
 
+/// Per-source/vendor/canonical effort carve-outs. The default scoring set
+/// is `default | medium | thinking`; exceptions listed here allow a higher
+/// effort variant to score when upstream only publishes that variant.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EffortPolicy {
+    #[serde(default)]
+    pub exceptions: Vec<EffortException>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct EffortException {
+    /// Effort name that would otherwise be blocked ("high", "max", ...).
+    pub effort: String,
+    /// Optional source id or prefix ending in `*`.
+    #[serde(default)]
+    pub source: Option<String>,
+    /// Optional vendor name.
+    #[serde(default)]
+    pub vendor: Option<String>,
+    /// Optional exact canonical id.
+    #[serde(default)]
+    pub canonical_id: Option<String>,
+}
+
+impl EffortPolicy {
+    pub fn allows(&self, effort: &str, source_id: &str, vendor: &str, canonical_id: &str) -> bool {
+        let effort_norm = effort.to_lowercase().replace(['-', '_'], " ");
+        self.exceptions.iter().any(|rule| {
+            if rule.effort.to_lowercase().replace(['-', '_'], " ") != effort_norm {
+                return false;
+            }
+            if let Some(s) = &rule.source {
+                if s.ends_with('*') {
+                    if !source_id.starts_with(&s[..s.len() - 1]) {
+                        return false;
+                    }
+                } else if s != source_id {
+                    return false;
+                }
+            }
+            if let Some(v) = &rule.vendor
+                && v.to_lowercase() != vendor.to_lowercase()
+            {
+                return false;
+            }
+            if let Some(c) = &rule.canonical_id
+                && c != canonical_id
+            {
+                return false;
+            }
+            true
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Coefficients {
     #[serde(default)]
@@ -115,7 +170,7 @@ pub struct Coefficients {
     /// into a single derived metric using the same missing-safe weighted
     /// average as group aggregation. Composites are computed after the raw
     /// metrics are normalized and inserted into `r.metrics`, so subsequent
-    /// group aggregation can reference them by name. Inputs MUST be other
+    /// group aggregation can consume them by name. Inputs MUST be other
     /// metrics defined in `[metrics.X]`; composites cannot reference other
     /// composites (kept simple on purpose).
     #[serde(default)]
@@ -126,6 +181,8 @@ pub struct Coefficients {
     pub penalties: Option<PenaltiesConfig>,
     #[serde(default)]
     pub aggregation: Option<AggregationConfig>,
+    #[serde(default)]
+    pub effort_policy: EffortPolicy,
 }
 
 const EMBEDDED_COEFFICIENTS: &str = include_str!("../../../data/coefficients.toml");

@@ -78,6 +78,61 @@ LiveCodingComposite = 0.12
 # Verified+Pro coverage clear the shrink transition. Verified remains
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
+[effort_policy]
+# Exceptions to the default scoring effort set (default | medium | thinking).
+# Higher-effort variants are normally skipped so the scoreboard reflects the
+# model's default behaviour; these carve-outs apply when upstream only
+# publishes that variant.
+
+# Qwen "Max" is a product tier, not a reasoning-effort marker.
+[[effort_policy.exceptions]]
+effort = "max"
+canonical_id = "qwen/qwen3.6-max-preview"
+
+[[effort_policy.exceptions]]
+effort = "max"
+canonical_id = "qwen/qwen3.7-max"
+
+# Anthropic submits MCP-Atlas only as max/high effort runs.
+[[effort_policy.exceptions]]
+effort = "max"
+source = "mcp_atlas"
+vendor = "anthropic"
+
+[[effort_policy.exceptions]]
+effort = "high"
+source = "mcp_atlas"
+vendor = "anthropic"
+
+# Artificial Analysis sometimes ships only a high row for these endpoints.
+[[effort_policy.exceptions]]
+effort = "high"
+source = "artificial_analysis"
+canonical_id = "google/gemini-3-pro"
+
+[[effort_policy.exceptions]]
+effort = "high"
+source = "artificial_analysis"
+canonical_id = "google/gemini-3.5-flash"
+
+[[effort_policy.exceptions]]
+effort = "high"
+source = "artificial_analysis"
+canonical_id = "xai/grok-4.3"
+
+# Scale SWE Atlas harness submissions are benchmark observations.
+[[effort_policy.exceptions]]
+effort = "max"
+source = "sweatlas_*"
+
+[[effort_policy.exceptions]]
+effort = "high"
+source = "sweatlas_*"
+
+[[effort_policy.exceptions]]
+effort = "thinking"
+source = "sweatlas_*"
+
 [synthesis]
 # Tightened to 0.50: more than half of a model's scored cells should not be
 # borrowed from siblings. The 15 % conservative pull already softens synthetic

@@ -124,10 +124,10 @@ pub fn synthesize_rows(
                     .push(idx);
             }
         }
-        // Cap counts unique synthesis pairs that emitted (matching the
-        // original semantic: "how many target models use this source via
-        // synthesis"). Stats track total cloned rows for downstream debug.
-        let mut synth_pair_count = 0usize;
+        // Cap counts emitted synthesized rows relative to real rows. A source
+        // with many multi-row donors (e.g. swebench, overrides) can fill a lot
+        // of fields from a single pair, so bounding rows bounds actual influence
+        // better than counting unique target models.
         let mut synth_row_count = 0usize;
 
         for pair in pairs {
@@ -137,8 +137,8 @@ pub fn synthesize_rows(
             let target_id = &pair.target;
             let from_id = &pair.from;
             if real_count > 0
-                && synth_pair_count > 0
-                && (synth_pair_count as f64 / (real_count + synth_pair_count) as f64)
+                && synth_row_count > 0
+                && (synth_row_count as f64 / (real_count + synth_row_count) as f64)
                     > cfg.per_source_cap
             {
                 // REVIEWER: the spec calls for a warning here, but `ipbr-core` deliberately avoids
@@ -176,7 +176,6 @@ pub fn synthesize_rows(
 
             let mut target_fields =
                 current_fields_for_target(rows, &row_indices_by_canonical, target_id);
-            let mut emitted_for_pair = false;
             for donor_idx in donor_indices {
                 let donor = rows[donor_idx].clone();
                 if !has_fillable_field(&donor, &target_fields) {
@@ -206,10 +205,6 @@ pub fn synthesize_rows(
                     target_fields.insert(field);
                 }
                 synth_row_count += 1;
-                emitted_for_pair = true;
-            }
-            if emitted_for_pair {
-                synth_pair_count += 1;
             }
         }
 

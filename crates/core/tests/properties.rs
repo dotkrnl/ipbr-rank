@@ -1,7 +1,10 @@
 use ipbr_core::MissingInfo;
 use ipbr_core::aggregate::missing_safe_avg;
-use ipbr_core::coefficients::AggregationConfig;
+use ipbr_core::coefficients::{AggregationConfig, Coefficients};
+use ipbr_core::ingest::ingest_rows;
+use ipbr_core::model::{ModelRecord, RawRow, Vendor};
 use proptest::prelude::*;
+use serde_json::json;
 use std::collections::BTreeMap;
 
 fn build_weights(values: &[f64]) -> BTreeMap<String, f64> {
@@ -104,5 +107,103 @@ proptest! {
         let cfg = AggregationConfig::default();
         let (v, _) = missing_safe_avg(&m_map, &w_map, &mut missing, "", &cfg);
         prop_assert!((v - 50.0).abs() < 1e-9);
+    }
+}
+
+#[test]
+fn real_rows_always_win_over_synthesized_and_penalty_is_bounded() {
+    // Deterministic property: for every scored metric, a real row should
+    // clobber a synthesized row regardless of input order, and a synthesized
+    // row should be pulled toward 50 by no more than the configured penalty.
+    let coef = Coefficients::load_embedded().unwrap();
+    let penalty = coef.penalties.as_ref().map(|p| p.synthesis).unwrap_or(0.15);
+
+    let make_record = |canonical: &str| {
+        let mut r = ModelRecord::new(
+            canonical.to_string(),
+            canonical.to_string(),
+            Vendor::Other("test".to_string()),
+        );
+        r.aliases.insert(canonical.to_string());
+        r
+    };
+
+    let make_real = |metric: &str, value: f64| {
+        let mut fields: BTreeMap<String, serde_json::Value> = BTreeMap::new();
+        fields.insert(metric.to_string(), json!(value));
+        RawRow {
+            source_id: "source".to_string(),
+            model_name: "target".to_string(),
+            vendor_hint: None,
+            fields,
+            synthesized_from: None,
+            synthesis_category: None,
+        }
+    };
+
+    let make_synth = |metric: &str, value: f64| {
+        let mut fields: BTreeMap<String, serde_json::Value> = BTreeMap::new();
+        fields.insert(metric.to_string(), json!(value));
+        RawRow {
+            source_id: "source".to_string(),
+            model_name: "target".to_string(),
+            vendor_hint: None,
+            fields,
+            synthesized_from: Some("donor".to_string()),
+            synthesis_category: Some(ipbr_core::SynthesisCategory::Conservative),
+        }
+    };
+
+    for metric in [
+        "TerminalBench",
+        "LMArenaText",
+        "SWEBenchVerified",
+        "MMLUPro",
+    ] {
+        // synth then real
+        let mut records = vec![make_record("target")];
+        let rows = vec![make_synth(metric, 100.0), make_real(metric, 80.0)];
+        ingest_rows(&mut records, rows);
+        let val = records[0].raw_metrics.get(metric).copied().unwrap();
+        assert!(
+            (val - 80.0).abs() < 1e-9,
+            "real row should overwrite synthesized for {metric}"
+        );
+        assert!(
+            !records[0].synthesized.contains_key(metric),
+            "synthesized provenance should be cleared for {metric}"
+        );
+
+        // real then synth
+        let mut records = vec![make_record("target")];
+        let rows = vec![make_real(metric, 80.0), make_synth(metric, 100.0)];
+        ingest_rows(&mut records, rows);
+        let val = records[0].raw_metrics.get(metric).copied().unwrap();
+        assert!(
+            (val - 80.0).abs() < 1e-9,
+            "real row should win regardless of order for {metric}"
+        );
+
+        // synth-only: normalized value should be pulled toward 50 by
+        // at most the configured synthesis penalty.
+        let mut records = vec![make_record("low"), make_record("target")];
+        records[0].raw_metrics.insert(metric.to_string(), 0.0);
+        records[1].raw_metrics.insert(metric.to_string(), 100.0);
+        records[1].synthesized.insert(
+            metric.to_string(),
+            ipbr_core::SynthesisProvenance {
+                source_id: "source".to_string(),
+                from: "donor".to_string(),
+                category: ipbr_core::SynthesisCategory::Conservative,
+            },
+        );
+        ipbr_core::compute_scores_with(&mut records, &coef);
+        let synth_norm = records[1].metrics.get(metric).copied().unwrap_or(50.0);
+        // normalized direct top = 100; conservative synth = 100*(1-p)+50*p
+        let expected = 100.0 * (1.0 - penalty) + 50.0 * penalty;
+        assert!(
+            (synth_norm - expected).abs() < 0.5,
+            "synthesized {metric} should be pulled toward 50 by ~{penalty}, got {synth_norm}"
+        );
     }
 }

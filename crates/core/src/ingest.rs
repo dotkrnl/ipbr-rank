@@ -20,6 +20,14 @@ pub struct IngestStats {
 }
 
 pub fn ingest_rows(records: &mut [ModelRecord], rows: Vec<RawRow>) -> IngestStats {
+    ingest_rows_with_policy(records, rows, &crate::coefficients::EffortPolicy::default())
+}
+
+pub fn ingest_rows_with_policy(
+    records: &mut [ModelRecord],
+    rows: Vec<RawRow>,
+    effort_policy: &crate::coefficients::EffortPolicy,
+) -> IngestStats {
     let mut stats = IngestStats::default();
     let snapshot: Vec<ModelRecord> = records.to_vec();
     let index = AliasIndex::build(&snapshot);
@@ -30,10 +38,17 @@ pub fn ingest_rows(records: &mut [ModelRecord], rows: Vec<RawRow>) -> IngestStat
         .partition(|row| row.synthesized_from.is_none());
 
     for row in real_rows {
-        ingest_real_row(records, &index, row, &mut stats, &mut real_metric_choices);
+        ingest_real_row(
+            records,
+            &index,
+            row,
+            &mut stats,
+            &mut real_metric_choices,
+            effort_policy,
+        );
     }
     for row in synthesized_rows {
-        ingest_synthesized_row(records, &index, row, &mut stats);
+        ingest_synthesized_row(records, &index, row, &mut stats, effort_policy);
     }
 
     stats
@@ -106,6 +121,7 @@ fn ingest_real_row(
     row: RawRow,
     stats: &mut IngestStats,
     metric_choices: &mut BTreeMap<(usize, String), EffortPreference>,
+    effort_policy: &crate::coefficients::EffortPolicy,
 ) {
     match index.match_record(&row.model_name, row.vendor_hint.as_deref()) {
         Some(i) => {
@@ -119,7 +135,13 @@ fn ingest_real_row(
             record.sources.insert(row.source_id);
             for (key, value) in row.fields {
                 if let Some(num) = json_to_f64(&value) {
-                    if !is_scoring_allowed_for(preference, &source_id, &canonical_id, &vendor) {
+                    if !is_scoring_allowed_for(
+                        preference,
+                        &source_id,
+                        &canonical_id,
+                        &vendor,
+                        effort_policy,
+                    ) {
                         continue;
                     }
                     let choice_key = (i, key.clone());
@@ -217,73 +239,37 @@ impl EffortPreference {
     }
 }
 
-/// Variant policy with two narrow per-source carve-outs:
-///
-/// 1. **Anthropic on MCP-Atlas** — Anthropic submits to Scale Labs' MCP-Atlas
-///    leaderboard only as `(max)` effort runs (no `(medium)` variant exists
-///    upstream). Without this carve-out opus-4.5/4.6/4.7 silently lose all
-///    MCP-Atlas signal, which is a heavily-weighted PLAN/BUILD metric.
-///
-/// 2. **high-only AA endpoint rows** — Artificial Analysis sometimes ships
-///    only a `(high)` row for a model endpoint; there's no medium/thinking
-///    alternative to prefer. Without this carve-out those models lose the
-///    whole AA metric bundle despite AA being the only live source for them.
-///
-/// 3. **Scale SWE Atlas harness submissions** — the public Scale rows are
-///    harness+model submissions and often include xHigh/Max effort labels
-///    without a lower-effort companion. Treat the submitted result as the
-///    benchmark observation, mirroring the existing MCP-Atlas exception.
-///
-/// 4. **Qwen Max product tier** — Qwen3.6-Max-Preview and Qwen3.7-Max use
-///    "Max" as the model tier, not as an effort/scaffolding marker.
-///    High-effort suffixes such as `-high` still resolve to `High` and remain
-///    blocked unless explicitly carved out.
+/// Variant policy driven by `[effort_policy]` in `coefficients.toml`. The
+/// default scoring set is `default | medium | thinking`; exceptions allow
+/// specific higher-effort variants to score when upstream only publishes
+/// those variants.
 ///
 /// These carve-outs are *single-source-and-canonical-scoped* by design — they
 /// do not weaken the global "no high/xhigh/max" policy for any other model
-/// or any other source. If a vendor ever ships a non-max variant for the
-/// same endpoint, the existing `metric_choices` last-write-wins-by-effort
-/// logic will prefer the lower-effort variant.
+/// or source. If a vendor ever ships a non-max variant for the same endpoint,
+/// the existing `metric_choices` last-write-wins-by-effort logic will prefer
+/// the lower-effort variant.
 fn is_scoring_allowed_for(
     preference: EffortPreference,
     source_id: &str,
     canonical_id: &str,
     vendor: &Vendor,
+    effort_policy: &crate::coefficients::EffortPolicy,
 ) -> bool {
     if preference.is_scoring_allowed() {
         return true;
     }
-    if matches!(
-        canonical_id,
-        "qwen/qwen3.6-max-preview" | "qwen/qwen3.7-max"
-    ) && matches!(preference, EffortPreference::Max)
-    {
-        return true;
-    }
-    if source_id == "mcp_atlas"
-        && matches!(preference, EffortPreference::Max | EffortPreference::High)
-        && matches!(vendor, Vendor::Anthropic)
-    {
-        return true;
-    }
-    if source_id == "artificial_analysis"
-        && matches!(preference, EffortPreference::High)
-        && matches!(
-            canonical_id,
-            "google/gemini-3-pro" | "google/gemini-3.5-flash" | "xai/grok-4.3"
-        )
-    {
-        return true;
-    }
-    if source_id.starts_with("sweatlas_")
-        && matches!(
-            preference,
-            EffortPreference::Max | EffortPreference::High | EffortPreference::Thinking
-        )
-    {
-        return true;
-    }
-    false
+    let effort_name = match preference {
+        EffortPreference::High => "high",
+        EffortPreference::Max => "max",
+        EffortPreference::Thinking => "thinking",
+        EffortPreference::Low => "low",
+        EffortPreference::NonReasoning => "non reasoning",
+        EffortPreference::Medium => "medium",
+        EffortPreference::Default => "default",
+        EffortPreference::Other => "other",
+    };
+    effort_policy.allows(effort_name, source_id, vendor.as_str(), canonical_id)
 }
 
 fn contains_phrase(normalized_text: &str, phrase: &str) -> bool {
@@ -316,6 +302,7 @@ fn ingest_synthesized_row(
     index: &AliasIndex<'_>,
     row: RawRow,
     stats: &mut IngestStats,
+    effort_policy: &crate::coefficients::EffortPolicy,
 ) {
     match index.match_record(&row.model_name, row.vendor_hint.as_deref()) {
         Some(i) => {
@@ -333,7 +320,13 @@ fn ingest_synthesized_row(
                 if NON_SYNTHESIZED_METRICS.contains(&key.as_str()) {
                     continue;
                 }
-                if !is_scoring_allowed_for(preference, &source_id, &canonical_id, &vendor) {
+                if !is_scoring_allowed_for(
+                    preference,
+                    &source_id,
+                    &canonical_id,
+                    &vendor,
+                    effort_policy,
+                ) {
                     continue;
                 }
                 if record.raw_metrics.contains_key(&key) {
@@ -802,7 +795,11 @@ mod tests {
                 synthesized,
             ];
 
-            let stats = ingest_rows(&mut records, rows);
+            let stats = ingest_rows_with_policy(
+                &mut records,
+                rows,
+                &crate::Coefficients::load_embedded().unwrap().effort_policy,
+            );
 
             assert_eq!(stats.matched, 3);
             assert_eq!(records[0].raw_metrics.get("SWEBenchPro"), Some(&60.6));

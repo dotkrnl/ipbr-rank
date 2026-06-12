@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context;
 use clap::Parser;
 use ipbr_core::{
-    Coefficients, IngestStats, ModelRecord, RawRow, SourceSummary, ingest_rows,
+    Coefficients, IngestStats, ModelRecord, RawRow, SourceSummary, ingest_rows_with_policy,
     load_embedded_pairs, required_aliases, synthesize_rows,
 };
 use ipbr_render::{
@@ -548,6 +548,7 @@ async fn build_scoreboard(
             .get(&source_id)
             .map(String::as_str)
             .unwrap_or("verified");
+        let effort_policy = &coefficients.effort_policy;
         record_source_summary(
             &mut source_summary,
             &source_id,
@@ -555,6 +556,7 @@ async fn build_scoreboard(
             row_count,
             &mut records,
             rows,
+            effort_policy,
         );
     }
 
@@ -589,8 +591,9 @@ fn record_source_summary(
     row_count: usize,
     records: &mut [ModelRecord],
     rows: Vec<ipbr_core::RawRow>,
+    effort_policy: &ipbr_core::EffortPolicy,
 ) {
-    let stats: IngestStats = ingest_rows(records, rows);
+    let stats: IngestStats = ingest_rows_with_policy(records, rows, effort_policy);
     source_summary.insert(
         source_id.to_string(),
         SourceSummary {

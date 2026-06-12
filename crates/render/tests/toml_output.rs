@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use ipbr_core::{
     Coefficients, ModelRecord, RawRow, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
-    ingest_rows, load_embedded_pairs, required_aliases, synthesize_rows,
+    ingest_rows_with_policy, load_embedded_pairs, required_aliases, synthesize_rows,
 };
 use ipbr_render::{
     Scoreboard,
@@ -271,7 +271,7 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
             .get(&source_id)
             .cloned()
             .unwrap_or_else(|| "verified".to_string());
-        let stats = ingest_rows(&mut records, rows);
+        let stats = ingest_rows_with_policy(&mut records, rows, &coefficients.effort_policy);
         source_summary.insert(
             source_id,
             SourceSummary {
