@@ -3,7 +3,7 @@ use crate::coefficients::SynthesisConfig;
 use crate::model::{ModelRecord, RawRow, SourceId, SynthesisCategory};
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct SynthesisStats {
@@ -17,6 +17,8 @@ pub struct SynthesisPair {
     pub from: String,
     #[serde(default)]
     pub category: SynthesisCategory,
+    #[serde(default)]
+    pub sources: Vec<String>,
 }
 
 impl SynthesisPair {
@@ -25,6 +27,7 @@ impl SynthesisPair {
             target: target.into(),
             from: from.into(),
             category: SynthesisCategory::Conservative,
+            sources: Vec::new(),
         }
     }
 
@@ -33,6 +36,7 @@ impl SynthesisPair {
             target: target.into(),
             from: from.into(),
             category: SynthesisCategory::SameSeriesForward,
+            sources: Vec::new(),
         }
     }
 }
@@ -127,6 +131,9 @@ pub fn synthesize_rows(
         let mut synth_row_count = 0usize;
 
         for pair in pairs {
+            if !pair.sources.is_empty() && !pair.sources.iter().any(|source| source == source_id) {
+                continue;
+            }
             let target_id = &pair.target;
             let from_id = &pair.from;
             if real_count > 0
@@ -144,15 +151,11 @@ pub fn synthesize_rows(
                 break;
             }
 
-            // Always emit when a donor row exists. The ingest layer applies
-            // per-field filtering (`ingest_synthesized_row` skips any field
-            // that the target already has a real value for), so a synthesis
-            // row only ends up filling fields that are *actually* missing
-            // for the target — no toml-level source-skip list needed. This
-            // is what makes synthesis the last-resort fill-in: real values
-            // always win, and partial real coverage (e.g. AISL hourly
-            // axes for a freshly-released model) is preserved while the
-            // donor's tail fills the rest.
+            // Emit only when the donor row has at least one field that the
+            // target does not already have in this source. The ingest layer
+            // still applies the authoritative per-field filtering, but this
+            // pre-filter keeps sparse-source caps from being spent on rows
+            // that can only become no-ops.
             //
             // Some sources emit multiple rows per model (e.g. swebench has a
             // separate row for each leaderboard, and the overrides source
@@ -171,8 +174,15 @@ pub fn synthesize_rows(
                 continue;
             };
 
+            let mut target_fields =
+                current_fields_for_target(rows, &row_indices_by_canonical, target_id);
+            let mut emitted_for_pair = false;
             for donor_idx in donor_indices {
                 let donor = rows[donor_idx].clone();
+                if !has_fillable_field(&donor, &target_fields) {
+                    continue;
+                }
+                let donor_fields: Vec<String> = donor.fields.keys().cloned().collect();
                 let donor_model_name = donor.model_name.clone();
                 let category = donor
                     .synthesis_category
@@ -192,15 +202,41 @@ pub fn synthesize_rows(
                     .entry(target_id.clone())
                     .or_default()
                     .push(synthesized_idx);
+                for field in donor_fields {
+                    target_fields.insert(field);
+                }
                 synth_row_count += 1;
+                emitted_for_pair = true;
             }
-            synth_pair_count += 1;
+            if emitted_for_pair {
+                synth_pair_count += 1;
+            }
         }
 
         stats.per_source.insert(source_id.clone(), synth_row_count);
     }
 
     stats
+}
+
+fn current_fields_for_target(
+    rows: &[RawRow],
+    row_indices_by_canonical: &BTreeMap<String, Vec<usize>>,
+    target_id: &str,
+) -> BTreeSet<String> {
+    row_indices_by_canonical
+        .get(target_id)
+        .into_iter()
+        .flatten()
+        .flat_map(|idx| rows[*idx].fields.keys().cloned())
+        .collect()
+}
+
+fn has_fillable_field(donor: &RawRow, target_fields: &BTreeSet<String>) -> bool {
+    donor
+        .fields
+        .keys()
+        .any(|field| field != "SynthesizedFromModelName" && !target_fields.contains(field))
 }
 
 #[cfg(test)]
@@ -260,21 +296,21 @@ mod tests {
 
     #[test]
     fn synthesize_emits_donor_row_even_when_target_has_partial_coverage() {
-        // Synthesis runs at the row level, but the ingest layer's
-        // `ingest_synthesized_row` skips any field that the target already
-        // carries a real value for (see crates/core/src/ingest.rs). So
-        // synthesize_rows always emits a synthesized row when a donor exists,
-        // and the per-field arbitration happens later. This shape lets a
-        // model with partial real coverage (e.g. AISL hourly-suite axes for
-        // a fresh release) keep its real values while picking up the donor's
-        // tail for the genuinely missing fields.
+        // Synthesis runs at the row level, but we only need to emit when
+        // the donor has at least one field the target lacks. The ingest layer
+        // still performs authoritative per-field arbitration later.
         let records = vec![
             record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
             record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4"]),
         ];
         let mut rows = rows_by_source(vec![
             raw("lmarena", "gpt-5.5", None, &[("score", json!(91.0))]),
-            raw("lmarena", "gpt-5.4", None, &[("score", json!(88.0))]),
+            raw(
+                "lmarena",
+                "gpt-5.4",
+                None,
+                &[("score", json!(88.0)), ("tail", json!(77.0))],
+            ),
         ]);
 
         let stats = synthesize_rows(
@@ -300,6 +336,83 @@ mod tests {
             Some(SynthesisCategory::SameSeriesForward)
         );
         assert_eq!(synth[0].model_name, "gpt-5.5");
+    }
+
+    #[test]
+    fn synthesize_skips_noop_when_target_already_has_donor_fields() {
+        let records = vec![
+            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+            record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4"]),
+        ];
+        let mut rows = rows_by_source(vec![
+            raw("lmarena", "gpt-5.5", None, &[("score", json!(91.0))]),
+            raw("lmarena", "gpt-5.4", None, &[("score", json!(88.0))]),
+        ]);
+
+        let stats = synthesize_rows(
+            &mut rows,
+            &[SynthesisPair::same_series_forward(
+                "openai/gpt-5.5",
+                "openai/gpt-5.4",
+            )],
+            &records,
+            &cfg(0.50, 0.50),
+        );
+
+        assert_eq!(stats.per_source.get("lmarena"), Some(&0));
+        assert_eq!(rows["lmarena"].len(), 2);
+        assert!(
+            rows["lmarena"]
+                .iter()
+                .all(|row| row.synthesized_from.is_none())
+        );
+    }
+
+    #[test]
+    fn synthesize_respects_source_scoped_pairs() {
+        let records = vec![
+            record("openai/gpt-5.5-pro", "gpt-5.5-pro", &["gpt-5.5-pro"]),
+            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+        ];
+        let mut rows = rows_by_source(vec![
+            raw(
+                "terminal_bench_2_1",
+                "gpt-5.5",
+                None,
+                &[("TerminalBench21", json!(52.4))],
+            ),
+            raw(
+                "swerebench",
+                "gpt-5.5",
+                None,
+                &[("SWERebench", json!(71.0))],
+            ),
+        ]);
+
+        synthesize_rows(
+            &mut rows,
+            &[SynthesisPair {
+                target: "openai/gpt-5.5-pro".to_string(),
+                from: "openai/gpt-5.5".to_string(),
+                category: SynthesisCategory::Conservative,
+                sources: vec!["terminal_bench_2_1".to_string()],
+            }],
+            &records,
+            &cfg(0.80, 0.80),
+        );
+
+        assert_eq!(
+            rows["terminal_bench_2_1"]
+                .iter()
+                .filter(|row| row.synthesized_from.is_some())
+                .count(),
+            1
+        );
+        assert!(
+            rows["swerebench"]
+                .iter()
+                .all(|row| row.synthesized_from.is_none())
+        );
     }
 
     #[test]

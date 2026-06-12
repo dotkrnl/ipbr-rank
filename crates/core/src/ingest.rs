@@ -234,10 +234,10 @@ impl EffortPreference {
 ///    without a lower-effort companion. Treat the submitted result as the
 ///    benchmark observation, mirroring the existing MCP-Atlas exception.
 ///
-/// 4. **Qwen Max product tier** — Qwen3.7-Max uses "Max" as the model tier,
-///    not as an effort/scaffolding marker. High-effort suffixes such as
-///    `-high` still resolve to `High` and remain blocked unless explicitly
-///    carved out.
+/// 4. **Qwen Max product tier** — Qwen3.6-Max-Preview and Qwen3.7-Max use
+///    "Max" as the model tier, not as an effort/scaffolding marker.
+///    High-effort suffixes such as `-high` still resolve to `High` and remain
+///    blocked unless explicitly carved out.
 ///
 /// These carve-outs are *single-source-and-canonical-scoped* by design — they
 /// do not weaken the global "no high/xhigh/max" policy for any other model
@@ -253,7 +253,11 @@ fn is_scoring_allowed_for(
     if preference.is_scoring_allowed() {
         return true;
     }
-    if canonical_id == "qwen/qwen3.7-max" && matches!(preference, EffortPreference::Max) {
+    if matches!(
+        canonical_id,
+        "qwen/qwen3.6-max-preview" | "qwen/qwen3.7-max"
+    ) && matches!(preference, EffortPreference::Max)
+    {
         return true;
     }
     if source_id == "mcp_atlas"
@@ -774,41 +778,39 @@ mod tests {
 
     #[test]
     fn qwen_max_product_tier_is_not_treated_as_effort() {
-        let mut records = vec![{
-            let mut r = ModelRecord::new(
-                "qwen/qwen3.7-max".to_string(),
-                "qwen3.7-max".to_string(),
-                Vendor::Alibaba,
-            );
-            r.aliases.insert("qwen/qwen3.7-max".to_string());
-            r.aliases.insert("qwen3.7-max-preview".to_string());
-            r.aliases.insert("qwen3.7-max".to_string());
-            r
-        }];
-        let mut synthesized = raw("swerebench", "qwen3.7-max", &[("SWERebench", json!(72.0))]);
-        synthesized.synthesized_from = Some("qwen/qwen3.6-plus".to_string());
-        let rows = vec![
-            raw(
-                "overrides",
-                "qwen/qwen3.7-max",
-                &[("SWEBenchPro", json!(60.6))],
+        for (canonical, display, preview_alias) in [
+            (
+                "qwen/qwen3.6-max-preview",
+                "qwen3.6-max-preview",
+                "qwen3.6-max",
             ),
-            raw(
-                "lmarena",
-                "qwen3.7-max-preview",
-                &[("LMArenaText", json!(91.0))],
-            ),
-            synthesized,
-        ];
+            ("qwen/qwen3.7-max", "qwen3.7-max", "qwen3.7-max-preview"),
+        ] {
+            let mut records = vec![{
+                let mut r =
+                    ModelRecord::new(canonical.to_string(), display.to_string(), Vendor::Alibaba);
+                r.aliases.insert(canonical.to_string());
+                r.aliases.insert(preview_alias.to_string());
+                r.aliases.insert(display.to_string());
+                r
+            }];
+            let mut synthesized = raw("swerebench", display, &[("SWERebench", json!(72.0))]);
+            synthesized.synthesized_from = Some("qwen/qwen3.6-plus".to_string());
+            let rows = vec![
+                raw("overrides", canonical, &[("SWEBenchPro", json!(60.6))]),
+                raw("lmarena", preview_alias, &[("LMArenaText", json!(91.0))]),
+                synthesized,
+            ];
 
-        let stats = ingest_rows(&mut records, rows);
+            let stats = ingest_rows(&mut records, rows);
 
-        assert_eq!(stats.matched, 3);
-        assert_eq!(records[0].raw_metrics.get("SWEBenchPro"), Some(&60.6));
-        assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&91.0));
-        assert_eq!(records[0].raw_metrics.get("SWERebench"), Some(&72.0));
-        assert!(records[0].override_reported.contains("SWEBenchPro"));
-        assert!(records[0].synthesized.contains_key("SWERebench"));
+            assert_eq!(stats.matched, 3);
+            assert_eq!(records[0].raw_metrics.get("SWEBenchPro"), Some(&60.6));
+            assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&91.0));
+            assert_eq!(records[0].raw_metrics.get("SWERebench"), Some(&72.0));
+            assert!(records[0].override_reported.contains("SWEBenchPro"));
+            assert!(records[0].synthesized.contains_key("SWERebench"));
+        }
     }
 
     #[test]

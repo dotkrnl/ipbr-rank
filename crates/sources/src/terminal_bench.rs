@@ -13,9 +13,15 @@ use crate::{
 const SOURCE_ID: &str = "terminal_bench";
 const CACHE_KEY: &str = "terminal_bench";
 const URL: &str = "https://www.tbench.ai/leaderboard/terminal-bench/2.0";
+const SOURCE_ID_2_1: &str = "terminal_bench_2_1";
+const CACHE_KEY_2_1: &str = "terminal_bench_2_1";
+const URL_2_1: &str = "https://www.tbench.ai/leaderboard/terminal-bench/2.1";
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct TerminalBenchSource;
+
+#[derive(Debug, Default, Clone, Copy)]
+pub struct TerminalBench21Source;
 
 #[async_trait::async_trait]
 impl Source for TerminalBenchSource {
@@ -49,23 +55,85 @@ impl Source for TerminalBenchSource {
         opts: FetchOptions<'_>,
         _secrets: &SecretStore,
     ) -> Result<Vec<RawRow>, SourceError> {
-        let html = if use_cached_html(opts, self.cache_key(), self.cache_ttl()) {
-            let Some(dir) = opts.cache_dir else {
-                return Err(SourceError::CacheMiss(format!(
-                    "{} requires --cache in --offline mode",
-                    self.id()
-                )));
-            };
-            read_cached_string(&cache_html_path(dir, self.cache_key()))?
-        } else {
-            let html = http.get_text(URL, &[]).await?;
-            if let Some(dir) = opts.cache_dir {
-                write_cache_html(dir, self.cache_key(), &html)?;
-            }
-            html
-        };
-        parse_rows(&html)
+        fetch_terminal_bench(
+            http,
+            opts,
+            self.id(),
+            self.cache_key(),
+            URL,
+            "TerminalBench",
+        )
+        .await
     }
+}
+
+#[async_trait::async_trait]
+impl Source for TerminalBench21Source {
+    fn id(&self) -> &str {
+        SOURCE_ID_2_1
+    }
+
+    fn cache_key(&self) -> &str {
+        CACHE_KEY_2_1
+    }
+
+    fn cache_paths(&self, cache_dir: &Path) -> Vec<PathBuf> {
+        vec![cache_html_path(cache_dir, self.cache_key())]
+    }
+
+    fn status(&self) -> VerificationStatus {
+        VerificationStatus::Verified
+    }
+
+    fn required_secret(&self) -> Option<crate::SecretRef> {
+        None
+    }
+
+    fn cache_ttl(&self) -> Duration {
+        Duration::from_secs(7 * 24 * 3600)
+    }
+
+    async fn fetch(
+        &self,
+        http: &dyn Http,
+        opts: FetchOptions<'_>,
+        _secrets: &SecretStore,
+    ) -> Result<Vec<RawRow>, SourceError> {
+        fetch_terminal_bench(
+            http,
+            opts,
+            self.id(),
+            self.cache_key(),
+            URL_2_1,
+            "TerminalBench21",
+        )
+        .await
+    }
+}
+
+async fn fetch_terminal_bench(
+    http: &dyn Http,
+    opts: FetchOptions<'_>,
+    source_id: &str,
+    cache_key: &str,
+    url: &str,
+    metric: &str,
+) -> Result<Vec<RawRow>, SourceError> {
+    let html = if use_cached_html(opts, cache_key, Duration::from_secs(7 * 24 * 3600)) {
+        let Some(dir) = opts.cache_dir else {
+            return Err(SourceError::CacheMiss(format!(
+                "{source_id} requires --cache in --offline mode",
+            )));
+        };
+        read_cached_string(&cache_html_path(dir, cache_key))?
+    } else {
+        let html = http.get_text(url, &[]).await?;
+        if let Some(dir) = opts.cache_dir {
+            write_cache_html(dir, cache_key, &html)?;
+        }
+        html
+    };
+    parse_rows(&html, metric, source_id)
 }
 
 fn cell_text(td: ElementRef<'_>) -> String {
@@ -78,7 +146,7 @@ fn cell_text(td: ElementRef<'_>) -> String {
 //   [0] checkbox  [1] rank  [2] agent  [3] model  [4] date
 //   [5] agent_org [6] model_org [7] accuracy ("82.0% ± 2.2")
 // The header tr also carries `data-slot="table-row"` so we filter by parent <tbody>.
-fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
+fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, SourceError> {
     let document = Html::parse_document(html);
     let row_sel = Selector::parse(r#"table[data-slot="table"] tbody tr[data-slot="table-row"]"#)
         .expect("valid selector");
@@ -103,9 +171,9 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
         };
 
         let mut fields = BTreeMap::new();
-        fields.insert("TerminalBench".to_string(), serde_json::Value::from(score));
+        fields.insert(metric.to_string(), serde_json::Value::from(score));
         let row = RawRow {
-            source_id: SOURCE_ID.to_string(),
+            source_id: source_id.to_string(),
             model_name: model_name.to_string(),
             vendor_hint: None,
             fields,
@@ -142,7 +210,7 @@ mod tests {
     #[test]
     fn parse_terminal_bench_fixture() {
         let html = include_str!("../../../data/fixtures/terminal_bench.html");
-        let rows = parse_rows(html).expect("fixture should parse");
+        let rows = parse_rows(html, "TerminalBench", SOURCE_ID).expect("fixture should parse");
         assert!(rows.len() >= 10, "expected >=10 rows, got {}", rows.len());
         assert!(rows.iter().all(|r| r.fields.contains_key("TerminalBench")));
 
@@ -194,7 +262,7 @@ mod tests {
           </tr>
         </tbody></table>
         "#;
-        let rows = parse_rows(html).expect("fixture should parse");
+        let rows = parse_rows(html, "TerminalBench", SOURCE_ID).expect("fixture should parse");
         assert_eq!(rows.len(), 1);
         assert_eq!(
             rows[0]

@@ -15,6 +15,7 @@ pub mod mcp_atlas;
 pub mod openrouter;
 pub mod overrides;
 pub mod registry;
+pub mod scale_agentic;
 pub mod scale_swe_atlas;
 pub mod sonar;
 pub mod swebench;
@@ -33,6 +34,7 @@ pub use lmarena::LmArenaSource;
 pub use mcp_atlas::McpAtlasSource;
 pub use openrouter::OpenRouterSource;
 pub use overrides::OverridesSource;
+pub use scale_agentic::HilBenchSource;
 pub use scale_swe_atlas::{
     SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource,
 };
@@ -40,7 +42,7 @@ pub use sonar::SonarSource;
 pub use swebench::SweBenchSource;
 pub use swebench_pro::SweBenchProSource;
 pub use swerebench::SweRebenchSource;
-pub use terminal_bench::TerminalBenchSource;
+pub use terminal_bench::{TerminalBench21Source, TerminalBenchSource};
 
 #[derive(Debug, Clone, Copy)]
 pub struct FetchOptions<'a> {

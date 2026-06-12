@@ -75,7 +75,17 @@ and agentic tool-use categories.
 - **API**: Terminal-Bench 2.0 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
+- **Metric**: `TerminalBench`
 - **Fixture**: `data/fixtures/terminal_bench.html`
+
+## terminal_bench_2_1
+
+- **Status**: Verified
+- **API**: Terminal-Bench 2.1 HTML leaderboard page
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. The source canonicalizes duplicate agent rows down to one row per matched model.
+- **Fixture**: `data/fixtures/terminal_bench_2_1.html`
 
 ## livecodebench
 
@@ -135,6 +145,15 @@ and agentic tool-use categories.
 - **Fragility note**: Same as `swebench_pro` — RSC field names.
 - **Fixture**: `data/fixtures/mcp_atlas.html`
 
+## hil_bench
+
+- **Status**: Verified
+- **API**: Scale Labs `labs.scale.com/leaderboard/hil` (same RSC pattern as `mcp_atlas`).
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metric**: `HiLBench` — human-in-the-loop escalation accuracy. It measures whether an agent recognizes ambiguous or blocked tasks and asks targeted human questions instead of guessing, so it feeds PLAN with a smaller BUILD contribution.
+- **Fixture**: `data/fixtures/hil_bench.html`
+
 ## bfcl
 
 - **Status**: Verified
@@ -187,8 +206,10 @@ real coverage from a source keeps its real values, and synthesis fills
 only the genuinely missing fields. Synthesis is the last-priority signal:
 real values always win.
 
-The synthesis layer respects per-source caps (default 30 %) so a single
-donor can't dominate a model's signal across an entire source.
+The synthesis layer respects per-source caps (configured at 65 %) so a single
+donor can't dominate a model's signal across an entire source. Individual
+pairs can also be source-scoped; the Terminal-Bench 2.1 / HiL-Bench gap-fills
+are restricted to those two narrow new sources.
 
 After per-metric normalization, conservative fields that came in via synthesis
 are pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
@@ -201,7 +222,8 @@ cross-series, and older-target-from-newer-donor fills remain
 Active pairs (target ← donor; see `data/synthesis_aliases.toml` for the
 authoritative list with rationale comments):
 
-- OpenAI: `gpt-5.5 ← gpt-5.4`, `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`
+- New-source scoped: `gpt-5.5-pro ← gpt-5.5`, `gpt-5.4-pro ← gpt-5.5`, `gpt-5.4-mini ← gpt-5.5`, `gpt-5.3-codex ← gpt-5.5`, `deepseek-v4-flash ← glm-5.1`, `deepseek-v3.2 ← deepseek-v4-flash`, `gemini-3.5-flash ← gemini-3.1-pro-preview`, `gemini-3.1-flash-lite ← gemini-3.5-flash`, `qwen3.6-plus ← glm-5.1`, `qwen3.5-397b-a17b ← qwen3.6-plus`, `qwen3.6-max-preview ← qwen3.5-397b-a17b` (Terminal-Bench 2.1 / HiL-Bench only)
+- OpenAI: `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2-codex ← gpt-5.3-codex`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`, `gpt-5.4-pro ← gpt-5.4`, `gpt-5.4-mini ← gpt-5.4`, `gpt-5.5-pro ← gpt-5.4-pro`
 - Anthropic: `claude-opus-4.7 ← claude-opus-4.6`, `claude-opus-4.5 ← claude-opus-4.6`, `claude-sonnet-4.6 ← claude-sonnet-4.5`, `claude-sonnet-4 ← claude-sonnet-4.5`
 - Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-3.5-flash ← gemini-3-flash`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
 - z.ai / Moonshot / Qwen: `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric), `moonshotai/kimi-k2.7-code ← moonshotai/kimi-k2.6`, `moonshotai/kimi-k2.5 ← moonshotai/kimi-k2.6`, `z-ai/glm-4.6 ← z-ai/glm-4.7`, `z-ai/glm-5 ← z-ai/glm-5.1`, `qwen/qwen3.6-plus ← z-ai/glm-5`, `qwen/qwen3.7-max ← qwen/qwen3.6-plus`

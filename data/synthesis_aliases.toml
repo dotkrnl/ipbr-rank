@@ -12,10 +12,89 @@
 # cross-series, or older-target-from-newer-donor fills; those keep the
 # configured 15% pull toward 50.
 
-# gpt-5.5→gpt-5.4 is declared AFTER gpt-5.4→gpt-5.3-codex so that when gpt-5.5
-# looks for a gpt-5.4 row in the swerebench source it finds the already-synthesized
-# row (gpt-5.4 ← gpt-5.3-codex), allowing one-hop chaining for SWERebench coverage.
-# Pair ordering matters: donors must be emitted before the pairs that depend on them.
+# ------------------------------------------------------------------
+# High-priority fills for Terminal-Bench 2.1 / Scale HiL-Bench
+# ------------------------------------------------------------------
+#
+# These sources cover the newest frontier rows but are intentionally narrow
+# leaderboards. Keep close same-vendor siblings near the top so sparse-source
+# caps are spent on current model gaps instead of no-op older fills.
+
+[[pair]]
+target = "openai/gpt-5.5-pro"
+from = "openai/gpt-5.5"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "openai/gpt-5.4-pro"
+from = "openai/gpt-5.5"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "openai/gpt-5.4-mini"
+from = "openai/gpt-5.5"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "openai/gpt-5.3-codex"
+from = "openai/gpt-5.5"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+# GPT-5.2-Codex is an older coding-specialist sibling. It has strong direct
+# coding coverage from AA/LMArena/Sonar/SWE/Terminal/OpenRouter; GPT-5.3-Codex
+# fills only remaining public-source gaps and is newer, so keep this
+# conservative rather than same-series-forward.
+[[pair]]
+target = "openai/gpt-5.2-codex"
+from = "openai/gpt-5.3-codex"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "deepseek/deepseek-v4-flash"
+from = "z-ai/glm-5.1"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "deepseek/deepseek-v3.2"
+from = "deepseek/deepseek-v4-flash"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "google/gemini-3.5-flash"
+from = "google/gemini-3.1-pro-preview"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "google/gemini-3.1-flash-lite"
+from = "google/gemini-3.5-flash"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "qwen/qwen3.6-plus"
+from = "z-ai/glm-5.1"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "qwen/qwen3.5-397b-a17b"
+from = "qwen/qwen3.6-plus"
+category = "conservative"
+sources = ["terminal_bench_2_1", "hil_bench"]
+
+[[pair]]
+target = "qwen/qwen3.6-max-preview"
+from = "qwen/qwen3.5-397b-a17b"
+category = "same_series_forward"
+sources = ["terminal_bench_2_1", "hil_bench"]
 
 [[pair]]
 target = "google/gemini-3.1-pro-preview"
@@ -148,8 +227,6 @@ category = "conservative"
 # overrides). The coding-specialist GPT-5.3-codex has swerebench data;
 # using it for this single benchmark is defensible since SWERebench is
 # explicitly a coding evaluation.
-# This pair is declared BEFORE gpt-5.5→gpt-5.4 so the chained swerebench
-# row is available when gpt-5.5 synthesizes from gpt-5.4.
 [[pair]]
 target = "openai/gpt-5.4"
 from = "openai/gpt-5.3-codex"
@@ -167,11 +244,6 @@ category = "conservative"
 target = "openai/gpt-5.4-mini"
 from = "openai/gpt-5.4"
 category = "conservative"
-
-[[pair]]
-target = "openai/gpt-5.5"
-from = "openai/gpt-5.4"
-category = "same_series_forward"
 
 # GPT-5.5 Pro is the direct Pro-line successor to GPT-5.4 Pro. Direct
 # ARC/OpenRouter plus official Browse/HLE rows win where available; the

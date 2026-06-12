@@ -27,18 +27,20 @@ HLETools = 0.03         # tool-assisted hard-question reasoning, kept distinct f
 # PLAN composition reflects "structured multi-step decomposition" measured
 # end-to-end. BFCL and TerminalBenchHard broaden tool-use / terminal-task
 # coverage while keeping any single agent harness from dominating PLAN.
-TerminalBench = 0.145
-TerminalBenchHard = 0.065
-BFCL = 0.065
+TerminalBench = 0.120
+TerminalBench21 = 0.035
+TerminalBenchHard = 0.060
+BFCL = 0.060
+HiLBench = 0.040
 Toolathlon = 0.035
 OSWorldVerified = 0.030
 HLETools = 0.025
 BrowseComp = 0.020
-Tau2Bench = 0.155
-ArtificialAnalysisReasoning = 0.175
-IFBench = 0.105
-LongContextRecall = 0.080
-MCPAtlas = 0.10
+Tau2Bench = 0.145
+ArtificialAnalysisReasoning = 0.160
+IFBench = 0.100
+LongContextRecall = 0.075
+MCPAtlas = 0.095
 
 # BUILD rebalanced around direct software-work evidence. SWEComposite remains
 # the largest single input, but Scale SWE Atlas now carries a separate
@@ -50,12 +52,14 @@ MCPAtlas = 0.10
 # densities do not triple-count one upstream payload. The legacy
 # LiveCodeBench JSON remains ingested but unweighted; AA's current
 # livecodebench field is carried separately as AALiveCodeBench.
-SWEComposite = 0.32
-SWEAtlasComposite = 0.16
-MCPAtlas = 0.065
-TerminalBench = 0.055
-TerminalBenchHard = 0.045
-BFCL = 0.03
+SWEComposite = 0.31
+SWEAtlasComposite = 0.155
+MCPAtlas = 0.060
+TerminalBench = 0.045
+TerminalBench21 = 0.025
+TerminalBenchHard = 0.040
+BFCL = 0.025
+HiLBench = 0.015
 Toolathlon = 0.015
 OSWorldVerified = 0.010
 GSO = 0.02
@@ -78,12 +82,14 @@ CopilotArenaOrLMArenaCode = 0.02
 [synthesis]
 # Default 0.50 is too tight for the current number of sparse frontier
 # fill-pairs across Scale, Sonar, SWE-Rebench, and operational sources.
-# 0.55 keeps the safeguard while allowing justified temporary gap-fills.
+# 0.55 kept older sources bounded, but Terminal-Bench 2.1 and HiL-Bench are
+# intentionally narrow frontier leaderboards; 0.65 lets the curated current-
+# model fills run while still capping synthetic rows below two-thirds.
 per_model_cap = 0.55
 # Several public sources have narrower coverage than the ranked model
-# set. 0.55 prevents a single source from dominating through synthesis
+# set. 0.65 prevents a single source from dominating through synthesis
 # while still letting the curated frontier-model fills run.
-per_source_cap = 0.55
+per_source_cap = 0.65
 
 [composite_metrics.SWEComposite]
 # Rebalanced: Rebench↑0.10 (contamination-resistant rolling signal deserves more
@@ -305,6 +311,15 @@ log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
+# Terminal-Bench 2.1 is a smaller but newer official Terminal-Bench track,
+# covering current agent/model combinations such as GPT-5.5, Opus 4.8,
+# Gemini 3.1 Pro, Claude Opus 4.7, and GLM-5.1.
+[metrics.TerminalBench21]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
 [metrics.TerminalBenchHard]
 higher_better = true
 log_scale = false
@@ -312,6 +327,17 @@ groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
 [metrics.BFCL]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+# HiL-Bench measures selective escalation: recognizing under-specified,
+# ambiguous, or contradictory tasks and asking targeted human questions via
+# `ask_human()` instead of guessing. It is primarily PLAN evidence with a
+# small BUILD contribution because successful escalation is needed to finish
+# blocked SWE tasks.
+[metrics.HiLBench]
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]

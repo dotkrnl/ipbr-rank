@@ -119,8 +119,8 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 |-----------|-------------------------------------------------------|
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.34), LMArenaText (0.22), GPQA_HLE_Reasoning (0.15), ARC_AGI_2 (0.12), ArtificialAnalysisMath (0.09), MMLUPro (0.08) |
-| **PLAN** (Planning) | TerminalBench (0.16), TerminalBenchHard (0.08), BFCL (0.08), ArtificialAnalysisReasoning (0.20), Tau2Bench (0.18), IFBench (0.12), LongContextRecall (0.08), MCPAtlas (0.10) |
-| **BUILD** (Building) | SWEComposite (0.32), SWEAtlasComposite (0.16), MCPAtlas (0.07), TerminalBench (0.06), TerminalBenchHard (0.05), BFCL (0.03), GSO (0.02), ArtificialAnalysisCoding (0.04), SciCode (0.04), AALiveCodeBench (0.04), GDPval (0.05), SonarComposite (0.07), LongContextRecall (0.03), CopilotArenaOrLMArenaCode (0.02) |
+| **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), HLETools (0.025), BrowseComp (0.020), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
+| **BUILD** (Building) | SWEComposite (0.310), SWEAtlasComposite (0.155), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.020), ArtificialAnalysisCoding (0.040), SciCode (0.040), AALiveCodeBench (0.040), GDPval (0.045), SonarComposite (0.065), LongContextRecall (0.030), CopilotArenaOrLMArenaCode (0.020) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
@@ -341,8 +341,10 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | MCPMarkVerified | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
 | ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN |
 | TerminalBench | higher | no | percentile | Terminal-Bench HTML | PLAN, BUILD |
+| TerminalBench21 | higher | no | percentile | Terminal-Bench 2.1 HTML | PLAN, BUILD |
 | TerminalBenchHard | higher | no | percentile | Artificial Analysis (`terminalbench_hard` field) | PLAN, BUILD |
 | BFCL | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | PLAN, BUILD |
+| HiLBench | higher | no | percentile | Scale HiL-Bench HTML | PLAN, BUILD |
 | Tau2Bench | higher | no | percentile | Artificial Analysis (tau2 field) | PLAN |
 | SciCode | higher | no | percentile | Artificial Analysis (scicode field) | BUILD |
 | AALiveCodeBench | higher | no | percentile | Artificial Analysis (livecodebench field) | BUILD |

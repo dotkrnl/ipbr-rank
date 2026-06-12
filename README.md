@@ -84,9 +84,11 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - LiveCodeBench — competitive-programming pass@1 (ingested for back-compat; *retired* from BUILD weighting after the upstream JSON froze at mid-2025 frontier — see `docs/sources.md`)
 - GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
+- Terminal-Bench 2.1 — newer narrow Terminal-Bench track covering current frontier agent/model combinations
 - BFCL V4 — Berkeley function/tool-calling leaderboard
 - Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
+- HiL-Bench (Scale) — human-in-the-loop escalation accuracy for ambiguous or blocked agent tasks
 - ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)
 - Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metric values (SWE-bench, Terminal-Bench, GDPval, MCP-Atlas, and reported-only launch-card metrics) for models the public leaderboards have not yet rated
 

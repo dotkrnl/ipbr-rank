@@ -641,6 +641,65 @@ async fn terminal_bench_fixture_contract() {
 }
 
 #[tokio::test]
+async fn terminal_bench_2_1_fixture_contract() {
+    let source = ipbr_sources::TerminalBench21Source;
+    let rows = source
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("terminal_bench_2_1 fixture should parse");
+
+    assert!(
+        rows.len() >= 6,
+        "expected at least 6 canonical fixture rows, got {}",
+        rows.len()
+    );
+    assert!(
+        rows.iter()
+            .all(|row| row.fields.contains_key("TerminalBench21"))
+    );
+    let (_records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= 6,
+        "expected at least 6 TerminalBench21 alias matches, got {matched}"
+    );
+}
+
+#[tokio::test]
+async fn hil_bench_fixture_contract() {
+    let source = ipbr_sources::HilBenchSource;
+    let rows = source
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("hil_bench fixture should parse");
+
+    assert!(
+        rows.len() >= 10,
+        "expected at least 10 fixture rows, got {}",
+        rows.len()
+    );
+    assert!(rows.iter().all(|row| row.fields.contains_key("HiLBench")));
+    let (_records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= 10,
+        "expected at least 10 HiLBench alias matches, got {matched}"
+    );
+}
+
+#[tokio::test]
 async fn livecodebench_fixture_contract() {
     let source = LiveCodeBenchSource;
     let rows = source
