@@ -49,19 +49,45 @@ done
 echo "==> building ipbr-rank-cli (release)"
 cargo build --release -p ipbr-rank-cli
 
-# Best-effort: pull the currently-published scoreboard so the new run can
-# render per-role deltas ("▲+1.2 since last refresh"). Failure is harmless;
-# the renderer just omits the chips when no prior file is present.
+# Daily snapshot: the delta indicator compares against yesterday's
+# scoreboard, not the last ~10-min refresh. On the first successful
+# run of each day, the live scoreboard is saved as a dated snapshot;
+# subsequent runs reuse it so every refresh shares the same baseline.
 mkdir -p cache
 prev_args=()
+today="$(date -u +%Y-%m-%d)"
+live="cache/prev_scoreboard.toml"
+snapshot="cache/daily_snapshot_${today}.toml"
+
+fetched=false
 if curl -fsS --max-time 10 \
     "https://ipbr.pages.dev/scoreboard.toml" \
-    -o cache/prev_scoreboard.toml 2>/dev/null; then
-  prev_args=(--prev cache/prev_scoreboard.toml)
+    -o "$live" 2>/dev/null; then
+  fetched=true
+  echo "fetched live scoreboard ($(wc -c < "$live") bytes)"
 else
-  rm -f cache/prev_scoreboard.toml
-  echo "note: prior scoreboard fetch failed; deltas will be omitted this run"
+  rm -f "$live"
+  echo "note: live scoreboard fetch failed"
 fi
+
+# Create today's snapshot if it doesn't exist yet (first run of the day).
+if [[ ! -f "$snapshot" ]] && $fetched; then
+  cp "$live" "$snapshot"
+  echo "created daily snapshot for $today"
+fi
+
+# Find the most recent daily snapshot that is NOT today's.
+yesterday_snapshot="$(ls -t cache/daily_snapshot_*.toml 2>/dev/null \
+  | grep -v "$today" | head -1)"
+if [[ -n "$yesterday_snapshot" ]]; then
+  prev_args=(--prev "$yesterday_snapshot")
+  echo "using daily snapshot: $yesterday_snapshot"
+else
+  echo "note: no prior-day snapshot found; deltas will be omitted this run"
+fi
+
+# Prune snapshots older than 7 days.
+find cache -name 'daily_snapshot_*.toml' -mtime +7 -delete 2>/dev/null || true
 
 echo "==> running pipeline"
 ./target/release/ipbr-rank \

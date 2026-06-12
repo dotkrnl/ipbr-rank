@@ -189,7 +189,7 @@ fn render_delta(current: f64, prev: Option<f64>) -> String {
         ("▼", "delta delta-down", "down")
     };
     format!(
-        r#"<span class="{cls}" aria-hidden="true">{arrow}{delta:+.1}</span><span class="sr-only"> {dir} {abs:.1} since last refresh</span>"#,
+        r#"<span class="{cls}" aria-hidden="true">{arrow}{delta:+.1}</span><span class="sr-only"> {dir} {abs:.1} since yesterday</span>"#,
         abs = delta.abs(),
     )
 }
