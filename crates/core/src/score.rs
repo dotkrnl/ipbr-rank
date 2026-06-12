@@ -80,10 +80,13 @@ fn normalize_population(
                 }
             };
             if let Some(v) = normed {
-                let final_value = if r.synthesized.contains_key(metric_key) {
-                    // Pull synthesized values toward the 50-baseline so they
-                    // act as a softer signal than direct measurements.
-                    v * (1.0 - penalties.synthesis) + 50.0 * penalties.synthesis
+                let final_value = if let Some(provenance) = r.synthesized.get(metric_key) {
+                    // Pull conservative synthesized values toward the 50
+                    // baseline so they act as a softer signal than direct
+                    // measurements. Same-series forward fills are explicit
+                    // version-advance priors and carry no synthesis pull.
+                    let penalty = provenance.category.penalty(penalties.synthesis);
+                    v * (1.0 - penalty) + 50.0 * penalty
                 } else {
                     v
                 };
@@ -159,7 +162,7 @@ mod tests {
 
     #[test]
     fn synthesized_metric_values_are_pulled_toward_50() {
-        use crate::model::SynthesisProvenance;
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
         let coef = Coefficients::load_embedded().unwrap();
         // Three records: low, high (direct), high (synthesized). The two
         // high records share a raw value but the synthesized one should
@@ -186,6 +189,7 @@ mod tests {
             SynthesisProvenance {
                 source_id: "terminal_bench".to_string(),
                 from: "d/direct".to_string(),
+                category: SynthesisCategory::Conservative,
             },
         );
         compute_scores_with(&mut records, &coef);
@@ -198,6 +202,46 @@ mod tests {
         assert!(
             (synth - 92.5).abs() < 0.5,
             "synthesized TerminalBench should pull toward 50, got {synth} (direct={direct})"
+        );
+    }
+
+    #[test]
+    fn same_series_forward_synthesized_metric_values_are_not_penalized() {
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("TerminalBench", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+            make_record(
+                "s/synth",
+                Vendor::Other("s".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+        ];
+        records[2].synthesized.insert(
+            "TerminalBench".to_string(),
+            SynthesisProvenance {
+                source_id: "terminal_bench".to_string(),
+                from: "d/direct".to_string(),
+                category: SynthesisCategory::SameSeriesForward,
+            },
+        );
+        compute_scores_with(&mut records, &coef);
+
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
+        assert!(direct > 95.0, "direct={direct}");
+        assert!(
+            (synth - direct).abs() < 1e-9,
+            "same-series forward synthesis should match direct normalized value, got synth={synth}, direct={direct}"
         );
     }
 
@@ -238,7 +282,7 @@ mod tests {
 
     #[test]
     fn synthesized_metrics_do_not_set_normalization_baseline() {
-        use crate::model::SynthesisProvenance;
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
             make_record(
@@ -262,6 +306,7 @@ mod tests {
             SynthesisProvenance {
                 source_id: "terminal_bench".to_string(),
                 from: "d/direct".to_string(),
+                category: SynthesisCategory::Conservative,
             },
         );
 

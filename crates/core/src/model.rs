@@ -19,6 +19,33 @@ impl MissingInfo {
 pub struct SynthesisProvenance {
     pub source_id: SourceId,
     pub from: String,
+    #[serde(default)]
+    pub category: SynthesisCategory,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SynthesisCategory {
+    #[default]
+    Conservative,
+    SameSeriesForward,
+}
+
+impl SynthesisCategory {
+    pub fn penalty(self, conservative_penalty: f64) -> f64 {
+        match self {
+            Self::Conservative => conservative_penalty,
+            Self::SameSeriesForward => 0.0,
+        }
+    }
+
+    pub fn chain(self, next: Self) -> Self {
+        if matches!(self, Self::Conservative) || matches!(next, Self::Conservative) {
+            Self::Conservative
+        } else {
+            Self::SameSeriesForward
+        }
+    }
 }
 
 pub type MetricKey = String;
@@ -135,4 +162,6 @@ pub struct RawRow {
     pub fields: BTreeMap<String, serde_json::Value>,
     #[serde(default)]
     pub synthesized_from: Option<String>,
+    #[serde(default)]
+    pub synthesis_category: Option<SynthesisCategory>,
 }

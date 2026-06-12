@@ -147,6 +147,7 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
             vendor_hint: None,
             fields,
             synthesized_from: None,
+            synthesis_category: None,
         });
     }
     Ok(rows)

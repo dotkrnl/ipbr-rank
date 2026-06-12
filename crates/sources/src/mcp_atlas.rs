@@ -186,6 +186,7 @@ pub(crate) fn parse_rows_with_model_map(
             vendor_hint: None,
             fields,
             synthesized_from: None,
+            synthesis_category: None,
         };
         let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
         match best_by_model.get_mut(&key) {

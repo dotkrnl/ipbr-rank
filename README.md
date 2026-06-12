@@ -96,7 +96,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 Each benchmark metric is **percentile-normalized** within the active model population (5th/95th boundaries, log-scaled for cost/speed/latency). Operational metrics (speed/cost/TTFT/context window) use a **tail-penalty** curve instead — top 80 % of the population maps into 70-100 (mild differentiation) and only the bottom 20 % drops sharply, because users perceive operational speed in tiers, not linearly.
 
 ### Synthesis Penalty
-Values that came in via sibling synthesis are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Synthesized metrics still contribute, just slightly more conservatively.
+Values that came in via conservative sibling synthesis are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Same-vendor, same-series version-advance fills carry no synthesis penalty. Synthesized metrics still contribute; the category in `data/synthesis_aliases.toml` controls whether they are discounted.
 
 Manual overrides from `data/score_overrides.toml` are also softened after
 normalization, but less aggressively: `final = score × 0.90 + 50 × 0.10`.

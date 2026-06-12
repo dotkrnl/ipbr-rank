@@ -643,6 +643,8 @@ struct ModelToml {
 struct SynthesisProvenanceToml {
     source: String,
     from: String,
+    #[serde(default)]
+    category: ipbr_core::SynthesisCategory,
 }
 
 #[derive(Debug, Deserialize)]
@@ -671,6 +673,7 @@ impl SynthesisProvenanceToml {
         ipbr_core::SynthesisProvenance {
             source_id: self.source,
             from: self.from,
+            category: self.category,
         }
     }
 }

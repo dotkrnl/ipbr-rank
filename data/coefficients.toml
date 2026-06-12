@@ -195,8 +195,9 @@ trust_transition_width = 0.20
 
 [penalties]
 # Conservative discount applied to per-metric values that came in via
-# sibling synthesis rather than a direct measurement. Pulls the score
-# toward 50 by this fraction.
+# cross-vendor/cross-series or older-target-from-newer-donor synthesis
+# rather than a direct measurement. Same-series forward fills declared in
+# data/synthesis_aliases.toml use zero synthesis penalty.
 synthesis = 0.15
 # Manual overrides are public but hand-curated. Making them slightly
 # softer than a directly ingested leaderboard row (10% pull toward 50).

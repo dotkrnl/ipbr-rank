@@ -5,6 +5,12 @@
 # The active pairs below were curated from the Phase 1 source set that now
 # emits these donor models upstream; the commented placeholders stay out of
 # the binding list until a real sibling exists in required_aliases data.
+#
+# category = "same_series_forward" means same vendor + same product line,
+# with the target newer than the donor. These fills carry zero synthesis
+# penalty after normalization. category = "conservative" covers cross-vendor,
+# cross-series, or older-target-from-newer-donor fills; those keep the
+# configured 15% pull toward 50.
 
 # gpt-5.5→gpt-5.4 is declared AFTER gpt-5.4→gpt-5.3-codex so that when gpt-5.5
 # looks for a gpt-5.4 row in the swerebench source it finds the already-synthesized
@@ -14,10 +20,12 @@
 [[pair]]
 target = "google/gemini-3.1-pro-preview"
 from = "google/gemini-3-pro"
+category = "same_series_forward"
 
 [[pair]]
 target = "openai/gpt-5.3-codex"
 from = "openai/gpt-5.4"
+category = "conservative"
 
 # Sonnet 4 was released May 2025 and never benchmarked by Anthropic on
 # Terminal-bench (only Opus 4 was) or by tbench.ai upstream, so it lacks
@@ -27,6 +35,7 @@ from = "openai/gpt-5.4"
 [[pair]]
 target = "anthropic/claude-sonnet-4"
 from = "anthropic/claude-sonnet-4.5"
+category = "conservative"
 
 # GLM-5.1 ↔ Kimi K2.6 cross-vendor synthesis. Practitioner consensus
 # (and our own SWE-rebench / AA Coding numbers where both have direct
@@ -38,10 +47,12 @@ from = "anthropic/claude-sonnet-4.5"
 [[pair]]
 target = "z-ai/glm-5.1"
 from = "moonshotai/kimi-k2.6"
+category = "conservative"
 
 [[pair]]
 target = "moonshotai/kimi-k2.6"
 from = "z-ai/glm-5.1"
+category = "conservative"
 
 # Kimi K2.7 Code is a coding-focused successor built on K2.6. As of the
 # 2026-06-12 release-day refresh, live direct coverage is limited to
@@ -51,6 +62,7 @@ from = "z-ai/glm-5.1"
 [[pair]]
 target = "moonshotai/kimi-k2.7-code"
 from = "moonshotai/kimi-k2.6"
+category = "same_series_forward"
 
 # Opus 4.7 is the direct successor to Opus 4.6. Provider overrides now cover
 # the headline SWE/Terminal values; 4.6 remains the closest donor for the
@@ -58,6 +70,7 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "anthropic/claude-opus-4.7"
 from = "anthropic/claude-opus-4.6"
+category = "same_series_forward"
 
 # Opus 4.8 is the next Opus generation after 4.7. The 2026-06-08 refresh
 # has direct AA/OpenRouter/ARC-AGI/MCP Atlas/SWE Atlas/SWERebench coverage;
@@ -65,6 +78,7 @@ from = "anthropic/claude-opus-4.6"
 [[pair]]
 target = "anthropic/claude-opus-4.8"
 from = "anthropic/claude-opus-4.7"
+category = "same_series_forward"
 
 # Claude Fable 5 is Anthropic's production Mythos-class model. Official
 # self-reports now cover the headline SWE/Terminal/MCP/GDP values, and the
@@ -73,6 +87,7 @@ from = "anthropic/claude-opus-4.7"
 [[pair]]
 target = "anthropic/claude-fable-5"
 from = "anthropic/claude-opus-4.8"
+category = "conservative"
 
 # Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
 # The 2.5-pro sibling lacks the same sources, so the next-generation
@@ -80,6 +95,7 @@ from = "anthropic/claude-opus-4.8"
 [[pair]]
 target = "google/gemini-2.5-flash"
 from = "google/gemini-3-flash"
+category = "conservative"
 
 # Gemini 2.5-pro has no SWE Atlas coverage and is sparse on several
 # current public coding sources. The 3-pro donor is same-tier and
@@ -88,6 +104,7 @@ from = "google/gemini-3-flash"
 [[pair]]
 target = "google/gemini-2.5-pro"
 from = "google/gemini-3-pro"
+category = "conservative"
 
 # ------------------------------------------------------------------
 # Synthesis for models added in the 2026-04-27 source refresh
@@ -99,12 +116,14 @@ from = "google/gemini-3-pro"
 [[pair]]
 target = "anthropic/claude-sonnet-4.6"
 from = "anthropic/claude-sonnet-4.5"
+category = "same_series_forward"
 
 # Claude Opus 4.5 is a legacy model (superseded by 4.6/4.7). Opus 4.6 has
 # full coverage. Mildly optimistic since 4.6 > 4.5, but same tier.
 [[pair]]
 target = "anthropic/claude-opus-4.5"
 from = "anthropic/claude-opus-4.6"
+category = "conservative"
 
 # GPT-5.2 is the entry-level model in the GPT-5 family. GPT-5.4 is the
 # closest forward sibling with broad source coverage. Optimistic but
@@ -112,12 +131,14 @@ from = "anthropic/claude-opus-4.6"
 [[pair]]
 target = "openai/gpt-5.2"
 from = "openai/gpt-5.4"
+category = "conservative"
 
 # GLM-4.6 and GLM-4.7 are adjacent generations from Z.ai. 4.7 should be
 # at least as capable as 4.6, making this mildly optimistic.
 [[pair]]
 target = "z-ai/glm-4.6"
 from = "z-ai/glm-4.7"
+category = "conservative"
 
 # GPT-5.4 is only missing swerebench (swebench is already covered by
 # overrides). The coding-specialist GPT-5.3-codex has swerebench data;
@@ -128,16 +149,19 @@ from = "z-ai/glm-4.7"
 [[pair]]
 target = "openai/gpt-5.4"
 from = "openai/gpt-5.3-codex"
+category = "conservative"
 
 [[pair]]
 target = "openai/gpt-5.5"
 from = "openai/gpt-5.4"
+category = "same_series_forward"
 
 # Grok-code-fast-1 lacks arc_agi; grok-4-latest has it. Same vendor, small
 # single-metric gap-fill.
 [[pair]]
 target = "xai/grok-code-fast-1"
 from = "xai/grok-4-latest"
+category = "conservative"
 
 # Kimi K2-0905 (Sept 2025) lacks SWE-Bench Pro; Moonshot only began reporting
 # Pro with K2.6. Use K2.6 as the donor for that single-metric gap. Mildly
@@ -145,6 +169,7 @@ from = "xai/grok-4-latest"
 [[pair]]
 target = "moonshotai/kimi-k2-0905"
 from = "moonshotai/kimi-k2.6"
+category = "conservative"
 
 # DeepSeek V4-Flash (released 2026-04-24) is missing SWERebench, the
 # heaviest weight in SWEComposite (0.40). SWE-Rebench is a rolling-window
@@ -160,6 +185,7 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
+category = "conservative"
 
 # ------------------------------------------------------------------
 # Synthesis for newly-added models (2026-05-07, post AA fixture refresh)
@@ -174,6 +200,7 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "moonshotai/kimi-k2.5"
 from = "moonshotai/kimi-k2.6"
+category = "conservative"
 
 # MiMo-V2.5 ← MiMo-V2.5-Pro. Same Xiaomi family, larger sibling. The
 # smaller V2.5 self-reports SWE-Pro, Terminal-Bench, and MMLU-Pro while
@@ -186,10 +213,12 @@ from = "moonshotai/kimi-k2.6"
 [[pair]]
 target = "xiaomi/mimo-v2.5-pro"
 from = "moonshotai/kimi-k2.5"
+category = "conservative"
 
 [[pair]]
 target = "xiaomi/mimo-v2.5"
 from = "xiaomi/mimo-v2.5-pro"
+category = "conservative"
 
 # MiniMax M2.5 ← Kimi K2.5. Cross-vendor tier proxy. M2.5 is an orphan
 # target — first MiniMax model in the rank, with no same-vendor sibling.
@@ -201,6 +230,7 @@ from = "xiaomi/mimo-v2.5-pro"
 [[pair]]
 target = "minimax/minimax-m2.5"
 from = "moonshotai/kimi-k2.5"
+category = "conservative"
 
 # MiniMax M2.7 ← MiniMax M2.5. Same vendor, prior generation. M2.5 has
 # full SWE-Verified + SWE-Rebench + arc_agi + terminal_bench + AA
@@ -213,6 +243,7 @@ from = "moonshotai/kimi-k2.5"
 [[pair]]
 target = "minimax/minimax-m2.7"
 from = "minimax/minimax-m2.5"
+category = "same_series_forward"
 
 # MiniMax M3 is M2.7's direct successor. The launch report covers current
 # SWE-Pro / Terminal-Bench / MCP-Atlas values, while the live refresh adds
@@ -221,6 +252,7 @@ from = "minimax/minimax-m2.5"
 [[pair]]
 target = "minimax/minimax-m3"
 from = "minimax/minimax-m2.7"
+category = "same_series_forward"
 
 # GLM-5 ← GLM-5.1. Same vendor, direct successor. Z.ai didn't publish
 # SWE-Bench Pro for the base GLM-5 (only for 5.1, where it claims SOTA
@@ -231,6 +263,7 @@ from = "minimax/minimax-m2.7"
 [[pair]]
 target = "z-ai/glm-5"
 from = "z-ai/glm-5.1"
+category = "conservative"
 
 # Qwen3.6-Plus ← GLM-5. Cross-vendor tier proxy. Qwen3.6-Plus has no
 # Alibaba sibling in our rank; AA's other Qwen entries are open-weight
@@ -246,6 +279,7 @@ from = "z-ai/glm-5.1"
 [[pair]]
 target = "qwen/qwen3.6-plus"
 from = "z-ai/glm-5"
+category = "conservative"
 
 # ------------------------------------------------------------------
 # Synthesis for newly-added models (2026-05-22, AA/LMArena/OpenRouter refresh)
@@ -258,6 +292,7 @@ from = "z-ai/glm-5"
 [[pair]]
 target = "google/gemini-3.5-flash"
 from = "google/gemini-3-flash"
+category = "same_series_forward"
 
 # Qwen3.7-Max is Alibaba's direct successor to Qwen3.6-Plus. The vendor
 # published the key SWE/Terminal/MCP/BFCL values for 3.7-Max, while 3.6-Plus
@@ -265,6 +300,7 @@ from = "google/gemini-3-flash"
 [[pair]]
 target = "qwen/qwen3.7-max"
 from = "qwen/qwen3.6-plus"
+category = "conservative"
 
 # Qwen3.7-Plus is the multimodal successor to Qwen3.6-Plus. Alibaba's
 # official table covers SWE/Terminal/MCP/BFCL/MMLU headline values; use the
@@ -272,6 +308,7 @@ from = "qwen/qwen3.6-plus"
 [[pair]]
 target = "qwen/qwen3.7-plus"
 from = "qwen/qwen3.6-plus"
+category = "same_series_forward"
 
 # Grok 4.3 is the same-family successor to Grok 4. Direct AA/LMArena/OpenRouter
 # rows and the GDPval override win wherever present; Grok 4 fills the older
@@ -279,6 +316,7 @@ from = "qwen/qwen3.6-plus"
 [[pair]]
 target = "xai/grok-4.3"
 from = "xai/grok-4-latest"
+category = "same_series_forward"
 
 # Muse Spark has direct AA, LMArena, and SWE Atlas rows, but no official
 # SWE-Bench/GDPval/OpenRouter-style operational data yet. Gemini 3.5 Flash is
@@ -288,3 +326,4 @@ from = "xai/grok-4-latest"
 [[pair]]
 target = "meta/muse-spark"
 from = "google/gemini-3.5-flash"
+category = "conservative"

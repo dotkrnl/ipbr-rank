@@ -320,6 +320,7 @@ fn ingest_synthesized_row(
                 .synthesized_from
                 .clone()
                 .expect("synthesized rows must carry synthesized_from");
+            let category = row.synthesis_category.unwrap_or_default();
             let preference = EffortPreference::from_row(&row);
             let source_id = row.source_id.clone();
             let canonical_id = record.canonical_id.clone();
@@ -341,6 +342,7 @@ fn ingest_synthesized_row(
                         crate::model::SynthesisProvenance {
                             source_id: row.source_id.clone(),
                             from: from.clone(),
+                            category,
                         },
                     );
                 }
@@ -378,6 +380,7 @@ mod tests {
             vendor_hint: None,
             fields: map,
             synthesized_from: None,
+            synthesis_category: None,
         }
     }
 

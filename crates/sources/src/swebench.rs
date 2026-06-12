@@ -157,6 +157,7 @@ fn extract_board(
             vendor_hint: None,
             fields,
             synthesized_from: None,
+            synthesis_category: None,
         });
     }
     Ok(())

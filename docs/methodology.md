@@ -17,7 +17,7 @@ The scoring pipeline has six stages:
 
 1. **Ingestion**: Fetch rows from each source, match model names to canonical IDs via alias matching, optionally synthesize missing rows from sibling models (`data/synthesis_aliases.toml`).
 2. **Normalization**: Transform each raw metric to a 0–100 scale using one of three transforms — percentile, tail-penalty, or as-score passthrough.
-3. **Uncertainty penalties**: Values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Values from manual overrides are pulled toward 50 by 10 %.
+3. **Uncertainty penalties**: Conservative values that came in via sibling synthesis are pulled toward the 50 baseline by 15 %. Same-series forward synthesis carries no penalty. Values from manual overrides are pulled toward 50 by 10 %.
 4. **Composite metrics**: Computed as missing-safe weighted averages of normalized inputs (`SWEComposite` and `SonarComposite`).
 5. **Group aggregation**: Combine related metrics into groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*), with shrink-to-50 for sparse data and a smooth transition to trusting present metrics across 60-80% group coverage.
 6. **Final scoring**: Role scores are weighted averages of groups. AISL was removed from active scoring after local reproduction showed the benchmark surface was not representative enough of real model quality and was too noise-prone.
@@ -75,16 +75,22 @@ target already has a real value for (`ingest_synthesized_row` in
 keeps its real values, and synthesis fills only the genuinely missing
 fields.
 
-After normalization, values that came in via the synthesis layer (i.e.,
-`r.synthesized.contains_key(metric)`) are blended toward 50:
+After normalization, conservative values that came in via the synthesis
+layer (i.e., `r.synthesized.contains_key(metric)`) are blended toward 50:
 
 ```
 final = normalized × 0.85 + 50 × 0.15
 ```
 
-This reflects genuine uncertainty about whether a sibling's score
-transfers cleanly. Synthesized values still count, just slightly more
-conservatively than direct measurements.
+This reflects genuine uncertainty about whether a sibling's score transfers
+cleanly. `data/synthesis_aliases.toml` can also mark a pair as
+`category = "same_series_forward"` when the donor is the same vendor and
+same product line, and the target is a newer version. Those version-advance
+fills carry no synthesis pull after normalization. Cross-vendor, cross-series,
+and older-target-from-newer-donor fills remain `category = "conservative"` and
+keep the 15% penalty. Conservative provenance is sticky through chained
+synthesis, so a cross-series donor does not become zero-penalty just because a
+later hop is same-series-forward.
 
 ### 3.5 Manual Override Penalty
 
@@ -378,10 +384,11 @@ curve so only genuinely slow models lose meaningful score).
 | `[penalties].synthesis` | 0.15 |
 | `[penalties].override_reported` | 0.10 |
 
-When a metric value comes in via the synthesis layer, its normalized score
-is blended toward 50: `final = score × 0.85 + 50 × 0.15`. Synthesized
-values still contribute, just slightly more conservatively than direct
-measurements.
+When a conservative metric value comes in via the synthesis layer, its
+normalized score is blended toward 50:
+`final = score × 0.85 + 50 × 0.15`. Same-series forward values carry no
+synthesis penalty. Synthesized values still contribute; their category
+controls whether they are discounted.
 
 ### Removed AISL Surface
 AI Stupid Level (`aistupidlevel`) is retained only as historical source

@@ -322,6 +322,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                     vendor_hint: (!vendor_hint.is_empty()).then(|| vendor_hint.to_string()),
                     fields: BTreeMap::new(),
                     synthesized_from: None,
+                    synthesis_category: None,
                 });
                 map_rating(config, rating, &mut raw_row.fields);
                 copy_numeric(&mut raw_row.fields, "Rank", row.get("rank"));

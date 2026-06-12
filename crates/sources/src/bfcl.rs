@@ -112,6 +112,7 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
             vendor_hint: vendor_hint.clone(),
             fields,
             synthesized_from: None,
+            synthesis_category: None,
         };
         let key = crate::alias_dedupe_key(
             &alias_records,

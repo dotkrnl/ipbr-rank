@@ -190,9 +190,13 @@ real values always win.
 The synthesis layer respects per-source caps (default 30 %) so a single
 donor can't dominate a model's signal across an entire source.
 
-After per-metric normalization, fields that came in via synthesis are
-pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
-§3.4) so they read as a softer signal than direct measurements.
+After per-metric normalization, conservative fields that came in via synthesis
+are pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
+§3.4) so they read as a softer signal than direct measurements. Same-vendor,
+same-series version-advance fills are marked `category = "same_series_forward"`
+in `data/synthesis_aliases.toml` and carry no synthesis penalty. Cross-vendor,
+cross-series, and older-target-from-newer-donor fills remain
+`category = "conservative"`.
 
 Active pairs (target ← donor; see `data/synthesis_aliases.toml` for the
 authoritative list with rationale comments):

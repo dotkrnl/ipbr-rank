@@ -1,6 +1,6 @@
 use crate::alias::AliasIndex;
 use crate::coefficients::SynthesisConfig;
-use crate::model::{ModelRecord, RawRow, SourceId};
+use crate::model::{ModelRecord, RawRow, SourceId, SynthesisCategory};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -11,30 +11,46 @@ pub struct SynthesisStats {
     pub capped_sources: Vec<SourceId>,
 }
 
-#[derive(Debug, Deserialize)]
-struct PairEntry {
-    target: String,
-    from: String,
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct SynthesisPair {
+    pub target: String,
+    pub from: String,
+    #[serde(default)]
+    pub category: SynthesisCategory,
+}
+
+impl SynthesisPair {
+    pub fn conservative(target: impl Into<String>, from: impl Into<String>) -> Self {
+        Self {
+            target: target.into(),
+            from: from.into(),
+            category: SynthesisCategory::Conservative,
+        }
+    }
+
+    pub fn same_series_forward(target: impl Into<String>, from: impl Into<String>) -> Self {
+        Self {
+            target: target.into(),
+            from: from.into(),
+            category: SynthesisCategory::SameSeriesForward,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
 struct PairFile {
-    pair: Vec<PairEntry>,
+    pair: Vec<SynthesisPair>,
 }
 
 const EMBEDDED_PAIRS: &str = include_str!("../../../data/synthesis_aliases.toml");
 
-pub fn load_embedded_pairs() -> Result<Vec<(String, String)>, toml::de::Error> {
+pub fn load_embedded_pairs() -> Result<Vec<SynthesisPair>, toml::de::Error> {
     load_pairs_from_str(EMBEDDED_PAIRS)
 }
 
-pub fn load_pairs_from_str(raw: &str) -> Result<Vec<(String, String)>, toml::de::Error> {
+pub fn load_pairs_from_str(raw: &str) -> Result<Vec<SynthesisPair>, toml::de::Error> {
     let file: PairFile = toml::from_str(raw)?;
-    Ok(file
-        .pair
-        .into_iter()
-        .map(|entry| (entry.target, entry.from))
-        .collect())
+    Ok(file.pair)
 }
 
 /// After ingestion, identify synthesis pairs that contributed zero fields
@@ -47,21 +63,26 @@ pub fn load_pairs_from_str(raw: &str) -> Result<Vec<(String, String)>, toml::de:
 /// returned vec lets tests assert on which pairs were flagged.
 pub fn warn_stale_synthesis_pairs(
     records: &[ModelRecord],
-    pairs: &[(String, String)],
+    pairs: &[SynthesisPair],
 ) -> Vec<(String, String)> {
     let mut stale = Vec::new();
-    for (target, from) in pairs {
-        let Some(record) = records.iter().find(|r| r.canonical_id == *target) else {
+    for pair in pairs {
+        let Some(record) = records.iter().find(|r| r.canonical_id == pair.target) else {
             // Target isn't registered at all — separate hygiene issue,
             // surfaced elsewhere via required_aliases validation.
             continue;
         };
-        let useful = record.synthesized.values().any(|prov| prov.from == *from);
+        let useful = record
+            .synthesized
+            .values()
+            .any(|prov| prov.from == pair.from);
         if !useful {
+            let target = &pair.target;
+            let from = &pair.from;
             eprintln!(
                 "warning: synthesis pair {target} <- {from} contributed no fields after ingestion; consider removing it from data/synthesis_aliases.toml"
             );
-            stale.push((target.clone(), from.clone()));
+            stale.push((pair.target.clone(), pair.from.clone()));
         }
     }
     stale
@@ -69,7 +90,7 @@ pub fn warn_stale_synthesis_pairs(
 
 pub fn synthesize_rows(
     rows_by_source: &mut BTreeMap<SourceId, Vec<RawRow>>,
-    pairs: &[(String, String)],
+    pairs: &[SynthesisPair],
     records: &[ModelRecord],
     cfg: &SynthesisConfig,
 ) -> SynthesisStats {
@@ -105,7 +126,9 @@ pub fn synthesize_rows(
         let mut synth_pair_count = 0usize;
         let mut synth_row_count = 0usize;
 
-        for (target_id, from_id) in pairs {
+        for pair in pairs {
+            let target_id = &pair.target;
+            let from_id = &pair.from;
             if real_count > 0
                 && synth_pair_count > 0
                 && (synth_pair_count as f64 / (real_count + synth_pair_count) as f64)
@@ -151,6 +174,10 @@ pub fn synthesize_rows(
             for donor_idx in donor_indices {
                 let donor = rows[donor_idx].clone();
                 let donor_model_name = donor.model_name.clone();
+                let category = donor
+                    .synthesis_category
+                    .unwrap_or(SynthesisCategory::SameSeriesForward)
+                    .chain(pair.category);
                 let mut synthesized = donor;
                 synthesized.fields.insert(
                     "SynthesizedFromModelName".to_string(),
@@ -158,6 +185,7 @@ pub fn synthesize_rows(
                 );
                 synthesized.model_name = display_name.to_string();
                 synthesized.synthesized_from = Some(from_id.clone());
+                synthesized.synthesis_category = Some(category);
                 let synthesized_idx = rows.len();
                 rows.push(synthesized);
                 row_indices_by_canonical
@@ -209,6 +237,7 @@ mod tests {
             vendor_hint: None,
             fields: map,
             synthesized_from: synthesized_from.map(str::to_string),
+            synthesis_category: None,
         }
     }
 
@@ -250,7 +279,10 @@ mod tests {
 
         let stats = synthesize_rows(
             &mut rows,
-            &[("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string())],
+            &[SynthesisPair::same_series_forward(
+                "openai/gpt-5.5",
+                "openai/gpt-5.4",
+            )],
             &records,
             &cfg(0.50, 0.50),
         );
@@ -263,6 +295,10 @@ mod tests {
             .collect();
         assert_eq!(synth.len(), 1);
         assert_eq!(synth[0].synthesized_from.as_deref(), Some("openai/gpt-5.4"));
+        assert_eq!(
+            synth[0].synthesis_category,
+            Some(SynthesisCategory::SameSeriesForward)
+        );
         assert_eq!(synth[0].model_name, "gpt-5.5");
     }
 
@@ -301,9 +337,9 @@ mod tests {
 
         synthesize_rows(
             &mut rows,
-            &[(
-                "anthropic/claude-sonnet-4".to_string(),
-                "anthropic/claude-sonnet-4.5".to_string(),
+            &[SynthesisPair::conservative(
+                "anthropic/claude-sonnet-4",
+                "anthropic/claude-sonnet-4.5",
             )],
             &records,
             &cfg(0.80, 0.80),
@@ -321,6 +357,46 @@ mod tests {
             .collect();
         assert!(metrics.contains("SWEBenchVerified"));
         assert!(metrics.contains("SWEBenchMultilingual"));
+        assert!(
+            synth
+                .iter()
+                .all(|row| row.synthesis_category == Some(SynthesisCategory::Conservative))
+        );
+    }
+
+    #[test]
+    fn synthesize_chains_keep_conservative_category_sticky() {
+        let records = vec![
+            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+            record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4"]),
+            record("openai/gpt-5.3-codex", "gpt-5.3-codex", &["gpt-5.3-codex"]),
+        ];
+        let mut rows = rows_by_source(vec![raw(
+            "swerebench",
+            "gpt-5.3-codex",
+            None,
+            &[("SWERebench", json!(72.0))],
+        )]);
+
+        synthesize_rows(
+            &mut rows,
+            &[
+                SynthesisPair::conservative("openai/gpt-5.4", "openai/gpt-5.3-codex"),
+                SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
+            ],
+            &records,
+            &cfg(0.90, 0.90),
+        );
+
+        let synth_55 = rows["swerebench"]
+            .iter()
+            .find(|row| row.model_name == "gpt-5.5")
+            .expect("chained synthesized GPT-5.5 row should exist");
+        assert_eq!(
+            synth_55.synthesis_category,
+            Some(SynthesisCategory::Conservative),
+            "a conservative donor row should remain conservative through a same-series forward hop"
+        );
     }
 
     #[test]
@@ -340,6 +416,7 @@ mod tests {
             crate::model::SynthesisProvenance {
                 source_id: "swerebench".into(),
                 from: "openai/gpt-5.4".into(),
+                category: SynthesisCategory::SameSeriesForward,
             },
         );
         let stale_target = ModelRecord::new(
@@ -350,10 +427,10 @@ mod tests {
         // No `synthesized` entries — every metric came from a real source.
         let records = vec![useful_target, stale_target];
         let pairs = vec![
-            ("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string()),
-            (
-                "anthropic/claude-opus-4.7".to_string(),
-                "anthropic/claude-opus-4.6".to_string(),
+            SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
+            SynthesisPair::same_series_forward(
+                "anthropic/claude-opus-4.7",
+                "anthropic/claude-opus-4.6",
             ),
         ];
         let stale = warn_stale_synthesis_pairs(&records, &pairs);
@@ -377,7 +454,10 @@ mod tests {
 
         synthesize_rows(
             &mut rows,
-            &[("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string())],
+            &[SynthesisPair::same_series_forward(
+                "openai/gpt-5.5",
+                "openai/gpt-5.4",
+            )],
             &records,
             &cfg(0.50, 0.50),
         );
@@ -406,7 +486,10 @@ mod tests {
 
         let stats = synthesize_rows(
             &mut rows,
-            &[("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string())],
+            &[SynthesisPair::same_series_forward(
+                "openai/gpt-5.5",
+                "openai/gpt-5.4",
+            )],
             &records,
             &cfg(0.30, 0.50),
         );
@@ -435,10 +518,10 @@ mod tests {
         let stats = synthesize_rows(
             &mut rows,
             &[
-                ("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string()),
-                (
-                    "google/gemini-3.1-pro-preview".to_string(),
-                    "google/gemini-3-pro".to_string(),
+                SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
+                SynthesisPair::same_series_forward(
+                    "google/gemini-3.1-pro-preview",
+                    "google/gemini-3-pro",
                 ),
             ],
             &records,
@@ -477,14 +560,14 @@ mod tests {
         let stats = synthesize_rows(
             &mut rows,
             &[
-                ("openai/gpt-5.5".to_string(), "openai/gpt-5.4".to_string()),
-                (
-                    "google/gemini-3.1-pro-preview".to_string(),
-                    "google/gemini-3-pro".to_string(),
+                SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
+                SynthesisPair::same_series_forward(
+                    "google/gemini-3.1-pro-preview",
+                    "google/gemini-3-pro",
                 ),
-                (
-                    "anthropic/claude-opus-4.7".to_string(),
-                    "anthropic/claude-opus-4.6".to_string(),
+                SynthesisPair::same_series_forward(
+                    "anthropic/claude-opus-4.7",
+                    "anthropic/claude-opus-4.6",
                 ),
             ],
             &records,
@@ -561,6 +644,7 @@ mod tests {
             Some(&SynthesisProvenance {
                 source_id: "openrouter".to_string(),
                 from: "openai/gpt-5.4".to_string(),
+                category: SynthesisCategory::Conservative,
             })
         );
         assert!(records[0].sources.is_empty());
@@ -580,6 +664,7 @@ mod tests {
             SynthesisProvenance {
                 source_id: "openrouter".to_string(),
                 from: "openai/gpt-5.4".to_string(),
+                category: SynthesisCategory::Conservative,
             },
         )]
         .into_iter()
@@ -600,6 +685,7 @@ mod tests {
                 [[pair]]
                 target = "first/target"
                 from = "first/from"
+                category = "same_series_forward"
 
                 [[pair]]
                 target = "second/target"
@@ -611,8 +697,8 @@ mod tests {
         assert_eq!(
             pairs,
             vec![
-                ("first/target".to_string(), "first/from".to_string()),
-                ("second/target".to_string(), "second/from".to_string()),
+                SynthesisPair::same_series_forward("first/target", "first/from"),
+                SynthesisPair::conservative("second/target", "second/from"),
             ]
         );
     }
