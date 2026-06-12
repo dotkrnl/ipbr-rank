@@ -186,6 +186,19 @@ aliases = [
     "gemini-2.5-pro-grounding",
 ]
 
+[models."moonshotai/kimi-k2.7-code"]
+vendor = "moonshot"
+aliases = [
+    "kimi 2.7", "kimi k2.7",
+    "kimi 2.7 code", "kimi k2.7 code",
+    "kimi-k2.7", "kimi-k2-7",
+    "kimi-k2.7-code", "kimi-k2-7-code",
+    "moonshot/kimi-k2.7-code", "moonshotai/kimi-k2.7-code",
+    "moonshotai/Kimi-K2.7-Code",
+    # Scale leaderboards spell decimals as `p` (no `.` allowed in slugs).
+    "kimi-k2p7", "kimi-k2p7-code",
+]
+
 [models."moonshotai/kimi-k2.6"]
 vendor = "moonshot"
 aliases = [

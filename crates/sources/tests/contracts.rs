@@ -52,6 +52,7 @@ const FLAGSHIPS: &[&str] = &[
     "google/gemini-3-flash",
     "google/gemini-2.5-flash",
     "google/gemini-2.5-pro",
+    "moonshotai/kimi-k2.7-code",
     "moonshotai/kimi-k2.6",
     "z-ai/glm-5.1",
 ];
@@ -74,7 +75,9 @@ fn assert_flagship_matches(records: &[ModelRecord], metric: &str, min_hits: usiz
         .count();
     assert!(
         flagship_hits >= min_hits,
-        "expected >={min_hits}/14 flagship {metric} matches, got {flagship_hits}/14"
+        "expected >={min_hits}/{} flagship {metric} matches, got {flagship_hits}/{}",
+        FLAGSHIPS.len(),
+        FLAGSHIPS.len(),
     );
 }
 
@@ -363,7 +366,7 @@ async fn swebench_fixture_contract() {
     );
 
     let (records, _matched) = ingest_fixture_rows(rows);
-    // Six of the 14 flagships in the fresh upstream JSON: Claude-Sonnet-4 /
+    // Six of the tracked flagships in the fresh upstream JSON: Claude-Sonnet-4 /
     // 4.5 / Opus-4.6, Gemini-3-Pro / 3-Flash / 2.5-Pro / 2.5-Flash. The
     // remaining flagships (GPT-5.x, Opus-4.7, Gemini-3.1-Pro, Kimi-K2.6,
     // GLM-5.1) self-report and are filled via score_overrides.toml rather
@@ -380,7 +383,8 @@ async fn swebench_fixture_contract() {
         .count();
     assert!(
         multilingual_hits >= 2,
-        "expected >=2 flagship SWEBenchMultilingual matches, got {multilingual_hits}/14"
+        "expected >=2 flagship SWEBenchMultilingual matches, got {multilingual_hits}/{}",
+        FLAGSHIPS.len(),
     );
 }
 
@@ -486,7 +490,8 @@ async fn swerebench_fixture_contract() {
         .count();
     assert!(
         hits >= 3,
-        "expected >=3 flagship SWE-rebench matches, got {hits}/14"
+        "expected >=3 flagship SWE-rebench matches, got {hits}/{}",
+        FLAGSHIPS.len(),
     );
 }
 

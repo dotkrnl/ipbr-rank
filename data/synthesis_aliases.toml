@@ -43,6 +43,15 @@ from = "moonshotai/kimi-k2.6"
 target = "moonshotai/kimi-k2.6"
 from = "z-ai/glm-5.1"
 
+# Kimi K2.7 Code is a coding-focused successor built on K2.6. As of the
+# 2026-06-12 release-day refresh, live direct coverage is limited to
+# OpenRouter plus Moonshot's official MCP-Atlas self-report. Use K2.6 as
+# the conservative prior-generation donor until AA/LMArena/Scale/SWE
+# leaderboards publish direct K2.7 rows.
+[[pair]]
+target = "moonshotai/kimi-k2.7-code"
+from = "moonshotai/kimi-k2.6"
+
 # Opus 4.7 is the direct successor to Opus 4.6. Provider overrides now cover
 # the headline SWE/Terminal values; 4.6 remains the closest donor for the
 # remaining SWE Atlas / SWERebench timing gaps.

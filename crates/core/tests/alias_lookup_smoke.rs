@@ -7,6 +7,11 @@ fn lookup_new_2026_05_07_models() {
     let cases: &[(&str, Option<&str>, &str)] = &[
         // (input, vendor_hint, expected canonical_id)
         ("glm-5", Some("zai"), "z-ai/glm-5"),
+        (
+            "kimi-k2-7-code",
+            Some("moonshot"),
+            "moonshotai/kimi-k2.7-code",
+        ),
         ("kimi-k2-5", Some("moonshot"), "moonshotai/kimi-k2.5"),
         ("kimi-k2-5", Some("kimi"), "moonshotai/kimi-k2.5"),
         ("mimo-v2-5-0424", Some("xiaomi"), "xiaomi/mimo-v2.5"),

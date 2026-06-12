@@ -603,6 +603,12 @@ metric = "MCPAtlas"
 value = 73.2
 note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MCP-Atlas, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "MCPAtlas"
+value = 76.0
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Atlas, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
 # ---------------------------------------------------------------------
 # BFCL — vendor-reported BFCL V4 figures not yet present in the public CSV.
 # ---------------------------------------------------------------------

@@ -200,7 +200,7 @@ authoritative list with rationale comments):
 - OpenAI: `gpt-5.5 ← gpt-5.4`, `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`
 - Anthropic: `claude-opus-4.7 ← claude-opus-4.6`, `claude-opus-4.5 ← claude-opus-4.6`, `claude-sonnet-4.6 ← claude-sonnet-4.5`, `claude-sonnet-4 ← claude-sonnet-4.5`
 - Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-3.5-flash ← gemini-3-flash`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
-- z.ai / Moonshot / Qwen: `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric), `moonshotai/kimi-k2.5 ← moonshotai/kimi-k2.6`, `z-ai/glm-4.6 ← z-ai/glm-4.7`, `z-ai/glm-5 ← z-ai/glm-5.1`, `qwen/qwen3.6-plus ← z-ai/glm-5`, `qwen/qwen3.7-max ← qwen/qwen3.6-plus`
+- z.ai / Moonshot / Qwen: `z-ai/glm-5.1 ↔ moonshotai/kimi-k2.6` (symmetric), `moonshotai/kimi-k2.7-code ← moonshotai/kimi-k2.6`, `moonshotai/kimi-k2.5 ← moonshotai/kimi-k2.6`, `z-ai/glm-4.6 ← z-ai/glm-4.7`, `z-ai/glm-5 ← z-ai/glm-5.1`, `qwen/qwen3.6-plus ← z-ai/glm-5`, `qwen/qwen3.7-max ← qwen/qwen3.6-plus`
 - DeepSeek / Xiaomi / MiniMax: `deepseek/deepseek-v4-flash ← moonshotai/kimi-k2.6`, `deepseek/deepseek-v4-pro ← deepseek/deepseek-v4-flash`, `xiaomi/mimo-v2.5-pro ← moonshotai/kimi-k2.5`, `xiaomi/mimo-v2.5 ← xiaomi/mimo-v2.5-pro`, `minimax/minimax-m2.5 ← moonshotai/kimi-k2.5`, `minimax/minimax-m2.7 ← minimax/minimax-m2.5`
 - xAI: `xai/grok-code-fast-1 ← xai/grok-4-latest`, `xai/grok-4.3 ← xai/grok-4-latest`
 - Meta: `meta/muse-spark ← google/gemini-3.5-flash`
