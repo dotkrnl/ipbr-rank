@@ -12,7 +12,7 @@ n_rows_unmatched = 98
 [sources."artificial_analysis"]
 status = "verified"
 n_rows_ingested = 528
-n_rows_matched = 292
+n_rows_matched = 248
 n_rows_unmatched = 444
 
 [sources."bfcl"]
@@ -36,25 +36,25 @@ n_rows_unmatched = 26
 [sources."lmarena"]
 status = "verified"
 n_rows_ingested = 406
-n_rows_matched = 267
+n_rows_matched = 245
 n_rows_unmatched = 326
 
 [sources."mcp_atlas"]
 status = "verified"
 n_rows_ingested = 23
-n_rows_matched = 61
+n_rows_matched = 57
 n_rows_unmatched = 3
 
 [sources."openrouter"]
 status = "verified"
 n_rows_ingested = 331
-n_rows_matched = 145
+n_rows_matched = 123
 n_rows_unmatched = 287
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 180
-n_rows_matched = 922
+n_rows_ingested = 178
+n_rows_matched = 689
 n_rows_unmatched = 0
 
 [sources."sonar"]
@@ -96,7 +96,7 @@ n_rows_unmatched = 12
 [sources."swerebench"]
 status = "verified"
 n_rows_ingested = 96
-n_rows_matched = 134
+n_rows_matched = 112
 n_rows_unmatched = 64
 
 [sources."terminal_bench"]
@@ -700,22 +700,22 @@ sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "s
 
 [models.scores]
 i_raw = 41.742941
-p_raw = 34.827987
-b_raw = 51.014244
-r = 44.440809
+p_raw = 33.210476
+b_raw = 49.140453
+r = 42.621034
 i_adj = 41.742941
-p_adj = 34.827987
-b_adj = 51.014244
+p_adj = 33.210476
+b_adj = 49.140453
 
 [models.groups]
-BUILD = 50.505467
+BUILD = 48.554851
 CRE = 43.792916
 GEN = 29.709734
 LM_ARENA_REVIEW_PROXY = 48.169142
 OPS_long = 70.980159
 OPS_precision = 74.932921
 OPS_review = 65.775723
-PLAN = 32.437730
+PLAN = 29.496801
 
 [models.metrics]
 AALiveCodeBench = 94.428099
@@ -737,7 +737,7 @@ LMArenaCreativeOrOpenEnded = 43.792916
 LMArenaDocument = 46.338284
 LMArenaText = 43.792916
 LongContextRecall = 25.643301
-MCPAtlas = 67.251055
+MCPAtlas = 37.841772
 MMLUPro = 61.636680
 OSWorldVerified = 13.480651
 OutputSpeed = 78.060999
@@ -1169,22 +1169,22 @@ sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar"]
 
 [models.scores]
 i_raw = 41.023956
-p_raw = 41.562261
-b_raw = 61.728614
-r = 51.065531
+p_raw = 39.678599
+b_raw = 59.001977
+r = 48.712956
 i_adj = 41.023956
-p_adj = 41.562261
-b_adj = 61.728614
+p_adj = 39.678599
+b_adj = 59.001977
 
 [models.groups]
-BUILD = 60.924393
+BUILD = 58.004572
 CRE = 37.497002
 GEN = 33.739996
 LM_ARENA_REVIEW_PROXY = 36.905860
 OPS_long = 95.672698
 OPS_precision = 92.483814
 OPS_review = 93.886912
-PLAN = 39.417741
+PLAN = 35.992900
 
 [models.metrics]
 AALiveCodeBench = 91.515263
@@ -1205,6 +1205,7 @@ LMArenaDocument = 12.551427
 LMArenaSearch = 61.260293
 LMArenaText = 37.497002
 LongContextRecall = 57.586513
+MCPAtlas = 18.474684
 MMLUPro = 86.530760
 OutputSpeed = 100.000000
 SWEAtlasComposite = 50.000000
@@ -1226,7 +1227,7 @@ TerminalBenchHard = 2.125280
 
 [models.missing]
 metrics = []
-groups_shrunk = ["PLAN"]
+groups_shrunk = []
 
 [[models]]
 canonical_id = "google/gemini-3.1-pro-preview"
@@ -1306,22 +1307,22 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter
 
 [models.scores]
 i_raw = 94.546607
-p_raw = 82.014794
-b_raw = 74.094746
-r = 69.587878
+p_raw = 78.934835
+b_raw = 70.210452
+r = 65.987206
 i_adj = 94.546607
-p_adj = 82.014794
-b_adj = 74.094746
+p_adj = 78.934835
+b_adj = 70.210452
 
 [models.groups]
-BUILD = 72.385808
+BUILD = 68.294976
 CRE = 99.731148
 GEN = 84.779108
 LM_ARENA_REVIEW_PROXY = 34.595129
 OPS_long = 90.994538
 OPS_precision = 86.652783
 OPS_review = 88.740689
-PLAN = 79.480548
+PLAN = 73.880622
 
 [models.metrics]
 AALiveCodeBench = 98.841486
@@ -1342,6 +1343,7 @@ LMArenaDocument = 5.942855
 LMArenaSearch = 63.247403
 LMArenaText = 99.731148
 LongContextRecall = 87.755102
+MCPAtlas = 12.911392
 MMLUPro = 92.977365
 OutputSpeed = 96.021393
 SWEAtlasComposite = 50.000000
@@ -1359,7 +1361,7 @@ TerminalBenchHard = 46.868009
 
 [models.missing]
 metrics = []
-groups_shrunk = ["PLAN"]
+groups_shrunk = []
 
 [[models]]
 canonical_id = "meta/muse-spark"
@@ -1656,22 +1658,22 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 7.407348
-p_raw = 25.557598
-b_raw = 44.253065
-r = 40.661237
+p_raw = 24.249581
+b_raw = 42.784807
+r = 39.209802
 i_adj = 7.407348
-p_adj = 25.557598
-b_adj = 44.253065
+p_adj = 24.249581
+b_adj = 42.784807
 
 [models.groups]
-BUILD = 44.059593
+BUILD = 42.538163
 CRE = 2.053100
 GEN = 10.638205
 LM_ARENA_REVIEW_PROXY = 48.169142
 OPS_long = 36.787057
 OPS_precision = 59.945135
 OPS_review = 56.302558
-PLAN = 30.592457
+PLAN = 28.214245
 
 [models.metrics]
 AALiveCodeBench = 0.000000
@@ -1691,7 +1693,7 @@ LMArenaCreativeOrOpenEnded = 2.053100
 LMArenaDocument = 46.338284
 LMArenaText = 2.053100
 LongContextRecall = 0.000000
-MCPAtlas = 67.251055
+MCPAtlas = 45.014768
 MMLUPro = 10.562972
 OSWorldVerified = 13.480651
 OutputSpeed = 0.000000
@@ -2465,22 +2467,22 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar",
 
 [models.scores]
 i_raw = 59.281383
-p_raw = 61.601901
-b_raw = 65.721124
-r = 62.799249
+p_raw = 61.897788
+b_raw = 66.076645
+r = 63.137601
 i_adj = 59.281383
-p_adj = 61.601901
-b_adj = 65.721124
+p_adj = 61.897788
+b_adj = 66.076645
 
 [models.groups]
-BUILD = 64.370992
+BUILD = 64.742996
 CRE = 60.708677
 GEN = 52.118893
 LM_ARENA_REVIEW_PROXY = 48.169142
 OPS_long = 75.079189
 OPS_precision = 80.366679
 OPS_review = 76.993785
-PLAN = 65.251958
+PLAN = 65.789932
 
 [models.metrics]
 ARC_AGI_2 = 11.843035
@@ -2500,7 +2502,7 @@ LMArenaCreativeOrOpenEnded = 60.708677
 LMArenaDocument = 46.338284
 LMArenaText = 60.708677
 LongContextRecall = 59.361136
-MCPAtlas = 61.871308
+MCPAtlas = 67.251055
 MMLUPro = 76.143355
 OSWorldVerified = 13.480651
 OutputSpeed = 70.371955

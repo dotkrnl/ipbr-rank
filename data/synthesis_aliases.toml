@@ -50,17 +50,12 @@ category = "conservative"
 # (and our own SWE-rebench / AA Coding numbers where both have direct
 # data) is that these two open-weight models trade blows in the same
 # capability tier — typical gap is 1-3 points on most coding evals.
-# When one is missing from a leaderboard the other is a defensible
-# stand-in. The pair is symmetrical so each can borrow from the other
-# for coverage gaps where public leaderboards cover only one of them.
+# When GLM-5.1 is missing from a leaderboard, Kimi K2.6 remains a defensible
+# stand-in. The reverse Kimi K2.6 <- GLM-5.1 edge is retired because Kimi now
+# has direct or override coverage for every field that donor would supply.
 [[pair]]
 target = "z-ai/glm-5.1"
 from = "moonshotai/kimi-k2.6"
-category = "conservative"
-
-[[pair]]
-target = "moonshotai/kimi-k2.6"
-from = "z-ai/glm-5.1"
 category = "conservative"
 
 # Kimi K2.7 Code is a coding-focused successor built on K2.6. As of the
