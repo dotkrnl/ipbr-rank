@@ -120,7 +120,7 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
 | **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.32), LMArenaText (0.21), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.11), ArtificialAnalysisMath (0.08), MMLUPro (0.07), BrowseComp (0.04), HLETools (0.03) |
 | **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
-| **BUILD** (Building) | SWEComposite (0.310), SWEAtlasComposite (0.155), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.020), ArtificialAnalysisCoding (0.040), SciCode (0.040), AALiveCodeBench (0.040), GDPval (0.045), SonarComposite (0.065), LongContextRecall (0.030), CopilotArenaOrLMArenaCode (0.020) |
+| **BUILD** (Building) | SWEComposite (0.330), SWEAtlasComposite (0.155), LiveCodingComposite (0.120), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.020), GDPval (0.045), SonarComposite (0.065), LongContextRecall (0.030) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
@@ -132,11 +132,14 @@ representative enough of real model quality and too noise-prone for this
 scoreboard.
 
 `SWEComposite` is a derived metric defined in `[composite_metrics.SWEComposite]`,
-computed as a missing-safe weighted average of `SWERebench` (0.40),
-`SWEBenchVerified` (0.15), `SWEBenchPro` (0.35), and `SWEBenchMultilingual`
-(0.10). All four inputs use percentile normalization so they're on a
-comparable scale before the composite collapses them. See the source-level
-scoreboard for the raw input values when diagnosing per-model performance.
+computed as a missing-safe weighted average of `SWERebench` (0.45),
+`SWEBenchVerified` (0.10), `SWEBenchPro` (0.35), and `SWEBenchMultilingual`
+(0.10). Verified was reduced because it saturates near the top of the frontier,
+while Rebench — a rolling-window benchmark — was increased for better
+contamination resistance and top-end differentiation. All four inputs use
+percentile normalization so they're on a comparable scale before the composite
+collapses them. See the source-level scoreboard for the raw input values when
+diagnosing per-model performance.
 
 `SWEAtlasComposite` similarly collapses Scale's SWE Atlas Q&A, test-writing,
 and refactoring tracks into one BUILD signal with weights 0.30 / 0.30 / 0.40.
@@ -151,6 +154,13 @@ into one signal stops a single Sonar payload from registering as four
 independent missing entries when a model isn't on Sonar's leaderboard, and
 prevents the three highly-correlated density metrics from triple-counting
 the same "buggy code" signal.
+
+`LiveCodingComposite` collapses four live coding/reasoning signals into one
+BUILD input so they don't pile up as four small independent weights.
+Defined in `[composite_metrics.LiveCodingComposite]` as a missing-safe
+weighted average of `ArtificialAnalysisCoding` (0.286), `SciCode` (0.286),
+`AALiveCodeBench` (0.286), and `CopilotArenaOrLMArenaCode` (0.142) — weights
+proportional to their previous standalone BUILD weights.
 
 ### 4.2 Shrink-to-50 with Trust Threshold
 
@@ -168,7 +178,7 @@ w_present = present_weight / total_weight
 
 shrink_value = weighted_avg × w_present + 50 × (1 - w_present)
 
-if w_present <= 0.60:
+if w_present <= 0.70:
     group_score = shrink_value
 elif w_present >= 0.80:
     group_score = weighted_avg
@@ -180,12 +190,13 @@ else:
 got penalized for not appearing on every peripheral leaderboard — a
 flagship missing one or two ~0.10-weight metrics would still drift
 toward 50 even though every direct measurement said top-of-population.
-The transition uses a smooth step across a 0.60–0.80 band instead of a
-hard cliff at 0.70. This prevents a tiny change in coverage (e.g. a new
-source adding one small metric) from causing a discontinuous ~15‑point
-jump in the group score. Well-covered models (≥80 %) trust the present
-mean directly; models below 60 % get the full proportional shrink;
-between those points the score blends smoothly.
+The transition uses a smooth step across a 0.70–0.80 band instead of a
+hard cliff. This prevents a tiny change in coverage (e.g. a new source
+adding one small metric) from causing a discontinuous jump in the group
+score, while requiring fuller evidence before the missing-weight shrink
+is removed. Well-covered models (≥80 %) trust the present mean directly;
+models below 70 % get the full proportional shrink; between those points
+the score blends smoothly.
 
 **Invariant**: If all metrics are missing, `present_weight = 0`, and
 `group_score = 50`.
@@ -206,12 +217,14 @@ Each of the four roles (I_raw, P_raw, B_raw, R) is a weighted average of groups.
 From `[final_score_weights.*]` in `data/coefficients.toml`:
 
 AISL's former 0.15 role slot is redistributed into the remaining
-non-operational public benchmark groups for each role. OPS_* stays fixed
-at 0.08 so speed/cost/context keep the same influence as before.
+non-operational public benchmark groups for each role. OPS_* stays at
+0.08 for Planning, Building, and Reviewing; Idea generation is less
+operationally sensitive, so `I_raw` reduces the operational weight to
+0.05 and increases GEN accordingly.
 
 **I_raw** (Idea):
 ```
-I_raw = 0.62×CRE + 0.30×GEN + 0.08×OPS_long
+I_raw = 0.62×CRE + 0.33×GEN + 0.05×OPS_long
 ```
 
 **P_raw** (Planning):
@@ -375,7 +388,7 @@ curve so only genuinely slow models lose meaningful score).
 
 | Role | Group Contributions |
 |------|---------------------|
-| I_raw | CRE 0.62, GEN 0.30, OPS_long 0.08 |
+| I_raw | CRE 0.62, GEN 0.33, OPS_long 0.05 |
 | P_raw | PLAN 0.55, GEN 0.37, OPS_precision 0.08 |
 | B_raw | BUILD 0.84, PLAN 0.08, OPS_precision 0.08 |
 | R | LM_ARENA_REVIEW_PROXY 0.18, BUILD 0.36, PLAN 0.38, OPS_review 0.08 |
@@ -391,6 +404,15 @@ normalized score is blended toward 50:
 `final = score × 0.85 + 50 × 0.15`. Same-series forward values carry no
 synthesis penalty. Synthesized values still contribute; their category
 controls whether they are discounted.
+
+### Synthesis Caps
+| Constant | Value |
+|----------|-------|
+| `[synthesis].per_model_cap` | 0.50 |
+| `[synthesis].per_source_cap` | 0.65 |
+
+A model whose synthetic cells exceed 50 % of its total scored cells is
+flagged `synthesis_dominant` in the output.
 
 ### Removed AISL Surface
 AI Stupid Level (`aistupidlevel`) is retained only as historical source

@@ -126,16 +126,16 @@ aliases = ["Claude Fable 5", "anthropic/claude-fable-5", "anthropic/claude-fable
 sources = ["artificial_analysis", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 76.371828
+i_raw = 77.173127
 p_raw = 87.312804
-b_raw = 82.895036
-r = 84.052018
-i_adj = 76.371828
+b_raw = 80.909701
+r = 83.201160
+i_adj = 77.173127
 p_adj = 87.312804
-b_adj = 82.895036
+b_adj = 80.909701
 
 [models.groups]
-BUILD = 84.933032
+BUILD = 82.569538
 CRE = 71.208482
 GEN = 90.419381
 LM_ARENA_REVIEW_PROXY = 79.097721
@@ -163,6 +163,7 @@ LMArenaCreativeOrOpenEnded = 71.208482
 LMArenaDocument = 69.942253
 LMArenaSearch = 88.253190
 LMArenaText = 71.208482
+LiveCodingComposite = 85.374619
 LongContextRecall = 82.405745
 MCPAtlas = 100.000000
 OSWorldVerified = 95.000000
@@ -174,7 +175,7 @@ SWEAtlasTestWriting = 92.500000
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 76.750000
+SWEComposite = 74.500000
 SciCode = 100.000000
 SonarBugDensity = 41.009615
 SonarComposite = 50.997842
@@ -199,16 +200,16 @@ aliases = ["Claude 4.5 Opus", "Claude 4.5 Opus (high reasoning)", "Claude 4.5 Op
 sources = ["artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 69.386698
+i_raw = 69.602847
 p_raw = 68.144959
-b_raw = 72.654146
-r = 65.357707
-i_adj = 69.386698
+b_raw = 72.525382
+r = 65.302522
+i_adj = 69.602847
 p_adj = 68.144959
-b_adj = 72.654146
+b_adj = 72.525382
 
 [models.groups]
-BUILD = 73.981114
+BUILD = 73.827822
 CRE = 69.580368
 GEN = 70.587547
 LM_ARENA_REVIEW_PROXY = 48.158606
@@ -239,6 +240,7 @@ LMArenaCreativeOrOpenEnded = 69.580368
 LMArenaDocument = 57.010594
 LMArenaSearch = 39.306617
 LMArenaText = 69.580368
+LiveCodingComposite = 73.786206
 LongContextRecall = 100.000000
 MCPAtlas = 45.822785
 MMLUPro = 98.781196
@@ -251,7 +253,7 @@ SWEAtlasTestWriting = 61.209324
 SWEBenchMultilingual = 82.989691
 SWEBenchPro = 77.530094
 SWEBenchVerified = 100.000000
-SWEComposite = 82.600034
+SWEComposite = 81.620725
 SWERebench = 80.413830
 SciCode = 63.073394
 SonarBugDensity = 62.500000
@@ -277,16 +279,16 @@ aliases = ["Claude Opus 4.6 (120K, High)", "Claude Opus 4.6 (120K, Low)", "Claud
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 94.051332
+i_raw = 94.524630
 p_raw = 78.871862
-b_raw = 72.889703
-r = 78.254379
-i_adj = 94.051332
+b_raw = 71.632381
+r = 77.715527
+i_adj = 94.524630
 p_adj = 78.871862
-b_adj = 72.889703
+b_adj = 71.632381
 
 [models.groups]
-BUILD = 72.636419
+BUILD = 71.139607
 CRE = 100.000000
 GEN = 87.667001
 LM_ARENA_REVIEW_PROXY = 100.000000
@@ -314,6 +316,7 @@ LMArenaCreativeOrOpenEnded = 100.000000
 LMArenaDocument = 100.000000
 LMArenaSearch = 100.000000
 LMArenaText = 100.000000
+LiveCodingComposite = 71.790042
 LongContextRecall = 85.996409
 MCPAtlas = 75.358650
 OSWorldVerified = 5.000000
@@ -325,7 +328,7 @@ SWEAtlasTestWriting = 63.187440
 SWEBenchMultilingual = 96.391753
 SWEBenchPro = 95.393075
 SWEBenchVerified = 89.157129
-SWEComposite = 76.400321
+SWEComposite = 74.442464
 SciCode = 76.834862
 SonarComposite = 50.000000
 TTFT = 75.739681
@@ -346,16 +349,16 @@ aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 96.162038
+i_raw = 96.884744
 p_raw = 85.615179
-b_raw = 79.481941
-r = 83.017194
-i_adj = 96.162038
+b_raw = 77.802123
+r = 82.297272
+i_adj = 96.884744
 p_adj = 85.615179
-b_adj = 79.481941
+b_adj = 77.802123
 
 [models.groups]
-BUILD = 79.843568
+BUILD = 77.843786
 CRE = 99.923019
 GEN = 95.097321
 LM_ARENA_REVIEW_PROXY = 96.774344
@@ -383,6 +386,7 @@ LMArenaCreativeOrOpenEnded = 99.923019
 LMArenaDocument = 98.544936
 LMArenaSearch = 95.003752
 LMArenaText = 99.923019
+LiveCodingComposite = 80.500583
 LongContextRecall = 84.201077
 MCPAtlas = 85.063291
 OSWorldVerified = 89.424779
@@ -394,7 +398,7 @@ SWEAtlasTestWriting = 63.187440
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 77.000000
+SWEComposite = 74.750000
 SciCode = 91.743119
 SonarBugDensity = 39.423077
 SonarComposite = 51.173932
@@ -420,16 +424,16 @@ aliases = ["Opus 4.8 (Claude Code)", "Opus 4.8 (Claude Code) xHigh", "Opus 4.8 C
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 80.177071
+i_raw = 80.646694
 p_raw = 87.397474
-b_raw = 84.355265
-r = 84.731229
-i_adj = 80.177071
+b_raw = 82.466470
+r = 83.921745
+i_adj = 80.646694
 p_adj = 87.397474
-b_adj = 84.355265
+b_adj = 82.466470
 
 [models.groups]
-BUILD = 85.020508
+BUILD = 82.771942
 CRE = 74.951155
 GEN = 91.999163
 LM_ARENA_REVIEW_PROXY = 84.232613
@@ -459,6 +463,7 @@ LMArenaCreativeOrOpenEnded = 74.951155
 LMArenaDocument = 73.461474
 LMArenaSearch = 95.003752
 LMArenaText = 74.951155
+LiveCodingComposite = 82.375537
 LongContextRecall = 69.838420
 MCPAtlas = 98.143460
 MCPMarkVerified = 20.480607
@@ -473,7 +478,7 @@ SWEAtlasTestWriting = 100.000000
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 77.000000
+SWEComposite = 74.750000
 SciCode = 86.009174
 SonarBugDensity = 39.423077
 SonarComposite = 51.173932
@@ -499,16 +504,16 @@ aliases = ["Claude 4 Sonnet (20250514)", "anthropic/claude-sonnet-4", "claude 4 
 sources = ["arc_agi", "artificial_analysis", "gso", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 11.634945
+i_raw = 9.893890
 p_raw = 30.681466
-b_raw = 47.507008
-r = 40.670993
-i_adj = 11.634945
+b_raw = 47.754770
+r = 40.777176
+i_adj = 9.893890
 p_adj = 30.681466
-b_adj = 47.507008
+b_adj = 47.754770
 
 [models.groups]
-BUILD = 46.059907
+BUILD = 46.354862
 CRE = 0.000000
 GEN = 18.400346
 LM_ARENA_REVIEW_PROXY = 30.567722
@@ -537,6 +542,7 @@ LMArenaDocument = 46.170448
 LMArenaSearch = 14.964995
 LMArenaText = 0.000000
 LiveCodeBench = 50.000000
+LiveCodingComposite = 18.528531
 LongContextRecall = 53.680431
 MCPAtlas = 9.508439
 MMLUPro = 37.260592
@@ -545,7 +551,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 45.618557
 SWEBenchPro = 68.048744
 SWEBenchVerified = 94.717576
-SWEComposite = 64.817927
+SWEComposite = 62.860970
 SWERebench = 55.578436
 SciCode = 8.600917
 SonarBugDensity = 0.000000
@@ -571,16 +577,16 @@ aliases = ["Claude 4.5 Sonnet (20250929)", "anthropic/claude-sonnet-4.5", "claud
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 55.808526
+i_raw = 54.981141
 p_raw = 46.843917
-b_raw = 55.647615
-r = 47.121697
-i_adj = 55.808526
+b_raw = 56.203541
+r = 47.359951
+i_adj = 54.981141
 p_adj = 46.843917
-b_adj = 55.647615
+b_adj = 56.203541
 
 [models.groups]
-BUILD = 54.862979
+BUILD = 55.524796
 CRE = 57.820969
 GEN = 46.718854
 LM_ARENA_REVIEW_PROXY = 27.138496
@@ -608,6 +614,7 @@ LMArenaCreativeOrOpenEnded = 57.820969
 LMArenaDocument = 45.494645
 LMArenaSearch = 8.782347
 LMArenaText = 57.820969
+LiveCodingComposite = 36.716375
 LongContextRecall = 59.066427
 MCPAtlas = 2.362869
 MMLUPro = 75.565873
@@ -616,7 +623,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 44.845361
 SWEBenchPro = 70.723733
 SWEBenchVerified = 85.450164
-SWEComposite = 73.460735
+SWEComposite = 73.113898
 SWERebench = 78.513420
 SciCode = 35.550459
 SonarBugDensity = 58.653846
@@ -642,16 +649,16 @@ aliases = ["anthropic/claude-sonnet-4.6", "claude sonnet 4.6", "claude-sonnet-4-
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 74.078703
+i_raw = 74.389160
 p_raw = 65.714128
-b_raw = 62.076192
-r = 65.509253
-i_adj = 74.078703
+b_raw = 61.585000
+r = 65.298742
+i_adj = 74.389160
 p_adj = 65.714128
-b_adj = 62.076192
+b_adj = 61.585000
 
 [models.groups]
-BUILD = 62.996566
+BUILD = 62.411813
 CRE = 74.909758
 GEN = 74.901417
 LM_ARENA_REVIEW_PROXY = 80.474457
@@ -678,6 +685,7 @@ LMArenaCreativeOrOpenEnded = 74.909758
 LMArenaDocument = 84.832214
 LMArenaSearch = 76.116699
 LMArenaText = 74.909758
+LiveCodingComposite = 58.464539
 LongContextRecall = 85.996409
 MCPAtlas = 44.556962
 MMLUPro = 75.565873
@@ -689,7 +697,7 @@ SWEAtlasTestWriting = 41.225147
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 70.723733
 SWEBenchVerified = 95.000000
-SWEComposite = 68.503307
+SWEComposite = 66.253307
 SciCode = 47.591743
 SonarBugDensity = 58.653846
 SonarComposite = 58.852608
@@ -714,16 +722,16 @@ aliases = ["DeepSeek V3.2", "DeepSeek V3.2 (high reasoning)", "DeepSeek V3.2 Rea
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "sonar", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 41.384367
+i_raw = 40.137370
 p_raw = 33.481319
-b_raw = 48.789675
-r = 42.665757
-i_adj = 41.384367
+b_raw = 49.186228
+r = 42.835708
+i_adj = 40.137370
 p_adj = 33.481319
-b_adj = 48.789675
+b_adj = 49.186228
 
 [models.groups]
-BUILD = 48.074454
+BUILD = 48.546541
 CRE = 43.243201
 GEN = 29.600675
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -752,6 +760,7 @@ IFBench = 53.581871
 LMArenaCreativeOrOpenEnded = 43.243201
 LMArenaDocument = 46.338284
 LMArenaText = 43.243201
+LiveCodingComposite = 49.304246
 LongContextRecall = 24.955117
 MCPAtlas = 37.841772
 MMLUPro = 61.636680
@@ -761,7 +770,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 0.000000
 SWEBenchPro = 89.594665
 SWEBenchVerified = 63.208378
-SWEComposite = 68.106106
+SWEComposite = 68.354027
 SWERebench = 68.166791
 SciCode = 31.536697
 SonarBugDensity = 8.653846
@@ -789,16 +798,16 @@ aliases = ["deepseek chat", "deepseek v4 flash", "deepseek-chat", "deepseek-v4-f
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 54.492744
+i_raw = 53.421532
 p_raw = 60.280697
-b_raw = 60.368888
-r = 59.283787
-i_adj = 54.492744
+b_raw = 60.100746
+r = 59.168869
+i_adj = 53.421532
 p_adj = 60.280697
-b_adj = 60.368888
+b_adj = 60.100746
 
 [models.groups]
-BUILD = 57.252555
+BUILD = 56.933338
 CRE = 49.784714
 GEN = 54.656987
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -823,6 +832,7 @@ IFBench = 94.700292
 LMArenaCreativeOrOpenEnded = 49.784714
 LMArenaDocument = 46.338284
 LMArenaText = 49.784714
+LiveCodingComposite = 48.896528
 LongContextRecall = 44.703770
 MCPAtlas = 37.126582
 MMLUPro = 61.517702
@@ -832,7 +842,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 75.051546
 SWEBenchPro = 91.923763
 SWEBenchVerified = 95.000000
-SWEComposite = 77.773841
+SWEComposite = 76.004512
 SWERebench = 59.613423
 SciCode = 36.697248
 SonarComposite = 50.000000
@@ -856,16 +866,16 @@ aliases = ["deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 71.587494
+i_raw = 71.274727
 p_raw = 75.310908
-b_raw = 68.788779
-r = 68.450025
-i_adj = 71.587494
+b_raw = 67.716155
+r = 67.990329
+i_adj = 71.274727
 p_adj = 75.310908
-b_adj = 68.788779
+b_adj = 67.716155
 
 [models.groups]
-BUILD = 66.263322
+BUILD = 64.986389
 CRE = 69.414873
 GEN = 72.937443
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -887,6 +897,7 @@ HLETools = 27.247191
 IFBench = 87.390351
 LMArenaCreativeOrOpenEnded = 69.414873
 LMArenaText = 69.414873
+LiveCodingComposite = 64.277225
 LongContextRecall = 62.657092
 MCPAtlas = 62.949367
 MMLUPro = 68.830528
@@ -895,7 +906,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 77.000000
+SWEComposite = 74.750000
 SciCode = 65.940367
 SonarComposite = 50.000000
 TTFT = 97.840525
@@ -917,16 +928,16 @@ aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 35.692405
+i_raw = 33.376321
 p_raw = 17.626609
-b_raw = 25.618150
-r = 24.884597
-i_adj = 35.692405
+b_raw = 25.767774
+r = 24.948721
+i_adj = 33.376321
 p_adj = 17.626609
-b_adj = 25.618150
+b_adj = 25.767774
 
 [models.groups]
-BUILD = 21.224094
+BUILD = 21.402217
 CRE = 38.148699
 GEN = 15.431547
 LM_ARENA_REVIEW_PROXY = 36.905860
@@ -954,6 +965,7 @@ LMArenaCreativeOrOpenEnded = 38.148699
 LMArenaDocument = 12.551427
 LMArenaSearch = 61.260293
 LMArenaText = 38.148699
+LiveCodingComposite = 16.328040
 LongContextRecall = 37.522442
 MCPAtlas = 18.474684
 MMLUPro = 25.652931
@@ -987,16 +999,16 @@ aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 66.993099
+i_raw = 65.641342
 p_raw = 40.648995
-b_raw = 42.847686
-r = 35.581269
-i_adj = 66.993099
+b_raw = 41.790580
+r = 35.128224
+i_adj = 65.641342
 p_adj = 40.648995
-b_adj = 42.847686
+b_adj = 41.790580
 
 [models.groups]
-BUILD = 39.846304
+BUILD = 38.587844
 CRE = 77.155552
 GEN = 40.926240
 LM_ARENA_REVIEW_PROXY = 7.561513
@@ -1024,6 +1036,7 @@ LMArenaCreativeOrOpenEnded = 77.155552
 LMArenaDocument = 15.004008
 LMArenaSearch = 0.119018
 LMArenaText = 77.155552
+LiveCodingComposite = 29.561346
 LongContextRecall = 60.861759
 MCPAtlas = 48.242616
 MMLUPro = 60.475914
@@ -1032,7 +1045,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 60.515464
 SWEBenchPro = 66.857260
 SWEBenchVerified = 87.303647
-SWEComposite = 42.547134
+SWEComposite = 38.181952
 SWERebench = 0.000000
 SciCode = 24.655963
 SonarComposite = 50.000000
@@ -1054,23 +1067,23 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 81.406691
-p_raw = 68.129757
-b_raw = 55.170667
-r = 56.352276
-i_adj = 81.406691
-p_adj = 68.129757
-b_adj = 55.170667
+i_raw = 80.679484
+p_raw = 67.540538
+b_raw = 54.896605
+r = 55.864455
+i_adj = 80.679484
+p_adj = 67.540538
+b_adj = 54.896605
 
 [models.groups]
-BUILD = 50.946592
+BUILD = 50.722357
 CRE = 85.875965
 GEN = 69.011510
 LM_ARENA_REVIEW_PROXY = 34.595129
 OPS_long = 93.251745
 OPS_precision = 90.396325
 OPS_review = 91.890183
-PLAN = 64.297804
+PLAN = 63.226496
 
 [models.metrics]
 AALiveCodeBench = 98.841486
@@ -1090,6 +1103,7 @@ LMArenaCreativeOrOpenEnded = 85.875965
 LMArenaDocument = 5.942855
 LMArenaSearch = 63.247403
 LMArenaText = 85.875965
+LiveCodingComposite = 73.078015
 LongContextRecall = 62.657092
 MCPAtlas = 12.911392
 MMLUPro = 92.977365
@@ -1101,7 +1115,7 @@ SWEAtlasTestWriting = 34.694608
 SWEBenchMultilingual = 100.000000
 SWEBenchPro = 44.063011
 SWEBenchVerified = 90.083870
-SWEComposite = 71.002515
+SWEComposite = 70.506807
 SWERebench = 80.169703
 SciCode = 69.380734
 SonarComposite = 50.000000
@@ -1123,16 +1137,16 @@ aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-groundi
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 89.323223
+i_raw = 90.102182
 p_raw = 74.650175
-b_raw = 65.628126
-r = 64.850342
-i_adj = 89.323223
+b_raw = 65.087052
+r = 64.618453
+i_adj = 90.102182
 p_adj = 74.650175
-b_adj = 65.628126
+b_adj = 65.087052
 
 [models.groups]
-BUILD = 65.709363
+BUILD = 65.065227
 CRE = 99.055561
 GEN = 78.910525
 LM_ARENA_REVIEW_PROXY = 46.715933
@@ -1159,6 +1173,7 @@ LMArenaCreativeOrOpenEnded = 99.055561
 LMArenaDocument = 27.583687
 LMArenaSearch = 65.848179
 LMArenaText = 99.055561
+LiveCodingComposite = 85.982531
 LongContextRecall = 85.996409
 MCPAtlas = 47.932489
 MMLUPro = 100.000000
@@ -1166,7 +1181,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 62.371134
 SWEBenchPro = 69.832070
 SWEBenchVerified = 97.497799
-SWEComposite = 74.709852
+SWEComposite = 73.510817
 SWERebench = 73.517110
 SciCode = 100.000000
 SonarComposite = 50.000000
@@ -1188,23 +1203,23 @@ aliases = ["Gemini 3.1 Flash-Lite High", "gemini 3.1 flash lite", "gemini flash 
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar"]
 
 [models.scores]
-i_raw = 41.059778
-p_raw = 41.925334
-b_raw = 55.414813
-r = 48.266374
-i_adj = 41.059778
-p_adj = 41.925334
-b_adj = 55.414813
+i_raw = 39.242495
+p_raw = 42.721920
+b_raw = 56.323896
+r = 49.156692
+i_adj = 39.242495
+p_adj = 42.721920
+b_adj = 56.323896
 
 [models.groups]
-BUILD = 53.431520
+BUILD = 54.375824
 CRE = 36.877089
 GEN = 35.131301
 LM_ARENA_REVIEW_PROXY = 36.905860
 OPS_long = 95.707398
 OPS_precision = 92.517151
 OPS_review = 93.948644
-PLAN = 39.137055
+PLAN = 40.585393
 
 [models.metrics]
 AALiveCodeBench = 91.515263
@@ -1224,6 +1239,7 @@ LMArenaCreativeOrOpenEnded = 36.877089
 LMArenaDocument = 12.551427
 LMArenaSearch = 61.260293
 LMArenaText = 36.877089
+LiveCodingComposite = 35.753426
 LongContextRecall = 57.271095
 MMLUPro = 86.530760
 OutputSpeed = 100.000000
@@ -1234,7 +1250,7 @@ SWEAtlasTestWriting = 36.990417
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 92.500000
 SWEBenchVerified = 84.071290
-SWEComposite = 84.493392
+SWEComposite = 84.072040
 SWERebench = 75.644248
 SciCode = 19.495413
 SonarComposite = 50.000000
@@ -1257,16 +1273,16 @@ aliases = ["gemini 3.1 pro", "gemini pro 3.1", "gemini-3-1-pro", "gemini-3-1-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 98.658836
+i_raw = 99.085159
 p_raw = 93.261175
-b_raw = 72.604284
-r = 76.144187
-i_adj = 98.658836
+b_raw = 71.841993
+r = 75.817491
+i_adj = 99.085159
 p_adj = 93.261175
-b_adj = 72.604284
+b_adj = 71.841993
 
 [models.groups]
-BUILD = 69.988446
+BUILD = 69.080957
 CRE = 100.000000
 GEN = 99.462361
 LM_ARENA_REVIEW_PROXY = 53.888051
@@ -1294,6 +1310,7 @@ LMArenaCreativeOrOpenEnded = 100.000000
 LMArenaDocument = 34.528395
 LMArenaSearch = 73.247707
 LMArenaText = 100.000000
+LiveCodingComposite = 81.370364
 LongContextRecall = 96.768402
 OutputSpeed = 87.856908
 SWEAtlasComposite = 33.099437
@@ -1302,7 +1319,7 @@ SWEAtlasTestWriting = 32.637041
 SWEBenchMultilingual = 62.371134
 SWEBenchPro = 78.154258
 SWEBenchVerified = 95.000000
-SWEComposite = 82.130295
+SWEComposite = 81.666444
 SWERebench = 85.722978
 SciCode = 100.000000
 SonarComposite = 50.000000
@@ -1326,23 +1343,23 @@ aliases = ["gemini 3.5 flash", "gemini flash 3.5", "gemini-3-5-flash", "gemini-3
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 97.381328
-p_raw = 83.856792
-b_raw = 67.052919
-r = 65.575319
-i_adj = 97.381328
-p_adj = 83.856792
-b_adj = 67.052919
+i_raw = 97.469164
+p_raw = 81.907170
+b_raw = 66.751382
+r = 64.220613
+i_adj = 97.469164
+p_adj = 81.907170
+b_adj = 66.751382
 
 [models.groups]
-BUILD = 64.271242
+BUILD = 64.249866
 CRE = 99.805131
 GEN = 94.043098
 LM_ARENA_REVIEW_PROXY = 34.595129
 OPS_long = 91.115219
 OPS_precision = 86.726705
 OPS_review = 88.844828
-PLAN = 76.586744
+PLAN = 73.041977
 
 [models.metrics]
 AALiveCodeBench = 98.841486
@@ -1362,6 +1379,7 @@ LMArenaCreativeOrOpenEnded = 99.805131
 LMArenaDocument = 5.942855
 LMArenaSearch = 63.247403
 LMArenaText = 99.805131
+LiveCodingComposite = 81.551580
 LongContextRecall = 87.791741
 MMLUPro = 92.977365
 OutputSpeed = 96.186752
@@ -1372,7 +1390,7 @@ SWEAtlasTestWriting = 34.694608
 SWEBenchMultilingual = 100.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 90.083870
-SWEComposite = 88.830462
+SWEComposite = 88.334753
 SWERebench = 80.169703
 SciCode = 83.142202
 SonarComposite = 50.000000
@@ -1395,23 +1413,23 @@ aliases = ["Meta Muse Spark", "meta/muse-spark", "muse spark", "muse-spark"]
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro"]
 
 [models.scores]
-i_raw = 90.354130
-p_raw = 83.182138
-b_raw = 72.378975
-r = 71.744968
-i_adj = 90.354130
-p_adj = 83.182138
-b_adj = 72.378975
+i_raw = 90.389147
+p_raw = 81.884225
+b_raw = 72.182404
+r = 70.844893
+i_adj = 90.389147
+p_adj = 81.884225
+b_adj = 72.182404
 
 [models.groups]
-BUILD = 70.669023
+BUILD = 70.659757
 CRE = 93.102818
 GEN = 86.115159
 LM_ARENA_REVIEW_PROXY = 48.303702
 OPS_long = 84.947936
 OPS_precision = 81.217699
 OPS_review = 83.018104
-PLAN = 81.494752
+PLAN = 79.134910
 
 [models.metrics]
 AALiveCodeBench = 91.515263
@@ -1430,6 +1448,7 @@ LMArenaCreativeOrOpenEnded = 93.102818
 LMArenaDocument = 35.347111
 LMArenaSearch = 61.260293
 LMArenaText = 93.102818
+LiveCodingComposite = 80.525559
 LongContextRecall = 80.610413
 MCPAtlas = 98.143460
 MMLUPro = 86.530760
@@ -1441,7 +1460,7 @@ SWEAtlasTestWriting = 38.317715
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 100.000000
 SWEBenchVerified = 84.071290
-SWEComposite = 87.118392
+SWEComposite = 86.697040
 SWERebench = 75.644248
 SciCode = 74.541284
 SonarBugDensity = 60.625000
@@ -1467,16 +1486,16 @@ aliases = ["MiniMax M2.5", "MiniMax-M2.5", "minimax 2.5", "minimax m2.5", "minim
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 15.736163
+i_raw = 14.214211
 p_raw = 45.423741
-b_raw = 50.515714
-r = 49.119778
-i_adj = 15.736163
+b_raw = 50.911568
+r = 49.289429
+i_adj = 14.214211
 p_adj = 45.423741
-b_adj = 50.515714
+b_adj = 50.911568
 
 [models.groups]
-BUILD = 47.855855
+BUILD = 48.327110
 CRE = 0.000000
 GEN = 30.730590
 LM_ARENA_REVIEW_PROXY = 38.817337
@@ -1502,6 +1521,7 @@ IFBench = 74.415205
 LMArenaCreativeOrOpenEnded = 0.000000
 LMArenaDocument = 27.634673
 LMArenaText = 0.000000
+LiveCodingComposite = 38.119609
 LongContextRecall = 60.861759
 MCPAtlas = 27.082278
 MMLUPro = 67.784388
@@ -1514,7 +1534,7 @@ SWEAtlasTestWriting = 0.000000
 SWEBenchMultilingual = 58.247423
 SWEBenchPro = 95.000000
 SWEBenchVerified = 90.083870
-SWEComposite = 78.473324
+SWEComposite = 77.204881
 SWERebench = 64.715003
 SciCode = 23.509174
 SonarBugDensity = 58.653846
@@ -1541,16 +1561,16 @@ aliases = ["MiniMax M2.7", "MiniMax M2.7 Highspeed", "MiniMax-M2.7", "minimax 2.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 34.696038
+i_raw = 34.080219
 p_raw = 54.987381
-b_raw = 56.345728
-r = 53.231471
-i_adj = 34.696038
+b_raw = 56.618207
+r = 53.348248
+i_adj = 34.080219
 p_adj = 54.987381
-b_adj = 56.345728
+b_adj = 56.618207
 
 [models.groups]
-BUILD = 54.593580
+BUILD = 54.917960
 CRE = 23.144182
 GEN = 49.222262
 LM_ARENA_REVIEW_PROXY = 38.817337
@@ -1576,6 +1596,7 @@ IFBench = 85.380117
 LMArenaCreativeOrOpenEnded = 23.144182
 LMArenaDocument = 27.634673
 LMArenaText = 23.144182
+LiveCodingComposite = 50.530123
 LongContextRecall = 75.224417
 MCPAtlas = 27.082278
 MMLUPro = 67.784388
@@ -1588,7 +1609,7 @@ SWEAtlasTestWriting = 0.000000
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 92.500000
-SWEComposite = 87.455149
+SWEComposite = 86.683918
 SWERebench = 77.075372
 SciCode = 48.738532
 SonarBugDensity = 70.192308
@@ -1615,16 +1636,16 @@ aliases = ["MiniMax M3", "MiniMax-M3", "minimax m3", "minimax-m3", "minimax/mini
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 66.818487
+i_raw = 67.028127
 p_raw = 73.073317
-b_raw = 63.520786
-r = 64.057418
-i_adj = 66.818487
+b_raw = 63.445643
+r = 64.025214
+i_adj = 67.028127
 p_adj = 73.073317
-b_adj = 63.520786
+b_adj = 63.445643
 
 [models.groups]
-BUILD = 61.228435
+BUILD = 61.138978
 CRE = 65.883514
 GEN = 69.815126
 LM_ARENA_REVIEW_PROXY = 41.274110
@@ -1650,6 +1671,7 @@ IFBench = 100.000000
 LMArenaCreativeOrOpenEnded = 65.883514
 LMArenaDocument = 32.548220
 LMArenaText = 65.883514
+LiveCodingComposite = 55.812425
 LongContextRecall = 100.000000
 MCPAtlas = 62.949367
 MMLUPro = 67.784388
@@ -1662,7 +1684,7 @@ SWEAtlasTestWriting = 0.000000
 SWEBenchMultilingual = 100.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 88.330149
+SWEComposite = 87.433918
 SWERebench = 77.075372
 SciCode = 39.564220
 SonarBugDensity = 70.192308
@@ -1689,16 +1711,16 @@ aliases = ["kimi k2 0905", "kimi k2 turbo", "kimi-k2-0905", "kimi-k2-0905-previe
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 6.683656
+i_raw = 5.890936
 p_raw = 24.554215
-b_raw = 42.810096
-r = 39.481668
-i_adj = 6.683656
+b_raw = 43.779260
+r = 39.897024
+i_adj = 5.890936
 p_adj = 24.554215
-b_adj = 42.810096
+b_adj = 43.779260
 
 [models.groups]
-BUILD = 42.498197
+BUILD = 43.651964
 CRE = 1.037996
 GEN = 10.332050
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -1725,6 +1747,7 @@ IFBench = 0.000000
 LMArenaCreativeOrOpenEnded = 1.037996
 LMArenaDocument = 46.338284
 LMArenaText = 1.037996
+LiveCodingComposite = 12.213105
 LongContextRecall = 0.000000
 MCPAtlas = 45.014768
 MMLUPro = 10.562972
@@ -1734,7 +1757,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 5.000000
 SWEBenchPro = 92.500000
 SWEBenchVerified = 58.551272
-SWEComposite = 65.503060
+SWEComposite = 65.556168
 SWERebench = 59.613423
 SciCode = 0.000000
 SonarComposite = 50.000000
@@ -1757,16 +1780,16 @@ aliases = ["kimi 2.5", "kimi k2.5", "kimi-k2-5", "kimi-k2-5-non-reasoning", "kim
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 45.575251
+i_raw = 45.383124
 p_raw = 55.628132
-b_raw = 51.354175
-r = 50.964961
-i_adj = 45.575251
+b_raw = 51.796512
+r = 51.154534
+i_adj = 45.383124
 p_adj = 55.628132
-b_adj = 51.354175
+b_adj = 51.796512
 
 [models.groups]
-BUILD = 48.943668
+BUILD = 49.470260
 CRE = 41.031501
 GEN = 51.640478
 LM_ARENA_REVIEW_PROXY = 36.843925
@@ -1792,6 +1815,7 @@ IFBench = 70.577485
 LMArenaCreativeOrOpenEnded = 41.031501
 LMArenaDocument = 23.687851
 LMArenaText = 41.031501
+LiveCodingComposite = 52.269321
 LongContextRecall = 57.271095
 MCPAtlas = 23.037975
 MMLUPro = 68.830528
@@ -1804,7 +1828,7 @@ SWEAtlasTestWriting = 14.432044
 SWEBenchMultilingual = 47.938144
 SWEBenchPro = 87.643781
 SWEBenchVerified = 66.915342
-SWEComposite = 72.946473
+SWEComposite = 73.030710
 SWERebench = 68.600084
 SciCode = 60.206422
 SonarBugDensity = 50.961538
@@ -1831,18 +1855,18 @@ aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "kimi
 sources = ["artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 76.475003
-p_raw = 76.667346
-b_raw = 68.861686
-r = 66.929073
-i_adj = 76.475003
-p_adj = 76.667346
-b_adj = 68.861686
+i_raw = 75.437335
+p_raw = 75.329067
+b_raw = 67.957991
+r = 66.541775
+i_adj = 75.437335
+p_adj = 75.329067
+b_adj = 67.957991
 
 [models.groups]
-BUILD = 67.229875
+BUILD = 66.154047
 CRE = 74.743787
-GEN = 80.393872
+GEN = 76.776903
 LM_ARENA_REVIEW_PROXY = 47.846049
 OPS_long = 75.196175
 OPS_precision = 81.382870
@@ -1867,6 +1891,7 @@ KimiCodeBenchV2 = 5.000000
 LMArenaCreativeOrOpenEnded = 74.743787
 LMArenaDocument = 45.692099
 LMArenaText = 74.743787
+LiveCodingComposite = 72.437095
 LongContextRecall = 80.610413
 MCPAtlas = 44.721519
 MCPMarkVerified = 5.000000
@@ -1878,7 +1903,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 81.523964
+SWEComposite = 79.839459
 SWERebench = 61.309909
 SciCode = 86.009174
 SonarComposite = 50.000000
@@ -1901,18 +1926,18 @@ aliases = ["kimi 2.7", "kimi 2.7 code", "kimi k2.7", "kimi k2.7 code", "kimi-k2-
 sources = ["overrides"]
 
 [models.scores]
-i_raw = 76.567017
-p_raw = 78.492908
-b_raw = 71.555350
-r = 69.152107
-i_adj = 76.567017
-p_adj = 78.492908
-b_adj = 71.555350
+i_raw = 75.530440
+p_raw = 77.139447
+b_raw = 70.525258
+r = 68.710638
+i_adj = 75.530440
+p_adj = 77.139447
+b_adj = 70.525258
 
 [models.groups]
-BUILD = 70.165863
+BUILD = 68.939563
 CRE = 74.743787
-GEN = 80.738701
+GEN = 77.080697
 LM_ARENA_REVIEW_PROXY = 47.846049
 OPS_long = 75.053235
 OPS_precision = 81.096989
@@ -1937,6 +1962,7 @@ KimiCodeBenchV2 = 57.432850
 LMArenaCreativeOrOpenEnded = 74.743787
 LMArenaDocument = 45.692099
 LMArenaText = 74.743787
+LiveCodingComposite = 72.437095
 LongContextRecall = 80.610413
 MCPAtlas = 69.784810
 MCPMarkVerified = 44.258010
@@ -1948,7 +1974,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 100.000000
 SWEBenchPro = 100.000000
 SWEBenchVerified = 100.000000
-SWEComposite = 84.523964
+SWEComposite = 82.589459
 SWERebench = 61.309909
 SciCode = 86.009174
 SonarComposite = 50.000000
@@ -1971,16 +1997,16 @@ aliases = ["gpt 5.2", "gpt-5-2", "gpt-5-2-2025-12-11", "gpt-5-2-high", "gpt-5-2-
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 39.771613
+i_raw = 39.557552
 p_raw = 52.785634
-b_raw = 62.993295
-r = 54.589756
-i_adj = 39.771613
+b_raw = 63.351413
+r = 54.743235
+i_adj = 39.557552
 p_adj = 52.785634
-b_adj = 62.993295
+b_adj = 63.351413
 
 [models.groups]
-BUILD = 64.170136
+BUILD = 64.596467
 CRE = 32.627158
 GEN = 49.926176
 LM_ARENA_REVIEW_PROXY = 33.760211
@@ -2010,6 +2036,7 @@ LMArenaCreativeOrOpenEnded = 32.627158
 LMArenaDocument = 0.000000
 LMArenaSearch = 67.520422
 LMArenaText = 32.627158
+LiveCodingComposite = 64.381323
 LongContextRecall = 46.499102
 MMLUPro = 56.993616
 OSWorldVerified = 42.101770
@@ -2020,7 +2047,7 @@ SWEAtlasTestWriting = 90.446906
 SWEBenchMultilingual = 41.752577
 SWEBenchPro = 30.123347
 SWEBenchVerified = 76.182753
-SWEComposite = 65.500565
+SWEComposite = 66.610768
 SWERebench = 98.386808
 SciCode = 44.151376
 SonarComposite = 50.000000
@@ -2042,16 +2069,16 @@ aliases = ["GPT 5.2 Codex", "GPT-5-2 Codex", "GPT-5.2 Codex High", "GPT-5.2 Code
 sources = ["artificial_analysis", "lmarena", "openrouter", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 64.780160
+i_raw = 64.801339
 p_raw = 56.221724
-b_raw = 62.737302
-r = 59.625129
-i_adj = 64.780160
+b_raw = 61.599902
+r = 59.137672
+i_adj = 64.801339
 p_adj = 56.221724
-b_adj = 62.737302
+b_adj = 61.599902
 
 [models.groups]
-BUILD = 63.772776
+BUILD = 62.418727
 CRE = 69.169341
 GEN = 57.767488
 LM_ARENA_REVIEW_PROXY = 60.476440
@@ -2073,6 +2100,7 @@ LMArenaCreativeOrOpenEnded = 69.169341
 LMArenaDocument = 65.944623
 LMArenaSearch = 55.008257
 LMArenaText = 69.169341
+LiveCodingComposite = 47.310974
 MCPAtlas = 49.318565
 OSWorldVerified = 42.101770
 SWEAtlasComposite = 70.595826
@@ -2082,7 +2110,7 @@ SWEAtlasTestWriting = 69.992005
 SWEBenchMultilingual = 37.628866
 SWEBenchPro = 63.114876
 SWEBenchVerified = 76.182753
-SWEComposite = 67.407498
+SWEComposite = 67.364235
 SWERebench = 75.317481
 SonarComposite = 50.000000
 TerminalBench = 75.317539
@@ -2091,7 +2119,7 @@ Toolathlon = 92.500000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "openai/gpt-5.3-codex"
@@ -2102,16 +2130,16 @@ aliases = ["gpt 5.3 codex", "gpt codex 5.3", "gpt-5-3-codex", "gpt-5.3-codex", "
 sources = ["artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 64.780160
+i_raw = 64.801339
 p_raw = 57.507336
-b_raw = 73.637323
-r = 65.104666
-i_adj = 64.780160
+b_raw = 73.254627
+r = 64.940654
+i_adj = 64.801339
 p_adj = 57.507336
-b_adj = 73.637323
+b_adj = 73.254627
 
 [models.groups]
-BUILD = 76.526374
+BUILD = 76.070784
 CRE = 69.169341
 GEN = 57.767488
 LM_ARENA_REVIEW_PROXY = 60.476440
@@ -2133,6 +2161,7 @@ LMArenaCreativeOrOpenEnded = 69.169341
 LMArenaDocument = 65.944623
 LMArenaSearch = 55.008257
 LMArenaText = 69.169341
+LiveCodingComposite = 49.131482
 OSWorldVerified = 42.101770
 SWEAtlasComposite = 74.230383
 SWEAtlasQnA = 61.843190
@@ -2140,7 +2169,7 @@ SWEAtlasRefactoring = 84.053561
 SWEAtlasTestWriting = 73.520005
 SWEBenchPro = 95.000000
 SWEBenchVerified = 92.500000
-SWEComposite = 94.742198
+SWEComposite = 94.900945
 SWERebench = 95.357446
 SonarComposite = 50.000000
 TerminalBench = 96.757049
@@ -2149,7 +2178,7 @@ Toolathlon = 92.500000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "openai/gpt-5.4"
@@ -2160,16 +2189,16 @@ aliases = ["GPT 5.4 (Codex) xHigh", "GPT-5.4 (Codex CLI) xHigh", "GPT-5.4 (Codex
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 67.481212
+i_raw = 67.450344
 p_raw = 57.323097
-b_raw = 76.078512
-r = 66.233236
-i_adj = 67.481212
+b_raw = 77.046716
+r = 66.648180
+i_adj = 67.450344
 p_adj = 57.323097
-b_adj = 76.078512
+b_adj = 77.046716
 
 [models.groups]
-BUILD = 79.310021
+BUILD = 80.462644
 CRE = 72.552166
 GEN = 58.990930
 LM_ARENA_REVIEW_PROXY = 62.325223
@@ -2191,6 +2220,7 @@ LMArenaCreativeOrOpenEnded = 72.552166
 LMArenaDocument = 68.758380
 LMArenaSearch = 55.892067
 LMArenaText = 72.552166
+LiveCodingComposite = 50.008184
 OSWorldVerified = 41.637168
 SWEAtlasComposite = 90.319591
 SWEAtlasQnA = 83.659244
@@ -2198,7 +2228,7 @@ SWEAtlasRefactoring = 89.866099
 SWEAtlasTestWriting = 97.584595
 SWEBenchPro = 92.500000
 SWEBenchVerified = 95.000000
-SWEComposite = 93.396244
+SWEComposite = 93.317302
 SWERebench = 93.579049
 SonarBugDensity = 83.653846
 SonarComposite = 64.885367
@@ -2210,7 +2240,7 @@ Toolathlon = 95.000000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "openai/gpt-5.4-mini"
@@ -2221,16 +2251,16 @@ aliases = ["GPT-5.4 Mini (High)", "GPT-5.4 Mini (Low)", "GPT-5.4 Mini (Medium)",
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar"]
 
 [models.scores]
-i_raw = 60.956970
+i_raw = 59.433940
 p_raw = 42.016757
-b_raw = 70.523414
-r = 58.557151
-i_adj = 60.956970
+b_raw = 70.505532
+r = 58.549488
+i_adj = 59.433940
 p_adj = 42.016757
-b_adj = 70.523414
+b_adj = 70.505532
 
 [models.groups]
-BUILD = 72.177132
+BUILD = 72.155845
 CRE = 69.169341
 GEN = 36.869908
 LM_ARENA_REVIEW_PROXY = 60.476440
@@ -2258,6 +2288,7 @@ LMArenaCreativeOrOpenEnded = 69.169341
 LMArenaDocument = 65.944623
 LMArenaSearch = 55.008257
 LMArenaText = 69.169341
+LiveCodingComposite = 41.335374
 LongContextRecall = 35.727110
 OSWorldVerified = 5.000000
 OutputSpeed = 94.186802
@@ -2267,7 +2298,7 @@ SWEAtlasRefactoring = 83.886184
 SWEAtlasTestWriting = 90.446906
 SWEBenchPro = 95.000000
 SWEBenchVerified = 92.500000
-SWEComposite = 91.046530
+SWEComposite = 90.743318
 SWERebench = 87.042192
 SciCode = 32.683486
 SonarBugDensity = 70.192308
@@ -2295,16 +2326,16 @@ aliases = ["GPT-5.4 Pro (xHigh)", "GPT-5.4 Pro Medium", "gpt 5.4 pro", "gpt-5-4-
 sources = ["arc_agi", "artificial_analysis", "openrouter", "overrides", "sonar"]
 
 [models.scores]
-i_raw = 64.214807
+i_raw = 64.363644
 p_raw = 58.609855
-b_raw = 76.407174
-r = 67.343697
-i_adj = 64.214807
+b_raw = 75.554195
+r = 66.978135
+i_adj = 64.363644
 p_adj = 58.609855
-b_adj = 76.407174
+b_adj = 75.554195
 
 [models.groups]
-BUILD = 80.632672
+BUILD = 79.617221
 CRE = 69.169341
 GEN = 57.175562
 LM_ARENA_REVIEW_PROXY = 60.476440
@@ -2326,6 +2357,7 @@ LMArenaCreativeOrOpenEnded = 69.169341
 LMArenaDocument = 65.944623
 LMArenaSearch = 55.008257
 LMArenaText = 69.169341
+LiveCodingComposite = 50.006956
 OSWorldVerified = 42.101770
 SWEAtlasComposite = 84.271652
 SWEAtlasQnA = 78.610357
@@ -2333,7 +2365,7 @@ SWEAtlasRefactoring = 83.886184
 SWEAtlasTestWriting = 90.446906
 SWEBenchPro = 92.500000
 SWEBenchVerified = 92.500000
-SWEComposite = 90.074307
+SWEComposite = 89.771096
 SWERebench = 87.042192
 SonarBugDensity = 81.730769
 SonarComposite = 66.051134
@@ -2346,7 +2378,7 @@ Toolathlon = 92.500000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "openai/gpt-5.5"
@@ -2357,16 +2389,16 @@ aliases = ["GPT 5.5 (Codex) xHigh", "GPT-5.5 (Codex) xHigh", "gpt 5.5", "gpt-5-5
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 84.768559
+i_raw = 85.228481
 p_raw = 91.221790
-b_raw = 91.946107
-r = 91.429916
-i_adj = 84.768559
+b_raw = 90.809545
+r = 90.942818
+i_adj = 85.228481
 p_adj = 91.221790
-b_adj = 91.946107
+b_adj = 90.809545
 
 [models.groups]
-BUILD = 93.183282
+BUILD = 91.830232
 CRE = 82.125804
 GEN = 92.307946
 LM_ARENA_REVIEW_PROXY = 90.912789
@@ -2395,6 +2427,7 @@ LMArenaCreativeOrOpenEnded = 82.125804
 LMArenaDocument = 85.549243
 LMArenaSearch = 96.276334
 LMArenaText = 82.125804
+LiveCodingComposite = 77.924522
 LongContextRecall = 94.973070
 MCPMarkVerified = 95.000000
 MLSBenchLite = 54.370680
@@ -2407,7 +2440,7 @@ SWEAtlasRefactoring = 91.387705
 SWEAtlasTestWriting = 89.667435
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 96.059894
+SWEComposite = 96.192381
 SWERebench = 97.384762
 SciCode = 86.009174
 SonarBugDensity = 97.115385
@@ -2435,16 +2468,16 @@ aliases = ["GPT-5.5 Pro (High)", "GPT-5.5 Pro (xHigh)", "gpt 5.5 pro", "gpt-5-5-
 sources = ["arc_agi", "artificial_analysis", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 64.173852
+i_raw = 64.318593
 p_raw = 58.461168
-b_raw = 76.557722
-r = 67.346507
-i_adj = 64.173852
+b_raw = 73.852565
+r = 66.187154
+i_adj = 64.318593
 p_adj = 58.461168
-b_adj = 76.557722
+b_adj = 73.852565
 
 [models.groups]
-BUILD = 80.828896
+BUILD = 77.608471
 CRE = 69.169341
 GEN = 57.039045
 LM_ARENA_REVIEW_PROXY = 60.476440
@@ -2466,6 +2499,7 @@ LMArenaCreativeOrOpenEnded = 69.169341
 LMArenaDocument = 65.944623
 LMArenaSearch = 55.008257
 LMArenaText = 69.169341
+LiveCodingComposite = 50.006956
 MCPAtlas = 49.318565
 OSWorldVerified = 42.101770
 SWEAtlasComposite = 84.271652
@@ -2474,7 +2508,7 @@ SWEAtlasRefactoring = 83.886184
 SWEAtlasTestWriting = 90.446906
 SWEBenchPro = 92.500000
 SWEBenchVerified = 92.500000
-SWEComposite = 90.074307
+SWEComposite = 89.771096
 SWERebench = 87.042192
 SonarBugDensity = 81.730769
 SonarComposite = 66.051134
@@ -2487,7 +2521,7 @@ Toolathlon = 92.500000
 
 [models.missing]
 metrics = []
-groups_shrunk = ["BUILD", "GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
+groups_shrunk = ["GEN", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
 canonical_id = "qwen/qwen3.5-397b-a17b"
@@ -2498,16 +2532,16 @@ aliases = ["Qwen/Qwen3.5-397B-A17B", "Qwen3.5 397B A17B", "Qwen3.5-397B-A17B", "
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench"]
 
 [models.scores]
-i_raw = 59.053239
+i_raw = 58.352574
 p_raw = 60.758717
-b_raw = 62.036581
-r = 60.709691
-i_adj = 59.053239
+b_raw = 62.700394
+r = 60.994182
+i_adj = 58.352574
 p_adj = 60.758717
-b_adj = 62.036581
+b_adj = 62.700394
 
 [models.groups]
-BUILD = 60.112277
+BUILD = 60.902530
 CRE = 60.347568
 GEN = 52.024493
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -2534,6 +2568,7 @@ IFBench = 93.603801
 LMArenaCreativeOrOpenEnded = 60.347568
 LMArenaDocument = 46.338284
 LMArenaText = 60.347568
+LiveCodingComposite = 41.499119
 LongContextRecall = 59.066427
 MCPAtlas = 67.251055
 MMLUPro = 76.143355
@@ -2546,7 +2581,7 @@ SWEAtlasTestWriting = 31.059256
 SWEBenchMultilingual = 66.701031
 SWEBenchPro = 92.500000
 SWEBenchVerified = 88.577684
-SWEComposite = 92.331756
+SWEComposite = 92.902872
 SWERebench = 100.000000
 SciCode = 20.068807
 SonarBugDensity = 75.961538
@@ -2574,16 +2609,16 @@ aliases = ["Qwen3.6-Max-Preview", "alibaba/qwen3.6-max-preview", "qwen 3.6 max p
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 63.238622
+i_raw = 63.623658
 p_raw = 65.913369
-b_raw = 65.223155
-r = 63.008612
-i_adj = 63.238622
+b_raw = 65.437952
+r = 63.100667
+i_adj = 63.623658
 p_adj = 65.913369
-b_adj = 65.223155
+b_adj = 65.437952
 
 [models.groups]
-BUILD = 64.907703
+BUILD = 65.163413
 CRE = 65.490595
 GEN = 62.266362
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -2610,6 +2645,7 @@ IFBench = 87.755848
 LMArenaCreativeOrOpenEnded = 65.490595
 LMArenaDocument = 46.338284
 LMArenaText = 65.490595
+LiveCodingComposite = 57.654688
 LongContextRecall = 80.610413
 MCPAtlas = 67.251055
 MMLUPro = 79.048172
@@ -2622,7 +2658,7 @@ SWEAtlasTestWriting = 31.059256
 SWEBenchMultilingual = 68.556701
 SWEBenchPro = 92.500000
 SWEBenchVerified = 92.864093
-SWEComposite = 93.160284
+SWEComposite = 93.517079
 SWERebench = 100.000000
 SciCode = 48.165138
 SonarBugDensity = 75.961538
@@ -2650,16 +2686,16 @@ aliases = ["Qwen3.6-Plus", "alibaba/qwen3.6-plus", "qwen 3.6 plus", "qwen/qwen3.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 59.369402
+i_raw = 58.647992
 p_raw = 64.144466
-b_raw = 65.388992
-r = 63.225288
-i_adj = 59.369402
+b_raw = 65.389036
+r = 63.225307
+i_adj = 58.647992
 p_adj = 64.144466
-b_adj = 65.388992
+b_adj = 65.389036
 
 [models.groups]
-BUILD = 63.339160
+BUILD = 63.339213
 CRE = 57.311055
 GEN = 57.665231
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -2685,6 +2721,7 @@ IFBench = 83.918129
 LMArenaCreativeOrOpenEnded = 57.311055
 LMArenaDocument = 46.338284
 LMArenaText = 57.311055
+LiveCodingComposite = 44.298659
 LongContextRecall = 80.610413
 MCPAtlas = 62.569620
 MMLUPro = 83.456181
@@ -2697,7 +2734,7 @@ SWEAtlasTestWriting = 31.059256
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 87.329342
+SWEComposite = 86.401759
 SWERebench = 76.448354
 SciCode = 12.614679
 SonarBugDensity = 92.500000
@@ -2725,16 +2762,16 @@ aliases = ["Qwen3.7 Max", "Qwen3.7-Max", "alibaba/qwen3.7-max", "qwen 3.7 max", 
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 89.056588
+i_raw = 88.652793
 p_raw = 79.897291
-b_raw = 73.568238
-r = 71.622290
-i_adj = 89.056588
+b_raw = 72.928950
+r = 71.348310
+i_adj = 88.652793
 p_adj = 79.897291
-b_adj = 73.568238
+b_adj = 72.928950
 
 [models.groups]
-BUILD = 71.304748
+BUILD = 70.543692
 CRE = 93.423716
 GEN = 79.097623
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -2761,6 +2798,7 @@ IFBench = 98.355263
 LMArenaCreativeOrOpenEnded = 93.423716
 LMArenaDocument = 46.338284
 LMArenaText = 93.423716
+LiveCodingComposite = 68.494343
 LongContextRecall = 77.019749
 MCPAtlas = 71.303797
 MMLUPro = 81.597504
@@ -2773,7 +2811,7 @@ SWEAtlasTestWriting = 31.059256
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 87.579342
+SWEComposite = 86.651759
 SWERebench = 76.448354
 SciCode = 59.059633
 SonarBugDensity = 92.500000
@@ -2800,16 +2838,16 @@ aliases = ["Qwen3.7 Plus", "Qwen3.7-Plus", "alibaba/qwen3.7-plus", "qwen 3.7 plu
 sources = ["artificial_analysis", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 61.520210
+i_raw = 60.996632
 p_raw = 70.112064
-b_raw = 69.140886
-r = 66.926916
-i_adj = 61.520210
+b_raw = 68.850819
+r = 66.802601
+i_adj = 60.996632
 p_adj = 70.112064
-b_adj = 69.140886
+b_adj = 68.850819
 
 [models.groups]
-BUILD = 67.153136
+BUILD = 66.807818
 CRE = 57.311055
 GEN = 64.713546
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -2836,6 +2874,7 @@ IFBench = 91.410819
 LMArenaCreativeOrOpenEnded = 57.311055
 LMArenaDocument = 46.338284
 LMArenaText = 57.311055
+LiveCodingComposite = 55.858858
 LongContextRecall = 55.475763
 MCPAtlas = 59.151899
 MMLUPro = 83.456181
@@ -2848,7 +2887,7 @@ SWEAtlasTestWriting = 31.059256
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 93.999120
-SWEComposite = 87.429210
+SWEComposite = 86.551671
 SWERebench = 76.448354
 SciCode = 40.137615
 SonarBugDensity = 92.500000
@@ -2875,23 +2914,23 @@ aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", 
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 36.516764
-p_raw = 44.366872
-b_raw = 44.290961
-r = 40.835583
-i_adj = 36.516764
-p_adj = 44.366872
-b_adj = 44.290961
+i_raw = 36.271704
+p_raw = 45.021671
+b_raw = 44.205219
+r = 41.210425
+i_adj = 36.271704
+p_adj = 45.021671
+b_adj = 44.205219
 
 [models.groups]
-BUILD = 43.420127
+BUILD = 43.204668
 CRE = 30.743217
 GEN = 44.217045
 LM_ARENA_REVIEW_PROXY = 25.000000
 OPS_long = 52.385701
 OPS_precision = 54.771402
 OPS_review = 54.771402
-PLAN = 42.954278
+PLAN = 44.144823
 
 [models.metrics]
 AALiveCodeBench = 66.108864
@@ -2908,10 +2947,11 @@ IFBench = 26.169591
 LMArenaCreativeOrOpenEnded = 30.743217
 LMArenaSearch = 0.000000
 LMArenaText = 30.743217
+LiveCodingComposite = 51.688839
 LongContextRecall = 71.633752
 MMLUPro = 65.118979
 SWEAtlasComposite = 50.000000
-SWEComposite = 44.843843
+SWEComposite = 44.199324
 SWERebench = 37.109609
 SciCode = 41.284404
 SonarComposite = 50.000000
@@ -2932,23 +2972,23 @@ aliases = ["Grok 4.20 (Reasoning)", "Grok 4.20 Reasoning", "grok 4.20", "grok-4-
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "openrouter", "terminal_bench"]
 
 [models.scores]
-i_raw = 68.822289
-p_raw = 68.688773
-b_raw = 51.598835
-r = 52.897092
-i_adj = 68.822289
-p_adj = 68.688773
-b_adj = 51.598835
+i_raw = 68.281450
+p_raw = 68.234514
+b_raw = 51.260066
+r = 52.466371
+i_adj = 68.281450
+p_adj = 68.234514
+b_adj = 51.260066
 
 [models.groups]
-BUILD = 47.148286
+BUILD = 46.823649
 CRE = 64.224863
 GEN = 72.527989
 LM_ARENA_REVIEW_PROXY = 25.872540
 OPS_long = 90.555966
 OPS_precision = 86.398355
 OPS_review = 89.065233
-PLAN = 63.530089
+PLAN = 62.704163
 
 [models.metrics]
 AALiveCodeBench = 63.692534
@@ -2969,11 +3009,12 @@ LMArenaCreativeOrOpenEnded = 64.224863
 LMArenaDocument = 1.149153
 LMArenaSearch = 50.595927
 LMArenaText = 64.224863
+LiveCodingComposite = 50.699291
 LongContextRecall = 17.773788
 MMLUPro = 62.851132
 OutputSpeed = 95.058772
 SWEAtlasComposite = 50.000000
-SWEComposite = 45.617267
+SWEComposite = 45.069425
 SWERebench = 39.043167
 SciCode = 40.711009
 SonarComposite = 50.000000
@@ -2995,23 +3036,23 @@ aliases = ["grok 4.3", "grok-4-3", "grok-4-3-high", "grok-4-3-low", "grok-4-3-no
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 40.569420
-p_raw = 57.694574
-b_raw = 48.170106
-r = 52.734267
-i_adj = 40.569420
-p_adj = 57.694574
-b_adj = 48.170106
+i_raw = 39.489302
+p_raw = 57.161187
+b_raw = 47.909153
+r = 52.287158
+i_adj = 39.489302
+p_adj = 57.161187
+b_adj = 47.909153
 
 [models.groups]
-BUILD = 43.731223
+BUILD = 43.512926
 CRE = 27.557565
 GEN = 54.219515
 LM_ARENA_REVIEW_PROXY = 48.239291
 OPS_long = 90.223441
 OPS_precision = 87.209170
 OPS_review = 89.087709
-PLAN = 55.739308
+PLAN = 54.769514
 
 [models.metrics]
 AALiveCodeBench = 66.108864
@@ -3030,11 +3071,12 @@ IFBench = 100.000000
 LMArenaCreativeOrOpenEnded = 27.557565
 LMArenaSearch = 46.478582
 LMArenaText = 27.557565
+LiveCodingComposite = 43.542242
 LongContextRecall = 55.475763
 MMLUPro = 65.118979
 OutputSpeed = 93.454821
 SWEAtlasComposite = 50.000000
-SWEComposite = 44.843843
+SWEComposite = 44.199324
 SWERebench = 37.109609
 SciCode = 34.977064
 SonarComposite = 50.000000
@@ -3056,23 +3098,23 @@ aliases = ["grok code fast 1", "grok-code-fast", "grok-code-fast-1", "x-ai/grok-
 sources = ["artificial_analysis", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 28.186645
-p_raw = 19.292942
-b_raw = 30.997443
-r = 27.879868
-i_adj = 28.186645
-p_adj = 19.292942
-b_adj = 30.997443
+i_raw = 26.943084
+p_raw = 22.071647
+b_raw = 31.524642
+r = 29.852425
+i_adj = 26.943084
+p_adj = 22.071647
+b_adj = 31.524642
 
 [models.groups]
-BUILD = 29.839195
+BUILD = 29.985652
 CRE = 33.631734
 GEN = 10.575807
 LM_ARENA_REVIEW_PROXY = 28.750000
 OPS_long = 52.027846
 OPS_precision = 54.055692
 OPS_review = 54.055692
-PLAN = 20.100796
+PLAN = 25.152987
 
 [models.metrics]
 AALiveCodeBench = 6.528135
@@ -3090,11 +3132,12 @@ IFBench = 0.000000
 LMArenaCreativeOrOpenEnded = 33.631734
 LMArenaSearch = 7.500000
 LMArenaText = 33.631734
+LiveCodingComposite = 1.867047
 LongContextRecall = 0.000000
 MMLUPro = 0.000000
 SWEAtlasComposite = 50.000000
 SWEBenchVerified = 65.223808
-SWEComposite = 41.962301
+SWEComposite = 39.910952
 SWERebench = 24.196826
 SciCode = 0.000000
 SonarComposite = 50.000000
@@ -3115,16 +3158,16 @@ aliases = ["MiMo-V2.5", "XiaomiMiMo/MiMo-V2.5", "mimo v2.5", "mimo-v2-5", "mimo-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 50.021461
+i_raw = 48.902104
 p_raw = 56.583124
-b_raw = 57.998751
-r = 55.656992
-i_adj = 50.021461
+b_raw = 58.065032
+r = 55.685398
+i_adj = 48.902104
 p_adj = 56.583124
-b_adj = 57.998751
+b_adj = 58.065032
 
 [models.groups]
-BUILD = 55.053385
+BUILD = 55.132290
 CRE = 45.821405
 GEN = 49.019049
 LM_ARENA_REVIEW_PROXY = 38.817337
@@ -3150,6 +3193,7 @@ IFBench = 62.353801
 LMArenaCreativeOrOpenEnded = 45.821405
 LMArenaDocument = 27.634673
 LMArenaText = 45.821405
+LiveCodingComposite = 46.216703
 LongContextRecall = 42.908438
 MCPAtlas = 27.082278
 MMLUPro = 5.000000
@@ -3162,7 +3206,7 @@ SWEAtlasTestWriting = 19.767238
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 92.500000
-SWEComposite = 82.699029
+SWEComposite = 81.364532
 SWERebench = 65.810072
 SciCode = 26.376147
 SonarBugDensity = 50.817308
@@ -3189,16 +3233,16 @@ aliases = ["MiMo-V2.5-Pro", "XiaomiMiMo/MiMo-V2.5-Pro", "mimo v2.5 pro", "mimo-v
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 75.339643
+i_raw = 75.238967
 p_raw = 69.742349
-b_raw = 62.533208
-r = 61.935996
-i_adj = 75.339643
+b_raw = 62.130802
+r = 61.763536
+i_adj = 75.238967
 p_adj = 69.742349
-b_adj = 62.533208
+b_adj = 62.130802
 
 [models.groups]
-BUILD = 60.090132
+BUILD = 59.611078
 CRE = 80.556225
 GEN = 66.121879
 LM_ARENA_REVIEW_PROXY = 38.817337
@@ -3224,6 +3268,7 @@ IFBench = 96.527778
 LMArenaCreativeOrOpenEnded = 80.556225
 LMArenaDocument = 27.634673
 LMArenaText = 80.556225
+LiveCodingComposite = 62.884476
 LongContextRecall = 100.000000
 MCPAtlas = 27.082278
 MMLUPro = 5.000000
@@ -3236,7 +3281,7 @@ SWEAtlasTestWriting = 19.767238
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
-SWEComposite = 83.074029
+SWEComposite = 81.614532
 SWERebench = 65.810072
 SciCode = 67.087156
 SonarBugDensity = 50.817308
@@ -3263,16 +3308,16 @@ aliases = ["GLM-4.6 (T=1)", "glm 4.6", "glm-4-6", "glm-4.6", "glm-4.6-t-1", "glm
 sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 51.586029
+i_raw = 50.397120
 p_raw = 26.228291
-b_raw = 27.404586
-r = 29.621870
-i_adj = 51.586029
+b_raw = 27.283791
+r = 29.570101
+i_adj = 50.397120
 p_adj = 26.228291
-b_adj = 27.404586
+b_adj = 27.283791
 
 [models.groups]
-BUILD = 23.895486
+BUILD = 23.751683
 CRE = 60.758836
 GEN = 28.276652
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -3298,6 +3343,7 @@ HLETools = 5.000000
 IFBench = 0.000000
 LMArenaCreativeOrOpenEnded = 60.758836
 LMArenaText = 60.758836
+LiveCodingComposite = 14.373578
 LongContextRecall = 0.000000
 MCPAtlas = 7.500000
 MMLUPro = 22.170633
@@ -3306,7 +3352,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 5.000000
 SWEBenchPro = 0.000000
 SWEBenchVerified = 54.867708
-SWEComposite = 23.224260
+SWEComposite = 22.292637
 SWERebench = 36.235259
 SciCode = 0.000000
 SonarBugDensity = 42.644231
@@ -3333,16 +3379,16 @@ aliases = ["glm 4.7", "glm-4-7", "glm-4.7", "glm-4p7", "z-ai/glm-4.7", "zai/glm-
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 55.965020
+i_raw = 55.283083
 p_raw = 48.619052
-b_raw = 46.629094
-r = 46.681021
-i_adj = 55.965020
+b_raw = 46.168651
+r = 46.483689
+i_adj = 55.283083
 p_adj = 48.619052
-b_adj = 46.629094
+b_adj = 46.168651
 
 [models.groups]
-BUILD = 43.998264
+BUILD = 43.450118
 CRE = 56.307251
 GEN = 50.621120
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -3367,6 +3413,7 @@ HLETools = 17.640449
 IFBench = 64.364035
 LMArenaCreativeOrOpenEnded = 56.307251
 LMArenaText = 56.307251
+LiveCodingComposite = 56.701218
 LongContextRecall = 50.089767
 MCPAtlas = 0.000000
 MMLUPro = 53.511317
@@ -3374,7 +3421,7 @@ OutputSpeed = 78.265299
 SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 42.577320
 SWEBenchVerified = 77.734813
-SWEComposite = 57.335693
+SWEComposite = 55.798220
 SWERebench = 58.371126
 SciCode = 37.844037
 SonarBugDensity = 41.346154
@@ -3401,16 +3448,16 @@ aliases = ["glm 5", "glm-5", "glm-5-20260211", "glm-5-non-reasoning", "glm-5-thi
 sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.263912
+i_raw = 62.725392
 p_raw = 58.059719
-b_raw = 62.193763
-r = 57.954109
-i_adj = 63.263912
+b_raw = 62.413527
+r = 58.048293
+i_adj = 62.725392
 p_adj = 58.059719
-b_adj = 62.193763
+b_adj = 62.413527
 
 [models.groups]
-BUILD = 61.214580
+BUILD = 61.476203
 CRE = 66.041609
 GEN = 54.952792
 LM_ARENA_REVIEW_PROXY = 48.169142
@@ -3436,6 +3483,7 @@ IFBench = 76.242690
 LMArenaCreativeOrOpenEnded = 66.041609
 LMArenaDocument = 46.338284
 LMArenaText = 66.041609
+LiveCodingComposite = 53.409023
 LongContextRecall = 46.499102
 MCPAtlas = 38.645570
 OSWorldVerified = 13.517699
@@ -3447,7 +3495,7 @@ SWEAtlasTestWriting = 27.716771
 SWEBenchMultilingual = 72.680412
 SWEBenchPro = 92.500000
 SWEBenchVerified = 76.182753
-SWEComposite = 83.516738
+SWEComposite = 83.763386
 SWERebench = 81.115711
 SciCode = 44.151376
 SonarBugDensity = 100.000000
@@ -3474,18 +3522,18 @@ aliases = ["glm 5.1", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "glm-5p1", 
 sources = ["artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "swerebench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 83.203565
-p_raw = 68.731990
-b_raw = 68.230071
-r = 62.950583
-i_adj = 83.203565
-p_adj = 68.731990
-b_adj = 68.230071
+i_raw = 82.311113
+p_raw = 67.699849
+b_raw = 68.473190
+r = 63.054778
+i_adj = 82.311113
+p_adj = 67.699849
+b_adj = 68.473190
 
 [models.groups]
-BUILD = 67.786402
+BUILD = 68.075830
 CRE = 89.307877
-GEN = 73.441138
+GEN = 70.651567
 LM_ARENA_REVIEW_PROXY = 48.169142
 OPS_long = 72.504245
 OPS_precision = 76.715943
@@ -3508,6 +3556,7 @@ IFBench = 86.842105
 LMArenaCreativeOrOpenEnded = 89.307877
 LMArenaDocument = 46.338284
 LMArenaText = 89.307877
+LiveCodingComposite = 53.348858
 LongContextRecall = 41.113106
 MCPAtlas = 70.295359
 OSWorldVerified = 13.517699
@@ -3516,7 +3565,7 @@ SWEAtlasComposite = 50.000000
 SWEBenchMultilingual = 92.500000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 92.500000
-SWEComposite = 96.375000
+SWEComposite = 96.750000
 SWERebench = 100.000000
 SciCode = 30.389908
 SonarComposite = 50.000000

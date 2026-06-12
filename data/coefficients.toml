@@ -46,13 +46,15 @@ MCPAtlas = 0.095
 # the largest single input, but Scale SWE Atlas now carries a separate
 # composite for codebase Q&A / test-writing / refactoring. BFCL and AA's
 # TerminalBenchHard/AALiveCodeBench fields add live tool/terminal/coding
-# coverage without giving any one harness a dominant coefficient.
+# coverage without giving any one harness a dominant coefficient. Live-coding
+# signals are collapsed into LiveCodingComposite so four correlated coding
+# benchmarks do not pile up as independent BUILD weights.
 [group_weights.BUILD]
 # Sonar stays collapsed into one SonarComposite input so issue/bug/vuln
 # densities do not triple-count one upstream payload. The legacy
 # LiveCodeBench JSON remains ingested but unweighted; AA's current
 # livecodebench field is carried separately as AALiveCodeBench.
-SWEComposite = 0.31
+SWEComposite = 0.33
 SWEAtlasComposite = 0.155
 MCPAtlas = 0.060
 TerminalBench = 0.045
@@ -63,13 +65,10 @@ HiLBench = 0.015
 Toolathlon = 0.015
 OSWorldVerified = 0.010
 GSO = 0.02
-ArtificialAnalysisCoding = 0.04
-SciCode = 0.04
-AALiveCodeBench = 0.04
 GDPval = 0.045
 SonarComposite = 0.065
 LongContextRecall = 0.03
-CopilotArenaOrLMArenaCode = 0.02
+LiveCodingComposite = 0.12
 
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
@@ -80,25 +79,25 @@ CopilotArenaOrLMArenaCode = 0.02
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
 [synthesis]
-# Default 0.50 is too tight for the current number of sparse frontier
-# fill-pairs across Scale, Sonar, SWE-Rebench, and operational sources.
-# 0.55 kept older sources bounded, but Terminal-Bench 2.1 and HiL-Bench are
-# intentionally narrow frontier leaderboards; 0.65 lets the curated current-
-# model fills run while still capping synthetic rows below two-thirds.
-per_model_cap = 0.55
+# Tightened to 0.50: more than half of a model's scored cells should not be
+# borrowed from siblings. The 15 % conservative pull already softens synthetic
+# values, but a stricter cap makes "synthesis_dominant" a meaningful warning
+# flag and prevents frontier models from ranking highly on mostly inferred
+# evidence. Terminal-Bench 2.1 / HiL-Bench narrow sources are still allowed to
+# run under the 0.65 per-source cap.
+per_model_cap = 0.50
 # Several public sources have narrower coverage than the ranked model
 # set. 0.65 prevents a single source from dominating through synthesis
 # while still letting the curated frontier-model fills run.
 per_source_cap = 0.65
 
 [composite_metrics.SWEComposite]
-# Rebalanced: Rebench↑0.10 (contamination-resistant rolling signal deserves more
-# weight), Pro↓0.05 (still dominant, but Pro's sparse coverage already creates
-# shrink-to-50 pressure via missing-data handling — stacking extra weight on top
-# double-penalised models without Pro rows), Verified↓0.05 (saturated/contaminated
-# at the frontier).
-SWERebench = 0.40            # contamination-resistant rolling-window signal
-SWEBenchVerified = 0.15      # widely reported, but saturated/contaminated
+# Rebalanced: Rebench↑0.15 (contamination-resistant rolling signal deserves more
+# weight), Verified↓0.10 (saturated/contaminated at the frontier; shrinking it
+# further reduces the influence of a benchmark where many frontier models cluster
+# near the ceiling). Pro and Multilingual weights stay unchanged.
+SWERebench = 0.45            # contamination-resistant rolling-window signal
+SWEBenchVerified = 0.10      # widely reported, but saturated/contaminated
 SWEBenchPro = 0.35           # hardest, multi-file (1.8k tasks, 4.1 files avg)
 SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
 
@@ -120,6 +119,17 @@ SonarFunctionalSkill = 0.40
 SonarIssueDensity = 0.25
 SonarBugDensity = 0.20
 SonarVulnerabilityDensity = 0.15
+
+# LiveCodingComposite collapses the four live coding/reasoning signals into one
+# BUILD input so they don't sit as four small independent weights. The weights
+# are proportional to the previous standalone BUILD weights
+# (ArtificialAnalysisCoding 0.04 / SciCode 0.04 / AALiveCodeBench 0.04 /
+# CopilotArenaOrLMArenaCode 0.02) → 0.286 / 0.286 / 0.286 / 0.142.
+[composite_metrics.LiveCodingComposite]
+ArtificialAnalysisCoding = 0.286
+SciCode = 0.286
+AALiveCodeBench = 0.286
+CopilotArenaOrLMArenaCode = 0.142
 
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
 # benchmark. It combines LM Arena search and document preference ratings
@@ -171,9 +181,12 @@ ContextWindow = 0.25
 # vs "very fast." Use the OPS_* groups directly for a pure speed/cost
 # view of the population.
 [final_score_weights.I_raw]
+# Idea generation is the least operationally sensitive role. Reduce the OPS
+# weight so creativity and general intelligence dominate the role score; the
+# GEN increase offsets the OPS decrease exactly.
 CRE = 0.62
-GEN = 0.30
-OPS_long = 0.08
+GEN = 0.33
+OPS_long = 0.05
 
 [final_score_weights.P_raw]
 PLAN = 0.55
@@ -193,11 +206,13 @@ OPS_review = 0.08
 
 [aggregation]
 # Coverage threshold around which we transition from shrink-to-50 to
-# trusting the present-weight mean directly.
-trust_threshold = 0.70
+# trusting the present-weight mean directly. Raised to 0.75 with a narrower
+# 0.10 band so models need fuller evidence before the missing-weight shrink is
+# removed; the smoother transition still avoids a discontinuous cliff.
+trust_threshold = 0.75
 # The width of the smooth-step transition band (centered on trust_threshold).
-# 0.20 means the transition occurs over [0.60, 0.80].
-trust_transition_width = 0.20
+# 0.10 means the transition occurs over [0.70, 0.80].
+trust_transition_width = 0.10
 
 [penalties]
 # Conservative discount applied to per-metric values that came in via
@@ -222,9 +237,10 @@ groups = ["CRE"]
 transform = "percentile"
 
 [metrics.CopilotArenaOrLMArenaCode]
+# Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.LMArenaSearch]
@@ -253,9 +269,10 @@ groups = ["GEN"]
 transform = "percentile"
 
 [metrics.ArtificialAnalysisCoding]
+# Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisReasoning]
@@ -442,15 +459,17 @@ groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.SciCode]
+# Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.AALiveCodeBench]
+# Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.IFBench]
