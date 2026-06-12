@@ -90,6 +90,15 @@ pub fn synthesize_rows(
 
     for (source_id, rows) in rows_by_source.iter_mut() {
         let real_count = rows.len();
+        let mut row_indices_by_canonical: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+        for (idx, row) in rows.iter().enumerate() {
+            if let Some(canonical_id) = resolve_canonical(row) {
+                row_indices_by_canonical
+                    .entry(canonical_id.to_string())
+                    .or_default()
+                    .push(idx);
+            }
+        }
         // Cap counts unique synthesis pairs that emitted (matching the
         // original semantic: "how many target models use this source via
         // synthesis"). Stats track total cloned rows for downstream debug.
@@ -126,13 +135,12 @@ pub fn synthesize_rows(
             // separate row for each leaderboard, and the overrides source
             // emits one row per metric). Clone *every* matching donor row so
             // each one gets a chance to fill a different field on the target.
-            let donors: Vec<RawRow> = rows
-                .iter()
-                .filter(|row| resolve_canonical(row) == Some(from_id.as_str()))
+            let donor_indices = row_indices_by_canonical
+                .get(from_id)
                 .cloned()
-                .collect();
+                .unwrap_or_default();
 
-            if donors.is_empty() {
+            if donor_indices.is_empty() {
                 continue;
             }
 
@@ -140,7 +148,8 @@ pub fn synthesize_rows(
                 continue;
             };
 
-            for donor in donors {
+            for donor_idx in donor_indices {
+                let donor = rows[donor_idx].clone();
                 let donor_model_name = donor.model_name.clone();
                 let mut synthesized = donor;
                 synthesized.fields.insert(
@@ -149,7 +158,12 @@ pub fn synthesize_rows(
                 );
                 synthesized.model_name = display_name.to_string();
                 synthesized.synthesized_from = Some(from_id.clone());
+                let synthesized_idx = rows.len();
                 rows.push(synthesized);
+                row_indices_by_canonical
+                    .entry(target_id.clone())
+                    .or_default()
+                    .push(synthesized_idx);
                 synth_row_count += 1;
             }
             synth_pair_count += 1;

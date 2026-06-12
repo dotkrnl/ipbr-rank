@@ -674,3 +674,254 @@ canonical_id = "xiaomi/mimo-v2.5-pro"
 metric = "MMLUPro"
 value = 68.5
 note = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, MMLU-Pro, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, accessed 2026-05-22"
+
+# ---------------------------------------------------------------------
+# Toolathlon — official release/model-card figures for long-horizon tool use.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "Toolathlon"
+value = 55.6
+note = "OpenAI GPT-5.5 launch evaluations, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "Toolathlon"
+value = 54.6
+note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "google/gemini-3.1-pro-preview"
+metric = "Toolathlon"
+value = 48.8
+note = "OpenAI GPT-5.5 launch evaluations, Gemini 3.1 Pro comparison row, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "Toolathlon"
+value = 43.5
+note = "DeepSeek V4 official release table, V4 Flash Think High mode, Toolathlon, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "Toolathlon"
+value = 49.0
+note = "DeepSeek V4 official release table, V4 Pro Think High mode, Toolathlon, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "Toolathlon"
+value = 50.0
+note = "Moonshot Kimi K2.6 official release table, Toolathlon, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "Toolathlon"
+value = 40.7
+note = "Z.ai GLM-5.1 official model card, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5"
+metric = "Toolathlon"
+value = 38.0
+note = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "Toolathlon"
+value = 23.8
+note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+# ---------------------------------------------------------------------
+# OSWorld-Verified — official release/model-card figures for computer use.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "OSWorldVerified"
+value = 78.7
+note = "OpenAI GPT-5.5 launch evaluations, OSWorld-Verified, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "OSWorldVerified"
+value = 75.0
+note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, OSWorld-Verified, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "OSWorldVerified"
+value = 78.0
+note = "Anthropic Claude Opus 4.7 official release table, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.6"
+metric = "OSWorldVerified"
+value = 72.7
+note = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "OSWorldVerified"
+value = 85.0
+note = "Anthropic Claude Fable 5 & Mythos 5 official release table, OSWorld-Verified, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "OSWorldVerified"
+value = 73.1
+note = "Moonshot Kimi K2.6 official release table, OSWorld-Verified, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
+
+# ---------------------------------------------------------------------
+# BrowseComp — official release/model-card figures for browsing/search.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "BrowseComp"
+value = 84.4
+note = "OpenAI GPT-5.5 launch evaluations, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "openai/gpt-5.4"
+metric = "BrowseComp"
+value = 82.7
+note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "BrowseComp"
+value = 79.3
+note = "Anthropic Claude Opus 4.7 official release table, BrowseComp, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.6"
+metric = "BrowseComp"
+value = 83.7
+note = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, BrowseComp, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "google/gemini-3.1-pro-preview"
+metric = "BrowseComp"
+value = 85.9
+note = "Google DeepMind Gemini 3.1 Pro model card, BrowseComp, https://deepmind.google/models/model-cards/gemini-3-1-pro/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "BrowseComp"
+value = 53.5
+note = "DeepSeek V4 official release table, V4 Flash Think High mode, BrowseComp, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "BrowseComp"
+value = 80.4
+note = "DeepSeek V4 official release table, V4 Pro Think High mode, BrowseComp, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "BrowseComp"
+value = 86.3
+note = "Moonshot Kimi K2.6 official release table, BrowseComp, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.5"
+metric = "BrowseComp"
+value = 74.9
+note = "Moonshot Kimi K2.5 official release table, BrowseComp, https://www.kimi.com/blog/kimi-k2-5, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.6"
+metric = "BrowseComp"
+value = 45.1
+note = "Z.ai GLM-4.6 official model card, BrowseComp, https://docs.z.ai/guides/llm/glm-4.6, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "BrowseComp"
+value = 68.0
+note = "Z.ai GLM-5.1 official model card, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5"
+metric = "BrowseComp"
+value = 62.0
+note = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "BrowseComp"
+value = 52.0
+note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+# ---------------------------------------------------------------------
+# HLE with tools — official release/model-card figures. Kept separate from
+# AA's no-tools GPQA/HLE reasoning blend.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.7"
+metric = "HLETools"
+value = 54.7
+note = "Anthropic Claude Opus 4.7 official release table, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.6"
+metric = "HLETools"
+value = 53.3
+note = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "HLETools"
+value = 64.5
+note = "Anthropic Claude Fable 5 & Mythos 5 official release table, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-flash"
+metric = "HLETools"
+value = 40.3
+note = "DeepSeek V4 official release table, V4 Flash Think High mode, HLE with tools, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "deepseek/deepseek-v4-pro"
+metric = "HLETools"
+value = 44.7
+note = "DeepSeek V4 official release table, V4 Pro Think High mode, HLE with tools, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "HLETools"
+value = 54.0
+note = "Moonshot Kimi K2.6 official release table, HLE with tools, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.5"
+metric = "HLETools"
+value = 50.2
+note = "Moonshot Kimi K2.5 official release table, HLE with tools, https://www.kimi.com/blog/kimi-k2-5, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.6"
+metric = "HLETools"
+value = 30.4
+note = "Z.ai GLM-4.6 official model card, HLE with tools, https://docs.z.ai/guides/llm/glm-4.6, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.1"
+metric = "HLETools"
+value = 52.3
+note = "Z.ai GLM-5.1 official model card, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-5"
+metric = "HLETools"
+value = 50.4
+note = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "z-ai/glm-4.7"
+metric = "HLETools"
+value = 42.8
+note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"

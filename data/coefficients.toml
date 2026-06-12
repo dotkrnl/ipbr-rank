@@ -14,24 +14,30 @@ LMArenaCreativeOrOpenEnded = 0.65
 LMArenaText = 0.35
 
 [group_weights.GEN]
-ArtificialAnalysisIntelligence = 0.34
-LMArenaText = 0.22
-GPQA_HLE_Reasoning = 0.15
-ARC_AGI_2 = 0.12        # novel pattern induction — orthogonal to knowledge benchmarks
-ArtificialAnalysisMath = 0.09
-MMLUPro = 0.08
+ArtificialAnalysisIntelligence = 0.32
+LMArenaText = 0.21
+GPQA_HLE_Reasoning = 0.14
+ARC_AGI_2 = 0.11        # novel pattern induction — orthogonal to knowledge benchmarks
+ArtificialAnalysisMath = 0.08
+MMLUPro = 0.07
+BrowseComp = 0.04       # browsing/search reasoning from official release/model-card tables
+HLETools = 0.03         # tool-assisted hard-question reasoning, kept distinct from AA's no-tools HLE blend
 
 [group_weights.PLAN]
 # PLAN composition reflects "structured multi-step decomposition" measured
 # end-to-end. BFCL and TerminalBenchHard broaden tool-use / terminal-task
 # coverage while keeping any single agent harness from dominating PLAN.
-TerminalBench = 0.16
-TerminalBenchHard = 0.08
-BFCL = 0.08
-Tau2Bench = 0.18
-ArtificialAnalysisReasoning = 0.20
-IFBench = 0.12
-LongContextRecall = 0.08
+TerminalBench = 0.145
+TerminalBenchHard = 0.065
+BFCL = 0.065
+Toolathlon = 0.035
+OSWorldVerified = 0.030
+HLETools = 0.025
+BrowseComp = 0.020
+Tau2Bench = 0.155
+ArtificialAnalysisReasoning = 0.175
+IFBench = 0.105
+LongContextRecall = 0.080
 MCPAtlas = 0.10
 
 # BUILD rebalanced around direct software-work evidence. SWEComposite remains
@@ -46,16 +52,18 @@ MCPAtlas = 0.10
 # livecodebench field is carried separately as AALiveCodeBench.
 SWEComposite = 0.32
 SWEAtlasComposite = 0.16
-MCPAtlas = 0.07
-TerminalBench = 0.06
-TerminalBenchHard = 0.05
+MCPAtlas = 0.065
+TerminalBench = 0.055
+TerminalBenchHard = 0.045
 BFCL = 0.03
+Toolathlon = 0.015
+OSWorldVerified = 0.010
 GSO = 0.02
 ArtificialAnalysisCoding = 0.04
 SciCode = 0.04
 AALiveCodeBench = 0.04
-GDPval = 0.05
-SonarComposite = 0.07
+GDPval = 0.045
+SonarComposite = 0.065
 LongContextRecall = 0.03
 CopilotArenaOrLMArenaCode = 0.02
 
@@ -445,6 +453,42 @@ transform = "percentile"
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
+transform = "percentile"
+
+# Toolathlon measures long-horizon tool-use across realistic applications.
+# Values currently come from official release/model-card tables, so they are
+# treated as override-reported rather than direct leaderboard measurements.
+[metrics.Toolathlon]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+# OSWorld-Verified measures desktop/computer-use agent tasks. It is useful
+# for planning and light BUILD evidence, but kept modestly weighted because
+# harness/scaffold differences can matter more than pure model quality.
+[metrics.OSWorldVerified]
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+# BrowseComp is an agentic browsing/search benchmark. It broadens GEN and
+# PLAN beyond static knowledge tests, but stays small because many rows are
+# official-table reports rather than a single neutral live leaderboard.
+[metrics.BrowseComp]
+higher_better = true
+log_scale = false
+groups = ["GEN", "PLAN"]
+transform = "percentile"
+
+# Tool-assisted Humanity's Last Exam. Kept separate from GPQA_HLE_Reasoning,
+# which blends AA's no-tools HLE/GPQA fields, so tool-use gains do not silently
+# rewrite the no-tools reasoning axis.
+[metrics.HLETools]
+higher_better = true
+log_scale = false
+groups = ["GEN", "PLAN"]
 transform = "percentile"
 
 # Operational metrics use the `tail_penalty` transform: the top 80 % of
