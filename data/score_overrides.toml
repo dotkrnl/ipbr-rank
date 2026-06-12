@@ -604,10 +604,143 @@ value = 73.2
 note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MCP-Atlas, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 [[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "MCPAtlas"
+value = 69.4
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi K2.6 comparison row, MCP Atlas, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
 canonical_id = "moonshotai/kimi-k2.7-code"
 metric = "MCPAtlas"
 value = 76.0
 note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Atlas, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+# ---------------------------------------------------------------------
+# Kimi K2.7 Code launch-card auxiliary coding/agentic metrics.
+# These metrics are registered with `groups = []` in coefficients.toml so
+# they are preserved in output but do not affect role scores until a broader
+# scoring review decides how to weight them.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "KimiCodeBenchV2"
+value = 50.9
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "KimiCodeBenchV2"
+value = 62.0
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "KimiCodeBenchV2"
+value = 69.0
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "KimiCodeBenchV2"
+value = 67.4
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "ProgramBench"
+value = 48.3
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "ProgramBench"
+value = 53.6
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "ProgramBench"
+value = 69.1
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "ProgramBench"
+value = 63.8
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "MLSBenchLite"
+value = 26.7
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "MLSBenchLite"
+value = 35.1
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "MLSBenchLite"
+value = 35.5
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "MLSBenchLite"
+value = 42.8
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "KimiClaw247Bench"
+value = 42.9
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "KimiClaw247Bench"
+value = 46.9
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "KimiClaw247Bench"
+value = 52.8
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "KimiClaw247Bench"
+value = 50.4
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.6"
+metric = "MCPMarkVerified"
+value = 72.8
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k2.7-code"
+metric = "MCPMarkVerified"
+value = 81.1
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.5"
+metric = "MCPMarkVerified"
+value = 92.9
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[[entries]]
+canonical_id = "anthropic/claude-opus-4.8"
+metric = "MCPMarkVerified"
+value = 76.4
+note = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 # ---------------------------------------------------------------------
 # BFCL — vendor-reported BFCL V4 figures not yet present in the public CSV.

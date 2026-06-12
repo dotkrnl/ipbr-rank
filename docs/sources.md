@@ -169,7 +169,7 @@ and agentic tool-use categories.
 
 - **Status**: Verified
 - **API**: None — reads `data/score_overrides.toml` (embedded into the binary at build time).
-- **Purpose**: Hand-curated metric values pulled from vendor system cards, launch posts, and other authoritative secondary sources. Fills coverage gaps for models that public leaderboards have not yet rated (typically newest frontier models — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0).
+- **Purpose**: Hand-curated metric values pulled from vendor system cards, launch posts, and other authoritative secondary sources. Fills coverage gaps for models that public leaderboards have not yet rated (typically newest frontier models — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0, Kimi K2.7 Code launch-card metrics).
 - **Discipline**: Every entry MUST cite its source in the `note` field; values without citations are explicitly disallowed by code review.
 - **Precedence**: Overrides flow through the same ingest path as live sources. After normalization they are discounted 10% toward the 50 baseline, so a cited manual value is slightly softer than a directly ingested leaderboard hit. If a public source later lands the same metric for the same model, the public value overwrites the override on the next run and the discount is removed.
 

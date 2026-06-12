@@ -328,6 +328,11 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | SWEAtlasTestWriting | higher | no | percentile | Scale SWE Atlas Test Writing | (input to SWEAtlasComposite) |
 | SWEAtlasRefactoring | higher | no | percentile | Scale SWE Atlas Refactoring | (input to SWEAtlasComposite) |
 | MCPAtlas | higher | no | percentile | Scale Labs (RSC HTML) | PLAN, BUILD |
+| KimiCodeBenchV2 | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
+| ProgramBench | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
+| MLSBenchLite | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
+| KimiClaw247Bench | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
+| MCPMarkVerified | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
 | ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN |
 | TerminalBench | higher | no | percentile | Terminal-Bench HTML | PLAN, BUILD |
 | TerminalBenchHard | higher | no | percentile | Artificial Analysis (`terminalbench_hard` field) | PLAN, BUILD |

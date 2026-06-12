@@ -88,7 +88,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)
-- Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metric values (SWE-bench Verified, Terminal-Bench, GDPval) for models the public leaderboards have not yet rated
+- Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metric values (SWE-bench, Terminal-Bench, GDPval, MCP-Atlas, and reported-only launch-card metrics) for models the public leaderboards have not yet rated
 
 ## Math Summary
 

@@ -2,7 +2,16 @@ use crate::alias::{AliasIndex, normalize_name};
 use crate::model::{ModelRecord, RawRow, SourceId, Vendor};
 use std::collections::{BTreeMap, BTreeSet};
 
-const NON_SYNTHESIZED_METRICS: &[&str] = &["AI_canary_health"];
+const NON_SYNTHESIZED_METRICS: &[&str] = &[
+    "AI_canary_health",
+    // Launch-card reported-only metrics are specific measured rows, not
+    // sibling priors. Keep them from propagating through synthesis.
+    "KimiCodeBenchV2",
+    "ProgramBench",
+    "MLSBenchLite",
+    "KimiClaw247Bench",
+    "MCPMarkVerified",
+];
 
 #[derive(Debug, Default, Clone)]
 pub struct IngestStats {
@@ -455,7 +464,7 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_rows_skip_canary_health_signal() {
+    fn synthesized_rows_skip_non_transferable_signals() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "openai/gpt-5.5".to_string(),
@@ -470,6 +479,7 @@ mod tests {
             "gpt-5.5",
             &[
                 ("AI_canary_health", json!(42.0)),
+                ("KimiCodeBenchV2", json!(62.0)),
                 ("AI_correctness", json!(80.0)),
             ],
         );
@@ -480,6 +490,8 @@ mod tests {
         assert_eq!(stats.matched, 1);
         assert!(!records[0].raw_metrics.contains_key("AI_canary_health"));
         assert!(!records[0].synthesized.contains_key("AI_canary_health"));
+        assert!(!records[0].raw_metrics.contains_key("KimiCodeBenchV2"));
+        assert!(!records[0].synthesized.contains_key("KimiCodeBenchV2"));
         assert_eq!(records[0].raw_metrics.get("AI_correctness"), Some(&80.0));
         assert!(records[0].synthesized.contains_key("AI_correctness"));
     }

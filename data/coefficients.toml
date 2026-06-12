@@ -363,6 +363,40 @@ log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
+# Kimi K2.7 Code launch-card auxiliary metrics. These are useful reported
+# measurements, but not yet part of role scoring: some are Moonshot-internal
+# harnesses and the public third-party boards are not yet ingested here.
+# `groups = []` keeps them descriptively available without changing weights.
+[metrics.KimiCodeBenchV2]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.ProgramBench]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.MLSBenchLite]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.KimiClaw247Bench]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.MCPMarkVerified]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
 # ARC-AGI v2 (semi-private track) — pure novel-pattern induction.
 # Orthogonal to GPQA/HLE which test learned knowledge.
 [metrics.ARC_AGI_2]
