@@ -117,10 +117,10 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 
 | Group Key | Member Metrics (with weights from `[group_weights.*]`) |
 |-----------|-------------------------------------------------------|
-| **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
-| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.32), LMArenaText (0.21), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.11), ArtificialAnalysisMath (0.08), MMLUPro (0.07), BrowseComp (0.04), HLETools (0.03) |
+| **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.50), LMArenaText (0.30), ARC_AGI_2 (0.20) |
+| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.36), LMArenaText (0.15), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.11), ArtificialAnalysisMath (0.10), MMLUPro (0.07), BrowseComp (0.04), HLETools (0.03) |
 | **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
-| **BUILD** (Building) | SWEComposite (0.330), SWEAtlasComposite (0.155), LiveCodingComposite (0.120), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.020), GDPval (0.045), SonarComposite (0.065), LongContextRecall (0.030) |
+| **BUILD** (Building) | SWEComposite (0.290), SWEAtlasComposite (0.140), LiveCodingComposite (0.140), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.035), GDPval (0.045), SonarComposite (0.090), LongContextRecall (0.025) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
@@ -243,14 +243,14 @@ B_raw = 0.84×BUILD + 0.08×PLAN + 0.08×OPS_precision
 
 **R** (Reviewing):
 ```
-R = 0.18×LM_ARENA_REVIEW_PROXY + 0.36×BUILD + 0.38×PLAN + 0.08×OPS_review
+R = 0.25×LM_ARENA_REVIEW_PROXY + 0.29×BUILD + 0.38×PLAN + 0.08×OPS_review
 ```
 
-LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.18:
+LM_ARENA_REVIEW_PROXY (LMArena search/document preference) sits at 0.25:
 useful review-adjacent evidence, but intentionally not treated as a direct
 code-review benchmark. Search and document are normalized as separate metrics
 before the proxy combines them, because their raw LMArena Elo scales differ.
-BUILD 0.36 keeps reviewing tied to "you can read the code." PLAN 0.38 captures
+BUILD 0.29 keeps reviewing tied to "you can read the code." PLAN 0.38 captures
 review-as-planning.
 
 **Operational metrics (OPS_long / OPS_precision / OPS_review)** carry
@@ -352,7 +352,7 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | MLSBenchLite | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
 | KimiClaw247Bench | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
 | MCPMarkVerified | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
-| ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN |
+| ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN, CRE |
 | TerminalBench | higher | no | percentile | Terminal-Bench HTML | PLAN, BUILD |
 | TerminalBench21 | higher | no | percentile | Terminal-Bench 2.1 HTML | PLAN, BUILD |
 | TerminalBenchHard | higher | no | percentile | Artificial Analysis (`terminalbench_hard` field) | PLAN, BUILD |
@@ -391,7 +391,7 @@ curve so only genuinely slow models lose meaningful score).
 | I_raw | CRE 0.62, GEN 0.33, OPS_long 0.05 |
 | P_raw | PLAN 0.55, GEN 0.37, OPS_precision 0.08 |
 | B_raw | BUILD 0.84, PLAN 0.08, OPS_precision 0.08 |
-| R | LM_ARENA_REVIEW_PROXY 0.18, BUILD 0.36, PLAN 0.38, OPS_review 0.08 |
+| R | LM_ARENA_REVIEW_PROXY 0.25, BUILD 0.29, PLAN 0.38, OPS_review 0.08 |
 
 ### Synthesis Penalty
 | Constant | Value |

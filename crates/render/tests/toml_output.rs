@@ -135,6 +135,7 @@ fn missing_output_uses_configured_transition_ceiling() {
     model
         .metrics
         .insert("LMArenaCreativeOrOpenEnded".to_string(), 80.0);
+    model.metrics.insert("LMArenaText".to_string(), 80.0);
     let scoreboard = Scoreboard {
         models: vec![model],
         coefficients,
@@ -156,7 +157,7 @@ fn missing_output_uses_configured_transition_ceiling() {
         .expect("groups_shrunk should be an array");
     assert!(
         groups.iter().all(|group| group.as_str() != Some("CRE")),
-        "CRE has 65% coverage, above the configured 55% transition ceiling: {missing}"
+        "CRE has 80% coverage, above the configured 55% transition ceiling: {missing}"
     );
 }
 

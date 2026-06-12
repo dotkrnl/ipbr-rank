@@ -10,18 +10,19 @@
 # narrower and honest than wide and fake.
 
 [group_weights.CRE]
-LMArenaCreativeOrOpenEnded = 0.65
-LMArenaText = 0.35
+LMArenaCreativeOrOpenEnded = 0.50
+LMArenaText = 0.30
+ARC_AGI_2 = 0.20
 
 [group_weights.GEN]
-ArtificialAnalysisIntelligence = 0.32
-LMArenaText = 0.21
+ArtificialAnalysisIntelligence = 0.36
+LMArenaText = 0.15
 GPQA_HLE_Reasoning = 0.14
-ARC_AGI_2 = 0.11        # novel pattern induction — orthogonal to knowledge benchmarks
-ArtificialAnalysisMath = 0.08
+ARC_AGI_2 = 0.11
+ArtificialAnalysisMath = 0.10
 MMLUPro = 0.07
-BrowseComp = 0.04       # browsing/search reasoning from official release/model-card tables
-HLETools = 0.03         # tool-assisted hard-question reasoning, kept distinct from AA's no-tools HLE blend
+BrowseComp = 0.04
+HLETools = 0.03
 
 [group_weights.PLAN]
 # PLAN composition reflects "structured multi-step decomposition" measured
@@ -50,12 +51,8 @@ MCPAtlas = 0.095
 # signals are collapsed into LiveCodingComposite so four correlated coding
 # benchmarks do not pile up as independent BUILD weights.
 [group_weights.BUILD]
-# Sonar stays collapsed into one SonarComposite input so issue/bug/vuln
-# densities do not triple-count one upstream payload. The legacy
-# LiveCodeBench JSON remains ingested but unweighted; AA's current
-# livecodebench field is carried separately as AALiveCodeBench.
-SWEComposite = 0.33
-SWEAtlasComposite = 0.155
+SWEComposite = 0.29
+SWEAtlasComposite = 0.14
 MCPAtlas = 0.060
 TerminalBench = 0.045
 TerminalBench21 = 0.025
@@ -64,11 +61,11 @@ BFCL = 0.025
 HiLBench = 0.015
 Toolathlon = 0.015
 OSWorldVerified = 0.010
-GSO = 0.02
+GSO = 0.035
 GDPval = 0.045
-SonarComposite = 0.065
-LongContextRecall = 0.03
-LiveCodingComposite = 0.12
+SonarComposite = 0.09
+LongContextRecall = 0.025
+LiveCodingComposite = 0.14
 
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
@@ -254,8 +251,8 @@ PLAN = 0.08
 OPS_precision = 0.08
 
 [final_score_weights.R]
-LM_ARENA_REVIEW_PROXY = 0.18
-BUILD = 0.36
+LM_ARENA_REVIEW_PROXY = 0.25
+BUILD = 0.29
 PLAN = 0.38
 OPS_review = 0.08
 
@@ -501,7 +498,7 @@ transform = "percentile"
 [metrics.ARC_AGI_2]
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = ["GEN", "CRE"]
 transform = "percentile"
 
 # AA already publishes per-eval scores in its existing payload; these were

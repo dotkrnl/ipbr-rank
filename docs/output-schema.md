@@ -195,8 +195,9 @@ Same as `data/coefficients.toml`:
 
 ```toml
 [group_weights.CRE]
-LMArenaCreativeOrOpenEnded = 0.65
-LMArenaText = 0.35
+LMArenaCreativeOrOpenEnded = 0.50
+LMArenaText = 0.30
+ARC_AGI_2 = 0.20
 
 [group_weights.GEN]
 # ... same structure for other groups
