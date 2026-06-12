@@ -118,8 +118,8 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | Group Key | Member Metrics (with weights from `[group_weights.*]`) |
 |-----------|-------------------------------------------------------|
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.65), LMArenaText (0.35) |
-| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.34), LMArenaText (0.22), GPQA_HLE_Reasoning (0.15), ARC_AGI_2 (0.12), ArtificialAnalysisMath (0.09), MMLUPro (0.08) |
-| **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), HLETools (0.025), BrowseComp (0.020), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
+| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.32), LMArenaText (0.21), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.11), ArtificialAnalysisMath (0.08), MMLUPro (0.07), BrowseComp (0.04), HLETools (0.03) |
+| **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
 | **BUILD** (Building) | SWEComposite (0.310), SWEAtlasComposite (0.155), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.020), ArtificialAnalysisCoding (0.040), SciCode (0.040), AALiveCodeBench (0.040), GDPval (0.045), SonarComposite (0.065), LongContextRecall (0.030), CopilotArenaOrLMArenaCode (0.020) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
