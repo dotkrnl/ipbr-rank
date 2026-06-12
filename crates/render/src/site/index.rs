@@ -212,38 +212,40 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
     }
 
     let mut html = String::from(
-        r##"<section id="leaderboard"><div class="toolbar"><input data-filter-input="#leaderboard-table" type="search" placeholder="filter by model or vendor"><div class="vendor-chips">"##,
+        r##"<section id="leaderboard"><div class="toolbar"><input data-filter-input="#leaderboard-table" type="search" placeholder="filter by model or vendor" aria-label="filter leaderboard by model or vendor"><div class="vendor-chips" role="group" aria-label="filter leaderboard by vendor">"##,
     );
-    html.push_str(r#"<button type="button" data-vendor="" class="active">all</button>"#);
+    html.push_str(
+        r#"<button type="button" data-vendor="" class="active" aria-pressed="true" aria-label="show all vendors">all</button>"#,
+    );
     for vendor in &vendors {
         html.push_str(&format!(
-            r#"<button type="button" data-vendor="{v}">{v}</button>"#,
+            r#"<button type="button" data-vendor="{v}" aria-pressed="false" aria-label="show only {v} models">{v}</button>"#,
             v = html_escape(vendor),
         ));
     }
     html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table"><thead><tr>"#);
     html.push_str(
-        r#"<th data-sort="model"><button type="button" class="sort">model</button></th>"#,
+        r#"<th scope="col" data-sort="model" aria-sort="none"><button type="button" class="sort" aria-label="sort by model descending">model</button></th>"#,
     );
     html.push_str(
-        r#"<th data-sort="vendor"><button type="button" class="sort">vendor</button></th>"#,
+        r#"<th scope="col" data-sort="vendor" aria-sort="none"><button type="button" class="sort" aria-label="sort by vendor descending">vendor</button></th>"#,
     );
 
     // Score columns — build is the default sort, marked active on initial render.
     for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
-        let active_attr = if key == "b" {
-            r#" data-sort-active="desc""#
+        let (active_attr, aria_sort) = if key == "b" {
+            (r#" data-sort-active="desc""#, "descending")
         } else {
-            ""
+            ("", "none")
         };
         html.push_str(&format!(
-            r#"<th class="num" data-sort="{key}"{active_attr}><button type="button" class="sort">{label}</button></th>"#
+            r#"<th scope="col" class="num" data-sort="{key}" aria-sort="{aria_sort}"{active_attr}><button type="button" class="sort" aria-label="sort by {label} score descending">{label}</button></th>"#
         ));
     }
     html.push_str(
-        r#"<th class="num" data-sort="r"><button type="button" class="sort">review</button></th>"#,
+        r#"<th scope="col" class="num" data-sort="r" aria-sort="none"><button type="button" class="sort" aria-label="sort by review score descending">review</button></th>"#,
     );
-    html.push_str(r#"<th></th></tr></thead><tbody>"#);
+    html.push_str(r#"<th scope="col" aria-label="details"></th></tr></thead><tbody>"#);
 
     for model in &models {
         html.push_str(&render_row(scoreboard, model));
@@ -292,9 +294,10 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
         )
         .unwrap();
     }
+    let details_id = format!("{id}-details");
     write!(
         html,
-        r#"<td class="expand-toggle" role="button" aria-label="expand">▸</td></tr>"#
+        r#"<td class="expand-toggle"><button type="button" aria-expanded="false" aria-controls="{details_id}" aria-label="show details for {name}" data-label-open="hide details for {name}" data-label-closed="show details for {name}">▸</button></td></tr>"#
     )
     .unwrap();
 
@@ -312,7 +315,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="expand" data-row="{id}"><td colspan="10"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing</span> {missing}</section></div></div></td></tr>"#,
+        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="10"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing</span> {missing}</section></div></div></td></tr>"#,
         groups = render_group_table(scoreboard, model),
         metrics = render_metric_table(scoreboard, model),
         sources = render_source_pills(scoreboard, model),

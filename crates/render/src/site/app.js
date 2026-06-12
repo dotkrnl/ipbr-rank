@@ -13,13 +13,17 @@
       btn.addEventListener('click', function () {
         var key = th.getAttribute('data-sort');
         var alreadyActive = th.getAttribute('data-sort-active') === 'desc';
-        Array.prototype.forEach.call(headers, function (h) { h.removeAttribute('data-sort-active'); });
+        Array.prototype.forEach.call(headers, function (h) {
+          h.removeAttribute('data-sort-active');
+          h.setAttribute('aria-sort', 'none');
+        });
         if (alreadyActive) {
           // Restore default order — only "row" rows; expand rows follow their parent.
           relayout(table, defaultOrder);
           return;
         }
         th.setAttribute('data-sort-active', 'desc');
+        th.setAttribute('aria-sort', 'descending');
         var rows = Array.prototype.filter.call(table.tBodies[0].rows, function (r) {
           return r.classList.contains('row');
         });
@@ -85,8 +89,12 @@
     });
     Array.prototype.forEach.call(chips, function (chip) {
       chip.addEventListener('click', function () {
-        Array.prototype.forEach.call(chips, function (c) { c.classList.remove('active'); });
+        Array.prototype.forEach.call(chips, function (c) {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
         chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
         state.vendor = chip.getAttribute('data-vendor') || '';
         apply();
       });
@@ -114,7 +122,13 @@
     var open = expand.classList.toggle('open');
     row.classList.toggle('expanded', open);
     var cell = row.querySelector('td.expand-toggle');
-    if (cell) cell.textContent = open ? '▾' : '▸';
+    var btn = cell && cell.querySelector('button');
+    if (btn) {
+      btn.textContent = open ? '▾' : '▸';
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var label = open ? btn.getAttribute('data-label-open') : btn.getAttribute('data-label-closed');
+      if (label) btn.setAttribute('aria-label', label);
+    }
   }
 
   // === Anchor auto-expand ===

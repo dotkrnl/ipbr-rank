@@ -268,7 +268,11 @@ table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
 table.leaderboard tr.expand.open { display: table-row; background: var(--panel); }
 table.leaderboard tr.expand td { padding: 14px 18px 18px; border-bottom: 1px solid var(--line); }
-table.leaderboard tr.row td.expand-toggle { width: 24px; text-align: center; cursor: pointer; color: var(--muted); }
+table.leaderboard tr.row td.expand-toggle { width: 24px; text-align: center; color: var(--muted); }
+table.leaderboard tr.row td.expand-toggle button {
+  font: inherit; color: inherit; background: transparent; border: 0; padding: 0;
+  cursor: pointer; width: 22px; height: 22px; line-height: 22px;
+}
 table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); }
 
 /* Inline expansion contents */

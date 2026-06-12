@@ -309,6 +309,44 @@ fn app_js_implements_required_features() {
     );
 }
 
+#[test]
+fn leaderboard_widgets_have_accessible_labels_and_state() {
+    let scoreboard = sample_scoreboard();
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+
+    let index = read(site_dir.join("index.html"));
+    let js = read(site_dir.join("assets/app.js"));
+
+    assert!(index.contains(r#"aria-label="filter leaderboard by model or vendor""#));
+    assert!(index.contains(r#"role="group" aria-label="filter leaderboard by vendor""#));
+    assert!(index.contains(r#"aria-label="show all vendors""#));
+    assert!(index.contains(r#"aria-pressed="true""#));
+    assert!(index.contains(r#"aria-pressed="false""#));
+
+    assert!(index.contains(r#"aria-sort="descending""#));
+    assert!(index.contains(r#"aria-sort="none""#));
+    assert!(index.contains(r#"aria-label="sort by build score descending""#));
+    assert!(
+        js.contains("aria-sort"),
+        "sort script should update aria-sort"
+    );
+
+    assert!(index.contains(r#"aria-controls="anthropic/claude-opus-4.7-details""#));
+    assert!(index.contains(r#"aria-label="show details for Claude Opus 4.7""#));
+    assert!(index.contains(r#"data-label-open="hide details for Claude Opus 4.7""#));
+    assert!(
+        js.contains("aria-expanded"),
+        "expand script should update expanded state"
+    );
+    assert!(
+        js.contains("aria-pressed"),
+        "vendor filter script should update pressed state"
+    );
+}
+
 fn assert_links_exist(site_dir: &Path, path: &Path, html: &str) {
     for link in extract_attr_values(html, "href")
         .into_iter()
