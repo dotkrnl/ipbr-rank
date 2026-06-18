@@ -77,8 +77,10 @@ if [[ ! -f "$snapshot" ]] && $fetched; then
 fi
 
 # Find the most recent daily snapshot that is NOT today's.
-yesterday_snapshot="$(ls -t cache/daily_snapshot_*.toml 2>/dev/null \
-  | grep -v "$today" | head -1)"
+yesterday_snapshot="$(
+  find cache -maxdepth 1 -name 'daily_snapshot_*.toml' ! -name "daily_snapshot_${today}.toml" \
+    -print 2>/dev/null | sort -r | head -1
+)"
 if [[ -n "$yesterday_snapshot" ]]; then
   prev_args=(--prev "$yesterday_snapshot")
   echo "using daily snapshot: $yesterday_snapshot"

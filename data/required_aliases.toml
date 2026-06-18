@@ -286,6 +286,18 @@ aliases = [
     "glm-5p1",
 ]
 
+[models."z-ai/glm-5.2"]
+vendor = "zai"
+aliases = [
+    "glm 5.2", "glm-5.2", "glm-5-2",
+    "glm-5-2-non-reasoning", "glm-5-2-thinking",
+    "z.ai glm 5.2", "z-ai/glm-5.2", "zai/glm-5.2",
+    "z-ai/glm-5.2-20260616",
+    "glm-5.2[1m]", "glm-5-2-1m",
+    # Scale leaderboards: `p` instead of `.`
+    "glm-5p2",
+]
+
 # ------------------------------------------------------------------
 # Models added from the 2026-04-27 source refresh
 # ------------------------------------------------------------------

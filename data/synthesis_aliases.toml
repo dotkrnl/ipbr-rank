@@ -361,6 +361,15 @@ target = "z-ai/glm-5"
 from = "z-ai/glm-5.1"
 category = "conservative"
 
+# GLM-5.2 is the direct successor to GLM-5.1. Launch-day public coverage
+# includes OpenRouter availability/pricing/context and Z.ai's official
+# SWE-Pro / Terminal-Bench 2.1 figures; 5.1 remains the closest same-vendor
+# donor for older leaderboards until they publish direct 5.2 rows.
+[[pair]]
+target = "z-ai/glm-5.2"
+from = "z-ai/glm-5.1"
+category = "same_series_forward"
+
 # Qwen3.6-Plus ← GLM-5. Cross-vendor tier proxy. Qwen3.6-Plus has no
 # Alibaba sibling in our rank; AA's other Qwen entries are open-weight
 # size variants (3.5-397B-A17B, 3-235B-A22B, etc.) that don't carry

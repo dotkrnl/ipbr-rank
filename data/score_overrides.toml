@@ -232,6 +232,16 @@ value = 70.3
 note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 # ---------------------------------------------------------------------
+# Terminal-Bench 2.1 — vendor-reported figures not yet in tbench.ai rows.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "z-ai/glm-5.2"
+metric = "TerminalBench21"
+value = 81.0
+note = "Z.ai GLM-5.2 official model card, Terminal-Bench 2.1, https://docs.z.ai/guides/llm/glm-5.2, accessed 2026-06-17"
+
+# ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
 # Elo ratings from blind pairwise comparison on real-world knowledge-
 # work tasks across 44 occupations. AA's web UI shows the leaderboard
@@ -430,6 +440,12 @@ canonical_id = "z-ai/glm-5.1"
 metric = "SWEBenchPro"
 value = 58.4
 note = "Z.ai GLM-5.1 launch / Hugging Face model card zai-org/GLM-5.1, 2026-04-08"
+
+[[entries]]
+canonical_id = "z-ai/glm-5.2"
+metric = "SWEBenchPro"
+value = 62.1
+note = "Z.ai GLM-5.2 official model card, SWE-bench Pro, https://docs.z.ai/guides/llm/glm-5.2, accessed 2026-06-17"
 
 [[entries]]
 canonical_id = "moonshotai/kimi-k2.5"
