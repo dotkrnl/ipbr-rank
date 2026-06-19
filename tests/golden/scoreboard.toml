@@ -3570,7 +3570,7 @@ canonical_id = "z-ai/glm-5.2"
 display_name = "glm-5.2"
 vendor = "zai"
 thinking_effort = "default"
-aliases = ["glm 5.2", "glm-5-2", "glm-5-2-1m", "glm-5-2-non-reasoning", "glm-5-2-thinking", "glm-5.2", "glm-5.2[1m]", "glm-5p2", "z-ai/glm-5.2", "z-ai/glm-5.2-20260616", "z.ai glm 5.2", "zai/glm-5.2"]
+aliases = ["glm 5.2", "glm 5.2 max", "glm-5-2", "glm-5-2-1m", "glm-5-2-non-reasoning", "glm-5-2-thinking", "glm-5.2", "glm-5.2 (max)", "glm-5.2 max", "glm-5.2[1m]", "glm-5p2", "z-ai/glm-5.2", "z-ai/glm-5.2-20260616", "z.ai glm 5.2", "zai/glm-5.2"]
 sources = ["overrides"]
 
 [models.scores]

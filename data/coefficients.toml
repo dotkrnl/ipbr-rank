@@ -122,6 +122,11 @@ effort = "max"
 source = "artificial_analysis"
 canonical_id = "z-ai/glm-5.2"
 
+[[effort_policy.exceptions]]
+effort = "max"
+source = "lmarena"
+canonical_id = "z-ai/glm-5.2"
+
 # Scale SWE Atlas harness submissions are benchmark observations.
 [[effort_policy.exceptions]]
 effort = "max"

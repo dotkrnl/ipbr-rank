@@ -15,6 +15,10 @@ const SOURCE_ID: &str = "lmarena";
 const CACHE_KEY: &str = "lmarena_overall";
 const DATASET: &str = "lmarena-ai/leaderboard-dataset";
 const CONFIGS: &[&str] = &["text", "webdev", "search", "document"];
+const WEB_PAGES: &[(&str, &str)] = &[
+    ("text", "https://lmarena.ai/leaderboard/text"),
+    ("webdev", "https://lmarena.ai/leaderboard/code"),
+];
 const PAGE_DELAY: Duration = Duration::from_secs(5);
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -55,10 +59,12 @@ impl Source for LmArenaSource {
                     self.id()
                 )));
             };
-            let payload = serde_json::from_slice::<Value>(&read_cached_bytes(&cache_json_path(
-                dir,
-                self.cache_key(),
-            ))?)?;
+            let mut payload = serde_json::from_slice::<Value>(&read_cached_bytes(
+                &cache_json_path(dir, self.cache_key()),
+            )?)?;
+            if !opts.offline {
+                append_live_web_pages_to_payload(http, &mut payload).await;
+            }
             return parse_rows(&payload);
         }
 
@@ -72,7 +78,7 @@ impl Source for LmArenaSource {
         let partial_cache = opts
             .cache_dir
             .map(|dir| partial_cache_path(dir, self.cache_key()));
-        let (payload, refresh_cache) =
+        let (mut payload, refresh_cache) =
             match fetch_live_payload(http, &headers, partial_cache.as_deref(), PAGE_DELAY).await {
                 Ok(payload) => (payload, true),
                 Err(err) => {
@@ -94,6 +100,9 @@ impl Source for LmArenaSource {
                     )
                 }
             };
+        if !refresh_cache {
+            append_live_web_pages_to_payload(http, &mut payload).await;
+        }
         if let (true, Some(dir)) = (refresh_cache, opts.cache_dir) {
             write_cache_json(dir, self.cache_key(), &payload)?;
         }
@@ -165,8 +174,114 @@ async fn fetch_live_payload(
     let mut wrapper = Map::new();
     wrapper.insert("dataset".to_string(), Value::String(DATASET.to_string()));
     wrapper.insert("split".to_string(), Value::String("latest".to_string()));
+    append_live_web_pages(http, &mut configs).await;
     wrapper.insert("configs".to_string(), Value::Object(configs));
     Ok(Value::Object(wrapper))
+}
+
+async fn append_live_web_pages_to_payload(http: &dyn Http, payload: &mut Value) {
+    if let Some(configs) = payload.get_mut("configs").and_then(Value::as_object_mut) {
+        append_live_web_pages(http, configs).await;
+    }
+}
+
+async fn append_live_web_pages(http: &dyn Http, configs: &mut Map<String, Value>) {
+    for (config, url) in WEB_PAGES {
+        match http.get_text(url, &[("User-Agent", "ipbr-rank")]).await {
+            Ok(html) => match parse_web_page(config, &html) {
+                Ok(Some(page)) => configs
+                    .entry((*config).to_string())
+                    .or_insert_with(|| Value::Array(Vec::new()))
+                    .as_array_mut()
+                    .expect("LMArena configs are arrays")
+                    .push(page),
+                Ok(None) => {}
+                Err(err) => eprintln!("warning: LMArena live {config} parse failed: {err}"),
+            },
+            Err(err) => eprintln!("warning: LMArena live {config} fetch failed: {err}"),
+        }
+    }
+}
+
+fn parse_web_page(config: &str, html: &str) -> Result<Option<Value>, SourceError> {
+    let mut rows = Vec::new();
+    let mut cursor = 0usize;
+    while let Some(rel_anchor) = html[cursor..].find(r#"\"modelKey\":\""#) {
+        let anchor = cursor + rel_anchor;
+        let Some(start) = html[..anchor].rfind('{') else {
+            cursor = anchor + 1;
+            continue;
+        };
+        let Some(end_rel) = html[anchor..].find('}') else {
+            cursor = anchor + 1;
+            continue;
+        };
+        let end = anchor + end_rel;
+        cursor = end + 1;
+
+        let object_text = unescape_jsx_string(&html[start..=end]);
+        let item: Value = serde_json::from_str(&object_text).map_err(|err| {
+            SourceError::Parse(format!("LMArena {config} live row failed to parse: {err}"))
+        })?;
+        let Some(model_name) = item.get("modelDisplayName").and_then(Value::as_str) else {
+            continue;
+        };
+        let Some(rating) = item.get("rating").and_then(number_like) else {
+            continue;
+        };
+        let mut row = Map::new();
+        row.insert("category".to_string(), Value::String("overall".to_string()));
+        row.insert(
+            "model_name".to_string(),
+            Value::String(model_name.to_string()),
+        );
+        row.insert("rating".to_string(), Value::from(rating));
+        if let Some(org) = item.get("modelOrganization").and_then(Value::as_str) {
+            row.insert("organization".to_string(), Value::String(org.to_string()));
+        }
+        copy_web_numeric(&mut row, "rank", item.get("rank"));
+        copy_web_numeric(&mut row, "vote_count", item.get("votes"));
+        copy_web_numeric(&mut row, "rating_lower", item.get("ratingLower"));
+        copy_web_numeric(&mut row, "rating_upper", item.get("ratingUpper"));
+
+        let mut entry = Map::new();
+        entry.insert("row".to_string(), Value::Object(row));
+        rows.push(Value::Object(entry));
+    }
+
+    if rows.is_empty() {
+        return Ok(None);
+    }
+    let mut page = Map::new();
+    page.insert("rows".to_string(), Value::Array(rows));
+    Ok(Some(Value::Object(page)))
+}
+
+/// Unwinds the JSON escaping used inside Next.js' streamed RSC payload.
+fn unescape_jsx_string(escaped: &str) -> String {
+    let mut out = String::with_capacity(escaped.len());
+    let bytes = escaped.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if i + 1 < bytes.len() && bytes[i] == b'\\' {
+            match bytes[i + 1] {
+                b'"' => {
+                    out.push('"');
+                    i += 2;
+                    continue;
+                }
+                b'\\' => {
+                    out.push('\\');
+                    i += 2;
+                    continue;
+                }
+                _ => {}
+            }
+        }
+        out.push(bytes[i] as char);
+        i += 1;
+    }
+    out
 }
 
 fn partial_cache_path(cache_dir: &Path, key: &str) -> PathBuf {
@@ -382,6 +497,12 @@ fn copy_numeric(fields: &mut BTreeMap<String, Value>, key: &str, value: Option<&
     }
 }
 
+fn copy_web_numeric(fields: &mut Map<String, Value>, key: &str, value: Option<&Value>) {
+    if let Some(value) = value.and_then(number_like) {
+        fields.insert(key.to_string(), Value::from(value));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -413,7 +534,7 @@ mod tests {
             _url: &str,
             _headers: &[(&str, &str)],
         ) -> Result<String, SourceError> {
-            panic!("lmarena fetch should not request text")
+            Ok(String::new())
         }
     }
 
@@ -479,7 +600,7 @@ mod tests {
             _url: &str,
             _headers: &[(&str, &str)],
         ) -> Result<String, SourceError> {
-            panic!("lmarena fetch should not request text")
+            Ok(String::new())
         }
     }
 
@@ -526,7 +647,7 @@ mod tests {
             _url: &str,
             _headers: &[(&str, &str)],
         ) -> Result<String, SourceError> {
-            panic!("lmarena fetch should not request text")
+            Ok(String::new())
         }
     }
 
@@ -619,7 +740,7 @@ mod tests {
             _url: &str,
             _headers: &[(&str, &str)],
         ) -> Result<String, SourceError> {
-            panic!("lmarena fetch should not request text")
+            Ok(String::new())
         }
     }
 
@@ -702,7 +823,7 @@ mod tests {
             _url: &str,
             _headers: &[(&str, &str)],
         ) -> Result<String, SourceError> {
-            panic!("lmarena fetch should not request text")
+            Ok(String::new())
         }
     }
 
@@ -876,5 +997,35 @@ mod tests {
                 .and_then(number_like),
             Some(1000.0)
         );
+    }
+
+    #[test]
+    fn parse_web_page_extracts_live_leaderboard_rows() {
+        let html = r#"<script>self.__next_f.push([1,"{\"rank\":2,\"rankUpper\":2,\"rankLower\":2,\"modelKey\":\"glm-5.2-code\",\"modelDisplayName\":\"glm-5.2 (max)\",\"rating\":1595.19,\"ratingUpper\":1611.46,\"ratingLower\":1578.92,\"votes\":1641,\"modelOrganization\":\"Z.ai\",\"modelUrl\":\"https://huggingface.co/zai-org/GLM-5.2\",\"license\":\"MIT\"}"])</script>"#;
+        let page = parse_web_page("webdev", html)
+            .expect("web page should parse")
+            .expect("web page should yield rows");
+        let payload = json!({
+            "configs": {
+                "webdev": [page]
+            }
+        });
+        let rows = parse_rows(&payload).expect("web page rows should map through normal parser");
+        let row = rows
+            .iter()
+            .find(|row| row.model_name == "glm-5.2 (max)")
+            .expect("GLM-5.2 max row should be present");
+
+        assert_eq!(
+            row.fields
+                .get("CopilotArenaOrLMArenaCode")
+                .and_then(number_like),
+            Some(1595.19)
+        );
+        assert_eq!(
+            row.fields.get("VoteCount").and_then(number_like),
+            Some(1641.0)
+        );
+        assert_eq!(row.vendor_hint.as_deref(), Some("Z.ai"));
     }
 }
