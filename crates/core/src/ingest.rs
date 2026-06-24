@@ -175,14 +175,14 @@ fn ingest_real_row(
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum EffortPreference {
-    Default = 0,
-    Medium = 1,
+    Max = 0,
+    High = 1,
     Thinking = 2,
-    NonReasoning = 3,
-    Low = 4,
-    High = 5,
-    Max = 6,
-    Other = 7,
+    Medium = 3,
+    Default = 4,
+    Other = 5,
+    Low = 6,
+    NonReasoning = 7,
 }
 
 impl EffortPreference {
@@ -217,38 +217,35 @@ impl EffortPreference {
 
         if contains("default") || !has_effort_marker {
             Self::Default
-        } else if contains("medium") {
-            Self::Medium
         } else if contains("non reasoning") {
             Self::NonReasoning
         } else if contains("low") {
             Self::Low
-        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
-            Self::Thinking
-        } else if contains("high") {
-            Self::High
         } else if contains("max") || contains("xhigh") {
             Self::Max
+        } else if contains("high") {
+            Self::High
+        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
+            Self::Thinking
+        } else if contains("medium") {
+            Self::Medium
         } else {
             Self::Other
         }
     }
 
     fn is_scoring_allowed(self) -> bool {
-        matches!(self, Self::Default | Self::Medium | Self::Thinking)
+        matches!(
+            self,
+            Self::Default | Self::Medium | Self::Thinking | Self::High | Self::Max
+        )
     }
 }
 
 /// Variant policy driven by `[effort_policy]` in `coefficients.toml`. The
-/// default scoring set is `default | medium | thinking`; exceptions allow
-/// specific higher-effort variants to score when upstream only publishes
-/// those variants.
-///
-/// These carve-outs are *single-source-and-canonical-scoped* by design — they
-/// do not weaken the global "no high/xhigh/max" policy for any other model
-/// or source. If a vendor ever ships a non-max variant for the same endpoint,
-/// the existing `metric_choices` last-write-wins-by-effort logic will prefer
-/// the lower-effort variant.
+/// default scoring set is `default | medium | thinking | high | max/xhigh`.
+/// Exceptions remain for intentionally blocked variants, currently low and
+/// non-reasoning rows.
 fn is_scoring_allowed_for(
     preference: EffortPreference,
     source_id: &str,
@@ -525,7 +522,7 @@ mod tests {
     }
 
     #[test]
-    fn real_rows_prefer_default_variant_over_thinking() {
+    fn real_rows_prefer_thinking_variant_over_default() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "anthropic/claude-opus-4.7".to_string(),
@@ -552,7 +549,7 @@ mod tests {
         let stats = ingest_rows(&mut records, rows);
 
         assert_eq!(stats.matched, 2);
-        assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&80.0));
+        assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&99.0));
     }
 
     #[test]
@@ -634,7 +631,7 @@ mod tests {
     }
 
     #[test]
-    fn real_rows_prefer_medium_variant_when_default_is_absent() {
+    fn real_rows_prefer_high_variant_when_default_is_absent() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "openai/gpt-5.5".to_string(),
@@ -663,7 +660,7 @@ mod tests {
         assert_eq!(stats.matched, 2);
         assert_eq!(
             records[0].raw_metrics.get("ArtificialAnalysisIntelligence"),
-            Some(&70.0)
+            Some(&99.0)
         );
     }
 
@@ -706,7 +703,7 @@ mod tests {
         assert_eq!(stats.matched, 2);
         assert_eq!(
             records[0].raw_metrics.get("ArtificialAnalysisIntelligence"),
-            Some(&70.0)
+            Some(&99.0)
         );
     }
 
@@ -743,7 +740,7 @@ mod tests {
     }
 
     #[test]
-    fn real_rows_skip_high_effort_when_no_default_medium_or_thinking_exists() {
+    fn real_rows_allow_high_effort_when_no_default_medium_or_thinking_exists() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "openai/gpt-5.5".to_string(),
@@ -762,10 +759,9 @@ mod tests {
         let stats = ingest_rows(&mut records, rows);
 
         assert_eq!(stats.matched, 1);
-        assert!(
-            !records[0]
-                .raw_metrics
-                .contains_key("ArtificialAnalysisIntelligence")
+        assert_eq!(
+            records[0].raw_metrics.get("ArtificialAnalysisIntelligence"),
+            Some(&99.0)
         );
     }
 
@@ -811,7 +807,7 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_rows_skip_high_effort_values() {
+    fn synthesized_rows_allow_high_effort_values() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "anthropic/claude-opus-4.7".to_string(),
@@ -825,10 +821,7 @@ mod tests {
             "artificial_analysis",
             "claude-opus-4.7",
             &[
-                (
-                    "DisplayName",
-                    json!("Claude Opus 4.6 (Non-reasoning, High Effort)"),
-                ),
+                ("DisplayName", json!("Claude Opus 4.6 (High Effort)")),
                 ("ArtificialAnalysisIntelligence", json!(80.0)),
             ],
         );
@@ -837,9 +830,13 @@ mod tests {
         let stats = ingest_rows(&mut records, vec![row]);
 
         assert_eq!(stats.matched, 1);
+        assert_eq!(
+            records[0].raw_metrics.get("ArtificialAnalysisIntelligence"),
+            Some(&80.0)
+        );
         assert!(
-            !records[0]
-                .raw_metrics
+            records[0]
+                .synthesized
                 .contains_key("ArtificialAnalysisIntelligence")
         );
     }

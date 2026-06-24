@@ -76,10 +76,9 @@ LiveCodingComposite = 0.14
 # useful for breadth, but Pro is the stronger live frontier signal because
 # Verified is increasingly saturated/contaminated at the top end.
 [effort_policy]
-# Exceptions to the default scoring effort set (default | medium | thinking).
-# Higher-effort variants are normally skipped so the scoreboard reflects the
-# model's default behaviour; these carve-outs apply when upstream only
-# publishes that variant.
+# Exceptions to the default scoring effort set
+# (default | medium | thinking | high | max/xhigh). These are retained for
+# product-tier aliases and any future explicitly blocked variants.
 
 # Qwen "Max" is a product tier, not a reasoning-effort marker.
 [[effort_policy.exceptions]]
@@ -90,7 +89,7 @@ canonical_id = "qwen/qwen3.6-max-preview"
 effort = "max"
 canonical_id = "qwen/qwen3.7-max"
 
-# Anthropic submits MCP-Atlas only as max/high effort runs.
+# Historical MCP-Atlas carve-outs; high/max are globally scoreable now.
 [[effort_policy.exceptions]]
 effort = "max"
 source = "mcp_atlas"
@@ -101,7 +100,7 @@ effort = "high"
 source = "mcp_atlas"
 vendor = "anthropic"
 
-# Artificial Analysis sometimes ships only a high row for these endpoints.
+# Historical Artificial Analysis carve-outs; high is globally scoreable now.
 [[effort_policy.exceptions]]
 effort = "high"
 source = "artificial_analysis"
@@ -359,7 +358,7 @@ transform = "percentile"
 # contamination-resistant variant, added specifically to penalize
 # deceptive optimizations — rather than raw `score`. Filtered to the
 # `Opt@1` setting; among Opt@1 rows for the same model we keep the one
-# with the lowest reasoning_effort (per CLAUDE.md/memory variant policy).
+# with the highest reasoning_effort (max/xhigh before high before default).
 [metrics.GSO]
 higher_better = true
 log_scale = false

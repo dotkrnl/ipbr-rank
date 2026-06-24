@@ -21,18 +21,6 @@
 # caps are spent on current model gaps instead of no-op older fills.
 
 [[pair]]
-target = "openai/gpt-5.5-pro"
-from = "openai/gpt-5.5"
-category = "conservative"
-sources = ["terminal_bench_2_1", "hil_bench"]
-
-[[pair]]
-target = "openai/gpt-5.4-pro"
-from = "openai/gpt-5.5"
-category = "conservative"
-sources = ["terminal_bench_2_1", "hil_bench"]
-
-[[pair]]
 target = "openai/gpt-5.4-mini"
 from = "openai/gpt-5.5"
 category = "conservative"
@@ -146,15 +134,6 @@ target = "anthropic/claude-opus-4.8"
 from = "anthropic/claude-opus-4.7"
 category = "same_series_forward"
 
-# Claude Fable 5 is Anthropic's production Mythos-class model. Official
-# self-reports now cover the headline SWE/Terminal/MCP/GDP values, and the
-# live refresh adds AA/MCP/OpenRouter rows; Opus 4.8 is the closest broadly
-# covered public Claude donor for the remaining public-source gaps.
-[[pair]]
-target = "anthropic/claude-fable-5"
-from = "anthropic/claude-opus-4.8"
-category = "conservative"
-
 # Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
 # The 2.5-pro sibling lacks the same sources, so the next-generation
 # 3-flash (same tier, full coverage) is the closest defensible donor.
@@ -215,26 +194,10 @@ target = "openai/gpt-5.4"
 from = "openai/gpt-5.3-codex"
 category = "conservative"
 
-# GPT-5.4 Pro and Mini are same-version tier variants, not version advances.
-# The official tables cover the headline Pro/Mini metrics; base GPT-5.4 fills
-# residual older-leaderboard gaps conservatively.
-[[pair]]
-target = "openai/gpt-5.4-pro"
-from = "openai/gpt-5.4"
-category = "conservative"
-
 [[pair]]
 target = "openai/gpt-5.4-mini"
 from = "openai/gpt-5.4"
 category = "conservative"
-
-# GPT-5.5 Pro is the direct Pro-line successor to GPT-5.4 Pro. Direct
-# ARC/OpenRouter plus official Browse/HLE rows win where available; the
-# remaining Pro-line gaps use version-advance synthesis with no penalty.
-[[pair]]
-target = "openai/gpt-5.5-pro"
-from = "openai/gpt-5.4-pro"
-category = "same_series_forward"
 
 # Grok-code-fast-1 lacks arc_agi; grok-4-latest has it. Same vendor, small
 # single-metric gap-fill.

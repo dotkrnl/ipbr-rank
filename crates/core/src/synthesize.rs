@@ -366,19 +366,19 @@ mod tests {
     #[test]
     fn synthesize_respects_source_scoped_pairs() {
         let records = vec![
-            record("openai/gpt-5.5-pro", "gpt-5.5-pro", &["gpt-5.5-pro"]),
-            record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
+            record("openai/gpt-5.4-mini", "gpt-5.4-mini", &["gpt-5.4-mini"]),
+            record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4"]),
         ];
         let mut rows = rows_by_source(vec![
             raw(
                 "terminal_bench_2_1",
-                "gpt-5.5",
+                "gpt-5.4",
                 None,
                 &[("TerminalBench21", json!(52.4))],
             ),
             raw(
                 "swerebench",
-                "gpt-5.5",
+                "gpt-5.4",
                 None,
                 &[("SWERebench", json!(71.0))],
             ),
@@ -387,8 +387,8 @@ mod tests {
         synthesize_rows(
             &mut rows,
             &[SynthesisPair {
-                target: "openai/gpt-5.5-pro".to_string(),
-                from: "openai/gpt-5.5".to_string(),
+                target: "openai/gpt-5.4-mini".to_string(),
+                from: "openai/gpt-5.4".to_string(),
                 category: SynthesisCategory::Conservative,
                 sources: vec!["terminal_bench_2_1".to_string()],
             }],
@@ -548,7 +548,7 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_rows_preserve_donor_name_for_effort_filtering() {
+    fn synthesized_rows_preserve_donor_name_for_effort_detection() {
         let records = vec![
             record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]),
             record("openai/gpt-5.4", "gpt-5.4", &["gpt-5.4", "gpt-5-4-high"]),
@@ -573,9 +573,14 @@ mod tests {
         let mut scored = records;
         ingest_rows(&mut scored, rows.remove("swebench_pro").unwrap());
 
+        assert_eq!(
+            scored[0].raw_metrics.get("SWEBenchPro"),
+            Some(&88.0),
+            "synthesized high-effort donor row should score under the high-effort policy"
+        );
         assert!(
-            !scored[0].raw_metrics.contains_key("SWEBenchPro"),
-            "synthesized high-effort donor row should not score as target default"
+            scored[0].synthesized.contains_key("SWEBenchPro"),
+            "synthesized donor row should still carry synthesis provenance"
         );
     }
 

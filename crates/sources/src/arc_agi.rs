@@ -189,16 +189,16 @@ impl ArcVariantPreference {
             .any(|phrase| contains(phrase));
         if !has_effort_marker {
             Self::Default
-        } else if contains("medium") {
-            Self::Medium
         } else if contains("low") {
             Self::Low
-        } else if contains("thinking") {
-            Self::Thinking
-        } else if contains("high") {
-            Self::High
         } else if contains("max") || contains("xhigh") {
             Self::Max
+        } else if contains("high") {
+            Self::High
+        } else if contains("thinking") {
+            Self::Thinking
+        } else if contains("medium") {
+            Self::Medium
         } else {
             Self::Other
         }

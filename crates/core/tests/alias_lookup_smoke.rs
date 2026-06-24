@@ -116,8 +116,6 @@ fn lookup_2026_06_12_models() {
     let cases: &[(&str, Option<&str>, &str)] = &[
         ("gpt-5.2-codex", Some("openai"), "openai/gpt-5.2-codex"),
         ("gpt-5.4-mini-high", Some("openai"), "openai/gpt-5.4-mini"),
-        ("gpt-5.4-pro-xhigh", Some("openai"), "openai/gpt-5.4-pro"),
-        ("gpt-5.5-pro-xhigh", Some("openai"), "openai/gpt-5.5-pro"),
         (
             "deepseek-v3-2-reasoning-0925",
             Some("deepseek"),

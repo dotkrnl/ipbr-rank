@@ -114,12 +114,6 @@ value = 80.4
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
 [[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "SWEBenchVerified"
-value = 95.0
-note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.2, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
-
-[[entries]]
 canonical_id = "minimax/minimax-m3"
 metric = "SWEBenchVerified"
 value = 80.5
@@ -214,12 +208,6 @@ value = 74.6
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 with Terminus-2 public harness, high effort, 5 attempts over 89 tasks, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "TerminalBench"
-value = 84.3
-note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 mini-SWE harness, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
-
-[[entries]]
 canonical_id = "minimax/minimax-m3"
 metric = "TerminalBench"
 value = 66.0
@@ -266,12 +254,6 @@ canonical_id = "anthropic/claude-opus-4.8"
 metric = "GDPval"
 value = 1890
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.13.6, GDPval-AA Elo, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
-
-[[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "GDPval"
-value = 1932
-note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.17.7, GDPval-AA Elo as of 2026-06-06, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
 
 [[entries]]
 canonical_id = "openai/gpt-5.4"
@@ -494,12 +476,6 @@ canonical_id = "qwen/qwen3.7-max"
 metric = "SWEBenchPro"
 value = 60.6
 note = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
-
-[[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "SWEBenchPro"
-value = 80.0
-note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A / Section 8.2, Fable 5 production value, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-10"
 
 [[entries]]
 canonical_id = "minimax/minimax-m3"
@@ -965,12 +941,6 @@ value = 72.7
 note = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
 [[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "OSWorldVerified"
-value = 85.0
-note = "Anthropic Claude Fable 5 & Mythos 5 official release table, OSWorld-Verified, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-11"
-
-[[entries]]
 canonical_id = "moonshotai/kimi-k2.6"
 metric = "OSWorldVerified"
 value = 73.1
@@ -991,18 +961,6 @@ canonical_id = "openai/gpt-5.4"
 metric = "BrowseComp"
 value = 82.7
 note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
-
-[[entries]]
-canonical_id = "openai/gpt-5.5-pro"
-metric = "BrowseComp"
-value = 90.1
-note = "OpenAI GPT-5.5 launch evaluations, GPT-5.5 Pro comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-12"
-
-[[entries]]
-canonical_id = "openai/gpt-5.4-pro"
-metric = "BrowseComp"
-value = 89.3
-note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 Pro comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-12"
 
 [[entries]]
 canonical_id = "anthropic/claude-opus-4.7"
@@ -1086,24 +1044,6 @@ canonical_id = "anthropic/claude-opus-4.6"
 metric = "HLETools"
 value = 53.3
 note = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
-
-[[entries]]
-canonical_id = "anthropic/claude-fable-5"
-metric = "HLETools"
-value = 64.5
-note = "Anthropic Claude Fable 5 & Mythos 5 official release table, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-fable-5-mythos-5, accessed 2026-06-11"
-
-[[entries]]
-canonical_id = "openai/gpt-5.5-pro"
-metric = "HLETools"
-value = 57.2
-note = "OpenAI GPT-5.5 launch evaluations, GPT-5.5 Pro Humanity's Last Exam with tools, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-12"
-
-[[entries]]
-canonical_id = "openai/gpt-5.4-pro"
-metric = "HLETools"
-value = 58.7
-note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 Pro Humanity's Last Exam with tools, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-12"
 
 [[entries]]
 canonical_id = "openai/gpt-5.4-mini"

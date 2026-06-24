@@ -577,7 +577,6 @@ mod tests {
         let idx = AliasIndex::build(&recs);
         for (input, vendor) in [
             ("gpt-5.4-chat", Some("openai")),
-            ("gpt-5.4-pro-high", Some("openai")),
             ("gpt-5.4-mini-high", Some("openai")),
             ("gpt-5.4-nano-high", Some("openai")),
             ("gpt-5.4-instant", Some("openai")),

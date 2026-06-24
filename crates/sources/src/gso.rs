@@ -82,11 +82,8 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 
     // GSO publishes one row per (model, scaffold, setting, reasoning_effort).
     // We only consume Opt@1 rows; among multiple Opt@1 rows for the same model
-    // we prefer the lowest reasoning_effort (`high` over `xhigh`, unspecified
-    // over `high`). This honors the project variant policy (medium/thinking/
-    // adaptive only) where possible while still ingesting the frontier rows
-    // GSO publishes only at -high (e.g. Claude Opus 4.7 high), per the
-    // explicit per-source carve-out documented in CLAUDE.md/memory.
+    // we prefer the highest reasoning_effort (max/xhigh before high before
+    // medium/default) so GSO matches the global scoring variant policy.
     //
     // We use `score_hack_control` (the contamination-resistant variant) over
     // raw `score`: GSO added the hack-control column specifically to penalize
@@ -142,15 +139,16 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 }
 
 /// Lower priority wins when picking between Opt@1 rows for the same model.
-/// Unspecified efforts beat -high beats -xhigh beats -max.
+/// Max/pro beats xhigh beats high beats medium/default.
 fn effort_priority(effort: &str) -> i64 {
     match effort.to_ascii_lowercase().as_str() {
-        "" | "?" | "default" | "medium" | "adaptive" | "thinking" => 0,
-        "low" => 1,
+        "max" | "pro" => 0,
+        "xhigh" | "x-high" => 1,
         "high" => 2,
-        "xhigh" | "x-high" => 3,
-        "max" | "pro" => 4,
-        _ => 5,
+        "adaptive" | "thinking" => 3,
+        "" | "?" | "default" | "medium" => 4,
+        "low" => 5,
+        _ => 6,
     }
 }
 
@@ -188,9 +186,9 @@ mod tests {
     }
 
     #[test]
-    fn prefers_lower_reasoning_effort_when_duplicated() {
+    fn prefers_higher_reasoning_effort_when_duplicated() {
         // GPT 5.4 in the fixture has both `high` and `xhigh` Opt@1 rows.
-        // The parser must keep `high` (lower-priority effort).
+        // The parser must keep `xhigh` (higher-priority effort).
         let payload: Value = serde_json::from_str(include_str!("../../../data/fixtures/gso.json"))
             .expect("fixture should parse as JSON");
         let rows = parse_rows(&payload).expect("fixture should parse");
@@ -200,10 +198,10 @@ mod tests {
             .expect("GPT 5.4 row must exist");
         let score = gpt54.fields.get("GSO").and_then(Value::as_f64).unwrap();
         // The `high` row has score_hack_control=22.55; the `xhigh` row has 30.39.
-        // We prefer `high`.
+        // We prefer `xhigh`.
         assert!(
-            (score - 22.55).abs() < 0.01,
-            "expected GPT 5.4 to keep the `high` row score (22.55), got {score}"
+            (score - 30.39).abs() < 0.01,
+            "expected GPT 5.4 to keep the `xhigh` row score (30.39), got {score}"
         );
     }
 
