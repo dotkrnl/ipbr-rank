@@ -261,6 +261,7 @@ table.leaderboard th.num button.sort::after { content: none; }
 table.leaderboard th.num button.sort::before { content: "▼ "; visibility: hidden; }
 table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibility: visible; }
 table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.leaderboard td.model-name { font: inherit; }
 table.leaderboard td.num .cell-score { display: inline-block; }
 table.leaderboard td.num[data-tier="high"] .cell-score { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }

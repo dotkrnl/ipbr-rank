@@ -268,7 +268,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td>{name}</td><td>{vendor}</td>"#,
+        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name}</td><td>{vendor}</td>"#,
         name_lc = name.to_lowercase(),
         i = s.i_raw,
         p = s.p_raw,

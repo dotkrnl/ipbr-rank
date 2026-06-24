@@ -29,6 +29,8 @@ fn style_css_path() -> &'static str {
     .as_str()
 }
 
+const CRITICAL_CSS: &str = r#"body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}"#;
+
 pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderError> {
     std::fs::create_dir_all(out.join("assets"))?;
     std::fs::write(out.join(style_css_path()), STYLE_CSS)?;
@@ -42,8 +44,9 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
 
 pub(crate) fn layout(title: &str, _scoreboard: &Scoreboard, body: &str) -> String {
     format!(
-        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><link rel="stylesheet" href="{style_href}"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr</a><span class="brand-strap">Live LLM coding scoreboard.</span></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
+        r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>{critical_css}</style><link rel="stylesheet" href="{style_href}"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr</a><span class="brand-strap">Live LLM coding scoreboard.</span></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
         title = html_escape(title),
+        critical_css = CRITICAL_CSS,
         style_href = style_css_path(),
         body = body,
     )

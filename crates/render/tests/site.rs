@@ -256,6 +256,11 @@ fn leaderboard_has_row_and_expansion_per_model() {
 
     // Leaderboard table with one numeric column per role.
     assert!(index.contains("class=\"leaderboard\""));
+    assert!(index.contains(r#"<td class="model-name">"#));
+    assert!(
+        index.contains(r#"<style>body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}</style><link rel="stylesheet""#),
+        "leaderboard model-name font must be critical inline CSS before external stylesheet"
+    );
 
     // One row + one hidden expansion per model — three models in fixture
     let row_count = index.matches("<tr class=\"row\"").count();
