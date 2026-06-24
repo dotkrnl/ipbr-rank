@@ -72,7 +72,7 @@ n_rows_unmatched = 42
 [sources."sweatlas_qna"]
 status = "verified"
 n_rows_ingested = 12
-n_rows_matched = 31
+n_rows_matched = 30
 n_rows_unmatched = 0
 
 [sources."sweatlas_refactoring"]
@@ -84,19 +84,19 @@ n_rows_unmatched = 1
 [sources."sweatlas_test_writing"]
 status = "verified"
 n_rows_ingested = 12
-n_rows_matched = 31
+n_rows_matched = 30
 n_rows_unmatched = 0
 
 [sources."swebench"]
 status = "verified"
 n_rows_ingested = 145
-n_rows_matched = 63
+n_rows_matched = 57
 n_rows_unmatched = 119
 
 [sources."swebench_pro"]
 status = "verified"
 n_rows_ingested = 24
-n_rows_matched = 24
+n_rows_matched = 21
 n_rows_unmatched = 12
 
 [sources."swerebench"]
@@ -351,14 +351,14 @@ sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp
 [models.scores]
 i_raw = 96.081918
 p_raw = 85.582328
-b_raw = 77.634223
-r = 83.567445
+b_raw = 76.645906
+r = 83.226240
 i_adj = 96.081918
 p_adj = 85.582328
-b_adj = 77.634223
+b_adj = 76.645906
 
 [models.groups]
-BUILD = 77.643094
+BUILD = 76.466526
 CRE = 98.682129
 GEN = 94.995885
 LM_ARENA_REVIEW_PROXY = 96.774344
@@ -391,10 +391,8 @@ LongContextRecall = 84.201077
 MCPAtlas = 85.063291
 OSWorldVerified = 89.424779
 OutputSpeed = 61.768834
-SWEAtlasComposite = 78.067893
-SWEAtlasQnA = 63.705536
+SWEAtlasComposite = 70.000000
 SWEAtlasRefactoring = 100.000000
-SWEAtlasTestWriting = 63.187440
 SWEBenchMultilingual = 95.000000
 SWEBenchPro = 95.000000
 SWEBenchVerified = 95.000000
