@@ -258,8 +258,8 @@ fn leaderboard_has_row_and_expansion_per_model() {
     assert!(index.contains("class=\"leaderboard\""));
     assert!(index.contains(r#"<td class="model-name">"#));
     assert!(
-        index.contains(r#"<style>body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}</style><link rel="stylesheet""#),
-        "leaderboard model-name font must be critical inline CSS before external stylesheet"
+        index.contains(r#"<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}</style><link rel="stylesheet""#),
+        "leaderboard font and text-size-adjust must be critical inline CSS before external stylesheet"
     );
 
     // One row + one hidden expansion per model — three models in fixture

@@ -29,7 +29,7 @@ fn style_css_path() -> &'static str {
     .as_str()
 }
 
-const CRITICAL_CSS: &str = r#"body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}"#;
+const CRITICAL_CSS: &str = r#"html{-webkit-text-size-adjust:100%;text-size-adjust:100%}body,table.leaderboard,table.leaderboard .model-name{font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}"#;
 
 pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderError> {
     std::fs::create_dir_all(out.join("assets"))?;
