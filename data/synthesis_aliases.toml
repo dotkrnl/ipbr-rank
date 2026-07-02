@@ -210,15 +210,6 @@ target = "z-ai/glm-4.6"
 from = "z-ai/glm-4.7"
 category = "conservative"
 
-# GPT-5.4 is only missing swerebench (swebench is already covered by
-# overrides). The coding-specialist GPT-5.3-codex has swerebench data;
-# using it for this single benchmark is defensible since SWERebench is
-# explicitly a coding evaluation.
-[[pair]]
-target = "openai/gpt-5.4"
-from = "openai/gpt-5.3-codex"
-category = "conservative"
-
 [[pair]]
 target = "openai/gpt-5.4-mini"
 from = "openai/gpt-5.4"
@@ -236,22 +227,6 @@ category = "conservative"
 # optimistic but defensible within the same family.
 [[pair]]
 target = "moonshotai/kimi-k2-0905"
-from = "moonshotai/kimi-k2.6"
-category = "conservative"
-
-# DeepSeek V4-Flash (released 2026-04-24) is missing SWERebench, the
-# heaviest weight in SWEComposite (0.40). SWE-Rebench is a rolling-window
-# benchmark that updates monthly and simply hasn't reached V4-Flash yet —
-# this is a transient timing gap, not vendor non-publication. Cross-vendor
-# tier-proxy from Kimi K2.6: same open-weight tier, similar parameter scale
-# (V4-Flash 284B/13B-active vs K2.6 mid-size MoE), and editorial consensus
-# puts them in the same capability band. The per-field filter in
-# `ingest_synthesized_row` ensures Kimi only writes to fields V4-Flash
-# is missing — V4-Flash's real rows are preserved untouched, and Kimi
-# only fills SWERebench plus other Flash-missing fields where Kimi has
-# data. Remove this pair once V4-Flash appears on swerebench.com directly.
-[[pair]]
-target = "deepseek/deepseek-v4-flash"
 from = "moonshotai/kimi-k2.6"
 category = "conservative"
 
@@ -365,6 +340,7 @@ category = "same_series_forward"
 target = "qwen/qwen3.6-plus"
 from = "z-ai/glm-5"
 category = "conservative"
+sources = ["arc_agi", "sonar", "swerebench"]
 
 # ------------------------------------------------------------------
 # Synthesis for newly-added models (2026-05-22, AA/LMArena/OpenRouter refresh)
@@ -436,14 +412,4 @@ category = "same_series_forward"
 [[pair]]
 target = "xai/grok-4.20"
 from = "xai/grok-4.3"
-category = "conservative"
-
-# Muse Spark has direct AA, LMArena, and SWE Atlas rows, but no official
-# SWE-Bench/GDPval/OpenRouter-style operational data yet. Gemini 3.5 Flash is
-# a contemporary frontier consumer/agentic model with similar AA/LMArena tier
-# placement and unusually broad coverage, so it is the least-bad temporary
-# donor. Treat the filled operational and SWE/GDP values as broad tier proxies.
-[[pair]]
-target = "meta/muse-spark"
-from = "google/gemini-3.5-flash"
 category = "conservative"

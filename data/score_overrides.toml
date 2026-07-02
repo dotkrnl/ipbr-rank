@@ -54,12 +54,6 @@ value = 88.7
 note = "OpenAI GPT-5.5 launch, 2026-04-23"
 
 [[entries]]
-canonical_id = "openai/gpt-5.4"
-metric = "SWEBenchVerified"
-value = 78.2
-note = "OpenAI GPT-5.4 reported figure, 2026-Q1"
-
-[[entries]]
 canonical_id = "moonshotai/kimi-k2.6"
 metric = "SWEBenchVerified"
 value = 80.2
@@ -289,19 +283,13 @@ note = "Anthropic Claude Sonnet 5 System Card Section 8.11.4, GDPval-AA v2 Elo, 
 canonical_id = "openai/gpt-5.4"
 metric = "GDPval"
 value = 1674
-note = "GDPval-AA Elo (xhigh), 2026-04-27"
+note = "Anthropic Claude Opus 4.7 launch GDPval-AA comparison chart for GPT-5.4 xhigh, https://www.anthropic.com/news/claude-opus-4-7, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "anthropic/claude-opus-4.6"
 metric = "GDPval"
 value = 1619
 note = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
-
-[[entries]]
-canonical_id = "anthropic/claude-sonnet-4.5"
-metric = "GDPval"
-value = 1677
-note = "GDPval-AA Elo (Sonnet 4.6 Adaptive Reasoning, used as 4.5-class proxy), 2026-04-27"
 
 [[entries]]
 canonical_id = "z-ai/glm-5.1"
