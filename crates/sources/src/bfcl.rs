@@ -1,8 +1,9 @@
 //! Berkeley Function Calling Leaderboard (BFCL) V4.
 //!
 //! The public leaderboard page loads `data_overall.csv` at runtime. We use
-//! the overall accuracy column as a PLAN/BUILD tool-calling signal and clean
-//! `(FC)` / `(Prompt)` display suffixes before alias matching.
+//! the overall accuracy column plus the category split columns as PLAN/BUILD
+//! tool-calling signals and clean `(FC)` / `(Prompt)` display suffixes before
+//! alias matching.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -82,6 +83,24 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
     let model_idx = find_column(header, "Model")?;
     let score_idx = find_column(header, "Overall Acc")?;
     let org_idx = header.iter().position(|name| name == "Organization");
+    let split_columns = [
+        (
+            "BFCLNonLiveAST",
+            find_column_opt(header, "Non-Live AST Acc"),
+        ),
+        ("BFCLLive", find_column_opt(header, "Live Acc")),
+        ("BFCLMultiTurn", find_column_opt(header, "Multi Turn Acc")),
+        ("BFCLWebSearch", find_column_opt(header, "Web Search Acc")),
+        ("BFCLMemory", find_column_opt(header, "Memory Acc")),
+        (
+            "BFCLRelevanceDetection",
+            find_column_opt(header, "Relevance Detection"),
+        ),
+        (
+            "BFCLIrrelevanceDetection",
+            find_column_opt(header, "Irrelevance Detection"),
+        ),
+    ];
 
     let alias_records = crate::embedded_alias_records();
     let alias_index = AliasIndex::build(&alias_records);
@@ -106,6 +125,14 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
 
         let mut fields = BTreeMap::new();
         fields.insert("BFCL".to_string(), Value::from(score));
+        for (metric, idx) in split_columns {
+            if let Some(value) = idx
+                .and_then(|idx| record.get(idx))
+                .and_then(|raw| parse_percent(raw))
+            {
+                fields.insert(metric.to_string(), Value::from(value));
+            }
+        }
         let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: model_name.clone(),
@@ -145,6 +172,10 @@ fn find_column(header: &[String], name: &str) -> Result<usize, SourceError> {
         .iter()
         .position(|value| value == name)
         .ok_or_else(|| SourceError::Parse(format!("BFCL CSV missing {name} column")))
+}
+
+fn find_column_opt(header: &[String], name: &str) -> Option<usize> {
+    header.iter().position(|value| value == name)
 }
 
 fn parse_csv(input: &str) -> Result<Vec<Vec<String>>, SourceError> {
@@ -243,12 +274,25 @@ mod tests {
 
     #[test]
     fn parses_overall_accuracy_csv() {
-        let csv = "Rank,Overall Acc,Model,Organization\n1,77.47%,Claude-Opus-4-5-20251101 (FC),Anthropic\n2,72.51%,Gemini-3-Pro-Preview (Prompt),Google\n";
+        let csv = "Rank,Overall Acc,Model,Non-Live AST Acc,Live Acc,Multi Turn Acc,Web Search Acc,Memory Acc,Relevance Detection,Irrelevance Detection,Organization\n1,77.47%,Claude-Opus-4-5-20251101 (FC),88.58%,79.79%,68.38%,84.50%,73.76%,62.50%,84.72%,Anthropic\n2,72.51%,Gemini-3-Pro-Preview (Prompt),80.00%,70.00%,60.00%,50.00%,40.00%,30.00%,20.00%,Google\n";
         let rows = parse_rows(csv).expect("CSV should parse");
         assert_eq!(rows.len(), 2);
         assert_eq!(rows[0].model_name, "Claude-Opus-4-5-20251101");
         assert_eq!(rows[0].vendor_hint.as_deref(), Some("anthropic"));
         assert_eq!(rows[0].fields["BFCL"].as_f64(), Some(77.47));
+        assert_eq!(rows[0].fields["BFCLNonLiveAST"].as_f64(), Some(88.58));
+        assert_eq!(rows[0].fields["BFCLLive"].as_f64(), Some(79.79));
+        assert_eq!(rows[0].fields["BFCLMultiTurn"].as_f64(), Some(68.38));
+        assert_eq!(rows[0].fields["BFCLWebSearch"].as_f64(), Some(84.50));
+        assert_eq!(rows[0].fields["BFCLMemory"].as_f64(), Some(73.76));
+        assert_eq!(
+            rows[0].fields["BFCLRelevanceDetection"].as_f64(),
+            Some(62.50)
+        );
+        assert_eq!(
+            rows[0].fields["BFCLIrrelevanceDetection"].as_f64(),
+            Some(84.72)
+        );
         assert_eq!(rows[1].model_name, "Gemini-3-Pro-Preview");
         assert_eq!(rows[1].vendor_hint.as_deref(), Some("google"));
     }

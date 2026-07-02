@@ -31,7 +31,7 @@ fail the run.
 - **API**: Artificial Analysis `/api/v2/data/llms/models`, `x-api-key` header
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
 - **Cache TTL**: 24 h
-- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `Tau2Bench`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `TTFT` / `BlendedCost`.
+- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `AIME25`, `Tau2Bench`, `TauBanking`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AATerminalBench21`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `TTFT` / `BlendedCost`.
 - **Multi-row dedup**: AA ships several rows per logical model (e.g. "Claude Opus 4.7 (Adaptive Reasoning, Max Effort)" and "(Non-reasoning, High Effort)"). The fetcher sorts ascending by intelligence index so the highest-effort row appears last and wins the last-write merge; speed/ttft sentinel zeros are skipped.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
@@ -84,7 +84,7 @@ and agentic tool-use categories.
 - **API**: Terminal-Bench 2.1 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. The source canonicalizes duplicate agent rows down to one row per matched model.
+- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. The source canonicalizes duplicate agent rows down to one row per matched model. Scoring consumes it through `TerminalBench21Composite` together with AA's `AATerminalBench21`.
 - **Fixture**: `data/fixtures/terminal_bench_2_1.html`
 
 ## livecodebench
@@ -160,7 +160,7 @@ and agentic tool-use categories.
 - **API**: Berkeley Function Calling Leaderboard V4 `data_overall.csv`
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `BFCL` — overall accuracy across BFCL V4's function/tool-calling categories, including live, multi-turn, web-search, memory, and relevance-detection tasks. Feeds PLAN and BUILD as a tool-use / agentic-calling signal.
+- **Metrics**: `BFCL` plus category splits `BFCLNonLiveAST`, `BFCLLive`, `BFCLMultiTurn`, `BFCLWebSearch`, `BFCLMemory`, `BFCLRelevanceDetection`, and `BFCLIrrelevanceDetection`. Scoring consumes these through `BFCLComposite`, with the overall leaderboard score kept as the anchor.
 - **Fixture**: `data/fixtures/bfcl.csv`
 
 ## arc_agi

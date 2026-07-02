@@ -15,12 +15,13 @@ LMArenaText = 0.30
 ARC_AGI_2 = 0.20
 
 [group_weights.GEN]
-ArtificialAnalysisIntelligence = 0.36
+ArtificialAnalysisIntelligence = 0.34
 LMArenaText = 0.15
 GPQA_HLE_Reasoning = 0.14
-ARC_AGI_2 = 0.11
-ArtificialAnalysisMath = 0.10
-MMLUPro = 0.07
+ARC_AGI_2 = 0.10
+ArtificialAnalysisMath = 0.08
+AIME25 = 0.06
+MMLUPro = 0.06
 BrowseComp = 0.04
 HLETools = 0.03
 
@@ -29,15 +30,15 @@ HLETools = 0.03
 # end-to-end. BFCL and TerminalBenchHard broaden tool-use / terminal-task
 # coverage while keeping any single agent harness from dominating PLAN.
 TerminalBench = 0.120
-TerminalBench21 = 0.035
+TerminalBench21Composite = 0.035
 TerminalBenchHard = 0.060
-BFCL = 0.060
+BFCLComposite = 0.060
 HiLBench = 0.040
 Toolathlon = 0.035
 OSWorldVerified = 0.030
 HLETools = 0.025
 BrowseComp = 0.020
-Tau2Bench = 0.145
+TauComposite = 0.145
 ArtificialAnalysisReasoning = 0.160
 IFBench = 0.100
 LongContextRecall = 0.075
@@ -55,9 +56,9 @@ SWEComposite = 0.29
 SWEAtlasComposite = 0.14
 MCPAtlas = 0.060
 TerminalBench = 0.045
-TerminalBench21 = 0.025
+TerminalBench21Composite = 0.025
 TerminalBenchHard = 0.040
-BFCL = 0.025
+BFCLComposite = 0.025
 HiLBench = 0.015
 Toolathlon = 0.015
 OSWorldVerified = 0.010
@@ -191,6 +192,33 @@ ArtificialAnalysisCoding = 0.286
 SciCode = 0.286
 AALiveCodeBench = 0.286
 CopilotArenaOrLMArenaCode = 0.142
+
+# TauComposite combines AA's general τ2-bench tool-use score with the newer
+# τ-bench banking field exposed in the same payload. Keep τ2 dominant because
+# it is the broader, historically populated signal.
+[composite_metrics.TauComposite]
+Tau2Bench = 0.75
+TauBanking = 0.25
+
+# TerminalBench21Composite combines the official Terminal-Bench 2.1 source
+# with AA's independently reported terminalbench_v2_1 field. The official
+# tbench.ai scrape remains the larger input; AA broadens model coverage.
+[composite_metrics.TerminalBench21Composite]
+TerminalBench21 = 0.55
+AATerminalBench21 = 0.45
+
+# BFCLComposite keeps Berkeley's overall V4 accuracy as the anchor while
+# making the category splits visible to PLAN/BUILD. Overall stays largest
+# because it is the upstream leaderboard headline metric.
+[composite_metrics.BFCLComposite]
+BFCL = 0.35
+BFCLNonLiveAST = 0.10
+BFCLLive = 0.15
+BFCLMultiTurn = 0.15
+BFCLWebSearch = 0.08
+BFCLMemory = 0.07
+BFCLRelevanceDetection = 0.06
+BFCLIrrelevanceDetection = 0.04
 
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
 # benchmark. It combines LM Arena search and document preference ratings
@@ -393,9 +421,17 @@ transform = "percentile"
 # covering current agent/model combinations such as GPT-5.5, Opus 4.8,
 # Gemini 3.1 Pro, Claude Opus 4.7, and GLM-5.1.
 [metrics.TerminalBench21]
+# Input to TerminalBench21Composite.
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
+transform = "percentile"
+
+[metrics.AATerminalBench21]
+# Input to TerminalBench21Composite; AA's terminalbench_v2_1 field.
+higher_better = true
+log_scale = false
+groups = []
 transform = "percentile"
 
 [metrics.TerminalBenchHard]
@@ -405,9 +441,52 @@ groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
 [metrics.BFCL]
+# Input to BFCLComposite.
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
+transform = "percentile"
+
+[metrics.BFCLNonLiveAST]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLLive]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLMultiTurn]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLWebSearch]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLMemory]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLRelevanceDetection]
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.BFCLIrrelevanceDetection]
+higher_better = true
+log_scale = false
+groups = []
 transform = "percentile"
 
 # HiL-Bench measures selective escalation: recognizing under-specified,
@@ -514,9 +593,17 @@ transform = "percentile"
 # previously unused. Wiring them up gives PLAN and BUILD more breadth without
 # adding any new HTTP fetches.
 [metrics.Tau2Bench]
+# Input to TauComposite.
 higher_better = true
 log_scale = false
-groups = ["PLAN"]
+groups = []
+transform = "percentile"
+
+[metrics.TauBanking]
+# Input to TauComposite; AA's tau_banking field.
+higher_better = true
+log_scale = false
+groups = []
 transform = "percentile"
 
 [metrics.SciCode]
@@ -540,6 +627,12 @@ groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.ArtificialAnalysisMath]
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.AIME25]
 higher_better = true
 log_scale = false
 groups = ["GEN"]

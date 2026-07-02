@@ -151,6 +151,92 @@ fn lookup_2026_06_12_models() {
 }
 
 #[test]
+fn lookup_claude_fable_5() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        (
+            "Claude Fable 5",
+            Some("anthropic"),
+            "anthropic/claude-fable-5",
+        ),
+        (
+            "anthropic/claude-5-fable-20260609",
+            Some("anthropic"),
+            "anthropic/claude-fable-5",
+        ),
+        (
+            "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
+            Some("anthropic"),
+            "anthropic/claude-fable-5",
+        ),
+        (
+            "Fable-5 (Claude Code) xHigh",
+            None,
+            "anthropic/claude-fable-5",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
+fn lookup_claude_sonnet_5_and_haiku_45() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        (
+            "anthropic/claude-sonnet-5-20260630",
+            Some("anthropic"),
+            "anthropic/claude-sonnet-5",
+        ),
+        (
+            "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)",
+            Some("anthropic"),
+            "anthropic/claude-sonnet-5",
+        ),
+        (
+            "claude-sonnet-5-non-reasoning",
+            Some("anthropic"),
+            "anthropic/claude-sonnet-5",
+        ),
+        (
+            "anthropic/claude-4.5-haiku-20251001",
+            Some("anthropic"),
+            "anthropic/claude-haiku-4.5",
+        ),
+        (
+            "Claude 4.5 Haiku (Reasoning)",
+            Some("anthropic"),
+            "anthropic/claude-haiku-4.5",
+        ),
+        (
+            "claude-haiku-4-5-20251001-thinking-16k",
+            Some("anthropic"),
+            "anthropic/claude-haiku-4.5",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);

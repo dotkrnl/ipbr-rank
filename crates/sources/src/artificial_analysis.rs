@@ -170,12 +170,20 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             fields.insert("GPQA_HLE_Reasoning".to_string(), Value::from(value));
         }
 
-        // AA also publishes per-eval scores under `evaluations.{tau2,scicode,
-        // ifbench}`. They're 0–1 fractions like gpqa/hle, so we scale to
+        // AA also publishes per-eval scores under `evaluations.{aime_25,tau2,
+        // tau_banking,scicode,ifbench}`. They're 0–1 fractions like gpqa/hle, so we scale to
         // 0–100 and emit as their own metrics. Skipped silently when absent
         // (older runs without these fields, smaller models, etc.)
+        if let Some(aime25) = number_at_paths(item, &[&["evaluations", "aime_25"], &["aime_25"]]) {
+            fields.insert("AIME25".to_string(), Value::from(aime25 * 100.0));
+        }
         if let Some(tau2) = number_at_paths(item, &[&["evaluations", "tau2"], &["tau2"]]) {
             fields.insert("Tau2Bench".to_string(), Value::from(tau2 * 100.0));
+        }
+        if let Some(tau_banking) =
+            number_at_paths(item, &[&["evaluations", "tau_banking"], &["tau_banking"]])
+        {
+            fields.insert("TauBanking".to_string(), Value::from(tau_banking * 100.0));
         }
         if let Some(scicode) = number_at_paths(item, &[&["evaluations", "scicode"], &["scicode"]]) {
             fields.insert("SciCode".to_string(), Value::from(scicode * 100.0));
@@ -193,6 +201,18 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             fields.insert(
                 "TerminalBenchHard".to_string(),
                 Value::from(terminalbench_hard * 100.0),
+            );
+        }
+        if let Some(terminalbench21) = number_at_paths(
+            item,
+            &[
+                &["evaluations", "terminalbench_v2_1"],
+                &["terminalbench_v2_1"],
+            ],
+        ) {
+            fields.insert(
+                "AATerminalBench21".to_string(),
+                Value::from(terminalbench21 * 100.0),
             );
         }
         if let Some(livecodebench) = number_at_paths(
@@ -487,8 +507,12 @@ mod tests {
                     "coding_index": 59.12,
                     "gpqa": 0.93,
                     "hle": 0.40,
+                    "aime_25": 0.75,
                     "terminalbench_hard": 0.50,
+                    "terminalbench_v2_1": 0.62,
                     "livecodebench": 0.80,
+                    "tau_banking": 0.5,
+                    "tau2": 0.64,
                     "artificial_analysis_math_index": 71.25,
                     "mmlu_pro": 0.88
                 },
@@ -534,6 +558,19 @@ mod tests {
         assert_eq!(
             row.fields.get("TerminalBenchHard").and_then(number_like),
             Some(50.0)
+        );
+        assert_eq!(
+            row.fields.get("AATerminalBench21").and_then(number_like),
+            Some(62.0)
+        );
+        assert_eq!(row.fields.get("AIME25").and_then(number_like), Some(75.0));
+        assert_eq!(
+            row.fields.get("TauBanking").and_then(number_like),
+            Some(50.0)
+        );
+        assert_eq!(
+            row.fields.get("Tau2Bench").and_then(number_like),
+            Some(64.0)
         );
         assert_eq!(
             row.fields.get("AALiveCodeBench").and_then(number_like),

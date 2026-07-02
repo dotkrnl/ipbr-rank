@@ -240,6 +240,10 @@ async fn artificial_analysis_fixture_contract() {
         "expected reasoning blend on majority of rows, got {reasoning_rows}/{}",
         rows.len()
     );
+    assert!(
+        rows.iter().any(|row| row.fields.contains_key("AIME25")),
+        "expected at least one AA fixture row to carry AIME25"
+    );
 
     let (records, matched) = ingest_fixture_rows(rows);
     assert!(
@@ -567,6 +571,20 @@ async fn bfcl_fixture_contract() {
         rows.len()
     );
     assert!(rows.iter().all(|row| row.fields.contains_key("BFCL")));
+    for metric in [
+        "BFCLNonLiveAST",
+        "BFCLLive",
+        "BFCLMultiTurn",
+        "BFCLWebSearch",
+        "BFCLMemory",
+        "BFCLRelevanceDetection",
+        "BFCLIrrelevanceDetection",
+    ] {
+        assert!(
+            rows.iter().all(|row| row.fields.contains_key(metric)),
+            "expected every BFCL row to carry {metric}"
+        );
+    }
     let (records, matched) = ingest_fixture_rows(rows);
     assert!(
         matched >= 7,

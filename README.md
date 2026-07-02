@@ -76,7 +76,7 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 **Verified sources** (always run):
 - OpenRouter API — model discovery, pricing, context windows
 - LM Arena — preference ratings across text, code, and hard prompts
-- Artificial Analysis — intelligence/coding/reasoning/math indices, plus tau2-bench, scicode, ifbench, terminalbench-hard, livecodebench, mmlu-pro, lcr, and gpqa+hle reasoning blend
+- Artificial Analysis — intelligence/coding/reasoning/math indices, plus AIME 2025, tau2/tau-banking, scicode, ifbench, Terminal-Bench fields, livecodebench, mmlu-pro, lcr, and gpqa+hle reasoning blend
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
@@ -84,8 +84,8 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - LiveCodeBench — competitive-programming pass@1 (ingested for back-compat; *retired* from BUILD weighting after the upstream JSON froze at mid-2025 frontier — see `docs/sources.md`)
 - GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
-- Terminal-Bench 2.1 — newer narrow Terminal-Bench track covering current frontier agent/model combinations
-- BFCL V4 — Berkeley function/tool-calling leaderboard
+- Terminal-Bench 2.1 — newer narrow Terminal-Bench track, combined with AA's terminalbench_v2_1 field
+- BFCL V4 — Berkeley function/tool-calling leaderboard, scored through an overall + category-split composite
 - Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - HiL-Bench (Scale) — human-in-the-loop escalation accuracy for ambiguous or blocked agent tasks

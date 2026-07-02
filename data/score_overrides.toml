@@ -30,6 +30,18 @@ value = 88.6
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "SWEBenchVerified"
+value = 85.2
+note = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "SWEBenchVerified"
+value = 95.0
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Section 8.2, Fable 5 SWE-bench Verified, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
+
+[[entries]]
 canonical_id = "anthropic/claude-sonnet-4.6"
 metric = "SWEBenchVerified"
 value = 79.6
@@ -229,6 +241,12 @@ metric = "TerminalBench21"
 value = 81.0
 note = "Z.ai GLM-5.2 official model card, Terminal-Bench 2.1, https://docs.z.ai/guides/llm/glm-5.2, accessed 2026-06-17"
 
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "TerminalBench21"
+value = 80.4
+note = "Anthropic Claude Sonnet 5 System Card Section 8.3, Terminal-Bench 2.1 mean reward over 445 trials, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
 # Elo ratings from blind pairwise comparison on real-world knowledge-
@@ -254,6 +272,18 @@ canonical_id = "anthropic/claude-opus-4.8"
 metric = "GDPval"
 value = 1890
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.13.6, GDPval-AA Elo, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "GDPval"
+value = 1783
+note = "Anthropic Claude Sonnet 5 System Card Section 8.11.4, GDPval-AA v2 Elo comparison row for Fable 5, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "GDPval"
+value = 1618
+note = "Anthropic Claude Sonnet 5 System Card Section 8.11.4, GDPval-AA v2 Elo, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "openai/gpt-5.4"
@@ -380,6 +410,18 @@ canonical_id = "anthropic/claude-opus-4.8"
 metric = "SWEBenchPro"
 value = 69.2
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "SWEBenchPro"
+value = 63.2
+note = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "SWEBenchPro"
+value = 80.0
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Section 8.2, Fable 5 SWE-bench Pro, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "openai/gpt-5.5"
@@ -516,6 +558,12 @@ canonical_id = "anthropic/claude-opus-4.8"
 metric = "SWEBenchMultilingual"
 value = 84.4
 note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "SWEBenchMultilingual"
+value = 78.3
+note = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "anthropic/claude-sonnet-4.6"
@@ -906,6 +954,18 @@ metric = "Toolathlon"
 value = 23.8
 note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "Toolathlon"
+value = 61.7
+note = "Anthropic Claude Sonnet 5 System Card Section 8.11.5, Toolathlon Pass@1 comparison row for Fable 5, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "Toolathlon"
+value = 54.3
+note = "Anthropic Claude Sonnet 5 System Card Section 8.11.5, Toolathlon Pass@1, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
 # ---------------------------------------------------------------------
 # OSWorld-Verified — official release/model-card figures for computer use.
 # ---------------------------------------------------------------------
@@ -935,6 +995,24 @@ value = 78.0
 note = "Anthropic Claude Opus 4.7 official release table, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
 [[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "OSWorldVerified"
+value = 81.2
+note = "Anthropic Claude Sonnet 5 System Card Section 8.10.2, OSWorld-Verified first-attempt success averaged over five runs, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-fable-5"
+metric = "OSWorldVerified"
+value = 85.0
+note = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A, OSWorld-Verified, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
+
+[[entries]]
+canonical_id = "anthropic/claude-haiku-4.5"
+metric = "OSWorldVerified"
+value = 50.7
+note = "Anthropic Claude Haiku 4.5 launch benchmark table and methodology footnote, OSWorld-Verified, https://www.anthropic.com/news/claude-haiku-4-5, accessed 2026-07-02"
+
+[[entries]]
 canonical_id = "anthropic/claude-opus-4.6"
 metric = "OSWorldVerified"
 value = 72.7
@@ -961,6 +1039,12 @@ canonical_id = "openai/gpt-5.4"
 metric = "BrowseComp"
 value = 82.7
 note = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "BrowseComp"
+value = 84.7
+note = "Anthropic Claude Sonnet 5 System Card Section 8.9.2, BrowseComp single-agent score, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "anthropic/claude-opus-4.7"
@@ -1038,6 +1122,12 @@ canonical_id = "anthropic/claude-opus-4.7"
 metric = "HLETools"
 value = 54.7
 note = "Anthropic Claude Opus 4.7 official release table, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "anthropic/claude-sonnet-5"
+metric = "HLETools"
+value = 57.4
+note = "Anthropic Claude Sonnet 5 System Card Table 8.1.A and Section 8.9.1, Humanity's Last Exam with tools, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [[entries]]
 canonical_id = "anthropic/claude-opus-4.6"

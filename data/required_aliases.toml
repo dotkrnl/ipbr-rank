@@ -104,6 +104,56 @@ aliases = [
     "claude-sonnet-4-5-search",
 ]
 
+[models."anthropic/claude-sonnet-5"]
+vendor = "anthropic"
+aliases = [
+    "sonnet 5", "claude sonnet 5", "claude-sonnet-5",
+    "claude 5 sonnet", "claude-5-sonnet",
+    "anthropic/claude-sonnet-5", "anthropic:claude-sonnet-5",
+    # Anthropic / OpenRouter dated snapshot IDs.
+    "claude-sonnet-5-20260630", "claude 5 sonnet 20260630",
+    "anthropic/claude-sonnet-5-20260630",
+    "anthropic/claude-5-sonnet-20260630",
+    # Artificial Analysis reasoning/effort variants.
+    "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)",
+    "Claude Sonnet 5 (Adaptive Reasoning, Xhigh Effort)",
+    "Claude Sonnet 5 (Adaptive Reasoning, High Effort)",
+    "Claude Sonnet 5 (Adaptive Reasoning, Medium Effort)",
+    "Claude Sonnet 5 (Adaptive Reasoning, Low Effort)",
+    "Claude Sonnet 5 (Non-reasoning, High Effort)",
+    "claude-sonnet-5-xhigh", "claude-sonnet-5-high",
+    "claude-sonnet-5-medium", "claude-sonnet-5-low",
+    "claude-sonnet-5-non-reasoning",
+    # LMArena / search endpoint spellings.
+    "claude-sonnet-5-thinking", "claude-sonnet-5-search",
+]
+
+[models."anthropic/claude-haiku-4.5"]
+vendor = "anthropic"
+aliases = [
+    "haiku 4.5", "claude haiku 4.5",
+    "claude-haiku-4-5", "claude-haiku-4.5",
+    "claude 4.5 haiku", "claude-4-5-haiku", "claude-4.5-haiku",
+    "anthropic/claude-haiku-4.5", "anthropic:claude-haiku-4.5",
+    # Anthropic / OpenRouter dated snapshot IDs.
+    "claude-haiku-4-5-20251001", "Claude-Haiku-4-5-20251001",
+    "claude-4-5-haiku-20251001", "claude-4.5-haiku-20251001",
+    "anthropic/claude-4.5-haiku-20251001",
+    "anthropic/claude-4-5-haiku-20251001",
+    # OpenRouter latest alias route.
+    "~anthropic/claude-haiku-latest", "claude-haiku-latest",
+    # Artificial Analysis reasoning rows.
+    "Claude 4.5 Haiku (Non-reasoning)", "Claude 4.5 Haiku (Reasoning)",
+    "claude-4-5-haiku-reasoning", "claude-4-5-haiku-non-reasoning",
+    # SWE / ARC-AGI / public leaderboard spellings.
+    "Claude 4.5 Haiku", "Claude 4.5 Haiku (high reasoning)",
+    "mini-SWE-agent + Claude 4.5 Haiku (high reasoning)",
+    "claude-haiku-4-5-20251001-thinking-1k",
+    "claude-haiku-4-5-20251001-thinking-8k",
+    "claude-haiku-4-5-20251001-thinking-16k",
+    "claude-haiku-4-5-20251001-thinking-32k",
+]
+
 [models."anthropic/claude-opus-4.6"]
 vendor = "anthropic"
 aliases = [
@@ -150,6 +200,24 @@ aliases = [
     "Opus 4.8 Claude Code (xHigh thinking)",
     "Opus 4.8 (Claude Code)", "opus 4.8 claude code",
     "Opus 4.8 (Claude Code) xHigh",
+]
+
+[models."anthropic/claude-fable-5"]
+vendor = "anthropic"
+aliases = [
+    "claude fable 5", "claude-fable-5", "claude 5 fable",
+    "claude-5-fable", "claude-5-fable-20260609",
+    "anthropic/claude-fable-5", "anthropic/claude-5-fable-20260609",
+    "anthropic:claude-fable-5",
+    # OpenRouter latest alias route.
+    "~anthropic/claude-fable-latest", "claude-fable-latest",
+    # Artificial Analysis long-form reasoning row.
+    "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
+    "claude-fable-5-adaptive", "claude-fable-5-max",
+    "claude-fable-5-high", "claude-fable-5-medium", "claude-fable-5-low",
+    # Scale SWE Atlas Claude Code harness spelling.
+    "Fable-5 (Claude Code) xHigh", "Fable-5 (Claude Code)",
+    "Fable 5 Claude Code", "Fable 5 Claude Code xHigh",
 ]
 
 [models."google/gemini-3.1-pro-preview"]

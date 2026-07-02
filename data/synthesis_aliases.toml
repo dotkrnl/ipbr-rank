@@ -134,6 +134,31 @@ target = "anthropic/claude-opus-4.8"
 from = "anthropic/claude-opus-4.7"
 category = "same_series_forward"
 
+# Fable 5 has direct OpenRouter/AA/LMArena/Terminal/MCP/SWE-Atlas rows and
+# official GDPval/Toolathlon overrides. Use Opus 4.8 only for older public
+# leaderboards that have not listed Fable yet; this is cross-family, so keep
+# the conservative pull.
+[[pair]]
+target = "anthropic/claude-fable-5"
+from = "anthropic/claude-opus-4.8"
+category = "conservative"
+
+# Sonnet 5 is the direct successor to Sonnet 4.6. Anthropic reports it as a
+# substantial agentic upgrade and direct rows/overrides cover the major new
+# evaluations; Sonnet 4.6 fills residual historical leaderboard gaps.
+[[pair]]
+target = "anthropic/claude-sonnet-5"
+from = "anthropic/claude-sonnet-4.6"
+category = "same_series_forward"
+
+# Haiku 4.5 is a smaller/lower-cost Claude 4.5-tier model. Sonnet 4.5 is the
+# closest broadly covered donor for sources that still omit Haiku, but the
+# tier gap makes this conservative rather than same-series-forward.
+[[pair]]
+target = "anthropic/claude-haiku-4.5"
+from = "anthropic/claude-sonnet-4.5"
+category = "conservative"
+
 # Gemini 2.5-flash lacks mcp_atlas, overrides, sonar, and swebench_pro.
 # The 2.5-pro sibling lacks the same sources, so the next-generation
 # 3-flash (same tier, full coverage) is the closest defensible donor.

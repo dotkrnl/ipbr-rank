@@ -118,9 +118,9 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | Group Key | Member Metrics (with weights from `[group_weights.*]`) |
 |-----------|-------------------------------------------------------|
 | **CRE** (Creativity) | LMArenaCreativeOrOpenEnded (0.50), LMArenaText (0.30), ARC_AGI_2 (0.20) |
-| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.36), LMArenaText (0.15), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.11), ArtificialAnalysisMath (0.10), MMLUPro (0.07), BrowseComp (0.04), HLETools (0.03) |
-| **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21 (0.035), TerminalBenchHard (0.060), BFCL (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), Tau2Bench (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
-| **BUILD** (Building) | SWEComposite (0.290), SWEAtlasComposite (0.140), LiveCodingComposite (0.140), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21 (0.025), TerminalBenchHard (0.040), BFCL (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.035), GDPval (0.045), SonarComposite (0.090), LongContextRecall (0.025) |
+| **GEN** (General Intelligence) | ArtificialAnalysisIntelligence (0.34), LMArenaText (0.15), GPQA_HLE_Reasoning (0.14), ARC_AGI_2 (0.10), ArtificialAnalysisMath (0.08), AIME25 (0.06), MMLUPro (0.06), BrowseComp (0.04), HLETools (0.03) |
+| **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21Composite (0.035), TerminalBenchHard (0.060), BFCLComposite (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), HLETools (0.025), BrowseComp (0.020), TauComposite (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
+| **BUILD** (Building) | SWEComposite (0.290), SWEAtlasComposite (0.140), LiveCodingComposite (0.140), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21Composite (0.025), TerminalBenchHard (0.040), BFCLComposite (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.035), GDPval (0.045), SonarComposite (0.090), LongContextRecall (0.025) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
 | **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
 | **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
@@ -161,6 +161,14 @@ Defined in `[composite_metrics.LiveCodingComposite]` as a missing-safe
 weighted average of `ArtificialAnalysisCoding` (0.286), `SciCode` (0.286),
 `AALiveCodeBench` (0.286), and `CopilotArenaOrLMArenaCode` (0.142) — weights
 proportional to their previous standalone BUILD weights.
+
+`TauComposite` combines AA's broader `Tau2Bench` field (0.75) with the newer
+`TauBanking` field (0.25). `TerminalBench21Composite` combines the official
+Terminal-Bench 2.1 source (0.55) with AA's `AATerminalBench21` field (0.45).
+`BFCLComposite` keeps Berkeley's overall BFCL score as the anchor (0.35) and
+adds the V4 category splits for non-live AST (0.10), live (0.15), multi-turn
+(0.15), web search (0.08), memory (0.07), relevance detection (0.06), and
+irrelevance detection (0.04).
 
 ### 4.2 Shrink-to-50 with Trust Threshold
 
@@ -232,7 +240,7 @@ I_raw = 0.62×CRE + 0.33×GEN + 0.05×OPS_long
 P_raw = 0.55×PLAN + 0.37×GEN + 0.08×OPS_precision
 ```
 
-PLAN's basket of TerminalBench / Tau2Bench / AAReasoning / MCPAtlas can
+PLAN's basket of TerminalBench / TauComposite / AAReasoning / MCPAtlas can
 favor any of the top-3 vendors depending on which gets a strong value
 in each.
 
@@ -330,11 +338,11 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 |------------|-----------|-----------|-----------|-------------------|--------|
 | LMArenaText | higher | no | percentile | LMArena | CRE, GEN |
 | LMArenaCreativeOrOpenEnded | higher | no | percentile | LMArena | CRE |
-| CopilotArenaOrLMArenaCode | higher | no | percentile | LMArena | BUILD |
+| CopilotArenaOrLMArenaCode | higher | no | percentile | LMArena | (input to LiveCodingComposite) |
 | LMArenaSearch | higher | no | percentile | LMArena search | LM_ARENA_REVIEW_PROXY |
 | LMArenaDocument | higher | no | percentile | LMArena document | LM_ARENA_REVIEW_PROXY |
 | ArtificialAnalysisIntelligence | higher | no | percentile | Artificial Analysis | GEN |
-| ArtificialAnalysisCoding | higher | no | percentile | Artificial Analysis | BUILD |
+| ArtificialAnalysisCoding | higher | no | percentile | Artificial Analysis | (input to LiveCodingComposite) |
 | ArtificialAnalysisReasoning | higher | no | percentile | Artificial Analysis (gpqa+hle blend) | PLAN |
 | LiveCodeBench | higher | no | percentile | LiveCodeBench JSON | (retired — see GSO) |
 | GSO | higher | no | percentile | gso-bench.github.io leaderboard JSON (`score_hack_control` field, `setting=Opt@1`) | BUILD |
@@ -354,15 +362,25 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | MCPMarkVerified | higher | no | percentile | overrides table (Moonshot Kimi K2.7 model card) | (reported only) |
 | ARC_AGI_2 | higher | no | percentile | ARC Prize (static JSON, v2 semi-private) | GEN, CRE |
 | TerminalBench | higher | no | percentile | Terminal-Bench HTML | PLAN, BUILD |
-| TerminalBench21 | higher | no | percentile | Terminal-Bench 2.1 HTML | PLAN, BUILD |
+| TerminalBench21 | higher | no | percentile | Terminal-Bench 2.1 HTML | (input to TerminalBench21Composite) |
+| AATerminalBench21 | higher | no | percentile | Artificial Analysis (`terminalbench_v2_1` field) | (input to TerminalBench21Composite) |
 | TerminalBenchHard | higher | no | percentile | Artificial Analysis (`terminalbench_hard` field) | PLAN, BUILD |
-| BFCL | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | PLAN, BUILD |
+| BFCL | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV overall score | (input to BFCLComposite) |
+| BFCLNonLiveAST | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLLive | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLMultiTurn | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLWebSearch | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLMemory | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLRelevanceDetection | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
+| BFCLIrrelevanceDetection | higher | no | percentile | Berkeley Function Calling Leaderboard V4 CSV | (input to BFCLComposite) |
 | HiLBench | higher | no | percentile | Scale HiL-Bench HTML | PLAN, BUILD |
-| Tau2Bench | higher | no | percentile | Artificial Analysis (tau2 field) | PLAN |
-| SciCode | higher | no | percentile | Artificial Analysis (scicode field) | BUILD |
-| AALiveCodeBench | higher | no | percentile | Artificial Analysis (livecodebench field) | BUILD |
+| Tau2Bench | higher | no | percentile | Artificial Analysis (tau2 field) | (input to TauComposite) |
+| TauBanking | higher | no | percentile | Artificial Analysis (`tau_banking` field) | (input to TauComposite) |
+| SciCode | higher | no | percentile | Artificial Analysis (scicode field) | (input to LiveCodingComposite) |
+| AALiveCodeBench | higher | no | percentile | Artificial Analysis (livecodebench field) | (input to LiveCodingComposite) |
 | IFBench | higher | no | percentile | Artificial Analysis (ifbench field) | PLAN |
 | ArtificialAnalysisMath | higher | no | percentile | Artificial Analysis math index | GEN |
+| AIME25 | higher | no | percentile | Artificial Analysis (`aime_25` field) | GEN |
 | MMLUPro | higher | no | percentile | Artificial Analysis (mmlu_pro field) | GEN |
 | GDPval | higher | no | percentile | overrides table (GDPval-AA Elo) | BUILD |
 | LongContextRecall | higher | no | percentile | Artificial Analysis (lcr field) | BUILD, PLAN |
