@@ -92,7 +92,7 @@ fn default_synthesis_penalty() -> f64 {
 }
 
 fn default_override_penalty() -> f64 {
-    0.10
+    0.0
 }
 
 impl Default for PenaltiesConfig {

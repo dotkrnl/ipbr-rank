@@ -309,9 +309,10 @@ trust_transition_width = 0.10
 # rather than a direct measurement. Same-series forward fills declared in
 # data/synthesis_aliases.toml use zero synthesis penalty.
 synthesis = 0.15
-# Manual overrides are public but hand-curated. Making them slightly
-# softer than a directly ingested leaderboard row (10% pull toward 50).
-override_reported = 0.10
+# Manual overrides are public, cited reported measurements. They stay out of
+# the direct-source normalization baseline, but no longer receive an additional
+# post-normalization pull toward 50.
+override_reported = 0.0
 
 [metrics.LMArenaText]
 higher_better = true

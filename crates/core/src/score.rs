@@ -91,9 +91,9 @@ fn normalize_population(
                     v
                 };
                 let final_value = if r.override_reported.contains(metric_key) {
-                    // Manual overrides are public but hand-curated. Keep
-                    // them strong, while making them slightly softer than a
-                    // directly ingested leaderboard row.
+                    // Manual overrides are public, cited reported values. The
+                    // configurable override penalty defaults to zero, but the
+                    // hook remains for coefficient experiments.
                     final_value * (1.0 - penalties.override_reported)
                         + 50.0 * penalties.override_reported
                 } else {
@@ -246,7 +246,7 @@ mod tests {
     }
 
     #[test]
-    fn override_reported_metric_values_are_pulled_toward_50() {
+    fn override_reported_metric_values_match_direct_normalized_values() {
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
             make_record(
@@ -275,8 +275,8 @@ mod tests {
         let reported = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(direct > 95.0, "direct={direct}");
         assert!(
-            (reported - 95.0).abs() < 0.5,
-            "override-reported score should get a 10% uncertainty pull toward 50, got {reported}"
+            (reported - direct).abs() < 1e-9,
+            "override-reported score should match the direct normalized value, got reported={reported}, direct={direct}"
         );
     }
 
