@@ -230,27 +230,25 @@ LMArenaSearch = 0.50
 LMArenaDocument = 0.50
 
 [group_weights.OPS_long]
-OutputSpeed = 0.55
-TTFT = 0.20
-BlendedCost = 0.10
-ContextWindow = 0.15
+OutputSpeed = 0.61
+TTFT = 0.22
+ContextWindow = 0.17
 
 [group_weights.OPS_precision]
-OutputSpeed = 0.30
-TTFT = 0.35
-BlendedCost = 0.20
-ContextWindow = 0.15
+OutputSpeed = 0.375
+TTFT = 0.4375
+ContextWindow = 0.1875
 
 [group_weights.OPS_review]
 # Reviewing big PRs is the most context-hungry of the four roles, yet
 # OPS_review previously weighted ContextWindow lower than OPS_long does.
 # TTFT was also overweighted at 0.40 — reviewers care more that the full
 # judgment lands than that the first token does. Rebalanced 2026-04 after
-# multi-agent review: OutputSpeed up, TTFT down, ContextWindow up.
-OutputSpeed = 0.30
-TTFT = 0.25
-BlendedCost = 0.20
-ContextWindow = 0.25
+# multi-agent review: OutputSpeed up, TTFT down, ContextWindow up. Price is
+# intentionally excluded from OPS role scoring as of 2026-07.
+OutputSpeed = 0.375
+TTFT = 0.3125
+ContextWindow = 0.3125
 
 # Role weights — capability scores. AISL was removed from active scoring
 # after local reproduction showed the benchmark surface was not
@@ -258,7 +256,7 @@ ContextWindow = 0.25
 # Its former 0.15 slot is redistributed into the non-operational public
 # benchmark groups for each role; OPS remains fixed at 0.08.
 #
-# Operational metrics (speed/cost/context/TTFT) carry weight 0.08, up from
+# Operational metrics (speed/context/TTFT) carry weight 0.08, up from
 # the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
 # population maps to 70..100, bottom 20 % to 0..70) means models in the
 # "fast enough" tier still cluster within a 2-point spread of each other
@@ -267,7 +265,7 @@ ContextWindow = 0.25
 # weight 0.08 a model on the slowest tail loses ~5 points relative to
 # the fast cluster, which finally makes "utterly slow" actually hurt
 # without warping rankings between models that are merely "average fast"
-# vs "very fast." Use the OPS_* groups directly for a pure speed/cost
+# vs "very fast." Use the OPS_* groups directly for a pure speed/context
 # view of the population.
 [final_score_weights.I_raw]
 # Idea generation is the least operationally sensitive role. Reduce the OPS
@@ -727,11 +725,11 @@ groups = ["GEN", "PLAN"]
 transform = "percentile"
 
 # Operational metrics use the `tail_penalty` transform: the top 80 % of
-# the population maps into 70-100 (most models look "fast/cheap enough"
+# the population maps into 70-100 (most models look "fast enough"
 # at a glance), only the bottom 20 % drops sharply. Linear/percentile
 # normalization made every spread between models matter equally, which
 # over-rewarded the very fastest models and over-punished moderately slow
-# ones. Users perceive operational speed/cost in tiers, not linearly.
+# ones. Users perceive operational speed in tiers, not linearly.
 [metrics.OutputSpeed]
 higher_better = true
 log_scale = true
@@ -747,7 +745,7 @@ transform = "tail_penalty"
 [metrics.BlendedCost]
 higher_better = false
 log_scale = true
-groups = ["OPS_long", "OPS_precision", "OPS_review"]
+groups = []
 transform = "tail_penalty"
 
 [metrics.ContextWindow]

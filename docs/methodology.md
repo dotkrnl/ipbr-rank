@@ -58,7 +58,7 @@ This is the default transform for nearly every metric — passthrough was retire
 
 ### 3.2 Tail-Penalty (`transform = "tail_penalty"`)
 
-Used for operational metrics (OutputSpeed, TTFT, BlendedCost, ContextWindow). Linear/percentile normalization scaled every speed difference equally — meaning a 30 % slower model looked 30 % worse, even though users perceive operational speed in tiers. The new curve squeezes the top 80 % of the population into a 70-100 band (mild differentiation) and stretches the bottom 20 % across 0-70 (sharp penalty for extremely slow models). Net effect: fast and "fast enough" models look similar; only models that are genuinely sluggish stand out.
+Used for scored operational metrics (OutputSpeed, TTFT, ContextWindow). Linear/percentile normalization scaled every speed difference equally — meaning a 30 % slower model looked 30 % worse, even though users perceive operational speed in tiers. The new curve squeezes the top 80 % of the population into a 70-100 band (mild differentiation) and stretches the bottom 20 % across 0-70 (sharp penalty for extremely slow models). Net effect: fast and "fast enough" models look similar; only models that are genuinely sluggish stand out. `BlendedCost` is still emitted for inspection, but it is no longer used in role scoring.
 
 ### 3.3 As-Score Passthrough (`transform = "as_score"`)
 
@@ -123,9 +123,9 @@ Metrics are grouped by domain. Each group is a weighted average of its member me
 | **PLAN** (Planning) | TerminalBench (0.120), TerminalBench21Composite (0.035), TerminalBenchHard (0.060), BFCLComposite (0.060), HiLBench (0.040), Toolathlon (0.035), OSWorldVerified (0.030), HLETools (0.025), BrowseComp (0.020), TauComposite (0.145), ArtificialAnalysisReasoning (0.160), IFBench (0.100), LongContextRecall (0.075), MCPAtlas (0.095) |
 | **BUILD** (Building) | SWEComposite (0.290), SWEAtlasComposite (0.140), LiveCodingComposite (0.140), MCPAtlas (0.060), TerminalBench (0.045), TerminalBench21Composite (0.025), TerminalBenchHard (0.040), BFCLComposite (0.025), HiLBench (0.015), Toolathlon (0.015), OSWorldVerified (0.010), GSO (0.035), GDPval (0.045), SonarComposite (0.090), LongContextRecall (0.025) |
 | **LM_ARENA_REVIEW_PROXY** (Reviewing proxy) | LMArenaSearch (0.50), LMArenaDocument (0.50) |
-| **OPS_long** (Ops for long generation) | OutputSpeed (0.55), TTFT (0.20), BlendedCost (0.10), ContextWindow (0.15) |
-| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.30), TTFT (0.35), BlendedCost (0.20), ContextWindow (0.15) |
-| **OPS_review** (Ops for reviewing) | OutputSpeed (0.30), TTFT (0.25), BlendedCost (0.20), ContextWindow (0.25) |
+| **OPS_long** (Ops for long generation) | OutputSpeed (0.61), TTFT (0.22), ContextWindow (0.17) |
+| **OPS_precision** (Ops for precise tasks) | OutputSpeed (0.375), TTFT (0.4375), ContextWindow (0.1875) |
+| **OPS_review** (Ops for reviewing) | OutputSpeed (0.375), TTFT (0.3125), ContextWindow (0.3125) |
 
 AISL's former `A_*` perspective groups were removed from active scoring on
 2026-05-21. We reproduced the benchmark locally and found the tasks not
@@ -271,8 +271,9 @@ score sits in a ~30-point band, so weight 0.08 produces only a 1-2
 point spread in the role score (the small-penalty regime); on the
 slowest tail the OPS group score collapses below 50 and the same 0.08
 weight delivers a 4-6 point penalty (the "great penalty" regime).
-Inspect the `OPS_*` groups directly for a pure speed/cost view of the
-population.
+Inspect the `OPS_*` groups directly for a pure speed/context view of the
+population. `BlendedCost` remains visible as a metric but no longer
+contributes to these groups or the final role scores.
 
 **Verification**: For each role, the weights sum to 1.0 (within floating-point epsilon).
 
@@ -391,7 +392,7 @@ The CLI accepts `--coefficients path/to/file.toml` to override the embedded coef
 | SonarVulnerabilityDensity | **lower** | no | percentile | Sonar code-quality JSON | (input to SonarComposite) |
 | OutputSpeed | higher | **yes** | tail_penalty | Artificial Analysis | OPS_* |
 | TTFT | **lower** | **yes** | tail_penalty | Artificial Analysis | OPS_* |
-| BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | OPS_* |
+| BlendedCost | **lower** | **yes** | tail_penalty | Artificial Analysis / OpenRouter | emitted, not scored |
 | ContextWindow | higher | **yes** | tail_penalty | OpenRouter | OPS_* |
 
 ---

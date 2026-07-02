@@ -126,22 +126,22 @@ aliases = ["Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
 sources = ["artificial_analysis", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 78.732494
-p_raw = 84.649061
-b_raw = 82.750450
-r = 81.771867
-i_adj = 78.732494
-p_adj = 84.649061
-b_adj = 82.750450
+i_raw = 79.099040
+p_raw = 85.751076
+b_raw = 83.852464
+r = 82.958689
+i_adj = 79.099040
+p_adj = 85.751076
+b_adj = 83.852464
 
 [models.groups]
 BUILD = 85.208619
 CRE = 73.252823
 GEN = 91.126553
 LM_ARENA_REVIEW_PROXY = 80.680397
-OPS_long = 64.879632
-OPS_precision = 55.100709
-OPS_review = 59.341114
+OPS_long = 72.210552
+OPS_precision = 68.875887
+OPS_review = 74.176392
 PLAN = 84.589418
 
 [models.metrics]
@@ -206,22 +206,22 @@ aliases = ["Claude 4.5 Haiku", "Claude 4.5 Haiku (Non-reasoning)", "Claude 4.5 H
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 15.943651
-p_raw = 24.239831
-b_raw = 38.452503
-r = 26.826508
-i_adj = 15.943651
-p_adj = 24.239831
-b_adj = 38.452503
+i_raw = 15.901042
+p_raw = 24.101822
+b_raw = 38.314494
+r = 26.536745
+i_adj = 15.901042
+p_adj = 24.101822
+b_adj = 38.314494
 
 [models.groups]
 BUILD = 37.036222
 CRE = 9.333174
 GEN = 19.731932
 LM_ARENA_REVIEW_PROXY = 12.900952
-OPS_long = 72.910910
-OPS_precision = 71.356927
-OPS_review = 63.769215
+OPS_long = 72.058736
+OPS_precision = 69.631812
+OPS_review = 60.147172
 PLAN = 20.419022
 
 [models.metrics]
@@ -289,22 +289,22 @@ aliases = ["Claude 4.5 Opus", "Claude 4.5 Opus (high reasoning)", "Claude 4.5 Op
 sources = ["artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.493556
-p_raw = 65.477589
-b_raw = 69.600459
-r = 61.558228
-i_adj = 63.493556
-p_adj = 65.477589
-b_adj = 69.600459
+i_raw = 63.718012
+p_raw = 66.240375
+b_raw = 70.363245
+r = 62.173699
+i_adj = 63.718012
+p_adj = 66.240375
+b_adj = 70.363245
 
 [models.groups]
 BUILD = 71.567795
 CRE = 61.216577
 GEN = 68.630335
 LM_ARENA_REVIEW_PROXY = 49.507415
-OPS_long = 57.825360
-OPS_precision = 53.435698
-OPS_review = 46.069973
+OPS_long = 62.314471
+OPS_precision = 62.970518
+OPS_review = 53.763362
 PLAN = 65.108199
 
 [models.metrics]
@@ -379,22 +379,22 @@ aliases = ["Claude Opus 4.6 (120K, High)", "Claude Opus 4.6 (120K, Low)", "Claud
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 91.574812
-p_raw = 74.667093
-b_raw = 73.454020
-r = 78.423673
-i_adj = 91.574812
-p_adj = 74.667093
-b_adj = 73.454020
+i_raw = 91.843011
+p_raw = 75.602641
+b_raw = 74.389568
+r = 79.395228
+i_adj = 91.843011
+p_adj = 75.602641
+b_adj = 74.389568
 
 [models.groups]
 BUILD = 74.866163
 CRE = 97.757492
 GEN = 84.317539
 LM_ARENA_REVIEW_PROXY = 100.000000
-OPS_long = 62.807568
-OPS_precision = 62.073810
-OPS_review = 63.874130
+OPS_long = 68.171567
+OPS_precision = 73.768158
+OPS_review = 76.018558
 PLAN = 70.006725
 
 [models.metrics]
@@ -457,22 +457,22 @@ aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 95.748957
-p_raw = 81.740793
-b_raw = 77.675555
-r = 81.444539
-i_adj = 95.748957
-p_adj = 81.740793
-b_adj = 77.675555
+i_raw = 96.012300
+p_raw = 82.664027
+b_raw = 78.598789
+r = 82.404819
+i_adj = 96.012300
+p_adj = 82.664027
+b_adj = 78.598789
 
 [models.groups]
 BUILD = 79.303239
 CRE = 99.692526
 GEN = 93.467177
 LM_ARENA_REVIEW_PROXY = 96.787498
-OPS_long = 61.908441
-OPS_precision = 61.458085
-OPS_review = 63.310413
+OPS_long = 67.175299
+OPS_precision = 72.998502
+OPS_review = 75.313912
 PLAN = 76.802348
 
 [models.metrics]
@@ -534,22 +534,22 @@ aliases = ["Opus 4.8 (Claude Code)", "Opus 4.8 (Claude Code) xHigh", "Opus 4.8 C
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 85.642476
-p_raw = 84.957112
-b_raw = 84.077599
-r = 82.171935
-i_adj = 85.642476
-p_adj = 84.957112
-b_adj = 84.077599
+i_raw = 85.955939
+p_raw = 85.957635
+b_raw = 85.078122
+r = 83.218685
+i_adj = 85.955939
+p_adj = 85.957635
+b_adj = 85.078122
 
 [models.groups]
 BUILD = 86.103743
 CRE = 82.237570
 GEN = 94.254986
 LM_ARENA_REVIEW_PROXY = 83.196209
-OPS_long = 71.020732
-OPS_precision = 65.322574
-OPS_review = 67.633935
+OPS_long = 77.290005
+OPS_precision = 77.829113
+OPS_review = 80.718314
 PLAN = 81.558111
 
 [models.metrics]
@@ -618,22 +618,22 @@ aliases = ["Claude 4 Sonnet (20250514)", "anthropic/claude-sonnet-4", "claude 4 
 sources = ["arc_agi", "artificial_analysis", "gso", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 11.039127
-p_raw = 30.211086
-b_raw = 42.734796
-r = 37.135117
-i_adj = 11.039127
-p_adj = 30.211086
-b_adj = 42.734796
+i_raw = 11.131074
+p_raw = 30.549030
+b_raw = 43.072740
+r = 37.506730
+i_adj = 11.131074
+p_adj = 30.549030
+b_adj = 43.072740
 
 [models.groups]
 BUILD = 40.982929
 CRE = 0.588163
 GEN = 21.280964
 LM_ARENA_REVIEW_PROXY = 31.408870
-OPS_long = 73.034955
-OPS_precision = 74.017395
-OPS_review = 75.700845
+OPS_long = 74.873906
+OPS_precision = 78.241692
+OPS_review = 80.346005
 PLAN = 29.846796
 
 [models.metrics]
@@ -701,22 +701,22 @@ aliases = ["Claude 4.5 Sonnet (20250929)", "anthropic/claude-sonnet-4.5", "claud
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 45.976347
-p_raw = 45.483008
-b_raw = 52.085012
-r = 43.321700
-i_adj = 45.976347
-p_adj = 45.483008
-b_adj = 52.085012
+i_raw = 46.046947
+p_raw = 45.777955
+b_raw = 52.379959
+r = 43.650436
+i_adj = 46.046947
+p_adj = 45.777955
+b_adj = 52.379959
 
 [models.groups]
 BUILD = 51.267302
 CRE = 43.773693
 GEN = 46.608030
 LM_ARENA_REVIEW_PROXY = 28.128082
-OPS_long = 69.120152
-OPS_precision = 71.867556
-OPS_review = 73.557022
+OPS_long = 70.532144
+OPS_precision = 75.554393
+OPS_review = 77.666226
 PLAN = 40.888422
 
 [models.metrics]
@@ -783,22 +783,22 @@ aliases = ["anthropic/claude-sonnet-4.6", "claude sonnet 4.6", "claude-sonnet-4-
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 73.012252
-p_raw = 63.093944
-b_raw = 62.251009
-r = 66.010760
-i_adj = 73.012252
-p_adj = 63.093944
-b_adj = 62.251009
+i_raw = 73.070492
+p_raw = 63.054367
+b_raw = 62.211432
+r = 66.128895
+i_adj = 73.070492
+p_adj = 63.054367
+b_adj = 62.211432
 
 [models.groups]
 BUILD = 63.362906
 CRE = 73.677102
 GEN = 72.852638
 LM_ARENA_REVIEW_PROXY = 82.691121
-OPS_long = 65.821568
-OPS_precision = 55.141353
-OPS_review = 63.026922
+OPS_long = 66.986370
+OPS_precision = 54.646640
+OPS_review = 64.503601
 PLAN = 57.685746
 
 [models.metrics]
@@ -868,22 +868,22 @@ aliases = ["Claude Sonnet 5 (Adaptive Reasoning, High Effort)", "Claude Sonnet 5
 sources = ["overrides"]
 
 [models.scores]
-i_raw = 68.578641
-p_raw = 57.560995
-b_raw = 66.878208
-r = 66.959665
-i_adj = 68.578641
-p_adj = 57.560995
-b_adj = 66.878208
+i_raw = 68.589864
+p_raw = 57.587543
+b_raw = 66.904756
+r = 67.079861
+i_adj = 68.589864
+p_adj = 57.587543
+b_adj = 66.904756
 
 [models.groups]
 BUILD = 68.709436
 CRE = 74.248319
 GEN = 59.569405
 LM_ARENA_REVIEW_PROXY = 82.691121
-OPS_long = 57.735582
-OPS_precision = 58.447602
-OPS_review = 63.129976
+OPS_long = 57.960036
+OPS_precision = 58.779452
+OPS_review = 64.632419
 PLAN = 56.080921
 
 [models.metrics]
@@ -935,22 +935,22 @@ aliases = ["DeepSeek V3.2", "DeepSeek V3.2 (high reasoning)", "DeepSeek V3.2 Rea
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "sonar", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 35.195771
-p_raw = 43.715948
-b_raw = 45.983225
-r = 46.279303
-i_adj = 35.195771
-p_adj = 43.715948
-b_adj = 45.983225
+i_raw = 34.914556
+p_raw = 42.826060
+b_raw = 45.093337
+r = 45.289415
+i_adj = 34.914556
+p_adj = 42.826060
+b_adj = 45.093337
 
 [models.groups]
 BUILD = 45.599037
 CRE = 31.047266
 GEN = 41.182580
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 47.124300
-OPS_precision = 51.748600
-OPS_review = 46.748600
+OPS_long = 41.500000
+OPS_precision = 40.625000
+OPS_review = 34.375000
 PLAN = 44.251828
 
 [models.metrics]
@@ -1017,22 +1017,22 @@ aliases = ["deepseek chat", "deepseek v4 flash", "deepseek-chat", "deepseek-v4-f
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 46.698925
-p_raw = 59.201226
-b_raw = 57.789620
-r = 58.426638
-i_adj = 46.698925
-p_adj = 59.201226
-b_adj = 57.789620
+i_raw = 46.645557
+p_raw = 59.087791
+b_raw = 57.676186
+r = 58.310640
+i_adj = 46.645557
+p_adj = 59.087791
+b_adj = 57.676186
 
 [models.groups]
 BUILD = 54.125762
 CRE = 40.984525
 GEN = 50.832855
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 90.273562
-OPS_precision = 94.328278
-OPS_review = 94.200110
+OPS_long = 89.206194
+OPS_precision = 92.910348
+OPS_review = 92.750138
 PLAN = 59.721467
 
 [models.metrics]
@@ -1083,22 +1083,22 @@ aliases = ["deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 67.717354
-p_raw = 72.152171
-b_raw = 66.269141
-r = 65.328676
-i_adj = 67.717354
-p_adj = 72.152171
-b_adj = 66.269141
+i_raw = 67.681033
+p_raw = 72.133786
+b_raw = 66.250755
+r = 65.308108
+i_adj = 67.681033
+p_adj = 72.133786
+b_adj = 66.250755
 
 [models.groups]
 BUILD = 63.597844
 CRE = 65.783664
 GEN = 69.048983
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 82.906361
-OPS_precision = 88.763286
-OPS_review = 88.654129
+OPS_long = 82.179942
+OPS_precision = 88.533468
+OPS_review = 88.397023
 PLAN = 71.823608
 
 [models.metrics]
@@ -1148,22 +1148,22 @@ aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 28.471264
-p_raw = 21.060749
-b_raw = 28.402145
-r = 28.653382
-i_adj = 28.471264
-p_adj = 21.060749
-b_adj = 28.402145
+i_raw = 28.513657
+p_raw = 21.123929
+b_raw = 28.465325
+r = 28.754129
+i_adj = 28.513657
+p_adj = 21.123929
+b_adj = 28.465325
 
 [models.groups]
 BUILD = 24.028350
 CRE = 29.280183
 GEN = 17.171117
 LM_ARENA_REVIEW_PROXY = 36.698312
-OPS_long = 93.021644
-OPS_precision = 88.922534
-OPS_review = 90.800908
+OPS_long = 93.869501
+OPS_precision = 89.712279
+OPS_review = 92.060247
 PLAN = 13.806606
 
 [models.metrics]
@@ -1234,22 +1234,22 @@ aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 54.587367
-p_raw = 37.817032
-b_raw = 41.952146
-r = 31.727477
-i_adj = 54.587367
-p_adj = 37.817032
-b_adj = 41.952146
+i_raw = 54.659146
+p_raw = 37.997966
+b_raw = 42.133081
+r = 31.951803
+i_adj = 54.659146
+p_adj = 37.997966
+b_adj = 42.133081
 
 [models.groups]
 BUILD = 39.149423
 CRE = 60.568928
 GEN = 38.605084
 LM_ARENA_REVIEW_PROXY = 7.599989
-OPS_long = 85.899075
-OPS_precision = 82.553054
-OPS_review = 84.722647
+OPS_long = 87.334657
+OPS_precision = 84.814735
+OPS_review = 87.526727
 PLAN = 30.779830
 
 [models.metrics]
@@ -1318,22 +1318,22 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 63.225169
-p_raw = 65.457434
-b_raw = 53.897205
-r = 53.554724
-i_adj = 63.225169
-p_adj = 65.457434
-b_adj = 53.897205
+i_raw = 63.282498
+p_raw = 65.596504
+b_raw = 54.036275
+r = 53.718856
+i_adj = 63.282498
+p_adj = 65.596504
+b_adj = 54.036275
 
 [models.groups]
 BUILD = 49.747984
 CRE = 59.015458
 GEN = 66.567798
 LM_ARENA_REVIEW_PROXY = 34.350955
-OPS_long = 93.364228
-OPS_precision = 90.258147
-OPS_review = 91.511220
+OPS_long = 94.510802
+OPS_precision = 91.996519
+OPS_review = 93.562860
 PLAN = 61.103086
 
 [models.metrics]
@@ -1396,22 +1396,22 @@ aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-groundi
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 80.495027
-p_raw = 71.863854
-b_raw = 64.128637
-r = 62.205037
-i_adj = 80.495027
-p_adj = 71.863854
-b_adj = 64.128637
+i_raw = 80.389309
+p_raw = 71.525556
+b_raw = 63.790339
+r = 61.866739
+i_adj = 80.389309
+p_adj = 71.525556
+b_adj = 63.790339
 
 [models.groups]
 BUILD = 64.303804
 CRE = 85.605788
 GEN = 75.193090
 LM_ARENA_REVIEW_PROXY = 47.146814
-OPS_long = 52.114366
-OPS_precision = 54.228732
-OPS_review = 54.228732
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
 PLAN = 72.189295
 
 [models.metrics]
@@ -1477,22 +1477,22 @@ aliases = ["Gemini 3.1 Flash-Lite High", "gemini 3.1 flash lite", "gemini flash 
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "sonar"]
 
 [models.scores]
-i_raw = 46.678206
-p_raw = 42.886764
-b_raw = 50.491238
-r = 44.513661
-i_adj = 46.678206
-p_adj = 42.886764
-b_adj = 50.491238
+i_raw = 46.714926
+p_raw = 42.950862
+b_raw = 50.555336
+r = 44.601729
+i_adj = 46.714926
+p_adj = 42.950862
+b_adj = 50.555336
 
 [models.groups]
 BUILD = 47.787339
 CRE = 45.627653
 GEN = 41.212765
 LM_ARENA_REVIEW_PROXY = 36.698312
-OPS_long = 95.776975
-OPS_precision = 92.590073
-OPS_review = 93.788584
+OPS_long = 96.511383
+OPS_precision = 93.391301
+OPS_review = 94.889440
 PLAN = 36.783336
 
 [models.metrics]
@@ -1557,22 +1557,22 @@ aliases = ["gemini 3.1 pro", "gemini pro 3.1", "gemini-3-1-pro", "gemini-3-1-pro
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 97.361548
-p_raw = 90.073023
-b_raw = 72.447693
-r = 74.284198
-i_adj = 97.361548
-p_adj = 90.073023
-b_adj = 72.447693
+i_raw = 97.442271
+p_raw = 90.280423
+b_raw = 72.655092
+r = 74.537237
+i_adj = 97.442271
+p_adj = 90.280423
+b_adj = 72.655092
 
 [models.groups]
 BUILD = 70.055323
 CRE = 100.000000
 GEN = 94.259570
 LM_ARENA_REVIEW_PROXY = 54.535561
-OPS_long = 85.117804
-OPS_precision = 81.513644
-OPS_review = 83.795608
+OPS_long = 86.732248
+OPS_precision = 84.106140
+OPS_review = 86.958595
 PLAN = 88.501619
 
 [models.metrics]
@@ -1642,22 +1642,22 @@ aliases = ["gemini 3.5 flash", "gemini flash 3.5", "gemini-3-5-flash", "gemini-3
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 95.275294
-p_raw = 83.614414
-b_raw = 68.088828
-r = 64.113942
-i_adj = 95.275294
-p_adj = 83.614414
-b_adj = 68.088828
+i_raw = 95.373373
+p_raw = 83.865498
+b_raw = 68.339913
+r = 64.401011
+i_adj = 95.373373
+p_adj = 83.865498
+b_adj = 68.339913
 
 [models.groups]
 BUILD = 65.452218
 CRE = 97.404552
 GEN = 91.930825
 LM_ARENA_REVIEW_PROXY = 34.350955
-OPS_long = 90.946001
-OPS_precision = 86.221541
-OPS_review = 88.020785
+OPS_long = 92.907571
+OPS_precision = 89.360103
+OPS_review = 91.609158
 PLAN = 77.640518
 
 [models.metrics]
@@ -1779,22 +1779,22 @@ aliases = ["MiniMax M2.5", "MiniMax-M2.5", "minimax 2.5", "minimax m2.5", "minim
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 14.661948
-p_raw = 45.714232
-b_raw = 50.068053
-r = 48.404842
-i_adj = 14.661948
-p_adj = 45.714232
-b_adj = 50.068053
+i_raw = 14.583807
+p_raw = 45.420905
+b_raw = 49.774727
+r = 47.967110
+i_adj = 14.583807
+p_adj = 45.420905
+b_adj = 49.774727
 
 [models.groups]
 BUILD = 47.256994
 CRE = 0.295721
 GEN = 31.431029
 LM_ARENA_REVIEW_PROXY = 39.080289
-OPS_long = 82.127228
-OPS_precision = 79.199948
-OPS_review = 71.979682
+OPS_long = 80.564400
+OPS_precision = 75.533364
+OPS_review = 66.508032
 PLAN = 50.452282
 
 [models.metrics]
@@ -1857,22 +1857,22 @@ aliases = ["MiniMax M2.7", "MiniMax M2.7 Highspeed", "MiniMax-M2.7", "minimax 2.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 30.717437
-p_raw = 54.243053
-b_raw = 55.622891
-r = 51.373114
-i_adj = 30.717437
-p_adj = 54.243053
-b_adj = 55.622891
+i_raw = 30.585132
+p_raw = 53.920768
+b_raw = 55.300607
+r = 50.881761
+i_adj = 30.585132
+p_adj = 53.920768
+b_adj = 55.300607
 
 [models.groups]
 BUILD = 53.916023
 CRE = 17.540262
 GEN = 49.613270
 LM_ARENA_REVIEW_PROXY = 39.080289
-OPS_long = 69.401901
-OPS_precision = 74.800427
-OPS_review = 66.346959
+OPS_long = 66.755797
+OPS_precision = 70.771872
+OPS_review = 60.205038
 PLAN = 54.367470
 
 [models.metrics]
@@ -1935,22 +1935,22 @@ aliases = ["MiniMax M3", "MiniMax-M3", "minimax m3", "minimax-m3", "minimax/mini
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 57.727727
-p_raw = 70.806425
-b_raw = 62.049616
-r = 61.092927
-i_adj = 57.727727
-p_adj = 70.806425
-b_adj = 62.049616
+i_raw = 57.556822
+p_raw = 70.482015
+b_raw = 61.725206
+r = 60.780338
+i_adj = 57.556822
+p_adj = 70.482015
+b_adj = 61.725206
 
 [models.groups]
 BUILD = 60.006493
 CRE = 51.822958
 GEN = 68.715308
 LM_ARENA_REVIEW_PROXY = 41.859851
-OPS_long = 58.428837
-OPS_precision = 73.769892
-OPS_review = 74.360914
+OPS_long = 55.010732
+OPS_precision = 69.714768
+OPS_review = 70.453545
 PLAN = 71.782127
 
 [models.metrics]
@@ -2013,22 +2013,22 @@ aliases = ["kimi k2 0905", "kimi k2 turbo", "kimi-k2-0905", "kimi-k2-0905-previe
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 5.335610
-p_raw = 24.610928
-b_raw = 42.175009
-r = 39.828736
-i_adj = 5.335610
-p_adj = 24.610928
-b_adj = 42.175009
+i_raw = 5.072207
+p_raw = 24.121321
+b_raw = 41.685402
+r = 39.265054
+i_adj = 5.072207
+p_adj = 24.121321
+b_adj = 41.685402
 
 [models.groups]
 BUILD = 41.808972
 CRE = 0.000000
 GEN = 10.647099
 LM_ARENA_REVIEW_PROXY = 49.015526
-OPS_long = 36.441351
-OPS_precision = 59.223125
-OPS_review = 55.519352
+OPS_long = 31.173296
+OPS_precision = 53.103039
+OPS_review = 48.473322
 PLAN = 28.970275
 
 [models.metrics]
@@ -2086,22 +2086,22 @@ aliases = ["kimi 2.5", "kimi k2.5", "kimi-k2-5", "kimi-k2-5-non-reasoning", "kim
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 54.083837
-p_raw = 56.361126
-b_raw = 50.239655
-r = 49.422082
-i_adj = 54.083837
-p_adj = 56.361126
-b_adj = 50.239655
+i_raw = 53.897355
+p_raw = 56.013180
+b_raw = 49.891709
+r = 48.998044
+i_adj = 53.897355
+p_adj = 56.013180
+b_adj = 49.891709
 
 [models.groups]
 BUILD = 47.958721
 CRE = 53.518294
 GEN = 55.238078
 LM_ARENA_REVIEW_PROXY = 37.153281
-OPS_long = 53.478571
-OPS_precision = 69.176550
-OPS_review = 65.371958
+OPS_long = 49.748935
+OPS_precision = 64.827217
+OPS_review = 60.071477
 PLAN = 55.252570
 
 [models.metrics]
@@ -2164,22 +2164,22 @@ aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "kimi
 sources = ["artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 72.567930
-p_raw = 71.880081
-b_raw = 66.364250
-r = 64.014858
-i_adj = 72.567930
-p_adj = 71.880081
-b_adj = 66.364250
+i_raw = 72.505040
+p_raw = 71.816946
+b_raw = 66.301116
+r = 63.872459
+i_adj = 72.505040
+p_adj = 71.816946
+b_adj = 66.301116
 
 [models.groups]
 BUILD = 64.748218
 CRE = 73.292959
 GEN = 71.423372
 LM_ARENA_REVIEW_PROXY = 48.841795
-OPS_long = 71.131646
-OPS_precision = 78.467709
-OPS_review = 74.504497
+OPS_long = 69.873855
+OPS_precision = 77.678530
+OPS_review = 72.724515
 PLAN = 71.229121
 
 [models.metrics]
@@ -2238,22 +2238,22 @@ aliases = ["kimi 2.7", "kimi 2.7 code", "kimi k2.7", "kimi k2.7 code", "kimi-k2-
 sources = ["overrides"]
 
 [models.scores]
-i_raw = 72.557915
-p_raw = 73.144460
-b_raw = 67.816654
-r = 65.325911
-i_adj = 72.557915
-p_adj = 73.144460
-b_adj = 67.816654
+i_raw = 72.505040
+p_raw = 73.113375
+b_raw = 67.785569
+r = 65.215561
+i_adj = 72.505040
+p_adj = 73.113375
+b_adj = 67.785569
 
 [models.groups]
 BUILD = 66.290935
 CRE = 73.292959
 GEN = 71.423372
 LM_ARENA_REVIEW_PROXY = 48.841795
-OPS_long = 70.931338
-OPS_precision = 78.067094
-OPS_review = 74.103882
+OPS_long = 69.873855
+OPS_precision = 77.678530
+OPS_review = 72.724515
 PLAN = 73.586263
 
 [models.metrics]
@@ -2312,22 +2312,22 @@ aliases = ["gpt 5.2", "gpt-5-2", "gpt-5-2-2025-12-11", "gpt-5-2-high", "gpt-5-2-
 sources = ["arc_agi", "artificial_analysis", "bfcl", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 52.741882
-p_raw = 66.386457
-b_raw = 62.126258
-r = 56.087601
-i_adj = 52.741882
-p_adj = 66.386457
-b_adj = 62.126258
+i_raw = 52.709344
+p_raw = 66.024293
+b_raw = 61.764094
+r = 55.861330
+i_adj = 52.709344
+p_adj = 66.024293
+b_adj = 61.764094
 
 [models.groups]
 BUILD = 62.773464
 CRE = 41.931901
 GEN = 71.446002
 LM_ARENA_REVIEW_PROXY = 33.760211
-OPS_long = 63.338460
-OPS_precision = 52.446458
-OPS_review = 59.241142
+OPS_long = 62.687697
+OPS_precision = 47.919400
+OPS_review = 56.412755
 PLAN = 65.010400
 
 [models.metrics]
@@ -2402,22 +2402,22 @@ aliases = ["GPT 5.2 Codex", "GPT-5-2 Codex", "GPT-5.2 Codex High", "GPT-5.2 Code
 sources = ["artificial_analysis", "lmarena", "openrouter", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 54.305885
-p_raw = 67.836114
-b_raw = 61.414618
-r = 63.469399
-i_adj = 54.305885
-p_adj = 67.836114
-b_adj = 61.414618
+i_raw = 54.386597
+p_raw = 68.114487
+b_raw = 61.692991
+r = 63.718051
+i_adj = 54.386597
+p_adj = 68.114487
+b_adj = 61.692991
 
 [models.groups]
 BUILD = 58.186257
 CRE = 50.000000
 GEN = 57.672209
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 85.481113
-OPS_precision = 84.473335
-OPS_review = 82.987274
+OPS_long = 87.095354
+OPS_precision = 87.952996
+OPS_review = 86.095420
 PLAN = 72.253691
 
 [models.metrics]
@@ -2463,22 +2463,22 @@ aliases = ["gpt 5.3 codex", "gpt codex 5.3", "gpt-5-3-codex", "gpt-5.3-codex", "
 sources = ["artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 70.770431
-p_raw = 74.739718
-b_raw = 75.567825
-r = 71.762742
-i_adj = 70.770431
-p_adj = 74.739718
-b_adj = 75.567825
+i_raw = 70.781965
+p_raw = 74.637733
+b_raw = 75.465840
+r = 71.727837
+i_adj = 70.781965
+p_adj = 74.637733
+b_adj = 75.465840
 
 [models.groups]
 BUILD = 76.567491
 CRE = 67.842064
 GEN = 76.087138
 LM_ARENA_REVIEW_PROXY = 61.934415
-OPS_long = 71.991910
-OPS_precision = 65.455446
-OPS_review = 68.809444
+OPS_long = 72.222603
+OPS_precision = 64.180635
+OPS_review = 68.373133
 PLAN = 75.183711
 
 [models.metrics]
@@ -2540,22 +2540,22 @@ aliases = ["GPT 5.4 (Codex) xHigh", "GPT-5.4 (Codex CLI) xHigh", "GPT-5.4 (Codex
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 88.872849
-p_raw = 77.874409
-b_raw = 78.273402
-r = 72.593950
-i_adj = 88.872849
-p_adj = 77.874409
-b_adj = 78.273402
+i_raw = 88.905574
+p_raw = 77.663279
+b_raw = 78.062272
+r = 72.578507
+i_adj = 88.905574
+p_adj = 77.663279
+b_adj = 78.062272
 
 [models.groups]
 BUILD = 81.200880
 CRE = 90.464853
 GEN = 89.319729
 LM_ARENA_REVIEW_PROXY = 64.040488
-OPS_long = 66.182588
-OPS_precision = 51.847765
-OPS_review = 61.632169
+OPS_long = 66.837100
+OPS_precision = 49.208634
+OPS_review = 61.439139
 PLAN = 73.960524
 
 [models.metrics]
@@ -2615,22 +2615,22 @@ aliases = ["GPT-5.4 Mini (High)", "GPT-5.4 Mini (Low)", "GPT-5.4 Mini (Medium)",
 sources = ["arc_agi", "artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar"]
 
 [models.scores]
-i_raw = 39.271619
-p_raw = 56.690515
-b_raw = 70.611035
-r = 64.515702
-i_adj = 39.271619
-p_adj = 56.690515
-b_adj = 70.611035
+i_raw = 39.314538
+p_raw = 56.780095
+b_raw = 70.700615
+r = 64.598780
+i_adj = 39.314538
+p_adj = 56.780095
+b_adj = 70.700615
 
 [models.groups]
 BUILD = 70.561158
 CRE = 29.918789
 GEN = 49.505171
 LM_ARENA_REVIEW_PROXY = 61.934415
-OPS_long = 87.705263
-OPS_precision = 84.226768
-OPS_review = 83.901692
+OPS_long = 88.563649
+OPS_precision = 85.346511
+OPS_review = 84.940166
 PLAN = 57.519019
 
 [models.metrics]
@@ -2693,22 +2693,22 @@ aliases = ["GPT 5.5 (Codex) xHigh", "GPT-5.5 (Codex) xHigh", "gpt 5.5", "gpt-5-5
 sources = ["arc_agi", "artificial_analysis", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 90.122497
-p_raw = 89.153518
-b_raw = 88.160419
-r = 88.689637
-i_adj = 90.122497
-p_adj = 89.153518
-b_adj = 88.160419
+i_raw = 90.487892
+p_raw = 90.359152
+b_raw = 89.366053
+r = 89.926593
+i_adj = 90.487892
+p_adj = 90.359152
+b_adj = 89.366053
 
 [models.groups]
 BUILD = 90.219023
 CRE = 89.218061
 GEN = 94.742630
 LM_ARENA_REVIEW_PROXY = 93.572544
-OPS_long = 70.844616
-OPS_precision = 65.934642
-OPS_review = 67.500721
+OPS_long = 78.152529
+OPS_precision = 81.005067
+OPS_review = 82.962665
 PLAN = 88.770861
 
 [models.metrics]
@@ -2776,22 +2776,22 @@ aliases = ["Qwen/Qwen3.5-397B-A17B", "Qwen3.5 397B A17B", "Qwen3.5-397B-A17B", "
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench"]
 
 [models.scores]
-i_raw = 50.699773
-p_raw = 61.056455
-b_raw = 63.017107
-r = 61.205291
-i_adj = 50.699773
-p_adj = 61.056455
-b_adj = 63.017107
+i_raw = 50.636050
+p_raw = 60.943694
+b_raw = 62.904346
+r = 61.023186
+i_adj = 50.636050
+p_adj = 60.943694
+b_adj = 62.904346
 
 [models.groups]
 BUILD = 61.187767
 CRE = 48.838026
 GEN = 50.542979
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 74.820274
-OPS_precision = 79.846173
-OPS_review = 76.378975
+OPS_long = 73.545809
+OPS_precision = 78.436656
+OPS_review = 74.102659
 PLAN = 65.396107
 
 [models.metrics]
@@ -2848,22 +2848,22 @@ aliases = ["Qwen3.6-Max-Preview", "alibaba/qwen3.6-max-preview", "qwen 3.6 max p
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 55.493643
-p_raw = 66.682802
-b_raw = 65.905653
-r = 63.093724
-i_adj = 55.493643
-p_adj = 66.682802
-b_adj = 65.905653
+i_raw = 55.311871
+p_raw = 66.382512
+b_raw = 65.605363
+r = 62.725313
+i_adj = 55.311871
+p_adj = 66.382512
+b_adj = 65.605363
 
 [models.groups]
 BUILD = 65.844857
 CRE = 52.963425
 GEN = 61.925155
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 44.420361
-OPS_precision = 61.865586
-OPS_review = 58.459534
+OPS_long = 40.784931
+OPS_precision = 58.111957
+OPS_review = 53.854391
 PLAN = 70.584087
 
 [models.metrics]
@@ -2920,22 +2920,22 @@ aliases = ["Qwen3.6-Plus", "alibaba/qwen3.6-plus", "qwen 3.6 plus", "qwen/qwen3.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 51.637008
-p_raw = 65.597600
-b_raw = 67.967284
-r = 64.589139
-i_adj = 51.637008
-p_adj = 65.597600
-b_adj = 67.967284
+i_raw = 51.605369
+p_raw = 65.584411
+b_raw = 67.954095
+r = 64.579291
+i_adj = 51.605369
+p_adj = 65.584411
+b_adj = 67.954095
 
 [models.groups]
 BUILD = 66.173399
 CRE = 46.402334
 GEN = 57.008807
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 81.093083
-OPS_precision = 86.424164
-OPS_review = 86.591229
+OPS_long = 80.460317
+OPS_precision = 86.259300
+OPS_review = 86.468131
 PLAN = 68.346197
 
 [models.metrics]
@@ -2989,22 +2989,22 @@ aliases = ["Qwen3.7 Max", "Qwen3.7-Max", "alibaba/qwen3.7-max", "qwen 3.7 max", 
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 77.382026
-p_raw = 80.804863
-b_raw = 75.547659
-r = 71.757544
-i_adj = 77.382026
-p_adj = 80.804863
-b_adj = 75.547659
+i_raw = 77.456494
+p_raw = 81.054639
+b_raw = 75.797435
+r = 72.010185
+i_adj = 77.456494
+p_adj = 81.054639
+b_adj = 75.797435
 
 [models.groups]
 BUILD = 73.570700
 CRE = 75.369547
 GEN = 78.925145
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 92.152172
-OPS_precision = 91.312345
-OPS_review = 91.455576
+OPS_long = 93.641536
+OPS_precision = 94.434546
+OPS_review = 94.613585
 PLAN = 80.541040
 
 [models.metrics]
@@ -3059,22 +3059,22 @@ aliases = ["Qwen3.7 Plus", "Qwen3.7-Plus", "alibaba/qwen3.7-plus", "qwen 3.7 plu
 sources = ["artificial_analysis", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 54.359846
-p_raw = 71.178270
-b_raw = 71.316972
-r = 67.370325
-i_adj = 54.359846
-p_adj = 71.178270
-b_adj = 71.316972
+i_raw = 54.320146
+p_raw = 71.145412
+b_raw = 71.284114
+r = 67.337708
+i_adj = 54.320146
+p_adj = 71.145412
+b_adj = 71.284114
 
 [models.groups]
 BUILD = 69.645728
 CRE = 46.402334
 GEN = 65.189814
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 81.555204
-OPS_precision = 87.323542
-OPS_review = 87.335591
+OPS_long = 80.761209
+OPS_precision = 86.912816
+OPS_review = 86.927877
 PLAN = 72.858464
 
 [models.metrics]
@@ -3129,22 +3129,22 @@ aliases = ["grok 4", "grok 4 latest", "grok-4", "grok-4-0709", "grok-4-latest", 
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 33.858094
-p_raw = 42.243365
-b_raw = 42.048477
-r = 37.079446
-i_adj = 33.858094
-p_adj = 42.243365
-b_adj = 42.048477
+i_raw = 34.070629
+p_raw = 42.923479
+b_raw = 42.728591
+r = 37.759560
+i_adj = 34.070629
+p_adj = 42.923479
+b_adj = 42.728591
 
 [models.groups]
 BUILD = 42.284120
 CRE = 26.673551
 GEN = 45.554630
 LM_ARENA_REVIEW_PROXY = 25.000000
-OPS_long = 45.749291
-OPS_precision = 41.498581
-OPS_review = 41.498581
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
 PLAN = 40.124119
 
 [models.metrics]
@@ -3198,22 +3198,22 @@ aliases = ["Grok 4.20 (Reasoning)", "Grok 4.20 Reasoning", "grok 4.20", "grok-4-
 sources = ["arc_agi", "artificial_analysis", "hil_bench", "lmarena", "openrouter", "terminal_bench"]
 
 [models.scores]
-i_raw = 73.584196
-p_raw = 67.277409
-b_raw = 50.753914
-r = 50.253190
-i_adj = 73.584196
-p_adj = 67.277409
-b_adj = 50.753914
+i_raw = 73.644890
+p_raw = 67.399826
+b_raw = 50.876332
+r = 50.422180
+i_adj = 73.644890
+p_adj = 67.399826
+b_adj = 50.876332
 
 [models.groups]
 BUILD = 46.329937
 CRE = 73.129335
 GEN = 71.824908
 LM_ARENA_REVIEW_PROXY = 25.478833
-OPS_long = 90.835765
-OPS_precision = 86.543790
-OPS_review = 88.872453
+OPS_long = 92.049645
+OPS_precision = 88.074008
+OPS_review = 90.984836
 PLAN = 61.415799
 
 [models.metrics]
@@ -3273,22 +3273,22 @@ aliases = ["grok 4.3", "grok-4-3", "grok-4-3-high", "grok-4-3-low", "grok-4-3-no
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 40.638184
-p_raw = 63.744235
-b_raw = 49.772687
-r = 55.102425
-i_adj = 40.638184
-p_adj = 63.744235
-b_adj = 49.772687
+i_raw = 40.695267
+p_raw = 63.877904
+b_raw = 49.906356
+r = 55.267655
+i_adj = 40.695267
+p_adj = 63.877904
+b_adj = 49.906356
 
 [models.groups]
 BUILD = 45.235674
 CRE = 24.118229
 GEN = 64.143304
 LM_ARENA_REVIEW_PROXY = 48.239291
-OPS_long = 90.351822
-OPS_precision = 87.106371
-OPS_review = 88.684418
+OPS_long = 91.493487
+OPS_precision = 88.777234
+OPS_review = 90.749793
 PLAN = 60.077641
 
 [models.metrics]
@@ -3346,22 +3346,22 @@ aliases = ["grok code fast 1", "grok-code-fast", "grok-code-fast-1", "x-ai/grok-
 sources = ["artificial_analysis", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 23.701141
-p_raw = 16.717694
-b_raw = 29.369434
-r = 26.164521
-i_adj = 23.701141
-p_adj = 16.717694
-b_adj = 29.369434
+i_raw = 23.881796
+p_raw = 17.295790
+b_raw = 29.947530
+r = 26.742617
+i_adj = 23.881796
+p_adj = 17.295790
+b_adj = 29.947530
 
 [models.groups]
 BUILD = 29.106933
 CRE = 30.172518
 GEN = 8.105559
 LM_ARENA_REVIEW_PROXY = 28.750000
-OPS_long = 46.386897
-OPS_precision = 42.773794
-OPS_review = 42.773794
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
 PLAN = 18.721333
 
 [models.metrics]
@@ -3417,22 +3417,22 @@ aliases = ["MiMo-V2.5", "XiaomiMiMo/MiMo-V2.5", "mimo v2.5", "mimo-v2-5", "mimo-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 44.123269
-p_raw = 55.632461
-b_raw = 56.885308
-r = 53.887506
-i_adj = 44.123269
-p_adj = 55.632461
-b_adj = 56.885308
+i_raw = 44.051148
+p_raw = 55.447675
+b_raw = 56.700522
+r = 53.714588
+i_adj = 44.051148
+p_adj = 55.447675
+b_adj = 56.700522
 
 [models.groups]
 BUILD = 53.788845
 CRE = 38.800667
 GEN = 47.727317
 LM_ARENA_REVIEW_PROXY = 39.080289
-OPS_long = 86.336815
-OPS_precision = 90.388430
-OPS_review = 90.981856
+OPS_long = 84.894389
+OPS_precision = 88.078599
+OPS_review = 88.820382
 PLAN = 55.895054
 
 [models.metrics]
@@ -3495,22 +3495,22 @@ aliases = ["MiMo-V2.5-Pro", "XiaomiMiMo/MiMo-V2.5-Pro", "mimo v2.5 pro", "mimo-v
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 65.626741
-p_raw = 67.554542
-b_raw = 60.788970
-r = 59.062622
-i_adj = 65.626741
-p_adj = 67.554542
-b_adj = 60.788970
+i_raw = 65.495099
+p_raw = 67.312769
+b_raw = 60.547197
+r = 58.831764
+i_adj = 65.495099
+p_adj = 67.312769
+b_adj = 60.547197
 
 [models.groups]
 BUILD = 58.437986
 CRE = 66.662667
 GEN = 63.726687
 LM_ARENA_REVIEW_PROXY = 39.080289
-OPS_long = 65.321619
-OPS_precision = 77.593898
-OPS_review = 78.139640
+OPS_long = 62.688772
+OPS_precision = 74.571733
+OPS_review = 75.253911
 PLAN = 68.669375
 
 [models.metrics]
@@ -3573,22 +3573,22 @@ aliases = ["GLM-4.6 (T=1)", "glm 4.6", "glm-4-6", "glm-4.6", "glm-4.6-t-1", "glm
 sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 49.112414
-p_raw = 25.334477
-b_raw = 26.938296
-r = 30.863835
-i_adj = 49.112414
-p_adj = 25.334477
-b_adj = 26.938296
+i_raw = 48.977820
+p_raw = 25.032744
+b_raw = 26.636562
+r = 30.388210
+i_adj = 48.977820
+p_adj = 25.032744
+b_adj = 26.636562
 
 [models.groups]
 BUILD = 23.619251
 CRE = 59.270694
 GEN = 27.643327
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 64.845728
-OPS_precision = 71.687576
-OPS_review = 62.992984
+OPS_long = 62.153845
+OPS_precision = 67.915910
+OPS_review = 57.047671
 PLAN = 17.038982
 
 [models.metrics]
@@ -3655,22 +3655,22 @@ aliases = ["glm 4.7", "glm-4-7", "glm-4.7", "glm-4p7", "z-ai/glm-4.7", "zai/glm-
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 54.430174
-p_raw = 48.582172
-b_raw = 45.227939
-r = 46.526131
-i_adj = 54.430174
-p_adj = 48.582172
-b_adj = 45.227939
+i_raw = 54.337715
+p_raw = 48.384095
+b_raw = 45.029862
+r = 46.145844
+i_adj = 54.337715
+p_adj = 48.384095
+b_adj = 45.029862
 
 [models.groups]
 BUILD = 42.417892
 CRE = 54.807231
 GEN = 50.926570
 LM_ARENA_REVIEW_PROXY = 50.000000
-OPS_long = 72.878460
-OPS_precision = 77.105133
-OPS_review = 67.994648
+OPS_long = 71.029281
+OPS_precision = 74.629176
+OPS_review = 63.241069
 PLAN = 42.856237
 
 [models.metrics]
@@ -3728,22 +3728,22 @@ aliases = ["glm 5", "glm-5", "glm-5-20260211", "glm-5-non-reasoning", "glm-5-thi
 sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 53.145023
-p_raw = 56.720530
-b_raw = 61.086218
-r = 56.603162
-i_adj = 53.145023
-p_adj = 56.720530
-b_adj = 61.086218
+i_raw = 53.061153
+p_raw = 56.550493
+b_raw = 60.916181
+r = 56.251453
+i_adj = 53.061153
+p_adj = 56.550493
+b_adj = 60.916181
 
 [models.groups]
 BUILD = 60.038318
 CRE = 51.949771
 GEN = 52.476233
 LM_ARENA_REVIEW_PROXY = 49.015526
-OPS_long = 72.380163
-OPS_precision = 76.472636
-OPS_review = 67.389040
+OPS_long = 70.702753
+OPS_precision = 74.347170
+OPS_review = 62.992674
 PLAN = 56.702751
 
 [models.metrics]
@@ -3805,22 +3805,22 @@ aliases = ["glm 5.1", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "glm-5p1", 
 sources = ["artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "swerebench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 79.489300
-p_raw = 65.473266
-b_raw = 67.640198
-r = 61.537288
-i_adj = 79.489300
-p_adj = 65.473266
-b_adj = 67.640198
+i_raw = 79.425932
+p_raw = 65.370501
+b_raw = 67.537434
+r = 61.252479
+i_adj = 79.425932
+p_adj = 65.370501
+b_adj = 67.537434
 
 [models.groups]
 BUILD = 67.187913
 CRE = 87.895909
 GEN = 64.852679
 LM_ARENA_REVIEW_PROXY = 49.015526
-OPS_long = 71.849043
-OPS_precision = 75.613597
-OPS_review = 66.511375
+OPS_long = 70.581686
+OPS_precision = 74.329038
+OPS_review = 62.951261
 PLAN = 64.415795
 
 [models.metrics]
@@ -3875,22 +3875,22 @@ aliases = ["glm 5.2", "glm 5.2 max", "glm-5-2", "glm-5-2-1m", "glm-5-2-non-reaso
 sources = ["overrides"]
 
 [models.scores]
-i_raw = 79.473655
-p_raw = 66.417133
-b_raw = 68.858320
-r = 62.561855
-i_adj = 79.473655
-p_adj = 66.417133
-b_adj = 68.858320
+i_raw = 79.425932
+p_raw = 66.364430
+b_raw = 68.805617
+r = 62.327107
+i_adj = 79.425932
+p_adj = 66.364430
+b_adj = 68.805617
 
 [models.groups]
 BUILD = 68.525547
 CRE = 87.895909
 GEN = 64.852679
 LM_ARENA_REVIEW_PROXY = 49.015526
-OPS_long = 71.536157
-OPS_precision = 74.987824
-OPS_review = 65.885603
+OPS_long = 70.581686
+OPS_precision = 74.329038
+OPS_review = 62.951261
 PLAN = 66.222938
 
 [models.metrics]

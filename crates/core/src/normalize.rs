@@ -66,7 +66,7 @@ pub fn robust_norm(
     Some(score)
 }
 
-/// Tail-penalty curve for operational metrics like speed/cost. The top
+/// Tail-penalty curve for operational metrics like speed/latency. The top
 /// 80 % of the population maps to 70..100 (mild penalty), the bottom 20 %
 /// maps to 0..70 (sharp penalty). Operates in the same percentile-linear
 /// space as `robust_norm` (so log-scale + p20/p80 boundaries) but bends
