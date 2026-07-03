@@ -35,7 +35,7 @@ impl Source for ArtificialAnalysisSource {
     }
 
     fn cache_ttl(&self) -> Duration {
-        Duration::from_secs(24 * 3600)
+        Duration::from_secs(10 * 60)
     }
 
     async fn fetch(

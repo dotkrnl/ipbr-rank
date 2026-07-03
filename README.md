@@ -202,7 +202,8 @@ cache regardless of mtime.
 
 | source | TTL | rationale |
 |---|---|---|
-| openrouter, lmarena, artificial_analysis | 24h | daily refresh |
+| artificial_analysis | 10m | high-churn live model/perf payload |
+| openrouter, lmarena | 24h | daily refresh |
 | livecodebench, gso | 2d | weekly-ish leaderboard refreshes |
 | swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |
 

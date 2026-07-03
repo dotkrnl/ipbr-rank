@@ -38,6 +38,11 @@ jobs:
           restore-keys: |
             upstream-cache-
 
+      - name: Invalidate high-churn source cache on demand
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          rm -f cache/artificial_analysis_llms.json
+
       - name: Build CLI
         run: cargo build --release -p ipbr-rank-cli
 
