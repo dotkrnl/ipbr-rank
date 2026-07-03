@@ -7,8 +7,10 @@
 # the binding list until a real sibling exists in required_aliases data.
 #
 # category = "same_series_forward" means same vendor + same product line,
-# with the target newer than the donor. These fills carry zero synthesis
-# penalty after normalization. category = "conservative" covers cross-vendor,
+# with the target newer than the donor. category = "stronger_successor" is
+# for documented stronger targets that borrow stale older-board rows from a
+# weaker donor. Both carry zero synthesis penalty after normalization.
+# category = "conservative" covers weaker, uncertain, cross-vendor,
 # cross-series, or older-target-from-newer-donor fills; those keep the
 # configured 15% pull toward 50.
 
@@ -136,12 +138,13 @@ category = "same_series_forward"
 
 # Fable 5 has direct OpenRouter/AA/LMArena/Terminal/MCP/SWE-Atlas rows and
 # official GDPval/Toolathlon overrides. Use Opus 4.8 only for older public
-# leaderboards that have not listed Fable yet; this is cross-family, so keep
-# the conservative pull.
+# leaderboards that have not listed Fable yet. Fable is documented as the
+# stronger public successor, so inherited Opus 4.8 rows should not be pulled
+# down; the category still records why this is not a same-series fill.
 [[pair]]
 target = "anthropic/claude-fable-5"
 from = "anthropic/claude-opus-4.8"
-category = "conservative"
+category = "stronger_successor"
 
 # Sonnet 5 is the direct successor to Sonnet 4.6. Anthropic reports it as a
 # substantial agentic upgrade and direct rows/overrides cover the major new

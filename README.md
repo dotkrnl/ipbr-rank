@@ -100,10 +100,10 @@ Each benchmark metric is **percentile-normalized** within the active model popul
 ### Synthesis Penalty
 Values that came in via conservative sibling synthesis are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Same-vendor, same-series version-advance fills carry no synthesis penalty. Synthesized metrics still contribute; the category in `data/synthesis_aliases.toml` controls whether they are discounted.
 
-Manual overrides from `data/score_overrides.toml` are also softened after
-normalization, but less aggressively: `final = score × 0.90 + 50 × 0.10`.
-They are public, cited values, yet still hand-curated rather than directly
-ingested leaderboard rows.
+Documented stronger successors that borrow stale older-leaderboard rows from
+weaker donors also carry no synthesis penalty. Manual overrides from
+`data/score_overrides.toml` are public, cited reported measurements; they are
+not pulled toward 50.
 
 ### Group Aggregation
 Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, and **OPS_review**. Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator blends smoothly from shrink-to-50 to trusting the present-weight mean across **60-80 %** group coverage; at **≥80 %** coverage, peripheral missing metrics no longer penalize otherwise well-covered models.
@@ -113,13 +113,13 @@ Each role score is a weighted average of groups. AISL was removed from
 scoring after local reproduction showed its benchmark surface was not
 representative enough and was too noise-prone. Its former weight is
 redistributed into the remaining non-operational public benchmark groups.
-Operational metrics (speed, cost, context window) carry 0.08 — paired
-with the tail-penalty curve, this means "fast enough" models cluster
+Operational metrics (speed, TTFT, context window) carry a small role weight;
+paired with the tail-penalty curve, this means "fast enough" models cluster
 within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.62×CRE + 0.30×GEN + 0.08×OPS_long
+- **I_raw** = 0.62×CRE + 0.33×GEN + 0.05×OPS_long
 - **P_raw** = 0.55×PLAN + 0.37×GEN + 0.08×OPS_precision
 - **B_raw** = 0.84×BUILD + 0.08×PLAN + 0.08×OPS_precision
-- **R** = 0.18×LM_ARENA_REVIEW_PROXY + 0.36×BUILD + 0.38×PLAN + 0.08×OPS_review
+- **R** = 0.25×LM_ARENA_REVIEW_PROXY + 0.29×BUILD + 0.38×PLAN + 0.08×OPS_review
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 

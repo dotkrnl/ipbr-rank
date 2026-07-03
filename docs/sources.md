@@ -215,8 +215,10 @@ After per-metric normalization, conservative fields that came in via synthesis
 are pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
 §3.4) so they read as a softer signal than direct measurements. Same-vendor,
 same-series version-advance fills are marked `category = "same_series_forward"`
-in `data/synthesis_aliases.toml` and carry no synthesis penalty. Cross-vendor,
-cross-series, and older-target-from-newer-donor fills remain
+in `data/synthesis_aliases.toml` and carry no synthesis penalty. Documented
+stronger targets borrowing stale older-board rows from weaker donors can use
+`category = "stronger_successor"`, also with no synthesis penalty. Cross-vendor,
+cross-series, weaker, uncertain, and older-target-from-newer-donor fills remain
 `category = "conservative"`.
 
 Active pairs (target ← donor; see `data/synthesis_aliases.toml` for the

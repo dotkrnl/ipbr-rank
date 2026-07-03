@@ -246,6 +246,46 @@ mod tests {
     }
 
     #[test]
+    fn stronger_successor_synthesized_metric_values_are_not_penalized() {
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "l/low",
+                Vendor::Other("l".into()),
+                &[("TerminalBench", 0.0)],
+            ),
+            make_record(
+                "d/direct",
+                Vendor::Other("d".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+            make_record(
+                "s/synth",
+                Vendor::Other("s".into()),
+                &[("TerminalBench", 100.0)],
+            ),
+        ];
+        records[2].synthesized.insert(
+            "TerminalBench".to_string(),
+            SynthesisProvenance {
+                source_id: "terminal_bench".to_string(),
+                from: "d/direct".to_string(),
+                category: SynthesisCategory::StrongerSuccessor,
+            },
+        );
+        compute_scores_with(&mut records, &coef);
+
+        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
+        assert!(direct > 95.0, "direct={direct}");
+        assert!(
+            (synth - direct).abs() < 1e-9,
+            "stronger-successor synthesis should match direct normalized value, got synth={synth}, direct={direct}"
+        );
+    }
+
+    #[test]
     fn override_reported_metric_values_match_direct_normalized_values() {
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![

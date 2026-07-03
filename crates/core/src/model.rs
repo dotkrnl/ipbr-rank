@@ -29,19 +29,23 @@ pub enum SynthesisCategory {
     #[default]
     Conservative,
     SameSeriesForward,
+    StrongerSuccessor,
 }
 
 impl SynthesisCategory {
     pub fn penalty(self, conservative_penalty: f64) -> f64 {
         match self {
             Self::Conservative => conservative_penalty,
-            Self::SameSeriesForward => 0.0,
+            Self::SameSeriesForward | Self::StrongerSuccessor => 0.0,
         }
     }
 
     pub fn chain(self, next: Self) -> Self {
         if matches!(self, Self::Conservative) || matches!(next, Self::Conservative) {
             Self::Conservative
+        } else if matches!(self, Self::StrongerSuccessor) || matches!(next, Self::StrongerSuccessor)
+        {
+            Self::StrongerSuccessor
         } else {
             Self::SameSeriesForward
         }

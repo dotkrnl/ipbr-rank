@@ -86,11 +86,14 @@ This reflects genuine uncertainty about whether a sibling's score transfers
 cleanly. `data/synthesis_aliases.toml` can also mark a pair as
 `category = "same_series_forward"` when the donor is the same vendor and
 same product line, and the target is a newer version. Those version-advance
-fills carry no synthesis pull after normalization. Cross-vendor, cross-series,
+fills carry no synthesis pull after normalization. A pair can also use
+`category = "stronger_successor"` when the target is documented as stronger
+than the donor but is missing from an older public leaderboard; those fills
+also carry no synthesis pull. Cross-vendor, cross-series, weaker, uncertain,
 and older-target-from-newer-donor fills remain `category = "conservative"` and
 keep the 15% penalty. Conservative provenance is sticky through chained
-synthesis, so a cross-series donor does not become zero-penalty just because a
-later hop is same-series-forward.
+synthesis, so a conservative donor does not become zero-penalty just because a
+later hop is same-series-forward or stronger-successor.
 
 ### 3.5 Manual Overrides
 

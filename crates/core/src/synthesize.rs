@@ -39,6 +39,15 @@ impl SynthesisPair {
             sources: Vec::new(),
         }
     }
+
+    pub fn stronger_successor(target: impl Into<String>, from: impl Into<String>) -> Self {
+        Self {
+            target: target.into(),
+            from: from.into(),
+            category: SynthesisCategory::StrongerSuccessor,
+            sources: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -504,6 +513,58 @@ mod tests {
             synth_55.synthesis_category,
             Some(SynthesisCategory::Conservative),
             "a conservative donor row should remain conservative through a same-series forward hop"
+        );
+    }
+
+    #[test]
+    fn synthesize_chains_preserve_stronger_successor_category_without_conservative_hop() {
+        let records = vec![
+            record(
+                "anthropic/claude-fable-5",
+                "claude-fable-5",
+                &["claude-fable-5"],
+            ),
+            record(
+                "anthropic/claude-opus-4.8",
+                "claude-opus-4.8",
+                &["claude-opus-4.8"],
+            ),
+            record(
+                "anthropic/claude-opus-4.7",
+                "claude-opus-4.7",
+                &["claude-opus-4.7"],
+            ),
+        ];
+        let mut rows = rows_by_source(vec![raw(
+            "swerebench",
+            "claude-opus-4.7",
+            None,
+            &[("SWERebench", json!(72.0))],
+        )]);
+
+        synthesize_rows(
+            &mut rows,
+            &[
+                SynthesisPair::same_series_forward(
+                    "anthropic/claude-opus-4.8",
+                    "anthropic/claude-opus-4.7",
+                ),
+                SynthesisPair::stronger_successor(
+                    "anthropic/claude-fable-5",
+                    "anthropic/claude-opus-4.8",
+                ),
+            ],
+            &records,
+            &cfg(0.90, 0.90),
+        );
+
+        let synth_fable = rows["swerebench"]
+            .iter()
+            .find(|row| row.model_name == "claude-fable-5")
+            .expect("chained synthesized Fable row should exist");
+        assert_eq!(
+            synth_fable.synthesis_category,
+            Some(SynthesisCategory::StrongerSuccessor)
         );
     }
 
