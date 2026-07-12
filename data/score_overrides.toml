@@ -208,18 +208,6 @@ value = 63.5
 note = "Z.ai GLM-5.1 Hugging Face model card, Terminal-Bench 2.0 (Terminus-2), https://huggingface.co/zai-org/GLM-5.1, accessed 2026-05-22"
 
 [[entries]]
-canonical_id = "anthropic/claude-opus-4.8"
-metric = "TerminalBench"
-value = 74.6
-note = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.3, Terminal-Bench 2.1 with Terminus-2 public harness, high effort, 5 attempts over 89 tasks, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
-
-[[entries]]
-canonical_id = "minimax/minimax-m3"
-metric = "TerminalBench"
-value = 66.0
-note = "MiniMax M3 launch report, Terminal-Bench 2.1, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
-
-[[entries]]
 canonical_id = "qwen/qwen3.7-plus"
 metric = "TerminalBench"
 value = 70.3
@@ -228,6 +216,12 @@ note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, Terminal Bench 2.0-Term
 # ---------------------------------------------------------------------
 # Terminal-Bench 2.1 — vendor-reported figures not yet in tbench.ai rows.
 # ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "minimax/minimax-m3"
+metric = "TerminalBench21"
+value = 66.0
+note = "MiniMax M3 launch report, Terminal-Bench 2.1, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
 
 [[entries]]
 canonical_id = "z-ai/glm-5.2"

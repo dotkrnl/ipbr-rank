@@ -56,15 +56,10 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
         .unwrap();
     }
 
-    // Per-render dynamic scale: each radar maps its own [min - 10, max] of
-    // shown values to [0, RADIUS]. This keeps polygons distinguishable
-    // regardless of how clustered or spread the underlying scores are.
-    let scale = compute_scale(slices);
-
     // Polygons, one per slice. Drawn in supplied order so callers control
     // z-stacking (e.g. rank-1 last so it sits on top).
     for slice in slices {
-        let points = polygon_points(slice, scale);
+        let points = polygon_points(slice);
         let title = slice
             .label
             .map(|label| format!("<title>{}</title>", html_escape(label)))
@@ -98,47 +93,11 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
 
 const RADAR_RADIUS: f64 = 50.0;
 
-/// Minimum span between baseline and ceiling. Without this, a slice whose
-/// scores happen to be identical (e.g. a deterministic fixture) would yield
-/// a zero-width range and a degenerate polygon at the centre.
-const RADAR_MIN_RANGE: f64 = 10.0;
-
-#[derive(Clone, Copy, Debug)]
-struct RadarScale {
-    baseline: f64,
-    ceiling: f64,
-}
-
-/// Compute the [baseline, ceiling] window for a single render: take the
-/// data's min and max across every slice / axis, drop the baseline by 10
-/// so the lowest-scored vertex doesn't sit exactly at the centre, and
-/// guarantee a minimum span so the math doesn't divide by zero.
-fn compute_scale(slices: &[RadarSlice<'_>]) -> RadarScale {
-    let mut min_score = f64::INFINITY;
-    let mut max_score = f64::NEG_INFINITY;
-    for slice in slices {
-        for v in [slice.idea, slice.plan, slice.build, slice.review] {
-            min_score = min_score.min(v);
-            max_score = max_score.max(v);
-        }
-    }
-    if !min_score.is_finite() || !max_score.is_finite() {
-        return RadarScale {
-            baseline: 60.0,
-            ceiling: 100.0,
-        };
-    }
-    let baseline = (min_score - 10.0).clamp(0.0, 90.0);
-    let ceiling = max_score.max(baseline + RADAR_MIN_RANGE).min(100.0);
-    RadarScale { baseline, ceiling }
-}
-
-fn polygon_points(slice: &RadarSlice<'_>, scale: RadarScale) -> String {
-    let range = (scale.ceiling - scale.baseline).max(RADAR_MIN_RANGE);
-    let r = |score: f64| {
-        let clamped = score.clamp(scale.baseline, scale.ceiling);
-        ((clamped - scale.baseline) / range) * RADAR_RADIUS
-    };
+/// Use the same absolute 0-100 scale for every radar. A dynamic per-model or
+/// per-cohort scale exaggerates small differences and makes two polygons with
+/// the same geometry represent different scores.
+fn polygon_points(slice: &RadarSlice<'_>) -> String {
+    let r = |score: f64| score.clamp(0.0, 100.0) / 100.0 * RADAR_RADIUS;
     let (idea, plan, build, review) = (
         r(slice.idea),
         r(slice.plan),

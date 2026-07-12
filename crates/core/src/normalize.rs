@@ -1,4 +1,52 @@
 const EPS: f64 = 1e-12;
+const LOGISTIC_ANCHOR_LOG_ODDS: f64 = 2.944_438_979_166_440_3; // ln(19)
+
+/// Normalize against fixed raw-unit anchors with an asymptotic logistic
+/// curve. Numerically lower/higher anchors map to 5/95 for higher-is-better
+/// metrics and 95/5 for lower-is-better metrics. Unlike winsorized min/max,
+/// values beyond the anchors continue moving toward (but do not abruptly
+/// clip at) 0 or 100.
+pub fn anchored_logistic_norm(
+    value: f64,
+    anchor_low: f64,
+    anchor_high: f64,
+    higher_better: bool,
+    log_scale: bool,
+) -> Option<f64> {
+    if !value.is_finite() || !anchor_low.is_finite() || !anchor_high.is_finite() {
+        return None;
+    }
+
+    let map = |v: f64| {
+        if log_scale {
+            (v > 0.0).then(|| v.ln())
+        } else {
+            Some(v)
+        }
+    };
+    let value = map(value)?;
+    let low = map(anchor_low)?;
+    let high = map(anchor_high)?;
+    if high - low <= EPS {
+        return None;
+    }
+
+    let midpoint = (low + high) / 2.0;
+    let slope = 2.0 * LOGISTIC_ANCHOR_LOG_ODDS / (high - low);
+    let oriented = if higher_better {
+        slope * (value - midpoint)
+    } else {
+        -slope * (value - midpoint)
+    };
+    // Branching form avoids overflow for observations far outside anchors.
+    let unit = if oriented >= 0.0 {
+        1.0 / (1.0 + (-oriented).exp())
+    } else {
+        let e = oriented.exp();
+        e / (1.0 + e)
+    };
+    Some(100.0 * unit)
+}
 
 pub(crate) fn percentile_linear(sorted: &[f64], q: f64) -> f64 {
     debug_assert!(!sorted.is_empty());
@@ -203,6 +251,33 @@ mod tests {
         let pop: Vec<f64> = (0..=100).map(|i| i as f64).collect();
         approx(robust_norm(-50.0, &pop, true, false).unwrap(), 0.0);
         approx(robust_norm(200.0, &pop, true, false).unwrap(), 100.0);
+    }
+
+    #[test]
+    fn anchored_logistic_maps_anchors_without_clipping_tails() {
+        approx(
+            anchored_logistic_norm(10.0, 10.0, 90.0, true, false).unwrap(),
+            5.0,
+        );
+        approx(
+            anchored_logistic_norm(90.0, 10.0, 90.0, true, false).unwrap(),
+            95.0,
+        );
+        let beyond = anchored_logistic_norm(110.0, 10.0, 90.0, true, false).unwrap();
+        assert!(beyond > 95.0 && beyond < 100.0, "beyond={beyond}");
+    }
+
+    #[test]
+    fn anchored_logistic_respects_direction_and_log_space() {
+        approx(
+            anchored_logistic_norm(10.0, 10.0, 90.0, false, false).unwrap(),
+            95.0,
+        );
+        approx(
+            anchored_logistic_norm(100.0, 10.0, 1000.0, true, true).unwrap(),
+            50.0,
+        );
+        assert!(anchored_logistic_norm(0.0, 10.0, 1000.0, true, true).is_none());
     }
 
     #[test]

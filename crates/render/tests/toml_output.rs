@@ -2,8 +2,9 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use ipbr_core::{
-    Coefficients, ModelRecord, RawRow, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
-    ingest_rows_with_policy, load_embedded_pairs, required_aliases, synthesize_rows,
+    Coefficients, ModelRecord, RawRow, SourceSummary, SynthesisCategory, SynthesisProvenance,
+    ThinkingEffort, Vendor, compute_scores_with, ingest_rows_with_policy, load_embedded_pairs,
+    required_aliases, synthesize_rows,
 };
 use ipbr_render::{
     Scoreboard,
@@ -42,15 +43,79 @@ fn writes_valid_nested_scoreboard_toml() {
     assert!(rendered.contains("[models.scores]"));
     assert!(rendered.contains("[models.groups]"));
     assert!(rendered.contains("[models.metrics]"));
+    assert!(rendered.contains("[models.raw_metrics]"));
+    assert!(rendered.contains("[models.metric_evidence."));
+    assert!(rendered.contains("[models.evidence.groups."));
+    assert!(rendered.contains("[models.evidence.roles."));
     assert!(rendered.contains("[models.missing]"));
 
     let parsed: toml::Value = toml::from_str(&rendered).expect("rendered TOML should parse");
-    assert_eq!(parsed["schema_version"].as_str(), Some("1.1.0"));
+    assert_eq!(parsed["schema_version"].as_str(), Some("2.0.0"));
+    assert_eq!(parsed["methodology"].as_str(), Some("v2"));
+    assert_eq!(
+        parsed["configuration_policy"].as_str(),
+        Some("best_available_max_effort")
+    );
     assert_eq!(
         parsed["generated_at"].as_str(),
         Some("2026-01-01T00:00:00Z")
     );
     assert_eq!(parsed["models"].as_array().map(std::vec::Vec::len), Some(2));
+
+    let models = parsed["models"].as_array().unwrap();
+    let anthropic = models
+        .iter()
+        .find(|model| model["canonical_id"].as_str() == Some("anthropic/claude-opus-4.7"))
+        .unwrap();
+    assert_eq!(
+        anthropic["thinking_effort"].as_str(),
+        Some("best_available")
+    );
+    assert_eq!(
+        anthropic["scores"]["i_status"].as_str(),
+        Some("provisional")
+    );
+    assert!(anthropic["scores"].get("i_adj").is_none());
+    assert_eq!(
+        anthropic["raw_metrics"]["SWEBenchVerified"].as_float(),
+        Some(80.0)
+    );
+    assert_eq!(
+        anthropic["metric_evidence"]["SWEBenchVerified"]["class"].as_str(),
+        Some("reported")
+    );
+    assert_eq!(
+        anthropic["metric_evidence"]["SWEBenchVerified"]["citation"].as_str(),
+        Some("Anthropic system card")
+    );
+    assert_eq!(
+        anthropic["metric_evidence"]["TerminalBench"]["class"].as_str(),
+        Some("synthesized")
+    );
+    assert_eq!(
+        anthropic["metric_evidence"]["TerminalBench"]["donor"].as_str(),
+        Some("anthropic/claude-sonnet-5")
+    );
+    assert!(anthropic["evidence"]["groups"].as_table().is_some());
+    assert!(anthropic["evidence"]["roles"].as_table().is_some());
+    assert_eq!(
+        anthropic["missing"]["synthesis_dominant"].as_bool(),
+        Some(true)
+    );
+
+    let openai = models
+        .iter()
+        .find(|model| model["canonical_id"].as_str() == Some("openai/gpt-5.5"))
+        .unwrap();
+    assert_eq!(openai["thinking_effort"].as_str(), Some("high"));
+    assert_eq!(
+        openai["raw_metrics"]["TerminalBenchUncertainty"].as_float(),
+        Some(1.25)
+    );
+    assert_eq!(
+        openai["metric_evidence"]["TerminalBenchUncertainty"]["source"].as_str(),
+        Some("terminal_bench")
+    );
 }
 
 #[test]
@@ -72,6 +137,10 @@ fn renders_missing_and_coefficients_toml() {
             .as_table()
             .is_some_and(|models| models.contains_key("anthropic/claude-opus-4.7"))
     );
+    assert_eq!(
+        missing_value["models"]["anthropic/claude-opus-4.7"]["synthesis_dominant"].as_bool(),
+        Some(true)
+    );
 
     let coefficients_value: toml::Value =
         toml::from_str(&coefficients).expect("coefficients TOML should parse");
@@ -84,22 +153,24 @@ fn renders_missing_and_coefficients_toml() {
 }
 
 #[test]
-fn missing_output_marks_groups_shrunk_at_actual_threshold() {
+fn missing_output_uses_core_v2_missing_diagnostics() {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
     let mut model = ModelRecord::new(
         "test/model".to_string(),
         "Test Model".to_string(),
         Vendor::Other("test".to_string()),
     );
+    model.raw_metrics.insert("LMArenaText".to_string(), 1400.0);
     model
-        .metrics
-        .insert("LMArenaCreativeOrOpenEnded".to_string(), 80.0);
+        .metric_sources
+        .insert("LMArenaText".to_string(), "lmarena".to_string());
+    compute_scores_with(std::slice::from_mut(&mut model), &coefficients);
     let scoreboard = Scoreboard {
         models: vec![model],
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v1".to_string(),
+        methodology: "v2".to_string(),
         source_summary: BTreeMap::new(),
         prev_scores: None,
     };
@@ -115,49 +186,11 @@ fn missing_output_marks_groups_shrunk_at_actual_threshold() {
         .expect("groups_shrunk should be an array");
     assert!(
         groups.iter().any(|group| group.as_str() == Some("CRE")),
-        "CRE has only 65% coverage and should be marked shrunk: {missing}"
+        "core evidence marks the partially observed CRE group: {missing}"
     );
-}
-
-#[test]
-fn missing_output_uses_configured_transition_ceiling() {
-    let mut coefficients =
-        Coefficients::load_embedded().expect("embedded coefficients should parse");
-    coefficients.aggregation = Some(ipbr_core::coefficients::AggregationConfig {
-        trust_threshold: 0.50,
-        trust_transition_width: 0.10,
-    });
-    let mut model = ModelRecord::new(
-        "test/model".to_string(),
-        "Test Model".to_string(),
-        Vendor::Other("test".to_string()),
-    );
-    model
-        .metrics
-        .insert("LMArenaCreativeOrOpenEnded".to_string(), 80.0);
-    model.metrics.insert("LMArenaText".to_string(), 80.0);
-    let scoreboard = Scoreboard {
-        models: vec![model],
-        coefficients,
-        generated_at: "2026-01-01T00:00:00Z".to_string(),
-        generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v1".to_string(),
-        source_summary: BTreeMap::new(),
-        prev_scores: None,
-    };
-    let tmp = tempdir().expect("tempdir should be created");
-
-    write_missing(&scoreboard, tmp.path()).expect("missing output should render");
-
-    let missing = std::fs::read_to_string(tmp.path().join("missing.toml"))
-        .expect("missing.toml should exist");
-    let missing_value: toml::Value = toml::from_str(&missing).expect("missing TOML should parse");
-    let groups = missing_value["models"]["test/model"]["groups_shrunk"]
-        .as_array()
-        .expect("groups_shrunk should be an array");
-    assert!(
-        groups.iter().all(|group| group.as_str() != Some("CRE")),
-        "CRE has 80% coverage, above the configured 55% transition ceiling: {missing}"
+    assert_eq!(
+        missing_value["models"]["test/model"]["synthesis_dominant"].as_bool(),
+        Some(false)
     );
 }
 
@@ -200,7 +233,17 @@ fn sample_scoreboard() -> Scoreboard {
     model_b.sources.insert("openrouter".to_string());
     model_b
         .raw_metrics
-        .insert("AI_correctness".to_string(), 91.0);
+        .insert("LMArenaText".to_string(), 1450.0);
+    model_b
+        .metric_sources
+        .insert("LMArenaText".to_string(), "lmarena".to_string());
+    model_b
+        .raw_metrics
+        .insert("TerminalBenchUncertainty".to_string(), 1.25);
+    model_b.metric_sources.insert(
+        "TerminalBenchUncertainty".to_string(),
+        "terminal_bench".to_string(),
+    );
 
     let mut model_a = ModelRecord::new(
         "anthropic/claude-opus-4.7".to_string(),
@@ -212,17 +255,53 @@ fn sample_scoreboard() -> Scoreboard {
     model_a.sources.insert("lmarena".to_string());
     model_a
         .raw_metrics
-        .insert("AI_correctness".to_string(), 88.0);
+        .insert("LMArenaText".to_string(), 1400.0);
+    model_a
+        .metric_sources
+        .insert("LMArenaText".to_string(), "lmarena".to_string());
+    model_a
+        .raw_metrics
+        .insert("SWEBenchVerified".to_string(), 80.0);
+    model_a
+        .override_reported
+        .insert("SWEBenchVerified".to_string());
+    model_a
+        .metric_sources
+        .insert("SWEBenchVerified".to_string(), "overrides".to_string());
+    model_a.override_notes.insert(
+        "SWEBenchVerified".to_string(),
+        "Anthropic system card".to_string(),
+    );
+    model_a
+        .raw_metrics
+        .insert("TerminalBench".to_string(), 75.0);
+    model_a
+        .metric_sources
+        .insert("TerminalBench".to_string(), "terminal_bench".to_string());
+    model_a.synthesized.insert(
+        "TerminalBench".to_string(),
+        SynthesisProvenance {
+            source_id: "terminal_bench".to_string(),
+            from: "anthropic/claude-sonnet-5".to_string(),
+            category: SynthesisCategory::SameSeriesForward,
+        },
+    );
 
     let mut models = vec![model_b, model_a];
     compute_scores_with(&mut models, &coefficients);
+    models
+        .iter_mut()
+        .find(|model| model.canonical_id == "anthropic/claude-opus-4.7")
+        .unwrap()
+        .missing
+        .synthesis_dominant = true;
 
     Scoreboard {
         models,
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v1".to_string(),
+        methodology: "v2".to_string(),
         source_summary: BTreeMap::new(),
         prev_scores: None,
     }
@@ -272,7 +351,17 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
             .get(&source_id)
             .cloned()
             .unwrap_or_else(|| "verified".to_string());
-        let stats = ingest_rows_with_policy(&mut records, rows, &coefficients.effort_policy);
+        let (direct_rows, synthesized_rows): (Vec<_>, Vec<_>) = rows
+            .into_iter()
+            .partition(|row| row.synthesized_from.is_none());
+        let stats = ingest_rows_with_policy(&mut records, direct_rows, &coefficients.effort_policy);
+        if !synthesized_rows.is_empty() {
+            let _ = ingest_rows_with_policy(
+                &mut records,
+                synthesized_rows,
+                &coefficients.effort_policy,
+            );
+        }
         source_summary.insert(
             source_id,
             SourceSummary {
@@ -292,7 +381,7 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
         coefficients,
         generated_at: now.to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v1".to_string(),
+        methodology: "v2".to_string(),
         source_summary,
         prev_scores: None,
     })

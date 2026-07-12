@@ -7,9 +7,12 @@
 //! The site at <https://swe-rebench.com> renders in the browser with Next.js;
 //! the leaderboard payload is server-rendered into the HTML as a JSON-encoded
 //! React Server Component blob. We locate the `"items":[…]` array, unescape
-//! the embedded JSON, and pick out each model's resolved rate over its full
-//! observation window. We prefer the `tools` agent variant (agentic execution)
-//! and fall back to `text` if a model only ships in the non-agentic harness.
+//! the embedded JSON, and pick out each model's resolved rate over its latest
+//! full post-release observation window. This release-date check is important:
+//! the upstream payload also includes ranges that the site marks as potentially
+//! contaminated because their tasks predate the model. We prefer the `tools`
+//! agent variant (agentic execution) and fall back to `text` if a model only
+//! ships in the non-agentic harness.
 //!
 //! The HTML embedding is the most fragile part of this source — if the site
 //! switches to client-side hydration or renames the keys, we'll need to
@@ -95,7 +98,7 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
     })?;
 
     // Prefer the `tools` (agentic) variant per model, fall back to `text`.
-    let mut by_model: BTreeMap<String, (i32, f64)> = BTreeMap::new();
+    let mut by_model: BTreeMap<String, (i32, f64, Option<f64>)> = BTreeMap::new();
     for item in &items {
         let Some(name) = item.get("modelName").and_then(Value::as_str) else {
             continue;
@@ -109,17 +112,17 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
             "text" => 1,
             _ => 0,
         };
-        let Some(rate) = headline_rate(item) else {
+        let Some((rate, sem)) = headline_stats(item) else {
             continue;
         };
         by_model
             .entry(name.to_string())
             .and_modify(|slot| {
                 if priority > slot.0 {
-                    *slot = (priority, rate);
+                    *slot = (priority, rate, sem);
                 }
             })
-            .or_insert((priority, rate));
+            .or_insert((priority, rate, sem));
     }
 
     if by_model.is_empty() {
@@ -130,9 +133,14 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
 
     Ok(by_model
         .into_iter()
-        .map(|(model_name, (_, rate))| {
+        .map(|(model_name, (_, rate, sem))| {
             let mut fields = BTreeMap::new();
             fields.insert("SWERebench".to_string(), Value::from(rate));
+            if let Some(sem) = sem {
+                // Auxiliary, unscored standard error for the selected agent
+                // variant and task window.
+                fields.insert("SWERebenchSEM".to_string(), Value::from(sem));
+            }
             RawRow {
                 source_id: SOURCE_ID.to_string(),
                 model_name,
@@ -145,14 +153,49 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
         .collect())
 }
 
-fn headline_rate(item: &Value) -> Option<f64> {
-    let trt = item.get("taskRangeTimestamp")?;
-    let from = trt.get("from").and_then(Value::as_i64)?;
-    let to = trt.get("to").and_then(Value::as_i64)?;
-    let key = format!("{from}:{to}");
-    let stats = item.get("rangeStats")?.get(&key)?;
-    let rate = stats.get("resolvedRate").and_then(Value::as_f64)?;
-    if rate.is_finite() { Some(rate) } else { None }
+fn headline_stats(item: &Value) -> Option<(f64, Option<f64>)> {
+    let release = item
+        .get("release")?
+        .get("timestamp")
+        .and_then(Value::as_i64)?;
+    let ranges = item.get("rangeStats")?.as_object()?;
+
+    // The page's selected `taskRangeTimestamp` may begin before the model was
+    // released. The site flags such rows as potentially contaminated, but that
+    // warning is presentation metadata rather than part of the selected stats.
+    // Pick the most recent ending range and, among ranges ending together, the
+    // widest one that starts on or after release. If no such range exists, the
+    // model has no uncontaminated SWE-rebench observation yet and is omitted.
+    let mut best: Option<(i64, i64, f64, Option<f64>)> = None;
+    for (key, stats) in ranges {
+        let Some((from, to)) = key.split_once(':') else {
+            continue;
+        };
+        let (Ok(from), Ok(to)) = (from.parse::<i64>(), to.parse::<i64>()) else {
+            continue;
+        };
+        if from < release || to <= from {
+            continue;
+        }
+        let Some(rate) = stats.get("resolvedRate").and_then(Value::as_f64) else {
+            continue;
+        };
+        if !rate.is_finite() {
+            continue;
+        }
+        let sem = stats
+            .get("sem")
+            .and_then(Value::as_f64)
+            .filter(|sem| sem.is_finite() && *sem >= 0.0);
+        let replace = best.as_ref().is_none_or(|(best_from, best_to, _, _)| {
+            to > *best_to || (to == *best_to && from < *best_from)
+        });
+        if replace {
+            best = Some((from, to, rate, sem));
+        }
+    }
+
+    best.map(|(_, _, rate, sem)| (rate, sem))
 }
 
 /// Locates the JSON-array body of the embedded `"items":[…]` payload. The
@@ -241,6 +284,49 @@ mod tests {
         assert_eq!(by.len(), 2);
         assert_eq!(by["Claude Opus 4.7"], &Value::from(61.5));
         assert_eq!(by["GLM-5.1"], &Value::from(33.3));
+
+        let opus = rows
+            .iter()
+            .find(|row| row.model_name == "Claude Opus 4.7")
+            .expect("tools row should be retained");
+        assert_eq!(opus.fields.get("SWERebenchSEM"), Some(&Value::from(0.4)));
+        let glm = rows
+            .iter()
+            .find(|row| row.model_name == "GLM-5.1")
+            .expect("text fallback should be retained");
+        assert_eq!(glm.fields.get("SWERebenchSEM"), Some(&Value::from(0.6)));
+    }
+
+    #[test]
+    fn selects_latest_full_post_release_range() {
+        let item = serde_json::json!({
+            "release": { "timestamp": 150 },
+            "taskRangeTimestamp": { "from": 100, "to": 400 },
+            "rangeStats": {
+                "100:400": { "resolvedRate": 99.0, "sem": 9.9 },
+                "200:300": { "resolvedRate": 41.0, "sem": 0.8 },
+                "250:400": { "resolvedRate": 50.0, "sem": 0.7 },
+                "200:400": { "resolvedRate": 61.0, "sem": 0.6 },
+                "300:400": { "resolvedRate": 70.0, "sem": 0.5 },
+                "400:400": { "resolvedRate": 100.0, "sem": 0.0 }
+            }
+        });
+
+        assert_eq!(headline_stats(&item), Some((61.0, Some(0.6))));
+    }
+
+    #[test]
+    fn omits_model_without_post_release_range() {
+        let item = serde_json::json!({
+            "release": { "timestamp": 300 },
+            "taskRangeTimestamp": { "from": 100, "to": 250 },
+            "rangeStats": {
+                "100:250": { "resolvedRate": 80.0, "sem": 0.5 },
+                "200:300": { "resolvedRate": 90.0, "sem": 0.4 }
+            }
+        });
+
+        assert_eq!(headline_stats(&item), None);
     }
 
     #[test]

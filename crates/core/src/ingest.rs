@@ -11,7 +11,16 @@ const NON_SYNTHESIZED_METRICS: &[&str] = &[
     "MLSBenchLite",
     "KimiClaw247Bench",
     "MCPMarkVerified",
+    // Observation-specific uncertainty metadata must stay attached to the
+    // measured row and never transfer to a sibling model.
+    "TerminalBenchUncertainty",
+    "TerminalBench21Uncertainty",
+    "SWERebenchSEM",
+    "EQBenchJudgemarkCILow",
+    "EQBenchJudgemarkCIHigh",
 ];
+
+const EVIDENCE_NOTE_SUFFIX: &str = "__evidence_note";
 
 #[derive(Debug, Default, Clone)]
 pub struct IngestStats {
@@ -77,6 +86,9 @@ pub fn warn_stale_overrides(
                 continue;
             };
             for key in row.fields.keys() {
+                if is_evidence_note_key(key) {
+                    continue;
+                }
                 by_pair
                     .entry((i, key.clone()))
                     .or_default()
@@ -107,12 +119,69 @@ pub fn warn_stale_overrides(
 }
 
 pub fn mark_synthesis_dominant(records: &mut [ModelRecord], per_model_cap: f64) {
+    let coefficients = crate::coefficients::Coefficients::load_embedded()
+        .expect("embedded coefficients are valid");
+    mark_synthesis_dominant_with_coefficients(records, per_model_cap, &coefficients);
+}
+
+/// Preliminary pre-score synthesis diagnostic using only leaf metrics that
+/// can reach a configured role. `compute_scores_with` replaces this with the
+/// authoritative family-capped role-weight calculation after scoring.
+pub fn mark_synthesis_dominant_with_coefficients(
+    records: &mut [ModelRecord],
+    per_model_cap: f64,
+    coefficients: &crate::coefficients::Coefficients,
+) {
+    let scored_metrics = scored_leaf_metrics(coefficients);
     for record in records {
-        let total_cells = record.raw_metrics.len();
-        let synthesized_cells = record.synthesized.len();
+        let total_cells = record
+            .raw_metrics
+            .keys()
+            .filter(|metric| scored_metrics.contains(*metric))
+            .count();
+        let synthesized_cells = record
+            .synthesized
+            .keys()
+            .filter(|metric| scored_metrics.contains(*metric))
+            .count();
         record.missing.synthesis_dominant =
             total_cells > 0 && (synthesized_cells as f64 / total_cells as f64) > per_model_cap;
     }
+}
+
+fn scored_leaf_metrics(coefficients: &crate::coefficients::Coefficients) -> BTreeSet<String> {
+    fn expand(
+        metric: &str,
+        coefficients: &crate::coefficients::Coefficients,
+        out: &mut BTreeSet<String>,
+        visiting: &mut BTreeSet<String>,
+    ) {
+        let Some(inputs) = coefficients.composite_metrics.get(metric) else {
+            if coefficients.metrics.contains_key(metric) {
+                out.insert(metric.to_string());
+            }
+            return;
+        };
+        if !visiting.insert(metric.to_string()) {
+            return;
+        }
+        for input in inputs.keys() {
+            expand(input, coefficients, out, visiting);
+        }
+        visiting.remove(metric);
+    }
+
+    let mut out = BTreeSet::new();
+    for groups in coefficients.final_score_weights.values() {
+        for group in groups.keys() {
+            if let Some(metrics) = coefficients.group_weights.get(group) {
+                for metric in metrics.keys() {
+                    expand(metric, coefficients, &mut out, &mut BTreeSet::new());
+                }
+            }
+        }
+    }
+    out
 }
 
 fn ingest_real_row(
@@ -128,12 +197,26 @@ fn ingest_real_row(
             let record = &mut records[i];
             let is_override = row.source_id == "overrides";
             let preference = EffortPreference::from_row(&row);
+            let evidence_notes: BTreeMap<String, String> = row
+                .fields
+                .iter()
+                .filter_map(|(key, value)| {
+                    evidence_note_metric(key).and_then(|metric| {
+                        value
+                            .as_str()
+                            .map(|note| (metric.to_string(), note.to_string()))
+                    })
+                })
+                .collect();
             // Capture before `row.source_id` is moved into `record.sources`.
             let source_id = row.source_id.clone();
             let canonical_id = record.canonical_id.clone();
             let vendor = record.vendor.clone();
             record.sources.insert(row.source_id);
             for (key, value) in row.fields {
+                if is_evidence_note_key(&key) {
+                    continue;
+                }
                 if let Some(num) = json_to_f64(&value) {
                     if !is_scoring_allowed_for(
                         preference,
@@ -145,25 +228,48 @@ fn ingest_real_row(
                         continue;
                     }
                     let choice_key = (i, key.clone());
-                    if metric_choices
-                        .get(&choice_key)
-                        .is_some_and(|existing| *existing < preference)
-                    {
-                        continue;
-                    }
-                    if let Some(existing) = record.raw_metrics.get(&key)
-                        && !record.synthesized.contains_key(&key)
-                        && !should_replace_metric_value(&key, *existing, num)
-                    {
-                        continue;
+                    let incoming_evidence = if is_override {
+                        EvidencePriority::Reported
+                    } else {
+                        EvidencePriority::Direct
+                    };
+                    let existing_evidence = evidence_priority(record, &key);
+                    if let Some(existing_evidence) = existing_evidence {
+                        if existing_evidence > incoming_evidence {
+                            continue;
+                        }
+                        if existing_evidence == incoming_evidence {
+                            let compare_value = match metric_choices.get(&choice_key) {
+                                // A stronger-effort row already won.
+                                Some(existing) if *existing < preference => continue,
+                                // Incoming effort is stronger: it wins even
+                                // if sampling noise made its headline lower.
+                                Some(existing) if *existing > preference => false,
+                                // Same or unknown effort: use metric direction.
+                                _ => true,
+                            };
+                            if compare_value
+                                && let Some(existing) = record.raw_metrics.get(&key)
+                                && !should_replace_metric_value(&key, *existing, num)
+                            {
+                                continue;
+                            }
+                        }
                     }
                     metric_choices.insert(choice_key, preference);
                     record.raw_metrics.insert(key.clone(), num);
                     record.synthesized.remove(&key);
+                    record.metric_sources.insert(key.clone(), source_id.clone());
                     if is_override {
-                        record.override_reported.insert(key);
+                        record.override_reported.insert(key.clone());
+                        if let Some(note) = evidence_notes.get(&key) {
+                            record.override_notes.insert(key, note.clone());
+                        } else {
+                            record.override_notes.remove(&key);
+                        }
                     } else {
                         record.override_reported.remove(&key);
+                        record.override_notes.remove(&key);
                     }
                 }
             }
@@ -188,7 +294,10 @@ enum EffortPreference {
 impl EffortPreference {
     fn from_row(row: &RawRow) -> Self {
         let mut text = row.model_name.clone();
-        for value in row.fields.values() {
+        for (key, value) in &row.fields {
+            if is_evidence_note_key(key) {
+                continue;
+            }
             if let Some(s) = value.as_str() {
                 text.push(' ');
                 text.push_str(s);
@@ -240,6 +349,40 @@ impl EffortPreference {
             Self::Default | Self::Medium | Self::Thinking | Self::High | Self::Max
         )
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum EvidencePriority {
+    Synthesized,
+    Reported,
+    Direct,
+}
+
+fn evidence_priority(record: &ModelRecord, metric: &str) -> Option<EvidencePriority> {
+    record.raw_metrics.contains_key(metric).then(|| {
+        if record.synthesized.contains_key(metric) {
+            EvidencePriority::Synthesized
+        } else if record.override_reported.contains(metric) {
+            EvidencePriority::Reported
+        } else {
+            EvidencePriority::Direct
+        }
+    })
+}
+
+pub(crate) fn is_evidence_note_key(key: &str) -> bool {
+    evidence_note_metric(key).is_some()
+}
+
+pub(crate) fn is_synthesizable_field(key: &str) -> bool {
+    key != "SynthesizedFromModelName"
+        && !is_evidence_note_key(key)
+        && !NON_SYNTHESIZED_METRICS.contains(&key)
+}
+
+fn evidence_note_metric(key: &str) -> Option<&str> {
+    key.strip_suffix(EVIDENCE_NOTE_SUFFIX)
+        .filter(|metric| !metric.is_empty())
 }
 
 /// Variant policy driven by `[effort_policy]` in `coefficients.toml`. The
@@ -314,7 +457,10 @@ fn ingest_synthesized_row(
             let canonical_id = record.canonical_id.clone();
             let vendor = record.vendor.clone();
             for (key, value) in row.fields {
-                if NON_SYNTHESIZED_METRICS.contains(&key.as_str()) {
+                if is_evidence_note_key(&key) {
+                    continue;
+                }
+                if !is_synthesizable_field(&key) {
                     continue;
                 }
                 if !is_scoring_allowed_for(
@@ -331,6 +477,9 @@ fn ingest_synthesized_row(
                 }
                 if let Some(num) = json_to_f64(&value) {
                     record.raw_metrics.insert(key.clone(), num);
+                    record
+                        .metric_sources
+                        .insert(key.clone(), row.source_id.clone());
                     record.synthesized.insert(
                         key,
                         crate::model::SynthesisProvenance {
@@ -403,6 +552,101 @@ mod tests {
         assert_eq!(records[0].raw_metrics.get("ContextWindow"), Some(&128000.0));
         assert_eq!(records[0].raw_metrics.get("OutputSpeed"), Some(&75.5));
         assert!(records[0].sources.contains("openrouter"));
+        assert_eq!(
+            records[0]
+                .metric_sources
+                .get("OutputSpeed")
+                .map(String::as_str),
+            Some("openrouter")
+        );
+    }
+
+    #[test]
+    fn direct_source_beats_override_across_ingest_order_and_clears_note() {
+        for direct_first in [false, true] {
+            let mut record =
+                ModelRecord::new("openai/gpt-5.5".into(), "gpt-5.5".into(), Vendor::Openai);
+            record.aliases.insert("gpt-5.5".into());
+            let mut records = vec![record];
+            let direct = raw(
+                "terminal_bench",
+                "gpt-5.5",
+                &[("TerminalBench", json!(80.0))],
+            );
+            let reported = raw(
+                "overrides",
+                "gpt-5.5",
+                &[
+                    ("TerminalBench", json!(99.0)),
+                    (
+                        "TerminalBench__evidence_note",
+                        json!("vendor xHigh launch-card result"),
+                    ),
+                ],
+            );
+            let ordered = if direct_first {
+                vec![direct, reported]
+            } else {
+                vec![reported, direct]
+            };
+            // Separate calls exercise precedence across the CLI's per-source
+            // ingestion boundary, not only within one input vector.
+            for row in ordered {
+                ingest_rows(&mut records, vec![row]);
+            }
+            assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&80.0));
+            assert_eq!(
+                records[0]
+                    .metric_sources
+                    .get("TerminalBench")
+                    .map(String::as_str),
+                Some("terminal_bench")
+            );
+            assert!(!records[0].override_reported.contains("TerminalBench"));
+            assert!(!records[0].override_notes.contains_key("TerminalBench"));
+        }
+    }
+
+    #[test]
+    fn winning_override_captures_note_without_note_affecting_effort() {
+        let mut record =
+            ModelRecord::new("openai/gpt-5.5".into(), "gpt-5.5".into(), Vendor::Openai);
+        record.aliases.insert("gpt-5.5".into());
+        let mut records = vec![record];
+        ingest_rows(
+            &mut records,
+            vec![raw(
+                "overrides",
+                "gpt-5.5",
+                &[
+                    ("TerminalBench", json!(80.0)),
+                    (
+                        "TerminalBench__evidence_note",
+                        json!("reported at prohibited low effort, xHigh comparison"),
+                    ),
+                ],
+            )],
+        );
+        assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&80.0));
+        assert_eq!(
+            records[0]
+                .override_notes
+                .get("TerminalBench")
+                .map(String::as_str),
+            Some("reported at prohibited low effort, xHigh comparison")
+        );
+        assert_eq!(
+            records[0]
+                .metric_sources
+                .get("TerminalBench")
+                .map(String::as_str),
+            Some("overrides")
+        );
+        assert!(
+            !records[0]
+                .raw_metrics
+                .contains_key("TerminalBench__evidence_note")
+        );
     }
 
     #[test]
@@ -477,6 +721,8 @@ mod tests {
             &[
                 ("AI_canary_health", json!(42.0)),
                 ("KimiCodeBenchV2", json!(62.0)),
+                ("TerminalBenchUncertainty", json!(1.2)),
+                ("SWERebenchSEM", json!(0.7)),
                 ("AI_correctness", json!(80.0)),
             ],
         );
@@ -489,6 +735,12 @@ mod tests {
         assert!(!records[0].synthesized.contains_key("AI_canary_health"));
         assert!(!records[0].raw_metrics.contains_key("KimiCodeBenchV2"));
         assert!(!records[0].synthesized.contains_key("KimiCodeBenchV2"));
+        assert!(
+            !records[0]
+                .raw_metrics
+                .contains_key("TerminalBenchUncertainty")
+        );
+        assert!(!records[0].raw_metrics.contains_key("SWERebenchSEM"));
         assert_eq!(records[0].raw_metrics.get("AI_correctness"), Some(&80.0));
         assert!(records[0].synthesized.contains_key("AI_correctness"));
     }
@@ -550,6 +802,39 @@ mod tests {
 
         assert_eq!(stats.matched, 2);
         assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&99.0));
+    }
+
+    #[test]
+    fn real_rows_prefer_stronger_effort_even_when_its_score_is_lower() {
+        for max_first in [false, true] {
+            let mut record = ModelRecord::new(
+                "openai/gpt-5.5".to_string(),
+                "gpt-5.5".to_string(),
+                Vendor::Openai,
+            );
+            record.aliases.insert("gpt-5-5".to_string());
+            record.aliases.insert("gpt-5-5-max".to_string());
+            let default = raw("benchmark", "gpt-5-5", &[("TerminalBench", json!(90.0))]);
+            let max = raw(
+                "benchmark",
+                "gpt-5-5-max",
+                &[("TerminalBench", json!(80.0))],
+            );
+            let rows = if max_first {
+                vec![max, default]
+            } else {
+                vec![default, max]
+            };
+            let mut records = vec![record];
+
+            ingest_rows(&mut records, rows);
+
+            assert_eq!(
+                records[0].raw_metrics.get("TerminalBench"),
+                Some(&80.0),
+                "max effort must win independently of row order"
+            );
+        }
     }
 
     #[test]

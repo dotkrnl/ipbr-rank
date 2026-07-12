@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use ipbr_core::{Coefficients, ModelRecord, SCHEMA_VERSION, aggregate::shrink_coverage_cutoff};
+use ipbr_core::{Coefficients, EvidenceCoverage, ModelRecord, SCHEMA_VERSION, SynthesisCategory};
 
 use crate::Scoreboard;
 
@@ -46,9 +46,10 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         toml_string(&scoreboard.generator)
     ));
     out.push_str(&format!(
-        "methodology = {}\n\n",
+        "methodology = {}\n",
         toml_string(&scoreboard.methodology)
     ));
+    out.push_str("configuration_policy = \"best_available_max_effort\"\n\n");
 
     if scoreboard.source_summary.is_empty() {
         out.push_str("[sources]\n\n");
@@ -102,10 +103,22 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         out.push_str(&format!("p_raw = {}\n", format_float(model.scores.p_raw)));
         out.push_str(&format!("b_raw = {}\n", format_float(model.scores.b_raw)));
         out.push_str(&format!("r = {}\n", format_float(model.scores.r)));
-        // i_adj/p_adj/b_adj retained as raw aliases for API back-compat.
-        out.push_str(&format!("i_adj = {}\n", format_float(model.scores.i_raw)));
-        out.push_str(&format!("p_adj = {}\n", format_float(model.scores.p_raw)));
-        out.push_str(&format!("b_adj = {}\n\n", format_float(model.scores.b_raw)));
+        out.push_str(&format!(
+            "i_status = {}\n",
+            toml_string(role_status(model, "I_raw"))
+        ));
+        out.push_str(&format!(
+            "p_status = {}\n",
+            toml_string(role_status(model, "P_raw"))
+        ));
+        out.push_str(&format!(
+            "b_status = {}\n",
+            toml_string(role_status(model, "B_raw"))
+        ));
+        out.push_str(&format!(
+            "r_status = {}\n\n",
+            toml_string(role_status(model, "R"))
+        ));
 
         out.push_str("[models.groups]\n");
         for (group, score) in &model.groups {
@@ -119,11 +132,27 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         }
         out.push('\n');
 
+        out.push_str("[models.raw_metrics]\n");
+        for metric in public_raw_metrics(model, &scoreboard.coefficients) {
+            out.push_str(&format!(
+                "{metric} = {}\n",
+                format_float(model.raw_metrics[metric])
+            ));
+        }
+        out.push('\n');
+
+        render_metric_evidence(&mut out, model, &scoreboard.coefficients);
+        render_evidence_summary(&mut out, model);
+
         out.push_str("[models.missing]\n");
         out.push_str(&format!("metrics = {}\n", toml_array(missing.metrics)));
         out.push_str(&format!(
-            "groups_shrunk = {}\n\n",
+            "groups_shrunk = {}\n",
             toml_array(missing.groups_shrunk)
+        ));
+        out.push_str(&format!(
+            "synthesis_dominant = {}\n\n",
+            model.missing.synthesis_dominant
         ));
     }
 
@@ -152,8 +181,12 @@ fn render_missing(scoreboard: &Scoreboard) -> String {
         ));
         out.push_str(&format!("metrics = {}\n", toml_array(missing.metrics)));
         out.push_str(&format!(
-            "groups_shrunk = {}\n\n",
+            "groups_shrunk = {}\n",
             toml_array(missing.groups_shrunk)
+        ));
+        out.push_str(&format!(
+            "synthesis_dominant = {}\n\n",
+            model.missing.synthesis_dominant
         ));
     }
 
@@ -166,43 +199,13 @@ struct ClassifiedMissing {
 }
 
 fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> ClassifiedMissing {
-    let mut metrics: Vec<String> = model
-        .missing
-        .metrics
-        .iter()
-        .filter(|metric| !metric.contains('/'))
-        .cloned()
+    let mut metrics: Vec<String> = scored_leaf_metrics(coefficients)
+        .into_iter()
+        .filter(|metric| !model.metrics.contains_key(metric))
         .collect();
     metrics.sort();
-    metrics.dedup();
 
-    // Start with whatever core already recorded (now includes A_* perspectives).
     let mut groups_shrunk: Vec<String> = model.missing.groups_shrunk.iter().cloned().collect();
-    let aggregation = coefficients.aggregation.clone().unwrap_or_default();
-    let shrink_cutoff = shrink_coverage_cutoff(&aggregation);
-
-    // Defensive re-computation for both regular groups and AISL perspectives.
-    for (group, weights) in coefficients
-        .group_weights
-        .iter()
-        .chain(coefficients.ai_stupid_perspective_weights.iter())
-    {
-        let total_weight: f64 = weights.values().sum();
-        if total_weight <= 0.0 {
-            continue;
-        }
-
-        let missing_weight: f64 = weights
-            .iter()
-            .filter(|(metric, _)| !model.metrics.contains_key(*metric))
-            .map(|(_, weight)| *weight)
-            .sum();
-
-        let present_coverage = 1.0 - missing_weight / total_weight;
-        if present_coverage < shrink_cutoff {
-            groups_shrunk.push(group.clone());
-        }
-    }
     groups_shrunk.sort();
     groups_shrunk.dedup();
 
@@ -212,12 +215,158 @@ fn classify_missing(model: &ModelRecord, coefficients: &Coefficients) -> Classif
     }
 }
 
+fn scored_leaf_metrics(coefficients: &Coefficients) -> std::collections::BTreeSet<String> {
+    fn expand(
+        metric: &str,
+        coefficients: &Coefficients,
+        leaves: &mut std::collections::BTreeSet<String>,
+        visiting: &mut std::collections::BTreeSet<String>,
+    ) {
+        if coefficients.precedence_composites.contains(metric) {
+            leaves.insert(metric.to_string());
+            return;
+        }
+        let Some(parts) = coefficients.composite_metrics.get(metric) else {
+            leaves.insert(metric.to_string());
+            return;
+        };
+        if !visiting.insert(metric.to_string()) {
+            return;
+        }
+        for part in parts.keys() {
+            expand(part, coefficients, leaves, visiting);
+        }
+        visiting.remove(metric);
+    }
+
+    let mut leaves = std::collections::BTreeSet::new();
+    for group_weights in coefficients.final_score_weights.values() {
+        for group in group_weights.keys() {
+            let Some(metric_weights) = coefficients.group_weights.get(group) else {
+                continue;
+            };
+            for metric in metric_weights.keys() {
+                expand(
+                    metric,
+                    coefficients,
+                    &mut leaves,
+                    &mut std::collections::BTreeSet::new(),
+                );
+            }
+        }
+    }
+    leaves
+}
+
+fn role_status<'a>(model: &'a ModelRecord, role: &str) -> &'a str {
+    match model.evidence.roles.get(role) {
+        Some(coverage) if !coverage.provisional => "ranked",
+        _ => "provisional",
+    }
+}
+
+fn is_auxiliary_metric(metric: &str) -> bool {
+    metric.ends_with("Uncertainty")
+        || metric.ends_with("SEM")
+        || metric.ends_with("CILow")
+        || metric.ends_with("CIHigh")
+}
+
+fn public_raw_metrics<'a>(
+    model: &'a ModelRecord,
+    coefficients: &'a Coefficients,
+) -> impl Iterator<Item = &'a String> {
+    model
+        .raw_metrics
+        .keys()
+        .filter(|metric| coefficients.metrics.contains_key(*metric) || is_auxiliary_metric(metric))
+}
+
+fn render_metric_evidence(out: &mut String, model: &ModelRecord, coefficients: &Coefficients) {
+    for metric in public_raw_metrics(model, coefficients) {
+        out.push_str(&format!(
+            "[models.metric_evidence.{}]\n",
+            toml_string(metric)
+        ));
+        let (class, donor, category) = if let Some(provenance) = model.synthesized.get(metric) {
+            (
+                "synthesized",
+                Some(provenance.from.as_str()),
+                Some(synthesis_category(provenance.category)),
+            )
+        } else if model.override_reported.contains(metric) {
+            ("reported", None, None)
+        } else {
+            ("direct", None, None)
+        };
+        out.push_str(&format!("class = {}\n", toml_string(class)));
+        if let Some(source) = model.metric_sources.get(metric) {
+            out.push_str(&format!("source = {}\n", toml_string(source)));
+        }
+        if let Some(donor) = donor {
+            out.push_str(&format!("donor = {}\n", toml_string(donor)));
+        }
+        if let Some(category) = category {
+            out.push_str(&format!("synthesis_category = {}\n", toml_string(category)));
+        }
+        if let Some(note) = model.override_notes.get(metric) {
+            out.push_str(&format!("citation = {}\n", toml_string(note)));
+        }
+        out.push('\n');
+    }
+}
+
+fn render_evidence_summary(out: &mut String, model: &ModelRecord) {
+    for (group, coverage) in &model.evidence.groups {
+        out.push_str(&format!(
+            "[models.evidence.groups.{}]\n",
+            toml_string(group)
+        ));
+        render_coverage(out, coverage, false);
+    }
+    for (role, coverage) in &model.evidence.roles {
+        out.push_str(&format!("[models.evidence.roles.{}]\n", toml_string(role)));
+        render_coverage(out, coverage, true);
+    }
+}
+
+fn render_coverage(out: &mut String, coverage: &EvidenceCoverage, include_status: bool) {
+    out.push_str(&format!("direct = {}\n", format_float(coverage.direct)));
+    out.push_str(&format!("reported = {}\n", format_float(coverage.reported)));
+    out.push_str(&format!(
+        "synthesized = {}\n",
+        format_float(coverage.synthesized)
+    ));
+    out.push_str(&format!("missing = {}\n", format_float(coverage.missing)));
+    out.push_str(&format!(
+        "effective = {}\n",
+        format_float(coverage.effective)
+    ));
+    out.push_str(&format!("family_count = {}\n", coverage.family_count));
+    out.push_str(&format!(
+        "direct_families = {}\n",
+        toml_array(coverage.direct_families.iter().cloned())
+    ));
+    if include_status {
+        out.push_str(&format!("provisional = {}\n", coverage.provisional));
+    }
+    out.push('\n');
+}
+
+fn synthesis_category(category: SynthesisCategory) -> &'static str {
+    match category {
+        SynthesisCategory::Conservative => "conservative",
+        SynthesisCategory::SameSeriesForward => "same_series_forward",
+        SynthesisCategory::StrongerSuccessor => "stronger_successor",
+    }
+}
+
 fn serialize_thinking_effort(effort: Option<&ipbr_core::ThinkingEffort>) -> &'static str {
     match effort {
         Some(ipbr_core::ThinkingEffort::Low) => "low",
         Some(ipbr_core::ThinkingEffort::Medium) => "medium",
         Some(ipbr_core::ThinkingEffort::High) => "high",
-        None => "default",
+        None => "best_available",
     }
 }
 

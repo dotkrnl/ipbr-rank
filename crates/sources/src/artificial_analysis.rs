@@ -78,8 +78,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 
     // AA ships multiple rows per logical model (e.g. default/medium/high/max
     // effort variants) and the alias matcher may collapse them into the same
-    // canonical_id. The ingest layer prefers default, then medium; this sort
-    // only keeps equal-priority variant ties deterministic.
+    // canonical_id. Preserve one row per distinct effort here; the ingest
+    // layer intentionally selects the strongest available effort
+    // (max → high → thinking → medium → default). This sort only
+    // keeps equal-effort duplicate ties deterministic.
     let mut sorted: Vec<&Value> = data.iter().collect();
     sorted.sort_by(|a, b| {
         let intelligence = |item: &Value| -> f64 {
@@ -145,29 +147,20 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             );
         }
 
-        // GPQA-Diamond and Humanity's Last Exam are reported as 0–1 fractions
-        // in AA's payload. Average them into a unified reasoning signal that
-        // populates both ArtificialAnalysisReasoning (PLAN group) and
-        // GPQA_HLE_Reasoning (GEN group). Percentile normalization downstream
-        // handles cross-benchmark calibration, so the equal-weight blend is
-        // intentional. Falls back to the single metric available if only one
-        // is present, and emits nothing if both are missing rather than
-        // synthesizing from intelligence (the previous behaviour silently
-        // turned the reasoning axis into a copy of the intelligence axis).
+        // GPQA-Diamond and Humanity's Last Exam are distinct evaluations,
+        // reported as 0–1 fractions in AA's payload. Preserve them as separate
+        // 0–100 observations so downstream scoring can normalize and combine
+        // them once. Earlier revisions emitted the same gpqa+hle blend under
+        // two metric names, which double-counted a single derived value across
+        // the PLAN and GEN groups. A missing component remains genuinely
+        // missing instead of changing the meaning of a blend.
         let gpqa = number_at_paths(item, &[&["evaluations", "gpqa"], &["gpqa"]]);
         let hle = number_at_paths(item, &[&["evaluations", "hle"], &["hle"]]);
-        let reasoning_blend = match (gpqa, hle) {
-            (Some(g), Some(h)) => Some(((g + h) / 2.0) * 100.0),
-            (Some(g), None) => Some(g * 100.0),
-            (None, Some(h)) => Some(h * 100.0),
-            (None, None) => None,
-        };
-        if let Some(value) = reasoning_blend {
-            fields.insert(
-                "ArtificialAnalysisReasoning".to_string(),
-                Value::from(value),
-            );
-            fields.insert("GPQA_HLE_Reasoning".to_string(), Value::from(value));
+        if let Some(gpqa) = gpqa {
+            fields.insert("GPQA".to_string(), Value::from(gpqa * 100.0));
+        }
+        if let Some(hle) = hle {
+            fields.insert("HLE".to_string(), Value::from(hle * 100.0));
         }
 
         // AA also publishes per-eval scores under `evaluations.{aime_25,tau2,
@@ -543,18 +536,10 @@ mod tests {
                 .and_then(number_like),
             Some(59.12)
         );
-        // Reasoning is now the equal-weight average of gpqa (0.93) and hle (0.40),
-        // scaled to the 0-100 range: ((0.93 + 0.40) / 2) * 100 = 66.5.
-        assert_eq!(
-            row.fields
-                .get("ArtificialAnalysisReasoning")
-                .and_then(number_like),
-            Some(66.5)
-        );
-        assert_eq!(
-            row.fields.get("GPQA_HLE_Reasoning").and_then(number_like),
-            Some(66.5)
-        );
+        assert_eq!(row.fields.get("GPQA").and_then(number_like), Some(93.0));
+        assert_eq!(row.fields.get("HLE").and_then(number_like), Some(40.0));
+        assert!(!row.fields.contains_key("ArtificialAnalysisReasoning"));
+        assert!(!row.fields.contains_key("GPQA_HLE_Reasoning"));
         assert_eq!(
             row.fields.get("TerminalBenchHard").and_then(number_like),
             Some(50.0)

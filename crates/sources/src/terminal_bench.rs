@@ -165,13 +165,22 @@ fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, 
             continue;
         }
         let acc_raw = cells[7].trim();
-        let score = match parse_accuracy(acc_raw) {
+        let (score, uncertainty) = match parse_accuracy(acc_raw) {
             Some(v) => v,
             None => continue,
         };
 
         let mut fields = BTreeMap::new();
         fields.insert(metric.to_string(), serde_json::Value::from(score));
+        if let Some(uncertainty) = uncertainty {
+            // Auxiliary, unscored uncertainty in percentage points. Keeping
+            // the key metric-specific prevents 2.0 and 2.1 observations from
+            // overwriting one another after canonical model aggregation.
+            fields.insert(
+                format!("{metric}Uncertainty"),
+                serde_json::Value::from(uncertainty),
+            );
+        }
         let row = RawRow {
             source_id: source_id.to_string(),
             model_name: model_name.to_string(),
@@ -195,10 +204,23 @@ fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, 
     Ok(best_by_model.into_values().map(|(_, row)| row).collect())
 }
 
-fn parse_accuracy(s: &str) -> Option<f64> {
-    let head = s.split('±').next()?.trim();
-    let head = head.trim_end_matches('%').trim();
-    head.parse::<f64>().ok().filter(|v| v.is_finite())
+fn parse_accuracy(s: &str) -> Option<(f64, Option<f64>)> {
+    let (score, uncertainty) = match s.split_once('±') {
+        Some((score, uncertainty)) => (score, Some(uncertainty)),
+        None => (s, None),
+    };
+    let score = parse_percentage(score)?;
+    let uncertainty = uncertainty.and_then(parse_percentage);
+    Some((score, uncertainty))
+}
+
+fn parse_percentage(s: &str) -> Option<f64> {
+    s.trim()
+        .trim_end_matches('%')
+        .trim()
+        .parse::<f64>()
+        .ok()
+        .filter(|value| value.is_finite())
 }
 
 #[cfg(test)]
@@ -239,8 +261,8 @@ mod tests {
 
     #[test]
     fn accuracy_strips_margin_and_percent() {
-        assert_eq!(parse_accuracy("82.0 % ± 2.2"), Some(82.0));
-        assert_eq!(parse_accuracy("78.4%"), Some(78.4));
+        assert_eq!(parse_accuracy("82.0 % ± 2.2"), Some((82.0, Some(2.2))));
+        assert_eq!(parse_accuracy("78.4%"), Some((78.4, None)));
         assert_eq!(parse_accuracy("n/a"), None);
     }
 
@@ -270,6 +292,13 @@ mod tests {
                 .get("TerminalBench")
                 .and_then(serde_json::Value::as_f64),
             Some(78.4)
+        );
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("TerminalBenchUncertainty")
+                .and_then(serde_json::Value::as_f64),
+            Some(2.0)
         );
     }
 }

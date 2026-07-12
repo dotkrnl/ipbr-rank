@@ -1,9 +1,9 @@
 use crate::{
-    ArcAgiSource, ArtificialAnalysisSource, BfclSource, GsoSource, HilBenchSource,
-    LiveCodeBenchSource, LmArenaSource, McpAtlasSource, OpenRouterSource, OverridesSource,
-    SonarSource, Source, SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource,
-    SweBenchProSource, SweBenchSource, SweRebenchSource, TerminalBench21Source,
-    TerminalBenchSource,
+    ArcAgiSource, ArtificialAnalysisSource, BfclSource, EqBenchCreativeWritingSource,
+    EqBenchJudgemarkSource, GsoSource, HilBenchSource, LiveCodeBenchSource, LmArenaSource,
+    McpAtlasSource, OpenRouterSource, OverridesSource, SonarSource, Source, SweAtlasQnaSource,
+    SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchProSource, SweBenchSource,
+    SweRebenchSource, TerminalBench21Source, TerminalBenchSource,
 };
 
 pub fn registry() -> Vec<Box<dyn Source>> {
@@ -20,6 +20,8 @@ pub fn registry() -> Vec<Box<dyn Source>> {
         Box::new(LiveCodeBenchSource),
         Box::new(GsoSource),
         Box::new(BfclSource),
+        Box::new(EqBenchCreativeWritingSource),
+        Box::new(EqBenchJudgemarkSource),
         Box::new(TerminalBenchSource),
         Box::new(TerminalBench21Source),
         Box::new(HilBenchSource),

@@ -105,7 +105,6 @@ struct OverrideEntry {
     /// Free-form provenance string. Captured at parse time as a sanity check
     /// that authors record where each number came from.
     #[serde(default)]
-    #[allow(dead_code)]
     note: String,
 }
 
@@ -133,12 +132,15 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
                 entry.canonical_id, entry.metric
             )));
         }
-        // Note is intentionally NOT inserted into fields. EffortPreference::from_row
-        // reads all string fields to detect thinking/high/xHigh effort markers;
-        // provenance notes like "OpenAI-reported (xHigh)" would silently block the
-        // override value from scoring. The note is validated above but not emitted.
         let mut fields = BTreeMap::new();
         fields.insert(entry.metric.clone(), Value::from(entry.value));
+        // Carry the citation beside its numeric observation. Core ingestion
+        // recognizes the reserved suffix, stores the note as provenance, and
+        // excludes it from effort detection and numeric metric ingestion.
+        fields.insert(
+            format!("{}__evidence_note", entry.metric),
+            Value::from(entry.note.clone()),
+        );
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
             // The alias matcher takes any registered alias, and every
@@ -186,9 +188,10 @@ note = "OpenAI launch, 2026-04-23"
             Some(87.6)
         );
         assert_eq!(
-            by_model["anthropic/claude-opus-4.7"].get("Note"),
-            None,
-            "Note must not be emitted into fields to avoid effort-detection poisoning"
+            by_model["anthropic/claude-opus-4.7"]
+                .get("SWEBenchVerified__evidence_note")
+                .and_then(Value::as_str),
+            Some("Anthropic launch, 2026-04-16")
         );
         assert_eq!(
             by_model["openai/gpt-5.5"]
@@ -224,5 +227,25 @@ value = 1.0
     fn empty_file_is_ok() {
         let rows = parse_rows("").expect("empty TOML should parse");
         assert!(rows.is_empty());
+    }
+
+    #[test]
+    fn embedded_terminal_bench_2_1_reports_are_versioned_correctly() {
+        let rows = parse_rows(EMBEDDED).expect("embedded overrides should parse");
+        let minimax = rows
+            .iter()
+            .find(|row| {
+                row.model_name == "minimax/minimax-m3"
+                    && row.fields.get("TerminalBench21").and_then(Value::as_f64) == Some(66.0)
+            })
+            .expect("expected MiniMax M3 Terminal-Bench 2.1 override");
+        assert!(!minimax.fields.contains_key("TerminalBench"));
+        assert!(
+            rows.iter().all(|row| {
+                row.model_name != "anthropic/claude-opus-4.8"
+                    || !row.fields.contains_key("TerminalBench21")
+            }),
+            "Opus 4.8 now has a direct Terminal-Bench 2.1 row; its stale override must stay retired"
+        );
     }
 }

@@ -1,5 +1,6 @@
 use crate::alias::AliasIndex;
 use crate::coefficients::SynthesisConfig;
+use crate::ingest::is_synthesizable_field;
 use crate::model::{ModelRecord, RawRow, SourceId, SynthesisCategory};
 use serde::Deserialize;
 use serde_json::Value;
@@ -123,7 +124,13 @@ pub fn synthesize_rows(
     let mut stats = SynthesisStats::default();
 
     for (source_id, rows) in rows_by_source.iter_mut() {
-        let real_count = rows.len();
+        // Only registered, non-synthesized source rows can justify synthesis
+        // capacity. Unmatched leaderboard rows previously inflated this
+        // denominator and silently authorized far more sibling borrowing.
+        let real_count = rows
+            .iter()
+            .filter(|row| row.synthesized_from.is_none() && resolve_canonical(row).is_some())
+            .count();
         let mut row_indices_by_canonical: BTreeMap<String, Vec<usize>> = BTreeMap::new();
         for (idx, row) in rows.iter().enumerate() {
             if let Some(canonical_id) = resolve_canonical(row) {
@@ -190,13 +197,21 @@ pub fn synthesize_rows(
                 if !has_fillable_field(&donor, &target_fields) {
                     continue;
                 }
-                let donor_fields: Vec<String> = donor.fields.keys().cloned().collect();
+                let donor_fields: Vec<String> = donor
+                    .fields
+                    .keys()
+                    .filter(|field| is_synthesizable_field(field))
+                    .cloned()
+                    .collect();
                 let donor_model_name = donor.model_name.clone();
                 let category = donor
                     .synthesis_category
                     .unwrap_or(SynthesisCategory::SameSeriesForward)
                     .chain(pair.category);
                 let mut synthesized = donor;
+                synthesized
+                    .fields
+                    .retain(|field, _| is_synthesizable_field(field));
                 synthesized.fields.insert(
                     "SynthesizedFromModelName".to_string(),
                     Value::from(donor_model_name),
@@ -232,7 +247,13 @@ fn current_fields_for_target(
         .get(target_id)
         .into_iter()
         .flatten()
-        .flat_map(|idx| rows[*idx].fields.keys().cloned())
+        .flat_map(|idx| {
+            rows[*idx]
+                .fields
+                .keys()
+                .filter(|field| is_synthesizable_field(field))
+                .cloned()
+        })
         .collect()
 }
 
@@ -240,7 +261,7 @@ fn has_fillable_field(donor: &RawRow, target_fields: &BTreeSet<String>) -> bool 
     donor
         .fields
         .keys()
-        .any(|field| field != "SynthesizedFromModelName" && !target_fields.contains(field))
+        .any(|field| is_synthesizable_field(field) && !target_fields.contains(field))
 }
 
 #[cfg(test)]
@@ -755,6 +776,94 @@ mod tests {
     }
 
     #[test]
+    fn synthesis_cap_denominator_excludes_unmatched_rows() {
+        let records = vec![
+            record("vendor/target-a", "target-a", &["target-a"]),
+            record("vendor/target-b", "target-b", &["target-b"]),
+            record("vendor/donor", "donor", &["donor"]),
+        ];
+        let mut source_rows = vec![raw("leaderboard", "donor", None, &[("score", json!(90.0))])];
+        for idx in 0..50 {
+            source_rows.push(raw(
+                "leaderboard",
+                &format!("unregistered-{idx}"),
+                None,
+                &[("score", json!(idx))],
+            ));
+        }
+        let mut rows = rows_by_source(source_rows);
+        let stats = synthesize_rows(
+            &mut rows,
+            &[
+                SynthesisPair::same_series_forward("vendor/target-a", "vendor/donor"),
+                SynthesisPair::same_series_forward("vendor/target-b", "vendor/donor"),
+            ],
+            &records,
+            &cfg(0.30, 0.50),
+        );
+        assert_eq!(stats.per_source["leaderboard"], 1);
+        assert_eq!(stats.capped_sources, vec!["leaderboard".to_string()]);
+    }
+
+    #[test]
+    fn evidence_notes_neither_trigger_nor_survive_synthesis() {
+        let records = vec![
+            record("vendor/target", "target", &["target"]),
+            record("vendor/donor", "donor", &["donor"]),
+        ];
+
+        // A note missing from the target is not itself a fillable field.
+        let mut rows = rows_by_source(vec![
+            raw("overrides", "target", None, &[("Metric", json!(80.0))]),
+            raw(
+                "overrides",
+                "donor",
+                None,
+                &[
+                    ("Metric", json!(90.0)),
+                    ("Metric__evidence_note", json!("donor citation")),
+                ],
+            ),
+        ]);
+        let stats = synthesize_rows(
+            &mut rows,
+            &[SynthesisPair::same_series_forward(
+                "vendor/target",
+                "vendor/donor",
+            )],
+            &records,
+            &cfg(1.0, 0.50),
+        );
+        assert_eq!(stats.per_source["overrides"], 0);
+
+        // When the numeric metric is fillable, only that metric is cloned.
+        let mut rows = rows_by_source(vec![raw(
+            "overrides",
+            "donor",
+            None,
+            &[
+                ("Metric", json!(90.0)),
+                ("Metric__evidence_note", json!("donor citation")),
+            ],
+        )]);
+        synthesize_rows(
+            &mut rows,
+            &[SynthesisPair::same_series_forward(
+                "vendor/target",
+                "vendor/donor",
+            )],
+            &records,
+            &cfg(1.0, 0.50),
+        );
+        let synthesized = rows["overrides"]
+            .iter()
+            .find(|row| row.synthesized_from.is_some())
+            .unwrap();
+        assert!(synthesized.fields.contains_key("Metric"));
+        assert!(!synthesized.fields.contains_key("Metric__evidence_note"));
+    }
+
+    #[test]
     fn synthesize_ingest_real_override_is_order_independent() {
         let synth_then_real = vec![
             raw(
@@ -828,13 +937,15 @@ mod tests {
     fn synthesize_per_model_cap_marks_synthesis_dominant() {
         let mut record = record("openai/gpt-5.5", "gpt-5.5", &["gpt-5.5"]);
         record.raw_metrics = [
-            ("AI_correctness".to_string(), 80.0),
-            ("AI_code".to_string(), 70.0),
+            ("SWEBenchPro".to_string(), 70.0),
+            ("MCPAtlas".to_string(), 80.0),
+            // Arbitrary numeric metadata must not dilute the scored ratio.
+            ("VoteCount".to_string(), 1_000_000.0),
         ]
         .into_iter()
         .collect();
         record.synthesized = [(
-            "AI_correctness".to_string(),
+            "SWEBenchPro".to_string(),
             SynthesisProvenance {
                 source_id: "openrouter".to_string(),
                 from: "openai/gpt-5.4".to_string(),

@@ -3,7 +3,7 @@ use crate::model::{ModelRecord, SourceId};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub const SCHEMA_VERSION: &str = "1.1.0";
+pub const SCHEMA_VERSION: &str = "2.0.0";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceSummary {

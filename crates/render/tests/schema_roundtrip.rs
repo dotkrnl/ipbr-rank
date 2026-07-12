@@ -1,34 +1,31 @@
 #![allow(dead_code)]
 
-//! Round-trip regression for the documented scoreboard schema.
-//!
-//! Builds a `Scoreboard`, serializes it via
-//! `ipbr_render::toml_output::write_scoreboard`, and re-parses the
-//! rendered TOML through a fresh `serde::Deserialize` struct that
-//! mirrors `docs/output-schema.md`. Synthesis is an internal scoring
-//! detail and intentionally absent from the rendered scoreboard, so no
-//! `[models.synthesized]` table or `synthesis_dominant` field is
-//! emitted.
+//! Strict round-trip regression for the public scoreboard schema v2.
 
 use std::collections::BTreeMap;
 
-use ipbr_core::{Coefficients, MissingInfo, ModelRecord, Vendor, compute_scores_with};
+use ipbr_core::{
+    Coefficients, ModelRecord, SourceSummary, SynthesisCategory, SynthesisProvenance,
+    ThinkingEffort, Vendor, compute_scores_with,
+};
 use ipbr_render::{Scoreboard, toml_output::write_scoreboard};
 use serde::Deserialize;
 use tempfile::tempdir;
 
 #[derive(Deserialize)]
-struct Schema11 {
+#[serde(deny_unknown_fields)]
+struct Schema20 {
     schema_version: String,
     generated_at: String,
     generator: String,
     methodology: String,
-    #[serde(default)]
+    configuration_policy: String,
     sources: BTreeMap<String, SourceTable>,
-    models: Vec<Model11>,
+    models: Vec<Model20>,
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SourceTable {
     status: String,
     n_rows_ingested: usize,
@@ -37,103 +34,170 @@ struct SourceTable {
 }
 
 #[derive(Deserialize)]
-struct Model11 {
+#[serde(deny_unknown_fields)]
+struct Model20 {
     canonical_id: String,
     display_name: String,
     vendor: String,
     thinking_effort: String,
     aliases: Vec<String>,
     sources: Vec<String>,
-    scores: Scores,
+    scores: Scores20,
     groups: BTreeMap<String, f64>,
     metrics: BTreeMap<String, f64>,
-    missing: Missing11,
+    raw_metrics: BTreeMap<String, f64>,
+    metric_evidence: BTreeMap<String, MetricEvidence>,
+    evidence: EvidenceTables,
+    missing: Missing20,
 }
 
 #[derive(Deserialize)]
-struct Scores {
+#[serde(deny_unknown_fields)]
+struct Scores20 {
     i_raw: f64,
     p_raw: f64,
     b_raw: f64,
     r: f64,
-    i_adj: f64,
-    p_adj: f64,
-    b_adj: f64,
+    i_status: String,
+    p_status: String,
+    b_status: String,
+    r_status: String,
 }
 
 #[derive(Deserialize)]
-struct Missing11 {
+#[serde(deny_unknown_fields)]
+struct MetricEvidence {
+    class: String,
+    source: Option<String>,
+    donor: Option<String>,
+    synthesis_category: Option<String>,
+    citation: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct EvidenceTables {
+    groups: BTreeMap<String, Coverage>,
+    roles: BTreeMap<String, Coverage>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Coverage {
+    direct: f64,
+    reported: f64,
+    synthesized: f64,
+    missing: f64,
+    effective: f64,
+    family_count: usize,
+    direct_families: Vec<String>,
+    #[serde(default)]
+    provisional: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Missing20 {
     metrics: Vec<String>,
     groups_shrunk: Vec<String>,
-}
-
-/// 1.0.0-shape consumer: matches a `1.x.x` major version, ignores
-/// 1.1.0-specific fields. Used to assert the bump is additive.
-#[derive(Deserialize)]
-struct Schema10 {
-    schema_version: String,
-    models: Vec<Model10>,
-}
-
-#[derive(Deserialize)]
-struct Model10 {
-    canonical_id: String,
-    metrics: BTreeMap<String, f64>,
-    missing: Missing10,
-}
-
-#[derive(Deserialize)]
-struct Missing10 {
-    metrics: Vec<String>,
-    groups_shrunk: Vec<String>,
+    synthesis_dominant: bool,
 }
 
 #[test]
-fn rendered_scoreboard_round_trips_through_documented_schema() {
+fn rendered_scoreboard_round_trips_through_schema_v2() {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
 
-    let mut real = ModelRecord::new(
+    let mut anthropic = ModelRecord::new(
         "anthropic/claude-opus-4.7".to_string(),
         "Claude Opus 4.7".to_string(),
         Vendor::Anthropic,
     );
-    real.aliases.insert("claude-opus-4-7".to_string());
-    real.sources.insert("lmarena".to_string());
-    real.metrics.insert("LMArenaText".to_string(), 81.0);
-    real.metrics.insert("SWEBenchVerified".to_string(), 76.5);
-    real.groups.insert("CRE".to_string(), 80.0);
-    real.missing = MissingInfo {
-        metrics: ["NoveltyBench".to_string()].into_iter().collect(),
-        groups_shrunk: ["LM_ARENA_REVIEW_PROXY".to_string()].into_iter().collect(),
-        synthesis_dominant: false,
-    };
+    anthropic.aliases.insert("claude-opus-4-7".to_string());
+    anthropic.sources.extend([
+        "lmarena".to_string(),
+        "overrides".to_string(),
+        "terminal_bench".to_string(),
+    ]);
+    anthropic
+        .raw_metrics
+        .insert("LMArenaText".to_string(), 1450.0);
+    anthropic
+        .metric_sources
+        .insert("LMArenaText".to_string(), "lmarena".to_string());
+    anthropic
+        .raw_metrics
+        .insert("SWEBenchVerified".to_string(), 80.0);
+    anthropic
+        .override_reported
+        .insert("SWEBenchVerified".to_string());
+    anthropic
+        .metric_sources
+        .insert("SWEBenchVerified".to_string(), "overrides".to_string());
+    anthropic.override_notes.insert(
+        "SWEBenchVerified".to_string(),
+        "Anthropic system card, table 8".to_string(),
+    );
+    anthropic
+        .raw_metrics
+        .insert("TerminalBench".to_string(), 75.0);
+    anthropic
+        .metric_sources
+        .insert("TerminalBench".to_string(), "terminal_bench".to_string());
+    anthropic.synthesized.insert(
+        "TerminalBench".to_string(),
+        SynthesisProvenance {
+            source_id: "terminal_bench".to_string(),
+            from: "anthropic/claude-sonnet-5".to_string(),
+            category: SynthesisCategory::SameSeriesForward,
+        },
+    );
+    anthropic
+        .raw_metrics
+        .insert("TerminalBenchUncertainty".to_string(), 1.25);
+    anthropic.metric_sources.insert(
+        "TerminalBenchUncertainty".to_string(),
+        "terminal_bench".to_string(),
+    );
 
-    let mut other = ModelRecord::new(
+    let mut openai = ModelRecord::new(
         "openai/gpt-5.5".to_string(),
         "GPT-5.5".to_string(),
         Vendor::Openai,
     );
-    other.aliases.insert("gpt-5-5".to_string());
-    other.sources.insert("openrouter".to_string());
-    other.metrics.insert("LMArenaText".to_string(), 79.5);
-    other.metrics.insert("SWEBenchVerified".to_string(), 70.25);
-    other.groups.insert("CRE".to_string(), 78.0);
-    other.missing = MissingInfo {
-        metrics: Default::default(),
-        groups_shrunk: Default::default(),
-        synthesis_dominant: false,
-    };
+    openai.thinking_effort = Some(ThinkingEffort::Medium);
+    openai.aliases.insert("gpt-5-5".to_string());
+    openai.sources.insert("lmarena".to_string());
+    openai.raw_metrics.insert("LMArenaText".to_string(), 1500.0);
+    openai
+        .metric_sources
+        .insert("LMArenaText".to_string(), "lmarena".to_string());
 
-    let mut models = vec![real, other];
+    let mut models = vec![openai, anthropic];
     compute_scores_with(&mut models, &coefficients);
+    models
+        .iter_mut()
+        .find(|model| model.canonical_id == "anthropic/claude-opus-4.7")
+        .unwrap()
+        .missing
+        .synthesis_dominant = true;
 
     let scoreboard = Scoreboard {
         models,
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v1".to_string(),
-        source_summary: BTreeMap::new(),
+        methodology: "v2".to_string(),
+        source_summary: [(
+            "lmarena".to_string(),
+            SourceSummary {
+                status: "verified".to_string(),
+                rows: 2,
+                matched: 2,
+                unmatched: 0,
+            },
+        )]
+        .into_iter()
+        .collect(),
         prev_scores: None,
     };
 
@@ -142,64 +206,78 @@ fn rendered_scoreboard_round_trips_through_documented_schema() {
     let rendered = std::fs::read_to_string(tmp.path().join("scoreboard.toml"))
         .expect("scoreboard.toml should be written");
 
-    let parsed: Schema11 =
-        toml::from_str(&rendered).expect("rendered TOML must match documented schema shape");
-
-    assert_eq!(parsed.schema_version, "1.1.0");
+    let parsed: Schema20 =
+        toml::from_str(&rendered).expect("rendered TOML must match schema v2 exactly");
+    assert_eq!(parsed.schema_version, "2.0.0");
     assert_eq!(parsed.generated_at, "2026-01-01T00:00:00Z");
     assert_eq!(parsed.generator, "ipbr-rank 0.1.0");
-    assert_eq!(parsed.methodology, "v1");
-    assert!(parsed.sources.is_empty());
+    assert_eq!(parsed.methodology, "v2");
+    assert_eq!(parsed.configuration_policy, "best_available_max_effort");
+    assert_eq!(parsed.sources["lmarena"].n_rows_matched, 2);
     assert_eq!(parsed.models.len(), 2);
 
-    let real = parsed
+    let anthropic = parsed
         .models
         .iter()
-        .find(|m| m.canonical_id == "anthropic/claude-opus-4.7")
-        .expect("real model present");
-    assert_eq!(real.display_name, "Claude Opus 4.7");
-    assert_eq!(real.vendor, "anthropic");
-    assert_eq!(real.thinking_effort, "default");
-    assert_eq!(real.aliases, vec!["claude-opus-4-7".to_string()]);
-    assert_eq!(real.sources, vec!["lmarena".to_string()]);
-    assert!((real.metrics["LMArenaText"] - 81.0).abs() < 1e-9);
-    assert!((real.metrics["SWEBenchVerified"] - 76.5).abs() < 1e-9);
-    assert_eq!(real.missing.metrics, vec!["NoveltyBench".to_string()]);
-    // `groups_shrunk` is recomputed by the renderer from coefficient
-    // weights, so we only assert it round-trips as a sorted string array.
-    let mut shrunk = real.missing.groups_shrunk.clone();
-    let was_sorted = shrunk.windows(2).all(|w| w[0] <= w[1]);
-    shrunk.sort();
-    shrunk.dedup();
-    assert_eq!(shrunk.len(), real.missing.groups_shrunk.len());
-    assert!(was_sorted, "groups_shrunk must be emitted sorted");
-    // Sanity-check role scores are real f64s (deserialized at all).
-    let _ = real.scores.i_raw + real.scores.b_adj + real.scores.r;
+        .find(|model| model.canonical_id == "anthropic/claude-opus-4.7")
+        .expect("Anthropic model present");
+    assert_eq!(anthropic.display_name, "Claude Opus 4.7");
+    assert_eq!(anthropic.vendor, "anthropic");
+    assert_eq!(anthropic.thinking_effort, "best_available");
+    assert_eq!(anthropic.aliases, vec!["claude-opus-4-7".to_string()]);
+    assert_eq!(anthropic.raw_metrics["SWEBenchVerified"], 80.0);
+    assert_eq!(anthropic.raw_metrics["TerminalBenchUncertainty"], 1.25);
 
-    let other = parsed
+    let direct = &anthropic.metric_evidence["LMArenaText"];
+    assert_eq!(direct.class, "direct");
+    assert_eq!(direct.source.as_deref(), Some("lmarena"));
+
+    let reported = &anthropic.metric_evidence["SWEBenchVerified"];
+    assert_eq!(reported.class, "reported");
+    assert_eq!(reported.source.as_deref(), Some("overrides"));
+    assert_eq!(
+        reported.citation.as_deref(),
+        Some("Anthropic system card, table 8")
+    );
+
+    let synthesized = &anthropic.metric_evidence["TerminalBench"];
+    assert_eq!(synthesized.class, "synthesized");
+    assert_eq!(
+        synthesized.donor.as_deref(),
+        Some("anthropic/claude-sonnet-5")
+    );
+    assert_eq!(
+        synthesized.synthesis_category.as_deref(),
+        Some("same_series_forward")
+    );
+
+    let uncertainty = &anthropic.metric_evidence["TerminalBenchUncertainty"];
+    assert_eq!(uncertainty.class, "direct");
+    assert_eq!(uncertainty.source.as_deref(), Some("terminal_bench"));
+
+    assert!(!anthropic.evidence.groups.is_empty());
+    assert_eq!(anthropic.evidence.roles.len(), 4);
+    assert_eq!(
+        anthropic.scores.i_status,
+        if anthropic.evidence.roles["I_raw"].provisional == Some(true) {
+            "provisional"
+        } else {
+            "ranked"
+        }
+    );
+    assert!(anthropic.missing.synthesis_dominant);
+    assert!(
+        anthropic
+            .missing
+            .groups_shrunk
+            .windows(2)
+            .all(|pair| pair[0] <= pair[1])
+    );
+
+    let openai = parsed
         .models
         .iter()
-        .find(|m| m.canonical_id == "openai/gpt-5.5")
-        .expect("second model present");
-    assert!(
-        (other.metrics["SWEBenchVerified"] - 70.25).abs() < 1e-9,
-        "metrics round-trip for the second model"
-    );
-
-    assert!(
-        !rendered.contains("[models.synthesized]"),
-        "synthesis is an internal scoring detail and must not appear in the rendered scoreboard"
-    );
-    assert!(
-        !rendered.contains("synthesis_dominant"),
-        "synthesis_dominant must not appear in the rendered scoreboard"
-    );
-
-    let legacy: Schema10 = toml::from_str(&rendered)
-        .expect("1.0.0-shape consumer must parse the rendered output unchanged");
-    assert!(
-        legacy.schema_version.starts_with("1."),
-        "consumers gating on major version 1.x.x parse the rendered output"
-    );
-    assert_eq!(legacy.models.len(), 2);
+        .find(|model| model.canonical_id == "openai/gpt-5.5")
+        .expect("OpenAI model present");
+    assert_eq!(openai.thinking_effort, "medium");
 }

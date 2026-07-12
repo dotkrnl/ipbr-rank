@@ -17,6 +17,31 @@ fn site_renders_without_panicking() {
 }
 
 #[test]
+fn provisional_scores_are_italicized_starred_and_explained() {
+    let mut scoreboard = sample_scoreboard();
+    scoreboard.models[0].evidence.roles.insert(
+        "B_raw".to_string(),
+        ipbr_core::EvidenceCoverage {
+            provisional: true,
+            ..Default::default()
+        },
+    );
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+    let index = read(site_dir.join("index.html"));
+
+    assert!(index.contains(
+        r#"<span class="cell-score provisional-score"><em>82.0</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span>"#
+    ));
+    assert!(index.contains(
+        r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met.</p>"#
+    ));
+    assert!(index.contains(r#"<span class="cell-score">81.0</span>"#));
+}
+
+#[test]
 fn site_emits_pages_api_toml_and_assets() {
     let scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
@@ -205,6 +230,7 @@ fn style_css_contains_d2_theme_tokens() {
         css.contains("prefers-color-scheme: light"),
         "expected light-theme fallback"
     );
+    assert!(css.contains(".provisional-score em { font-style: italic; }"));
 }
 
 fn html_files(root: &Path) -> Vec<PathBuf> {
@@ -280,8 +306,13 @@ fn leaderboard_has_row_and_expansion_per_model() {
     assert!(index.contains("class=\"exp-rank"));
 
     // Sort buttons emit data-sort attribute on header
+    assert!(index.contains("data-sort=\"balanced\""));
+    assert!(index.contains("data-sort-balanced="));
+    assert!(index.contains("status-badge"));
     assert!(index.contains("data-sort=\"i\""));
     assert!(index.contains("data-sort=\"r\""));
+    assert!(index.contains("role evidence"));
+    assert!(index.contains("raw → normalized"));
 }
 
 #[test]
@@ -448,8 +479,9 @@ fn scoring_panel_has_role_definitions_and_link() {
     }
     // Link to full methodology page
     assert!(index.contains("href=\"about.html\""));
-    // Trust transition note
-    assert!(index.contains("60-80%") || index.contains("60-80 %"));
+    assert!(index.contains("missing and sibling-only leaves reduce confidence"));
+    assert!(index.contains("never enter Idea, Plan, Build, Review"));
+    assert!(index.contains("best-available/max-effort"));
 }
 
 #[test]
@@ -467,8 +499,11 @@ fn hero_renders_title_tagline_radar_and_per_role_leaders() {
         index.contains(r#"class="beat beat-lead">Models drift."#),
         "tagline lead beat (Models drift) should carry .beat-lead"
     );
-    assert!(index.contains("Agents battle."), "tagline beat 2 missing");
-    assert!(index.contains("Math decides."), "tagline beat 3 missing");
+    assert!(
+        index.contains("Evidence accumulates."),
+        "tagline beat 2 missing"
+    );
+    assert!(index.contains("Ranks update."), "tagline beat 3 missing");
 
     // Brand wordmark only appears in the persistent header — not duplicated
     // in the hero.
@@ -477,8 +512,15 @@ fn hero_renders_title_tagline_radar_and_per_role_leaders() {
         "hero must not duplicate the brand h1"
     );
 
-    // Live status block.
-    assert!(index.contains("live-dot"), "missing live indicator");
+    // Snapshot status block must not imply continuous live state.
+    assert!(
+        index.contains("snapshot-label"),
+        "missing snapshot indicator"
+    );
+    assert!(
+        !index.contains("live-dot"),
+        "snapshot must not claim to be live"
+    );
 
     // Hero radar SVG with single-letter axis labels (one per role class).
     assert!(
@@ -529,6 +571,10 @@ fn expansion_includes_mini_radar() {
     assert_eq!(
         mini_count, 3,
         "expected one mini radar per model row, got {mini_count}"
+    );
+    assert!(
+        index.contains(r#"points="0,-40.0 40.5,0 0,41.0 -41.5,0""#),
+        "80/81/82/83 fixture scores must use the absolute 0-100 radar scale"
     );
 }
 

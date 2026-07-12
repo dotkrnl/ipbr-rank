@@ -144,6 +144,20 @@ fn parse_response(body: &str) -> Result<Vec<RawRow>> {
 - See `crates/sources/src/terminal_bench.rs` or `swerebench.rs` for examples.
 - Override `cache_paths()` and use `use_cached_html` / `cache_html_path` so the cache lookup hits the right extension.
 
+For JavaScript assets with embedded data, use the `.js` cache helpers and
+extract the specifically named payload rather than scraping unrelated script
+text. `eqbench.rs` is the reference implementation.
+
+Before returning rows, canonicalize aliases and keep one best model-level row.
+The project policy prefers max/xhigh, high, thinking/adaptive, medium, then
+default effort. If the source publishes agent/harness submissions rather than
+effort labels, document the best-row rule in `docs/sources.md`.
+
+Preserve published uncertainty as auxiliary numeric fields (`*Uncertainty`,
+`*SEM`, or `*CILow`/`*CIHigh`). Auxiliary uncertainty is unscored and must be
+listed in `NON_SYNTHESIZED_METRICS`; it belongs to the measured observation,
+not a sibling model.
+
 ### 4. Write a Contract Test
 
 In `crates/sources/tests/your_source_test.rs`:
@@ -189,7 +203,9 @@ async fn test_your_source_fixture() {
 - No panics during parsing
 - Expected fields are present and parseable
 - At least one known model is recognized
-- Row drop rate is acceptable (≤20%)
+- Parsed-row and canonical-match coverage are reported and justified for the source
+- Duplicate effort/agent rows collapse deterministically to the documented winner
+- Uncertainty bounds stay attached to the selected row, when available
 
 ### 5. Register the Source
 
@@ -234,13 +250,13 @@ Description of what this source provides and any caveats.
 
 ```bash
 # Contract test against fixture
-cargo test --package ipbr-sources your_source
+cargo test --package ipbr-rank-sources your_source
 
 # Full integration (will use cached fixture)
 cargo test --workspace
 
 # Live smoke (requires network + secrets)
-cargo test --package ipbr-sources your_source -- --ignored
+cargo test --package ipbr-rank-sources your_source -- --ignored
 ```
 
 ---
@@ -252,11 +268,24 @@ If your source contributes new metrics not in `data/coefficients.toml`:
 1. Add the metric definition to `[metrics.*]` in `data/coefficients.toml`:
    ```toml
    [metrics.YourNewMetric]
+   family = "your_source_family"
    higher_better = true
    log_scale = false
    groups = ["BUILD"]  # or whichever groups this metric belongs to
-   transform = "as_score"  # or "percentile" or "tail_penalty"
+   transform = "percentile"  # fallback for explicitly unanchored diagnostics
+   anchor_low = 10.0
+   anchor_high = 90.0
    ```
+
+   Active ranked leaves in methodology v2 require fixed raw-unit anchors.
+   Derive them from a frozen direct-evidence reference snapshot and review
+   them as part of the methodology/coefficient version. The logistic scorer
+   maps low/high anchors to approximately 5/95. Do not derive anchors from the
+   live cohort at scoring time.
+
+   `family` identifies correlated observations for the role-level source-family
+   cap. Reuse a family for metrics from the same benchmark suite or aggregate
+   source; do not create a new family merely to evade the cap.
 
 2. Add the metric to the appropriate group weights:
    ```toml
@@ -267,8 +296,13 @@ If your source contributes new metrics not in `data/coefficients.toml`:
 
 3. Run the coefficient validation test:
    ```bash
-   cargo test --package ipbr-core test_weights_sum_to_one
+   cargo test --package ipbr-rank-core
    ```
+
+4. Confirm the new metric has an intentional evidence path. Missing weight is
+   tracked separately from capability, cited reports are discounted, and
+   sibling fills are prior-only. A metric with no final role path is a
+   diagnostic, even if it appears in raw output.
 
 ---
 

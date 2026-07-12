@@ -261,7 +261,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         }
         if let Some(issue_density) = item.get("issueDensity").and_then(number_like)
             && issue_density.is_finite()
-            && issue_density > 0.0
+            && issue_density >= 0.0
         {
             // Lower is better — coefficients flip the direction via
             // `higher_better = false`, so we emit the raw rate here.
@@ -417,6 +417,26 @@ mod tests {
         let rows = parse_rows(&payload).expect("should parse");
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].model_name, "Bar");
+    }
+
+    #[test]
+    fn accepts_zero_issue_density_as_a_valid_measurement() {
+        let payload = json!({
+            "models": [{
+                "name": "Zero-Issue Model",
+                "organization": "Example",
+                "issueDensity": 0.0
+            }]
+        });
+        let rows = parse_rows(&payload).expect("zero is a valid lower-better density");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SonarIssueDensity")
+                .and_then(Value::as_f64),
+            Some(0.0)
+        );
     }
 
     #[test]

@@ -5,12 +5,9 @@
 
 A Rust workspace that fetches public LLM benchmarks from verified sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a static website. (CLI binary and crate names stay `ipbr-rank`.)
 
-> **Fully vibe-coded.** No human wrote the scoring weights — Claude, Gemini,
-> GPT, and Kimi argued over every coefficient, every group composition, and
-> every penalty curve in this repo. Round after round of cross-model code
-> review settled the numbers; the human just refereed and pressed merge.
-> The repo's copyright reflects that: the four debating models are the
-> credited authors. See `docs/methodology.md` for what they landed on.
+Methodology v2 separates capability from deployment diagnostics, publishes
+evidence quality and provenance, and marks under-supported roles provisional.
+See [`docs/methodology.md`](docs/methodology.md) for the scoring contract.
 
 ## Quick Start
 
@@ -67,16 +64,19 @@ intervention.
 - **B** (Building): Implementation, SWE-style work, terminal tasks, and code-quality benchmarks
 - **R** (Reviewing): Judging code quality, correctness, preference evaluation
 
-Each role has a single **raw** score (0–100, based on public benchmarks).
+Each role has one 0–100 evidence-adjusted benchmark score.
 
 ## Sources
 
 All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sources.md) for the full list.
 
 **Verified sources** (always run):
+
 - OpenRouter API — model discovery, pricing, context windows
-- LM Arena — preference ratings across text, code, and hard prompts
-- Artificial Analysis — intelligence/coding/reasoning/math indices, plus AIME 2025, tau2/tau-banking, scicode, ifbench, Terminal-Bench fields, livecodebench, mmlu-pro, lcr, and gpqa+hle reasoning blend
+- LM Arena — text, code, search, and document preference ratings
+- EQ-Bench Creative Writing v3 — direct creative-writing Elo
+- EQ-Bench Judgemark v4 — judge-discrimination score with a published 95% confidence interval
+- Artificial Analysis — intelligence/coding/math indices plus separate GPQA and HLE observations, AIME 2025, tau2/tau-banking, scicode, ifbench, Terminal-Bench fields, livecodebench, mmlu-pro, lcr, speed, TTFT, and pricing diagnostics
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
@@ -85,8 +85,8 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
 - Terminal-Bench 2.0 — agentic terminal task leaderboard
 - Terminal-Bench 2.1 — newer narrow Terminal-Bench track, combined with AA's terminalbench_v2_1 field
-- BFCL V4 — Berkeley function/tool-calling leaderboard, scored through an overall + category-split composite
-- Sonar Code Quality — functional pass rate plus issue, bug, and vulnerability density (the only public benchmark that measures generated-code quality directly)
+- BFCL V4 — Berkeley function/tool-calling leaderboard; the overall score is used without stacking its derived categories
+- Sonar Code Quality — diagnostic functional pass rate plus issue, bug, and vulnerability density; excluded from rank while published effort levels are not comparable across models
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - HiL-Bench (Scale) — human-in-the-loop escalation accuracy for ambiguous or blocked agent tasks
 - ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)
@@ -94,48 +94,63 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 
 ## Math Summary
 
-### Normalization
-Each benchmark metric is **percentile-normalized** within the active model population (5th/95th boundaries, log-scaled for cost/speed/latency). Operational metrics (speed/cost/TTFT/context window) use a **tail-penalty** curve instead — top 80 % of the population maps into 70-100 (mild differentiation) and only the bottom 20 % drops sharply, because users perceive operational speed in tiers, not linearly.
+### Ranked entity
 
-### Synthesis Penalty
-Values that came in via conservative sibling synthesis are blended toward 50 by 15 % so they read as a softer signal than direct measurements: `final = score × 0.85 + 50 × 0.15`. Same-vendor, same-series version-advance fills carry no synthesis penalty. Synthesized metrics still contribute; the category in `data/synthesis_aliases.toml` controls whether they are discounted.
+Each canonical model has one record. For each metric, the scorer keeps the
+best eligible model-level observation, preferring max/xhigh, high,
+thinking/adaptive, medium, then default effort. This is a capability envelope,
+not necessarily one runnable endpoint configuration.
 
-Documented stronger successors that borrow stale older-leaderboard rows from
-weaker donors also carry no synthesis penalty. Manual overrides from
-`data/score_overrides.toml` are public, cited reported measurements; they are
-not pulled toward 50.
+### Normalization and evidence
 
-### Group Aggregation
-Metrics are grouped into **CRE**, **GEN**, **PLAN**, **BUILD**, **LM_ARENA_REVIEW_PROXY**, **OPS_long**, **OPS_precision**, and **OPS_review**. Each group is a weighted average of its metrics. When a model is missing metrics, the aggregator blends smoothly from shrink-to-50 to trusting the present-weight mean across **60-80 %** group coverage; at **≥80 %** coverage, peripheral missing metrics no longer penalize otherwise well-covered models.
+Active ranked leaves use fixed, versioned raw anchors with an asymptotic
+logistic mapping: the low and high anchors map to approximately 5 and 95.
+Scores therefore do not move merely because an unrelated model joins the
+cohort.
 
-### Final Scores
-Each role score is a weighted average of groups. AISL was removed from
-scoring after local reproduction showed its benchmark surface was not
-representative enough and was too noise-prone. Its former weight is
-redistributed into the remaining non-operational public benchmark groups.
-Operational metrics (speed, TTFT, context window) carry a small role weight;
-paired with the tail-penalty curve, this means "fast enough" models cluster
-within a 1-2 point spread but genuinely slow models lose 4-6 points:
-- **I_raw** = 0.62×CRE + 0.33×GEN + 0.05×OPS_long
-- **P_raw** = 0.55×PLAN + 0.37×GEN + 0.08×OPS_precision
-- **B_raw** = 0.84×BUILD + 0.08×PLAN + 0.08×OPS_precision
-- **R** = 0.25×LM_ARENA_REVIEW_PROXY + 0.29×BUILD + 0.38×PLAN + 0.08×OPS_review
+Evidence is reliability-weighted toward the neutral prior of 50:
+
+- direct public observation: **1.00**
+- cited reported override: **0.60**
+- sibling synthesis (all categories): **0.00 / prior-only**
+
+Capability is averaged over available direct and discounted same-model
+reported evidence; missing and sibling-only leaves do not depress the point
+estimate. Their nominal weight remains visible as confidence/coverage, and a
+fully unsupported role falls back to 50. Final role paths are flattened to
+unique leaves, and no source family may carry more than 30% of a role when
+enough independent families exist.
+
+### Final scores
+
+- **I_raw** = 0.65×CRE + 0.35×GEN
+- **P_raw** = 0.65×PLAN + 0.35×GEN
+- **B_raw** = 0.95×BUILD + 0.05×PLAN
+- **R** = 0.20×REVIEW_DIRECT + 0.20×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.30×PLAN
+
+The displayed **Balanced capability** rank is the unweighted mean of the four
+role proxies. A role is marked provisional when direct coverage is below 60%
+or spans fewer than three direct benchmark families.
+
+Pricing, speed, latency, TTFT, and context-window values are diagnostics only.
+They have zero path to any role or Balanced capability rank.
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical derivation and all coefficients.
 
 ## Sample Output (TOML)
 
 ```toml
-schema_version = "1.0.0"
-generated_at = "2026-04-26T11:35:46Z"
+schema_version = "2.0.0"
+generated_at = "2026-07-12T19:44:00Z"
 generator = "ipbr-rank 0.1.0"
-methodology = "v1"
+methodology = "v2"
+configuration_policy = "best_available_max_effort"
 
 [[models]]
 canonical_id = "anthropic/claude-opus-4.7"
 display_name = "Claude Opus 4.7"
 vendor = "anthropic"
-thinking_effort = "default"
+thinking_effort = "best_available"
 aliases = ["opus 4.7", "claude-opus-4-7"]
 sources = ["openrouter", "lmarena", "artificial_analysis"]
 
@@ -144,10 +159,10 @@ i_raw = 78.4
 p_raw = 81.1
 b_raw = 79.6
 r = 84.0
-# i_adj/p_adj/b_adj retained as raw aliases for API back-compat.
-i_adj = 78.4
-p_adj = 81.1
-b_adj = 79.6
+i_status = "ranked"
+p_status = "ranked"
+b_status = "ranked"
+r_status = "provisional"
 
 [models.groups]
 CRE = 80.2
@@ -159,9 +174,29 @@ LMArenaText = 82.5
 SWEBenchVerified = 76.0
 # ...
 
+[models.raw_metrics]
+EQBenchJudgemark = 83.96
+EQBenchJudgemarkCILow = 80.47
+EQBenchJudgemarkCIHigh = 89.49
+
+[models.metric_evidence.EQBenchJudgemark]
+class = "direct"
+source = "eqbench_judgemark"
+
+[models.evidence.roles.R]
+direct = 0.55
+reported = 0.10
+synthesized = 0.05
+missing = 0.30
+effective = 0.61
+family_count = 2
+direct_families = ["eqbench", "lmarena"]
+provisional = true
+
 [models.missing]
 metrics = []
 groups_shrunk = []
+synthesis_dominant = false
 ```
 
 See [`docs/output-schema.md`](docs/output-schema.md) for the complete TOML schema reference.
@@ -203,7 +238,7 @@ cache regardless of mtime.
 | source | TTL | rationale |
 |---|---|---|
 | artificial_analysis | 10m | high-churn live model/perf payload |
-| openrouter, lmarena | 24h | daily refresh |
+| openrouter, lmarena, eqbench_creative_writing, eqbench_judgemark | 24h | daily refresh |
 | livecodebench, gso | 2d | weekly-ish leaderboard refreshes |
 | swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |
 
@@ -216,6 +251,7 @@ when present — the HuggingFace datasets-server in particular rate-limits
 aggressively while paginating LMArena, so set `HF_TOKEN` when available.
 
 ### Offline Mode (for CI/tests)
+
 ```bash
 # Deterministic golden test against fixtures
 ipbr-rank all \

@@ -9,6 +9,42 @@ pub struct MissingInfo {
     pub synthesis_dominant: bool,
 }
 
+/// Evidence coverage carried from leaf benchmark observations through
+/// composites, groups, and role scores. The four evidence-class shares are
+/// nominal path weights and sum to one (within floating-point tolerance).
+/// `effective` additionally discounts reported and synthesized observations
+/// by their configured reliability.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct EvidenceCoverage {
+    #[serde(default)]
+    pub direct: f64,
+    #[serde(default)]
+    pub reported: f64,
+    #[serde(default)]
+    pub synthesized: f64,
+    #[serde(default)]
+    pub missing: f64,
+    #[serde(default)]
+    pub effective: f64,
+    /// Distinct configured benchmark families with direct evidence.
+    #[serde(default)]
+    pub direct_families: BTreeSet<String>,
+    #[serde(default)]
+    pub family_count: usize,
+    /// Role scores that fail the configured direct-coverage or independent-
+    /// family gate remain computable, but must be presented as provisional.
+    #[serde(default)]
+    pub provisional: bool,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct EvidenceSummary {
+    #[serde(default)]
+    pub groups: BTreeMap<GroupKey, EvidenceCoverage>,
+    #[serde(default)]
+    pub roles: BTreeMap<String, EvidenceCoverage>,
+}
+
 impl MissingInfo {
     pub fn new() -> Self {
         Self::default()
@@ -136,6 +172,17 @@ pub struct ModelRecord {
     pub synthesized: BTreeMap<MetricKey, SynthesisProvenance>,
     #[serde(default)]
     pub override_reported: BTreeSet<MetricKey>,
+    /// Winning source for each raw metric after evidence and effort
+    /// precedence have been applied.
+    #[serde(default)]
+    pub metric_sources: BTreeMap<MetricKey, SourceId>,
+    /// Human-readable citations/notes emitted by the override source. Notes
+    /// are retained only while the corresponding override remains the
+    /// winning observation.
+    #[serde(default)]
+    pub override_notes: BTreeMap<MetricKey, String>,
+    #[serde(default)]
+    pub evidence: EvidenceSummary,
 }
 
 impl ModelRecord {
@@ -154,6 +201,9 @@ impl ModelRecord {
             missing: MissingInfo::new(),
             synthesized: BTreeMap::new(),
             override_reported: BTreeSet::new(),
+            metric_sources: BTreeMap::new(),
+            override_notes: BTreeMap::new(),
+            evidence: EvidenceSummary::default(),
         }
     }
 }

@@ -7,6 +7,7 @@ pub mod aistupidlevel;
 pub mod arc_agi;
 pub mod artificial_analysis;
 pub mod bfcl;
+pub mod eqbench;
 pub mod gso;
 pub mod http;
 pub mod livecodebench;
@@ -27,6 +28,7 @@ pub use aistupidlevel::AiStupidLevelSource;
 pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
 pub use bfcl::BfclSource;
+pub use eqbench::{EqBenchCreativeWritingSource, EqBenchJudgemarkSource};
 pub use gso::GsoSource;
 pub use http::ReqwestHttp;
 pub use livecodebench::LiveCodeBenchSource;
@@ -160,6 +162,15 @@ pub(crate) fn use_cached_csv(opts: FetchOptions<'_>, key: &str, ttl: Duration) -
         .unwrap_or(false)
 }
 
+pub(crate) fn use_cached_js(opts: FetchOptions<'_>, key: &str, ttl: Duration) -> bool {
+    if opts.offline {
+        return true;
+    }
+    opts.cache_dir
+        .map(|d| cache_is_fresh(&cache_js_path(d, key), ttl))
+        .unwrap_or(false)
+}
+
 pub fn cache_is_fresh(path: &Path, ttl: Duration) -> bool {
     let Ok(meta) = std::fs::metadata(path) else {
         return false;
@@ -199,6 +210,10 @@ pub fn cache_csv_path(cache: &Path, key: &str) -> PathBuf {
 
 pub fn cache_html_path(cache: &Path, key: &str) -> PathBuf {
     cache.join(format!("{key}.html"))
+}
+
+pub fn cache_js_path(cache: &Path, key: &str) -> PathBuf {
+    cache.join(format!("{key}.js"))
 }
 
 pub(crate) fn read_cached_bytes(path: &Path) -> Result<Vec<u8>, SourceError> {
@@ -263,5 +278,15 @@ pub(crate) fn write_cache_csv(
 ) -> Result<(), SourceError> {
     std::fs::create_dir_all(cache_dir)?;
     std::fs::write(cache_csv_path(cache_dir, key), payload)?;
+    Ok(())
+}
+
+pub(crate) fn write_cache_js(
+    cache_dir: &Path,
+    key: &str,
+    payload: &str,
+) -> Result<(), SourceError> {
+    std::fs::create_dir_all(cache_dir)?;
+    std::fs::write(cache_js_path(cache_dir, key), payload)?;
     Ok(())
 }

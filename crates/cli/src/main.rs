@@ -576,7 +576,7 @@ async fn build_scoreboard(
             coefficients: coefficients.clone(),
             generated_at: now,
             generator: format!("ipbr-rank {}", env!("CARGO_PKG_VERSION")),
-            methodology: "v1".to_string(),
+            methodology: "v2".to_string(),
             source_summary,
             prev_scores: None,
         },
@@ -593,7 +593,16 @@ fn record_source_summary(
     rows: Vec<ipbr_core::RawRow>,
     effort_policy: &ipbr_core::EffortPolicy,
 ) {
-    let stats: IngestStats = ingest_rows_with_policy(records, rows, effort_policy);
+    // Public source counts describe fetched observations, not sibling rows
+    // synthesized after fetch. Ingest direct rows first, then fills, while
+    // reporting match statistics only for the upstream payload.
+    let (direct_rows, synthesized_rows): (Vec<_>, Vec<_>) = rows
+        .into_iter()
+        .partition(|row| row.synthesized_from.is_none());
+    let stats: IngestStats = ingest_rows_with_policy(records, direct_rows, effort_policy);
+    if !synthesized_rows.is_empty() {
+        let _ = ingest_rows_with_policy(records, synthesized_rows, effort_policy);
+    }
     source_summary.insert(
         source_id.to_string(),
         SourceSummary {
@@ -638,16 +647,25 @@ struct ModelToml {
     #[serde(default)]
     metrics: BTreeMap<String, f64>,
     #[serde(default)]
-    synthesized: BTreeMap<String, SynthesisProvenanceToml>,
+    raw_metrics: BTreeMap<String, f64>,
+    #[serde(default)]
+    metric_evidence: BTreeMap<String, MetricEvidenceToml>,
+    #[serde(default)]
+    evidence: ipbr_core::EvidenceSummary,
     missing: MissingToml,
 }
 
 #[derive(Debug, Deserialize)]
-struct SynthesisProvenanceToml {
-    source: String,
-    from: String,
+struct MetricEvidenceToml {
+    class: String,
     #[serde(default)]
-    category: ipbr_core::SynthesisCategory,
+    source: Option<String>,
+    #[serde(default)]
+    donor: Option<String>,
+    #[serde(default)]
+    synthesis_category: Option<ipbr_core::SynthesisCategory>,
+    #[serde(default)]
+    citation: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -667,16 +685,6 @@ impl SourceSummaryToml {
             rows: self.n_rows_ingested,
             matched: self.n_rows_matched,
             unmatched: self.n_rows_unmatched,
-        }
-    }
-}
-
-impl SynthesisProvenanceToml {
-    fn into_synthesis_provenance(self) -> ipbr_core::SynthesisProvenance {
-        ipbr_core::SynthesisProvenance {
-            source_id: self.source,
-            from: self.from,
-            category: self.category,
         }
     }
 }
@@ -717,14 +725,37 @@ impl ModelToml {
         record.scores = self.scores;
         record.groups = self.groups;
         record.metrics = self.metrics;
+        record.raw_metrics = self.raw_metrics;
+        record.evidence = self.evidence;
         record.missing.metrics = self.missing.metrics.into_iter().collect();
         record.missing.groups_shrunk = self.missing.groups_shrunk.into_iter().collect();
         record.missing.synthesis_dominant = self.missing.synthesis_dominant;
-        record.synthesized = self
-            .synthesized
-            .into_iter()
-            .map(|(metric, provenance)| (metric, provenance.into_synthesis_provenance()))
-            .collect();
+        for (metric, evidence) in self.metric_evidence {
+            if let Some(source) = evidence.source.clone() {
+                record.metric_sources.insert(metric.clone(), source);
+            }
+            match evidence.class.as_str() {
+                "reported" => {
+                    record.override_reported.insert(metric.clone());
+                    if let Some(citation) = evidence.citation {
+                        record.override_notes.insert(metric, citation);
+                    }
+                }
+                "synthesized" => {
+                    if let Some(donor) = evidence.donor {
+                        record.synthesized.insert(
+                            metric,
+                            ipbr_core::SynthesisProvenance {
+                                source_id: evidence.source.unwrap_or_else(|| "unknown".to_string()),
+                                from: donor,
+                                category: evidence.synthesis_category.unwrap_or_default(),
+                            },
+                        );
+                    }
+                }
+                _ => {}
+            }
+        }
         record
     }
 }

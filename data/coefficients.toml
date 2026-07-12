@@ -1,6 +1,11 @@
 # Coefficients for ipbr-rank scoring.
 # This file is the authoritative source of truth; the CLI embeds it verbatim.
 
+# These derived metrics select the highest-priority available input instead of
+# averaging duplicate observations of the same benchmark. Input weights encode
+# precedence, not statistical mass.
+precedence_composites = ["TerminalBench21Composite"]
+
 # Group weights only reference metrics we actually source. Earlier revisions
 # carried NoveltyBench, EQWritingOrLongform, LiveBenchGeneral, NaturalPlan,
 # PlanBench, TravelPlanner, JudgeBench, CodeJudgeBench, RewardBench2,
@@ -10,72 +15,55 @@
 # narrower and honest than wide and fake.
 
 [group_weights.CRE]
-LMArenaCreativeOrOpenEnded = 0.50
-LMArenaText = 0.30
-ARC_AGI_2 = 0.20
+# EQ-Bench Creative Writing v3 supplies a direct, current creativity signal.
+# LM Arena Text remains a modest preference/breadth input; ARC adds novelty.
+EQBenchCreativeWriting = 0.50
+LMArenaText = 0.20
+ARC_AGI_2 = 0.30
 
 [group_weights.GEN]
-ArtificialAnalysisIntelligence = 0.34
-LMArenaText = 0.15
-GPQA_HLE_Reasoning = 0.14
-ARC_AGI_2 = 0.10
-ArtificialAnalysisMath = 0.08
-AIME25 = 0.06
-MMLUPro = 0.06
-BrowseComp = 0.04
-HLETools = 0.03
+# Aggregate indices and their component evaluations must not both count.
+# BrowseComp and HLETools remain diagnostics until a neutral direct feed exists.
+LMArenaText = 0.35
+ARC_AGI_2 = 0.30
+AAReasoningComposite = 0.35
 
 [group_weights.PLAN]
-# PLAN composition reflects "structured multi-step decomposition" measured
-# end-to-end. BFCL and TerminalBenchHard broaden tool-use / terminal-task
-# coverage while keeping any single agent harness from dominating PLAN.
-TerminalBench = 0.120
-TerminalBench21Composite = 0.035
-TerminalBenchHard = 0.060
-BFCLComposite = 0.060
-HiLBench = 0.040
-Toolathlon = 0.035
-OSWorldVerified = 0.030
-HLETools = 0.025
-BrowseComp = 0.020
-TauComposite = 0.145
-ArtificialAnalysisReasoning = 0.160
-IFBench = 0.100
-LongContextRecall = 0.075
-MCPAtlas = 0.095
+# PLAN uses current end-to-end agent, tool-use, instruction-following, and
+# context signals. Terminal-Bench 2.0 is superseded by 2.1. Reported-only
+# Toolathlon/OSWorld/HLETools/BrowseComp and the construct-mismatched ARC path
+# remain diagnostic rather than affecting the primary rank.
+TerminalBench21Composite = 0.13
+TerminalBenchHard = 0.08
+BFCLComposite = 0.10
+HiLBench = 0.08
+TauComposite = 0.14
+IFBench = 0.11
+LongContextRecall = 0.10
+MCPAtlas = 0.26
 
-# BUILD rebalanced around direct software-work evidence. SWEComposite remains
-# the largest single input, but Scale SWE Atlas now carries a separate
-# composite for codebase Q&A / test-writing / refactoring. BFCL and AA's
-# TerminalBenchHard/AALiveCodeBench fields add live tool/terminal/coding
-# coverage without giving any one harness a dominant coefficient. Live-coding
-# signals are collapsed into LiveCodingComposite so four correlated coding
-# benchmarks do not pile up as independent BUILD weights.
+# BUILD is centered on direct software-work evidence. SWEComposite remains the
+# largest input; SWE Atlas, terminal work, BFCL, GSO, live coding, and MCP
+# orchestration cover distinct implementation demands. Sonar remains a
+# diagnostic because its current rows mix explicit effort levels and measure a
+# narrower coding-quality profile than the repository/agent benchmarks.
 [group_weights.BUILD]
-SWEComposite = 0.29
-SWEAtlasComposite = 0.14
-MCPAtlas = 0.060
-TerminalBench = 0.045
-TerminalBench21Composite = 0.025
-TerminalBenchHard = 0.040
-BFCLComposite = 0.025
-HiLBench = 0.015
-Toolathlon = 0.015
-OSWorldVerified = 0.010
-GSO = 0.035
-GDPval = 0.045
-SonarComposite = 0.09
-LongContextRecall = 0.025
-LiveCodingComposite = 0.14
+SWEComposite = 0.284
+SWEAtlasComposite = 0.148
+MCPAtlas = 0.102
+TerminalBench21Composite = 0.080
+TerminalBenchHard = 0.057
+BFCLComposite = 0.068
+HiLBench = 0.045
+GSO = 0.103
+LongContextRecall = 0.045
+LiveCodingComposite = 0.068
 
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
 # don't pile up as independent weights.
 #
-# SWEComposite now favors SWE-Bench Pro and lets a model with direct
-# Verified+Pro coverage clear the shrink transition. Verified remains
-# useful for breadth, but Pro is the stronger live frontier signal because
-# Verified is increasingly saturated/contaminated at the top end.
+# Active composites and precedence fallbacks are defined below.
 [effort_policy]
 # Exceptions to the default scoring effort set
 # (default | medium | thinking | high | max/xhigh). These are retained for
@@ -141,12 +129,9 @@ effort = "thinking"
 source = "sweatlas_*"
 
 [synthesis]
-# Tightened to 0.50: more than half of a model's scored cells should not be
-# borrowed from siblings. The 15 % conservative pull already softens synthetic
-# values, but a stricter cap makes "synthesis_dominant" a meaningful warning
-# flag and prevents frontier models from ranking highly on mostly inferred
-# evidence. Terminal-Bench 2.1 / HiL-Bench narrow sources are still allowed to
-# run under the 0.65 per-source cap.
+# Sibling rows remain available for provenance and sensitivity views but have
+# zero reliability in the primary score. These caps bound emitted fills and
+# drive the weighted `synthesis_dominant` diagnostic.
 per_model_cap = 0.50
 # Several public sources have narrower coverage than the ranked model
 # set. 0.65 prevents a single source from dominating through synthesis
@@ -154,14 +139,12 @@ per_model_cap = 0.50
 per_source_cap = 0.65
 
 [composite_metrics.SWEComposite]
-# Rebalanced: Rebench↑0.15 (contamination-resistant rolling signal deserves more
-# weight), Verified↓0.10 (saturated/contaminated at the frontier; shrinking it
-# further reduces the influence of a benchmark where many frontier models cluster
-# near the ceiling). Pro and Multilingual weights stay unchanged.
-SWERebench = 0.45            # contamination-resistant rolling-window signal
-SWEBenchVerified = 0.10      # widely reported, but saturated/contaminated
-SWEBenchPro = 0.35           # hardest, multi-file (1.8k tasks, 4.1 files avg)
-SWEBenchMultilingual = 0.10  # static, narrow scope, harder to game
+# SWE-bench Verified is retained as a diagnostic but retired from the primary
+# rank because it is static, saturated at the frontier, and redundant with the
+# harder tracks. SWE-Rebench rows are admitted only for post-release windows.
+SWERebench = 0.45
+SWEBenchPro = 0.45
+SWEBenchMultilingual = 0.10
 
 # Scale SWE Atlas splits real software-engineering work into codebase Q&A,
 # test writing, and refactoring. Keep the three correlated Scale signals as
@@ -171,27 +154,25 @@ SWEAtlasQnA = 0.30
 SWEAtlasTestWriting = 0.30
 SWEAtlasRefactoring = 0.40
 
-# SonarComposite collapses Sonar's four submetrics (functional pass rate +
-# three correlated density metrics) into one signal so that BUILD treats
-# the whole Sonar payload as one source. Weights are kept proportional to
-# the previous standalone weights (functional 0.04 / issue 0.025 / bug 0.02
-# / vuln 0.015) → 0.40 / 0.25 / 0.20 / 0.15 within the composite.
+# Diagnostic-only composite retained for inspecting functional pass rate and
+# issue density. It has no final role path.
 [composite_metrics.SonarComposite]
-SonarFunctionalSkill = 0.40
-SonarIssueDensity = 0.25
-SonarBugDensity = 0.20
-SonarVulnerabilityDensity = 0.15
+SonarFunctionalSkill = 0.60
+SonarIssueDensity = 0.40
 
-# LiveCodingComposite collapses the four live coding/reasoning signals into one
-# BUILD input so they don't sit as four small independent weights. The weights
-# are proportional to the previous standalone BUILD weights
-# (ArtificialAnalysisCoding 0.04 / SciCode 0.04 / AALiveCodeBench 0.04 /
-# CopilotArenaOrLMArenaCode 0.02) → 0.286 / 0.286 / 0.286 / 0.142.
+# LiveCodingComposite combines the current, broadly covered coding signals.
 [composite_metrics.LiveCodingComposite]
-ArtificialAnalysisCoding = 0.286
-SciCode = 0.286
-AALiveCodeBench = 0.286
-CopilotArenaOrLMArenaCode = 0.142
+SciCode = 0.60
+CopilotArenaOrLMArenaCode = 0.40
+
+# GPQA and HLE are distinct observations. Collapse the AA reasoning family
+# exactly once instead of emitting the same blend under two names.
+[composite_metrics.AAReasoningComposite]
+# AIME 2025 and MMLU-Pro remain visible diagnostics, but AA retired them from
+# its current Intelligence Index. The primary reasoning composite uses the two
+# current, broadly covered leaves.
+GPQA = 0.50
+HLE = 0.50
 
 # TauComposite combines AA's general τ2-bench tool-use score with the newer
 # τ-bench banking field exposed in the same payload. Keep τ2 dominant because
@@ -200,9 +181,8 @@ CopilotArenaOrLMArenaCode = 0.142
 Tau2Bench = 0.75
 TauBanking = 0.25
 
-# TerminalBench21Composite combines the official Terminal-Bench 2.1 source
-# with AA's independently reported terminalbench_v2_1 field. The official
-# tbench.ai scrape remains the larger input; AA broadens model coverage.
+# The weights encode precedence: official Terminal-Bench 2.1 is preferred and
+# AA's observation is a coverage fallback. They are never averaged together.
 [composite_metrics.TerminalBench21Composite]
 TerminalBench21 = 0.55
 AATerminalBench21 = 0.45
@@ -211,14 +191,7 @@ AATerminalBench21 = 0.45
 # making the category splits visible to PLAN/BUILD. Overall stays largest
 # because it is the upstream leaderboard headline metric.
 [composite_metrics.BFCLComposite]
-BFCL = 0.35
-BFCLNonLiveAST = 0.10
-BFCLLive = 0.15
-BFCLMultiTurn = 0.15
-BFCLWebSearch = 0.08
-BFCLMemory = 0.07
-BFCLRelevanceDetection = 0.06
-BFCLIrrelevanceDetection = 0.04
+BFCL = 1.0
 
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
 # benchmark. It combines LM Arena search and document preference ratings
@@ -229,6 +202,13 @@ BFCLIrrelevanceDetection = 0.04
 LMArenaSearch = 0.50
 LMArenaDocument = 0.50
 
+[group_weights.REVIEW_DIRECT]
+# Judgemark directly evaluates a model used as a judge and publishes 95% CIs.
+# It is not code-review-specific, so the UI still labels R as a review proxy.
+EQBenchJudgemark = 1.0
+
+# Reference-only operational views. They are rendered as diagnostics but are
+# unreachable from every final_score_weights role and from balanced ranking.
 [group_weights.OPS_long]
 OutputSpeed = 0.61
 TTFT = 0.22
@@ -240,91 +220,90 @@ TTFT = 0.4375
 ContextWindow = 0.1875
 
 [group_weights.OPS_review]
-# Reviewing big PRs is the most context-hungry of the four roles, yet
-# OPS_review previously weighted ContextWindow lower than OPS_long does.
-# TTFT was also overweighted at 0.40 — reviewers care more that the full
-# judgment lands than that the first token does. Rebalanced 2026-04 after
-# multi-agent review: OutputSpeed up, TTFT down, ContextWindow up. Price is
-# intentionally excluded from OPS role scoring as of 2026-07.
 OutputSpeed = 0.375
 TTFT = 0.3125
 ContextWindow = 0.3125
 
-# Role weights — capability scores. AISL was removed from active scoring
-# after local reproduction showed the benchmark surface was not
-# representative enough of real model quality and was too noise-prone.
-# Its former 0.15 slot is redistributed into the non-operational public
-# benchmark groups for each role; OPS remains fixed at 0.08.
-#
-# Operational metrics (speed/context/TTFT) carry weight 0.08, up from
-# the earlier 0.03. The tail-penalty curve in OPS_* (top 80 % of the
-# population maps to 70..100, bottom 20 % to 0..70) means models in the
-# "fast enough" tier still cluster within a 2-point spread of each other
-# in the role score — the small-penalty regime the previous 0.03 weight
-# was trying to express. Models in the *bottom* 20 % drop sharply: at
-# weight 0.08 a model on the slowest tail loses ~5 points relative to
-# the fast cluster, which finally makes "utterly slow" actually hurt
-# without warping rankings between models that are merely "average fast"
-# vs "very fast." Use the OPS_* groups directly for a pure speed/context
-# view of the population.
+# Role weights are capability-only. Price, throughput, latency, and advertised
+# context have no path into these tables and therefore exactly zero rank weight.
 [final_score_weights.I_raw]
-# Idea generation is the least operationally sensitive role. Reduce the OPS
-# weight so creativity and general intelligence dominate the role score; the
-# GEN increase offsets the OPS decrease exactly.
-CRE = 0.62
-GEN = 0.33
-OPS_long = 0.05
+# Capability only. Operational and pricing metrics remain visible diagnostics
+# but do not affect any rank.
+CRE = 0.65
+GEN = 0.35
 
 [final_score_weights.P_raw]
-PLAN = 0.55
-GEN = 0.37
-OPS_precision = 0.08
+PLAN = 0.65
+GEN = 0.35
 
 [final_score_weights.B_raw]
-BUILD = 0.84
-PLAN = 0.08
-OPS_precision = 0.08
+BUILD = 0.95
+PLAN = 0.05
 
 [final_score_weights.R]
-LM_ARENA_REVIEW_PROXY = 0.25
-BUILD = 0.29
-PLAN = 0.38
-OPS_review = 0.08
+# Judgemark measures judge discrimination rather than code review and has a
+# narrow direct cohort, so it no longer dominates the Review proxy.
+REVIEW_DIRECT = 0.20
+LM_ARENA_REVIEW_PROXY = 0.20
+BUILD = 0.30
+PLAN = 0.30
 
 [aggregation]
-# Coverage threshold around which we transition from shrink-to-50 to
-# trusting the present-weight mean directly. Raised to 0.75 with a narrower
-# 0.10 band so models need fuller evidence before the missing-weight shrink is
-# removed; the smoother transition still avoids a discontinuous cliff.
+# Presentation-only threshold for the legacy `groups_shrunk` diagnostic.
+# Numeric v2 capability uses available same-model evidence; it never switches
+# behavior at this threshold.
 trust_threshold = 0.75
-# The width of the smooth-step transition band (centered on trust_threshold).
-# 0.10 means the transition occurs over [0.70, 0.80].
 trust_transition_width = 0.10
 
-[penalties]
-# Conservative discount applied to per-metric values that came in via
-# cross-vendor/cross-series or older-target-from-newer-donor synthesis
-# rather than a direct measurement. Same-series forward fills declared in
-# data/synthesis_aliases.toml use zero synthesis penalty.
-synthesis = 0.15
-# Manual overrides are public, cited reported measurements. They stay out of
-# the direct-source normalization baseline, but no longer receive an additional
-# post-normalization pull toward 50.
-override_reported = 0.0
+[evidence]
+# Ranking v2 separates score from evidence quality. Same-model cited reports
+# are discounted; sibling values are published only as provenance/sensitivity
+# and contribute exactly the neutral prior to the primary score. No single
+# correlated source/benchmark family may exceed 30% of role leaf weight.
+prior_score = 50.0
+direct_reliability = 1.0
+reported_reliability = 0.60
+conservative_synthesis_reliability = 0.0
+same_series_synthesis_reliability = 0.0
+stronger_successor_synthesis_reliability = 0.0
+provisional_min_direct = 0.60
+provisional_min_families = 3
+max_family_weight = 0.30
+
+[normalization]
+# v2 freezes each ranked metric's raw-unit scale to the refreshed 2026-07-12
+# cohort. Anchors are the direct-evidence p5/p95 values where at least two
+# distinct direct observations existed; reported-only metrics use the same
+# quantiles over cited reports. Future cohorts do not move these anchors.
+anchor_version = "2026-07-12.v1"
+snapshot_date = "2026-07-12"
+derivation = "direct_p05_p95_with_reported_only_fallback"
+low_quantile = 0.05
+high_quantile = 0.95
+reported_fallback = true
 
 [metrics.LMArenaText]
+family = "lmarena"
+anchor_low = 1382.87
+anchor_high = 1487.64
 higher_better = true
 log_scale = false
 groups = ["CRE", "GEN"]
 transform = "percentile"
 
 [metrics.LMArenaCreativeOrOpenEnded]
+family = "lmarena"
+# Retained as an unscored schema key for older consumers. The source no longer
+# fabricates it from the identical LMArenaText rating.
 higher_better = true
 log_scale = false
-groups = ["CRE"]
+groups = []
 transform = "percentile"
 
 [metrics.CopilotArenaOrLMArenaCode]
+family = "lmarena"
+anchor_low = 1260.30
+anchor_high = 1559.63
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
@@ -332,15 +311,39 @@ groups = []
 transform = "percentile"
 
 [metrics.LMArenaSearch]
+family = "lmarena"
+anchor_low = 1142.22
+anchor_high = 1242.02
 higher_better = true
 log_scale = false
 groups = ["LM_ARENA_REVIEW_PROXY"]
 transform = "percentile"
 
 [metrics.LMArenaDocument]
+family = "lmarena"
+anchor_low = 1412.94
+anchor_high = 1499.34
 higher_better = true
 log_scale = false
 groups = ["LM_ARENA_REVIEW_PROXY"]
+transform = "percentile"
+
+[metrics.EQBenchCreativeWriting]
+family = "eqbench"
+anchor_low = 1367.42
+anchor_high = 2185.10
+higher_better = true
+log_scale = false
+groups = ["CRE"]
+transform = "percentile"
+
+[metrics.EQBenchJudgemark]
+family = "eqbench"
+anchor_low = 35.3666
+anchor_high = 88.2502
+higher_better = true
+log_scale = false
+groups = ["REVIEW_DIRECT"]
 transform = "percentile"
 
 # All benchmark metrics use percentile normalization so they're on a
@@ -351,12 +354,14 @@ transform = "percentile"
 # leaderboard X" maps to ~100 across all benchmarks, regardless of headline
 # difficulty.
 [metrics.ArtificialAnalysisIntelligence]
+family = "artificial_analysis"
 higher_better = true
 log_scale = false
 groups = ["GEN"]
 transform = "percentile"
 
 [metrics.ArtificialAnalysisCoding]
+family = "artificial_analysis"
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
@@ -364,12 +369,33 @@ groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisReasoning]
+family = "artificial_analysis"
+# Retained for schema compatibility; replaced by distinct GPQA and HLE inputs.
 higher_better = true
 log_scale = false
-groups = ["PLAN"]
+groups = []
+transform = "percentile"
+
+[metrics.GPQA]
+family = "artificial_analysis"
+anchor_low = 77.15
+anchor_high = 92.765
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.HLE]
+family = "artificial_analysis"
+anchor_low = 9.645
+anchor_high = 44.52
+higher_better = true
+log_scale = false
+groups = ["GEN"]
 transform = "percentile"
 
 [metrics.LiveCodeBench]
+family = "livecodebench"
 # Retained as an ingested metric for backwards-compat with the cached
 # fixture and any consumers reading per-source values, but removed from
 # group_weights.BUILD (see comment there). The upstream JSON has been
@@ -387,15 +413,20 @@ transform = "percentile"
 # `Opt@1` setting; among Opt@1 rows for the same model we keep the one
 # with the highest reasoning_effort (max/xhigh before high before default).
 [metrics.GSO]
+family = "gso"
+anchor_low = 3.185
+anchor_high = 43.875
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.GPQA_HLE_Reasoning]
+family = "artificial_analysis"
+# Retained for schema compatibility; no longer emitted or scored.
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = []
 transform = "percentile"
 
 # SWE-flavor metrics use percentile normalization so they enter the
@@ -405,12 +436,18 @@ transform = "percentile"
 # with Rebench coverage. After percentile normalization, "top of Rebench"
 # and "top of Verified" both map to ~100 within their own populations.
 [metrics.SWEBenchVerified]
+family = "swe"
+anchor_low = 57.1325
+anchor_high = 77.85
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.TerminalBench]
+family = "terminal_bench"
+anchor_low = 24.76
+anchor_high = 80.20
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -420,6 +457,9 @@ transform = "percentile"
 # covering current agent/model combinations such as GPT-5.5, Opus 4.8,
 # Gemini 3.1 Pro, Claude Opus 4.7, and GLM-5.1.
 [metrics.TerminalBench21]
+family = "terminal_bench"
+anchor_low = 62.0
+anchor_high = 83.31
 # Input to TerminalBench21Composite.
 higher_better = true
 log_scale = false
@@ -427,19 +467,35 @@ groups = []
 transform = "percentile"
 
 [metrics.AATerminalBench21]
+family = "terminal_bench"
+anchor_low = 34.4944
+anchor_high = 84.4007
 # Input to TerminalBench21Composite; AA's terminalbench_v2_1 field.
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
+[metrics.TerminalBench21Composite]
+family = "terminal_bench"
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "as_score"
+
 [metrics.TerminalBenchHard]
+family = "artificial_analysis"
+anchor_low = 23.7879
+anchor_high = 58.0303
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
 [metrics.BFCL]
+family = "bfcl"
+anchor_low = 56.018
+anchor_high = 75.778
 # Input to BFCLComposite.
 higher_better = true
 log_scale = false
@@ -447,42 +503,49 @@ groups = []
 transform = "percentile"
 
 [metrics.BFCLNonLiveAST]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLLive]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLMultiTurn]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLWebSearch]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLMemory]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLRelevanceDetection]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.BFCLIrrelevanceDetection]
+family = "bfcl"
 higher_better = true
 log_scale = false
 groups = []
@@ -494,18 +557,27 @@ transform = "percentile"
 # small BUILD contribution because successful escalation is needed to finish
 # blocked SWE tasks.
 [metrics.HiLBench]
+family = "scale"
+anchor_low = 5.683
+anchor_high = 28.3135
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
 [metrics.SWEBenchMultilingual]
+family = "swe"
+anchor_low = 62.135
+anchor_high = 72.315
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.SWERebench]
+family = "swe"
+anchor_low = 30.7162
+anchor_high = 60.7613
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
@@ -514,24 +586,36 @@ transform = "percentile"
 # Scale's harder, multi-file SWE-Bench. Frontier scores 50-65% (vs Verified
 # saturating near 90), so it differentiates better at the top.
 [metrics.SWEBenchPro]
+family = "swe"
+anchor_low = 21.832
+anchor_high = 56.64
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.SWEAtlasQnA]
+family = "scale"
+anchor_low = 9.67
+anchor_high = 50.862
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.SWEAtlasTestWriting]
+family = "scale"
+anchor_low = 23.9775
+anchor_high = 51.8525
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.SWEAtlasRefactoring]
+family = "scale"
+anchor_low = 15.712
+anchor_high = 51.046
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
@@ -541,6 +625,9 @@ transform = "percentile"
 # Feeds PLAN (planning multi-step tool sequences) and BUILD (real coding-agent
 # loops are tool-orchestration loops).
 [metrics.MCPAtlas]
+family = "scale"
+anchor_low = 56.70
+anchor_high = 83.30
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -551,30 +638,35 @@ transform = "percentile"
 # harnesses and the public third-party boards are not yet ingested here.
 # `groups = []` keeps them descriptively available without changing weights.
 [metrics.KimiCodeBenchV2]
+family = "vendor_reported"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.ProgramBench]
+family = "vendor_reported"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.MLSBenchLite]
+family = "vendor_reported"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.KimiClaw247Bench]
+family = "vendor_reported"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.MCPMarkVerified]
+family = "vendor_reported"
 higher_better = true
 log_scale = false
 groups = []
@@ -583,6 +675,9 @@ transform = "percentile"
 # ARC-AGI v2 (semi-private track) — pure novel-pattern induction.
 # Orthogonal to GPQA/HLE which test learned knowledge.
 [metrics.ARC_AGI_2]
+family = "arc_agi"
+anchor_low = 3.792
+anchor_high = 76.8925
 higher_better = true
 log_scale = false
 groups = ["GEN", "CRE"]
@@ -592,6 +687,9 @@ transform = "percentile"
 # previously unused. Wiring them up gives PLAN and BUILD more breadth without
 # adding any new HTTP fetches.
 [metrics.Tau2Bench]
+family = "artificial_analysis"
+anchor_low = 54.3275
+anchor_high = 98.0117
 # Input to TauComposite.
 higher_better = true
 log_scale = false
@@ -599,6 +697,9 @@ groups = []
 transform = "percentile"
 
 [metrics.TauBanking]
+family = "artificial_analysis"
+anchor_low = 8.65979
+anchor_high = 30.3711
 # Input to TauComposite; AA's tau_banking field.
 higher_better = true
 log_scale = false
@@ -606,6 +707,9 @@ groups = []
 transform = "percentile"
 
 [metrics.SciCode]
+family = "artificial_analysis"
+anchor_low = 38.625
+anchor_high = 56.375
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
@@ -613,6 +717,9 @@ groups = []
 transform = "percentile"
 
 [metrics.AALiveCodeBench]
+family = "artificial_analysis"
+anchor_low = 61.35
+anchor_high = 91.07
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
@@ -620,30 +727,44 @@ groups = []
 transform = "percentile"
 
 [metrics.IFBench]
+family = "artificial_analysis"
+anchor_low = 45.5238
+anchor_high = 80.9524
 higher_better = true
 log_scale = false
 groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.ArtificialAnalysisMath]
+family = "artificial_analysis"
+# Diagnostic aggregate only; AIME and other distinct components are scored.
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = []
 transform = "percentile"
 
 [metrics.AIME25]
+family = "artificial_analysis"
+anchor_low = 53.1333
+anchor_high = 97.60
 higher_better = true
 log_scale = false
 groups = ["GEN"]
 transform = "percentile"
 
 [metrics.MMLUPro]
+family = "artificial_analysis"
+anchor_low = 78.31
+anchor_high = 89.59
 higher_better = true
 log_scale = false
 groups = ["GEN"]
 transform = "percentile"
 
 [metrics.LongContextRecall]
+family = "artificial_analysis"
+anchor_low = 55.9833
+anchor_high = 74.0
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -651,31 +772,39 @@ transform = "percentile"
 
 # Sonar Code Quality leaderboard — functional pass rate.
 [metrics.SonarFunctionalSkill]
+family = "sonar"
+anchor_low = 73.239
+anchor_high = 83.646
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 # Sonar issue density (issues / kLOC). Lower is better; the metric def
 # inverts via `higher_better = false` before percentile normalization.
 [metrics.SonarIssueDensity]
+family = "sonar"
+anchor_low = 14.85
+anchor_high = 25.3505
 higher_better = false
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 # Sonar bug density (bugs / kLOC). Lower is better.
 [metrics.SonarBugDensity]
+family = "sonar"
 higher_better = false
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 # Sonar vulnerability density (vulnerabilities / kLOC). Lower is better.
 [metrics.SonarVulnerabilityDensity]
+family = "sonar"
 higher_better = false
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 # GDPval-AA measures real-world economic-value workflows across 44 knowledge-
@@ -683,6 +812,9 @@ transform = "percentile"
 # only via overrides because AA's GDPval endpoint isn't exposed through the
 # LLM-list API we already fetch.
 [metrics.GDPval]
+family = "vendor_reported"
+anchor_low = 869.95
+anchor_high = 1782.90
 higher_better = true
 log_scale = false
 groups = ["BUILD"]
@@ -692,6 +824,9 @@ transform = "percentile"
 # Values currently come from official release/model-card tables, so they are
 # treated as override-reported rather than direct leaderboard measurements.
 [metrics.Toolathlon]
+family = "vendor_reported"
+anchor_low = 31.61
+anchor_high = 58.345
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -701,6 +836,9 @@ transform = "percentile"
 # for planning and light BUILD evidence, but kept modestly weighted because
 # harness/scaffold differences can matter more than pure model quality.
 [metrics.OSWorldVerified]
+family = "vendor_reported"
+anchor_low = 59.26
+anchor_high = 83.48
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -710,45 +848,54 @@ transform = "percentile"
 # PLAN beyond static knowledge tests, but stays small because many rows are
 # official-table reports rather than a single neutral live leaderboard.
 [metrics.BrowseComp]
+family = "vendor_reported"
+anchor_low = 49.585
+anchor_high = 86.04
 higher_better = true
 log_scale = false
 groups = ["GEN", "PLAN"]
 transform = "percentile"
 
-# Tool-assisted Humanity's Last Exam. Kept separate from GPQA_HLE_Reasoning,
-# which blends AA's no-tools HLE/GPQA fields, so tool-use gains do not silently
-# rewrite the no-tools reasoning axis.
+# Tool-assisted Humanity's Last Exam. Kept separate from the no-tools GPQA and
+# HLE leaves so tool-use gains do not silently rewrite the reasoning composite.
 [metrics.HLETools]
+family = "vendor_reported"
+anchor_low = 36.34
+anchor_high = 55.78
 higher_better = true
 log_scale = false
 groups = ["GEN", "PLAN"]
 transform = "percentile"
 
-# Operational metrics use the `tail_penalty` transform: the top 80 % of
+# Reference-only operational metrics use the `tail_penalty` transform: the top 80 % of
 # the population maps into 70-100 (most models look "fast enough"
 # at a glance), only the bottom 20 % drops sharply. Linear/percentile
 # normalization made every spread between models matter equally, which
 # over-rewarded the very fastest models and over-punished moderately slow
-# ones. Users perceive operational speed in tiers, not linearly.
+# ones. These values remain visible diagnostics but have no final-score path.
 [metrics.OutputSpeed]
+family = "operations"
 higher_better = true
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
 transform = "tail_penalty"
 
 [metrics.TTFT]
+family = "operations"
 higher_better = false
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]
 transform = "tail_penalty"
 
 [metrics.BlendedCost]
+family = "operations"
 higher_better = false
 log_scale = true
 groups = []
 transform = "tail_penalty"
 
 [metrics.ContextWindow]
+family = "operations"
 higher_better = true
 log_scale = true
 groups = ["OPS_long", "OPS_precision", "OPS_review"]

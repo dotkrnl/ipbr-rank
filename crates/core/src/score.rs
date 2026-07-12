@@ -1,10 +1,24 @@
-use crate::aggregate::missing_safe_avg;
-use crate::coefficients::{Coefficients, MetricTransform, PenaltiesConfig};
-use crate::model::ModelRecord;
-use crate::normalize::{as_score_0_100, robust_norm, tail_penalty_norm};
-use std::collections::BTreeMap;
+use crate::coefficients::{Coefficients, EvidenceConfig, MetricTransform};
+use crate::model::{
+    EvidenceCoverage, EvidenceSummary, MissingInfo, ModelRecord, SynthesisCategory,
+};
+use crate::normalize::{anchored_logistic_norm, as_score_0_100, robust_norm, tail_penalty_norm};
+use std::collections::{BTreeMap, BTreeSet};
 
 const ROLE_KEYS: &[&str] = &["I_raw", "P_raw", "B_raw", "R"];
+const EPS: f64 = 1e-12;
+
+#[derive(Debug, Clone)]
+struct Signal {
+    value: f64,
+    evidence: EvidenceCoverage,
+}
+
+#[derive(Debug, Clone)]
+struct AggregateEvaluation {
+    signal: Option<Signal>,
+    evidence: EvidenceCoverage,
+}
 
 pub fn compute_scores(records: &mut [ModelRecord]) {
     let coef = Coefficients::load_embedded().expect("embedded coefficients are valid");
@@ -12,12 +26,42 @@ pub fn compute_scores(records: &mut [ModelRecord]) {
 }
 
 pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
-    let penalties = coef.penalties.clone().unwrap_or_default();
     let aggregation = coef.aggregation.clone().unwrap_or_default();
-    normalize_population(records, coef, &penalties);
-    compute_composite_metrics(records, coef, &aggregation);
-    aggregate_groups(records, coef, &aggregation);
-    compute_role_scores(records, coef, &aggregation);
+    let evidence_cfg = coef.evidence.clone().unwrap_or_default();
+
+    // Derived state must not leak across repeated scoring passes.
+    for record in records.iter_mut() {
+        record.metrics.clear();
+        record.groups.clear();
+        record.scores = Default::default();
+        record.missing.metrics.clear();
+        record.missing.groups_shrunk.clear();
+        record.missing.synthesis_dominant = false;
+        record.evidence = EvidenceSummary::default();
+    }
+
+    let mut metric_signals = normalize_population(records, coef, &evidence_cfg);
+    compute_composite_metrics(records, coef, &evidence_cfg, &mut metric_signals);
+    let group_signals =
+        aggregate_groups(records, coef, &aggregation, &evidence_cfg, &metric_signals);
+    compute_role_scores(
+        records,
+        coef,
+        &evidence_cfg,
+        &metric_signals,
+        &group_signals,
+    );
+
+    // Replace the old raw-cell heuristic with actual weighted role paths.
+    if let Some(synthesis) = &coef.synthesis {
+        for record in records.iter_mut() {
+            record.missing.synthesis_dominant = record
+                .evidence
+                .roles
+                .values()
+                .any(|coverage| coverage.synthesized > synthesis.per_model_cap + EPS);
+        }
+    }
 }
 
 /// Compute each composite metric as a missing-safe weighted average of its
@@ -29,23 +73,75 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
 fn compute_composite_metrics(
     records: &mut [ModelRecord],
     coef: &Coefficients,
-    aggregation: &crate::coefficients::AggregationConfig,
+    evidence_cfg: &EvidenceConfig,
+    metric_signals: &mut [BTreeMap<String, Signal>],
 ) {
-    for r in records.iter_mut() {
+    let prior = evidence_cfg.prior();
+    for (r, signals) in records.iter_mut().zip(metric_signals.iter_mut()) {
         for (name, weights) in &coef.composite_metrics {
             let prefix = format!("{name}/");
-            let (value, _shrunk) =
-                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
-            r.metrics.insert(name.clone(), value);
+            let evaluated = if coef.precedence_composites.contains(name) {
+                precedence_signal(signals, weights, Some(&mut r.missing), &prefix)
+            } else {
+                aggregate_signals(signals, weights, Some(&mut r.missing), &prefix, prior)
+            };
+            // Crucial distinction: a fully absent composite stays absent.
+            // Partial composites contain explicit prior replacements and
+            // preserve their recursive evidence coverage.
+            if let Some(signal) = evaluated.signal {
+                r.metrics.insert(name.clone(), signal.value);
+                signals.insert(name.clone(), signal);
+            }
         }
+    }
+}
+
+fn precedence_signal(
+    signals: &BTreeMap<String, Signal>,
+    weights: &BTreeMap<String, f64>,
+    missing_info: Option<&mut MissingInfo>,
+    prefix: &str,
+) -> AggregateEvaluation {
+    let selected = weights
+        .iter()
+        .filter(|(_, weight)| weight.is_finite() && **weight > 0.0)
+        .filter_map(|(key, weight)| signals.get(key).map(|signal| (key, *weight, signal)))
+        .max_by(|(left_key, left_weight, _), (right_key, right_weight, _)| {
+            left_weight
+                .total_cmp(right_weight)
+                .then_with(|| right_key.cmp(left_key))
+        });
+
+    if let Some((_, _, signal)) = selected {
+        return AggregateEvaluation {
+            signal: Some(signal.clone()),
+            evidence: signal.evidence.clone(),
+        };
+    }
+
+    if let Some(info) = missing_info {
+        for (key, weight) in weights {
+            if weight.is_finite() && *weight > 0.0 {
+                info.metrics.insert(format!("{prefix}{key}"));
+            }
+        }
+    }
+    AggregateEvaluation {
+        signal: None,
+        evidence: EvidenceCoverage {
+            missing: 1.0,
+            ..Default::default()
+        },
     }
 }
 
 fn normalize_population(
     records: &mut [ModelRecord],
     coef: &Coefficients,
-    penalties: &PenaltiesConfig,
-) {
+    evidence_cfg: &EvidenceConfig,
+) -> Vec<BTreeMap<String, Signal>> {
+    let prior = evidence_cfg.prior();
+    let mut signals = vec![BTreeMap::new(); records.len()];
     for (metric_key, def) in &coef.metrics {
         let all_pop: Vec<f64> = records
             .iter()
@@ -65,80 +161,203 @@ fn normalize_population(
         } else {
             &all_pop
         };
-        for r in records.iter_mut() {
+        for (idx, r) in records.iter_mut().enumerate() {
             let raw = match r.raw_metrics.get(metric_key) {
                 Some(v) if v.is_finite() => *v,
                 _ => continue,
             };
-            let normed = match def.transform {
-                MetricTransform::AsScore => as_score_0_100(raw),
-                MetricTransform::Percentile => {
-                    robust_norm(raw, pop, def.higher_better, def.log_scale)
+            let normed = match (def.anchor_low, def.anchor_high) {
+                (Some(low), Some(high)) => {
+                    anchored_logistic_norm(raw, low, high, def.higher_better, def.log_scale)
                 }
-                MetricTransform::TailPenalty => {
-                    tail_penalty_norm(raw, pop, def.higher_better, def.log_scale)
-                }
+                _ => match def.transform {
+                    MetricTransform::AsScore => as_score_0_100(raw),
+                    MetricTransform::Percentile => {
+                        robust_norm(raw, pop, def.higher_better, def.log_scale)
+                    }
+                    MetricTransform::TailPenalty => {
+                        tail_penalty_norm(raw, pop, def.higher_better, def.log_scale)
+                    }
+                },
             };
             if let Some(v) = normed {
-                let final_value = if let Some(provenance) = r.synthesized.get(metric_key) {
-                    // Pull conservative synthesized values toward the 50
-                    // baseline so they act as a softer signal than direct
-                    // measurements. Same-series forward fills are explicit
-                    // version-advance priors and carry no synthesis pull.
-                    let penalty = provenance.category.penalty(penalties.synthesis);
-                    v * (1.0 - penalty) + 50.0 * penalty
-                } else {
-                    v
-                };
-                let final_value = if r.override_reported.contains(metric_key) {
-                    // Manual overrides are public, cited reported values. The
-                    // configurable override penalty defaults to zero, but the
-                    // hook remains for coefficient experiments.
-                    final_value * (1.0 - penalties.override_reported)
-                        + 50.0 * penalties.override_reported
-                } else {
-                    final_value
-                };
+                let family = def.family.clone().unwrap_or_else(|| metric_key.clone());
+                let (reliability, mut coverage) =
+                    if let Some(provenance) = r.synthesized.get(metric_key) {
+                        let reliability = match provenance.category {
+                            SynthesisCategory::Conservative => {
+                                evidence_cfg.conservative_synthesis_reliability
+                            }
+                            SynthesisCategory::SameSeriesForward => {
+                                evidence_cfg.same_series_synthesis_reliability
+                            }
+                            SynthesisCategory::StrongerSuccessor => {
+                                evidence_cfg.stronger_successor_synthesis_reliability
+                            }
+                        };
+                        (
+                            evidence_cfg.reliability(reliability),
+                            EvidenceCoverage {
+                                synthesized: 1.0,
+                                ..Default::default()
+                            },
+                        )
+                    } else if r.override_reported.contains(metric_key) {
+                        (
+                            evidence_cfg.reliability(evidence_cfg.reported_reliability),
+                            EvidenceCoverage {
+                                reported: 1.0,
+                                ..Default::default()
+                            },
+                        )
+                    } else {
+                        let mut direct_families = BTreeSet::new();
+                        direct_families.insert(family);
+                        (
+                            evidence_cfg.reliability(evidence_cfg.direct_reliability),
+                            EvidenceCoverage {
+                                direct: 1.0,
+                                direct_families,
+                                family_count: 1,
+                                ..Default::default()
+                            },
+                        )
+                    };
+                coverage.effective = reliability;
+                let final_value = prior + reliability * (v - prior);
                 r.metrics.insert(metric_key.clone(), final_value);
+                signals[idx].insert(
+                    metric_key.clone(),
+                    Signal {
+                        value: final_value,
+                        evidence: coverage,
+                    },
+                );
             }
         }
     }
+    signals
 }
 
 fn aggregate_groups(
     records: &mut [ModelRecord],
     coef: &Coefficients,
     aggregation: &crate::coefficients::AggregationConfig,
-) {
-    for r in records.iter_mut() {
+    evidence_cfg: &EvidenceConfig,
+    metric_signals: &[BTreeMap<String, Signal>],
+) -> Vec<BTreeMap<String, Signal>> {
+    let prior = evidence_cfg.prior();
+    let mut group_signals = vec![BTreeMap::new(); records.len()];
+    for (idx, r) in records.iter_mut().enumerate() {
         for (group_key, weights) in &coef.group_weights {
             let prefix = format!("{group_key}/");
-            let (v, shrunk) =
-                missing_safe_avg(&r.metrics, weights, &mut r.missing, &prefix, aggregation);
-            r.groups.insert(group_key.clone(), v);
-            if shrunk {
+            let evaluated = aggregate_signals(
+                &metric_signals[idx],
+                weights,
+                Some(&mut r.missing),
+                &prefix,
+                prior,
+            );
+            r.groups.insert(
+                group_key.clone(),
+                evaluated
+                    .signal
+                    .as_ref()
+                    .map(|signal| signal.value)
+                    .unwrap_or(prior),
+            );
+            if evaluated.evidence.effective < crate::aggregate::shrink_coverage_cutoff(aggregation)
+            {
                 r.missing.groups_shrunk.insert(group_key.clone());
+            }
+            r.evidence
+                .groups
+                .insert(group_key.clone(), evaluated.evidence.clone());
+            if let Some(signal) = evaluated.signal {
+                group_signals[idx].insert(group_key.clone(), signal);
             }
         }
     }
+    group_signals
 }
 
 fn compute_role_scores(
     records: &mut [ModelRecord],
     coef: &Coefficients,
-    aggregation: &crate::coefficients::AggregationConfig,
+    evidence_cfg: &EvidenceConfig,
+    metric_signals: &[BTreeMap<String, Signal>],
+    group_signals: &[BTreeMap<String, Signal>],
 ) {
-    for r in records.iter_mut() {
+    let prior = evidence_cfg.prior();
+    let role_leaf_weights: BTreeMap<&str, BTreeMap<String, f64>> = ROLE_KEYS
+        .iter()
+        .filter_map(|role| {
+            coef.final_score_weights
+                .get(*role)
+                .map(|_| (*role, flatten_role_leaf_weights(coef, role)))
+        })
+        .collect();
+
+    for (idx, r) in records.iter_mut().enumerate() {
         let mut role_values: BTreeMap<&str, f64> = BTreeMap::new();
         for &role in ROLE_KEYS {
-            let weights = match coef.final_score_weights.get(role) {
-                Some(w) => w,
-                None => continue,
+            let Some(group_weights) = coef.final_score_weights.get(role) else {
+                continue;
             };
-            let prefix = format!("{role}/");
-            let (v, _shrunk) =
-                missing_safe_avg(&r.groups, weights, &mut r.missing, &prefix, aggregation);
-            role_values.insert(role, v);
+
+            // Keep high-level missing group diagnostics even though final
+            // scores are evaluated from flattened, family-capped leaves.
+            for (group, weight) in group_weights {
+                if weight.is_finite() && *weight > 0.0 && !group_signals[idx].contains_key(group) {
+                    r.missing.metrics.insert(format!("{role}/{group}"));
+                }
+            }
+
+            let leaves = role_leaf_weights.get(role).cloned().unwrap_or_default();
+            let mut family_leaves: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
+            for (metric, weight) in leaves {
+                let family = coef
+                    .metrics
+                    .get(&metric)
+                    .and_then(|def| def.family.clone())
+                    .unwrap_or_else(|| metric.clone());
+                *family_leaves
+                    .entry(family)
+                    .or_default()
+                    .entry(metric)
+                    .or_default() += weight;
+            }
+
+            let family_masses: BTreeMap<String, f64> = family_leaves
+                .iter()
+                .map(|(family, leaves)| (family.clone(), positive_weight_sum(leaves)))
+                .collect();
+            let capped_weights = cap_family_weights(&family_masses, evidence_cfg.max_family_weight);
+            let mut family_signals = BTreeMap::new();
+            let mut family_evidence = BTreeMap::new();
+            for (family, leaf_weights) in &family_leaves {
+                let evaluated =
+                    aggregate_signals(&metric_signals[idx], leaf_weights, None, "", prior);
+                family_evidence.insert(family.clone(), evaluated.evidence.clone());
+                if let Some(signal) = evaluated.signal {
+                    family_signals.insert(family.clone(), signal);
+                }
+            }
+            let evaluated = aggregate_signals(&family_signals, &capped_weights, None, "", prior);
+            let value = evaluated
+                .signal
+                .as_ref()
+                .map(|signal| signal.value)
+                .unwrap_or(prior);
+            // Numeric capability is estimated from available same-model
+            // evidence, while coverage always retains the full nominal path,
+            // including prior-only sibling fills and truly missing leaves.
+            let mut coverage = aggregate_evidence(&family_evidence, &capped_weights);
+            coverage.provisional = coverage.direct + EPS
+                < evidence_cfg.provisional_min_direct.clamp(0.0, 1.0)
+                || coverage.family_count < evidence_cfg.provisional_min_families;
+            r.evidence.roles.insert(role.to_string(), coverage);
+            role_values.insert(role, value);
         }
         r.scores.i_raw = *role_values.get("I_raw").unwrap_or(&50.0);
         r.scores.p_raw = *role_values.get("P_raw").unwrap_or(&50.0);
@@ -147,10 +366,238 @@ fn compute_role_scores(
     }
 }
 
+fn aggregate_signals(
+    signals: &BTreeMap<String, Signal>,
+    weights: &BTreeMap<String, f64>,
+    mut missing_info: Option<&mut MissingInfo>,
+    prefix: &str,
+    _prior: f64,
+) -> AggregateEvaluation {
+    let total = positive_weight_sum(weights);
+    if total <= EPS {
+        return AggregateEvaluation {
+            signal: None,
+            evidence: EvidenceCoverage {
+                missing: 1.0,
+                ..Default::default()
+            },
+        };
+    }
+
+    let mut value_sum = 0.0;
+    let mut observed_weight = 0.0;
+    let mut evidence = EvidenceCoverage::default();
+    for (key, weight) in weights {
+        if !weight.is_finite() || *weight <= 0.0 {
+            continue;
+        }
+        if let Some(signal) = signals.get(key).filter(|signal| signal.value.is_finite()) {
+            if signal.evidence.effective > EPS {
+                observed_weight += weight;
+                value_sum += weight * signal.value;
+            }
+            evidence.direct += weight * signal.evidence.direct;
+            evidence.reported += weight * signal.evidence.reported;
+            evidence.synthesized += weight * signal.evidence.synthesized;
+            evidence.missing += weight * signal.evidence.missing;
+            evidence.effective += weight * signal.evidence.effective;
+            evidence
+                .direct_families
+                .extend(signal.evidence.direct_families.iter().cloned());
+        } else {
+            evidence.missing += weight;
+            if let Some(info) = missing_info.as_deref_mut() {
+                info.metrics.insert(format!("{prefix}{key}"));
+            }
+        }
+    }
+
+    evidence.direct /= total;
+    evidence.reported /= total;
+    evidence.synthesized /= total;
+    evidence.missing /= total;
+    evidence.effective /= total;
+    evidence.family_count = evidence.direct_families.len();
+    let signal = (observed_weight > EPS).then(|| Signal {
+        value: (value_sum / observed_weight).clamp(0.0, 100.0),
+        evidence: evidence.clone(),
+    });
+    AggregateEvaluation { signal, evidence }
+}
+
+fn aggregate_evidence(
+    evidence_by_key: &BTreeMap<String, EvidenceCoverage>,
+    weights: &BTreeMap<String, f64>,
+) -> EvidenceCoverage {
+    let total = positive_weight_sum(weights);
+    if total <= EPS {
+        return EvidenceCoverage {
+            missing: 1.0,
+            ..Default::default()
+        };
+    }
+    let mut result = EvidenceCoverage::default();
+    for (key, weight) in weights {
+        if !weight.is_finite() || *weight <= 0.0 {
+            continue;
+        }
+        if let Some(evidence) = evidence_by_key.get(key) {
+            result.direct += weight * evidence.direct;
+            result.reported += weight * evidence.reported;
+            result.synthesized += weight * evidence.synthesized;
+            result.missing += weight * evidence.missing;
+            result.effective += weight * evidence.effective;
+            result
+                .direct_families
+                .extend(evidence.direct_families.iter().cloned());
+        } else {
+            result.missing += weight;
+        }
+    }
+    result.direct /= total;
+    result.reported /= total;
+    result.synthesized /= total;
+    result.missing /= total;
+    result.effective /= total;
+    result.family_count = result.direct_families.len();
+    result
+}
+
+fn positive_weight_sum(weights: &BTreeMap<String, f64>) -> f64 {
+    weights
+        .values()
+        .filter(|weight| weight.is_finite() && **weight > 0.0)
+        .sum()
+}
+
+fn flatten_role_leaf_weights(coef: &Coefficients, role: &str) -> BTreeMap<String, f64> {
+    let mut leaves = BTreeMap::new();
+    let Some(groups) = coef.final_score_weights.get(role) else {
+        return leaves;
+    };
+    let role_total = positive_weight_sum(groups);
+    if role_total <= EPS {
+        return leaves;
+    }
+    for (group, role_weight) in groups {
+        if !role_weight.is_finite() || *role_weight <= 0.0 {
+            continue;
+        }
+        let Some(metrics) = coef.group_weights.get(group) else {
+            continue;
+        };
+        let group_total = positive_weight_sum(metrics);
+        if group_total <= EPS {
+            continue;
+        }
+        for (metric, metric_weight) in metrics {
+            if !metric_weight.is_finite() || *metric_weight <= 0.0 {
+                continue;
+            }
+            let path_weight = role_weight / role_total * metric_weight / group_total;
+            expand_metric_leaves(coef, metric, path_weight, &mut leaves, &mut BTreeSet::new());
+        }
+    }
+    leaves
+}
+
+fn expand_metric_leaves(
+    coef: &Coefficients,
+    metric: &str,
+    weight: f64,
+    leaves: &mut BTreeMap<String, f64>,
+    visiting: &mut BTreeSet<String>,
+) {
+    if coef.precedence_composites.contains(metric) {
+        *leaves.entry(metric.to_string()).or_default() += weight;
+        return;
+    }
+    let Some(inputs) = coef.composite_metrics.get(metric) else {
+        *leaves.entry(metric.to_string()).or_default() += weight;
+        return;
+    };
+    if !visiting.insert(metric.to_string()) {
+        // Invalid cycles are treated as a missing leaf instead of recursing.
+        *leaves.entry(metric.to_string()).or_default() += weight;
+        return;
+    }
+    let total = positive_weight_sum(inputs);
+    if total <= EPS {
+        *leaves.entry(metric.to_string()).or_default() += weight;
+    } else {
+        for (input, input_weight) in inputs {
+            if input_weight.is_finite() && *input_weight > 0.0 {
+                expand_metric_leaves(coef, input, weight * input_weight / total, leaves, visiting);
+            }
+        }
+    }
+    visiting.remove(metric);
+}
+
+/// Redistribute family mass with water-filling so no configured family
+/// exceeds the cap. If there are too few families for the requested cap to
+/// sum to one, the smallest feasible cap (1 / family_count) is used.
+fn cap_family_weights(
+    original: &BTreeMap<String, f64>,
+    configured_cap: f64,
+) -> BTreeMap<String, f64> {
+    let mut normalized: BTreeMap<String, f64> = original
+        .iter()
+        .filter(|(_, weight)| weight.is_finite() && **weight > 0.0)
+        .map(|(key, weight)| (key.clone(), *weight))
+        .collect();
+    let total: f64 = normalized.values().sum();
+    if total <= EPS {
+        return BTreeMap::new();
+    }
+    for weight in normalized.values_mut() {
+        *weight /= total;
+    }
+    let count = normalized.len();
+    let cap = if configured_cap.is_finite() {
+        configured_cap.clamp(0.0, 1.0).max(1.0 / count as f64)
+    } else {
+        1.0
+    };
+    if cap >= 1.0 - EPS {
+        return normalized;
+    }
+
+    let mut result = BTreeMap::new();
+    let mut remaining: BTreeSet<String> = normalized.keys().cloned().collect();
+    let mut remaining_mass = 1.0;
+    loop {
+        let original_remaining: f64 = remaining.iter().map(|key| normalized[key]).sum();
+        if remaining.is_empty() || original_remaining <= EPS {
+            break;
+        }
+        let offenders: Vec<String> = remaining
+            .iter()
+            .filter(|key| remaining_mass * normalized[*key] / original_remaining > cap + EPS)
+            .cloned()
+            .collect();
+        if offenders.is_empty() {
+            for key in remaining {
+                result.insert(
+                    key.clone(),
+                    remaining_mass * normalized[&key] / original_remaining,
+                );
+            }
+            break;
+        }
+        for key in offenders {
+            result.insert(key.clone(), cap);
+            remaining.remove(&key);
+            remaining_mass -= cap;
+        }
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{ModelRecord, Vendor};
+    use crate::model::{ModelRecord, RoleScores, Vendor};
 
     fn make_record(id: &str, vendor: Vendor, raw: &[(&str, f64)]) -> ModelRecord {
         let mut r = ModelRecord::new(id.to_string(), id.to_string(), vendor);
@@ -165,8 +612,8 @@ mod tests {
         use crate::model::{SynthesisCategory, SynthesisProvenance};
         let coef = Coefficients::load_embedded().unwrap();
         // Three records: low, high (direct), high (synthesized). The two
-        // high records share a raw value but the synthesized one should
-        // be pulled toward 50 by `[penalties].synthesis`.
+        // high records share a raw value but the synthesized one is
+        // prior-only in the primary score.
         let mut records = vec![
             make_record(
                 "l/low",
@@ -198,15 +645,15 @@ mod tests {
         let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
         // Direct value should percentile-normalize to ~100 (top of pop).
         assert!(direct > 95.0, "direct={direct}");
-        // Synthesized value should be 100 * 0.85 + 50 * 0.15 = 92.5.
+        // Sibling synthesis has zero primary reliability.
         assert!(
-            (synth - 92.5).abs() < 0.5,
+            (synth - 50.0).abs() < 1e-9,
             "synthesized TerminalBench should pull toward 50, got {synth} (direct={direct})"
         );
     }
 
     #[test]
-    fn same_series_forward_synthesized_metric_values_are_not_penalized() {
+    fn same_series_forward_synthesized_metric_values_use_configured_reliability() {
         use crate::model::{SynthesisCategory, SynthesisProvenance};
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
@@ -240,13 +687,13 @@ mod tests {
         let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(direct > 95.0, "direct={direct}");
         assert!(
-            (synth - direct).abs() < 1e-9,
-            "same-series forward synthesis should match direct normalized value, got synth={synth}, direct={direct}"
+            (synth - 50.0).abs() < 1e-9,
+            "same-series forward synthesis should be prior-only, got synth={synth}, direct={direct}"
         );
     }
 
     #[test]
-    fn stronger_successor_synthesized_metric_values_are_not_penalized() {
+    fn stronger_successor_synthesized_metric_values_use_configured_reliability() {
         use crate::model::{SynthesisCategory, SynthesisProvenance};
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
@@ -280,13 +727,13 @@ mod tests {
         let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(direct > 95.0, "direct={direct}");
         assert!(
-            (synth - direct).abs() < 1e-9,
-            "stronger-successor synthesis should match direct normalized value, got synth={synth}, direct={direct}"
+            (synth - 50.0).abs() < 1e-9,
+            "stronger-successor synthesis should be prior-only, got synth={synth}, direct={direct}"
         );
     }
 
     #[test]
-    fn override_reported_metric_values_match_direct_normalized_values() {
+    fn override_reported_metric_values_use_configured_reliability() {
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
             make_record(
@@ -314,16 +761,19 @@ mod tests {
         let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
         let reported = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(direct > 95.0, "direct={direct}");
+        let expected = 50.0 + 0.60 * (direct - 50.0);
         assert!(
-            (reported - direct).abs() < 1e-9,
-            "override-reported score should match the direct normalized value, got reported={reported}, direct={direct}"
+            (reported - expected).abs() < 1e-9,
+            "override-reported score should use 0.60 reliability, got reported={reported}, direct={direct}"
         );
     }
 
     #[test]
     fn synthesized_metrics_do_not_set_normalization_baseline() {
         use crate::model::{SynthesisCategory, SynthesisProvenance};
-        let coef = Coefficients::load_embedded().unwrap();
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.metrics.get_mut("TerminalBench").unwrap().anchor_low = None;
+        coef.metrics.get_mut("TerminalBench").unwrap().anchor_high = None;
         let mut records = vec![
             make_record(
                 "l/low",
@@ -361,7 +811,9 @@ mod tests {
 
     #[test]
     fn override_reported_metrics_do_not_set_normalization_baseline_when_direct_population_exists() {
-        let coef = Coefficients::load_embedded().unwrap();
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.metrics.get_mut("TerminalBench").unwrap().anchor_low = None;
+        coef.metrics.get_mut("TerminalBench").unwrap().anchor_high = None;
         let mut records = vec![
             make_record(
                 "l/low",
@@ -446,17 +898,17 @@ mod tests {
 
         let high_composite = records[1].metrics.get("SWEComposite").copied().unwrap();
         assert!(
-            (high_composite - 100.0).abs() < 1e-6,
+            (high_composite - 100.0).abs() < 0.01,
             "expected ~100, got {high_composite}"
         );
         let low_composite = records[0].metrics.get("SWEComposite").copied().unwrap();
         assert!(
-            (low_composite - 0.0).abs() < 1e-6,
+            (low_composite - 0.0).abs() < 0.1,
             "expected ~0, got {low_composite}"
         );
         // BUILD group should now be exactly the composite (since it's the only weight).
         let high_code = records[1].groups.get("BUILD").copied().unwrap();
-        assert!((high_code - 100.0).abs() < 1e-6, "BUILD={high_code}");
+        assert!((high_code - 100.0).abs() < 0.01, "BUILD={high_code}");
     }
 
     #[test]
@@ -467,8 +919,8 @@ mod tests {
             [("SWEComposite".to_string(), 1.0)].into_iter().collect(),
         );
 
-        // Only one of the three SWE inputs is present — composite should
-        // shrink toward 50 proportional to the missing weight.
+        // Only one of the three SWE inputs is present. Capability remains the
+        // available same-model estimate; coverage carries the uncertainty.
         let mut records = vec![
             make_record("low/x", Vendor::Other("a".into()), &[("SWERebench", 0.0)]),
             make_record("hi/y", Vendor::Other("b".into()), &[("SWERebench", 100.0)]),
@@ -476,12 +928,9 @@ mod tests {
         compute_scores_with(&mut records, &coef);
 
         let high = records[1].metrics.get("SWEComposite").copied().unwrap();
-        // SWERebench carries weight 0.45 of 1.00 in the composite — that's
-        // below the 0.70 trust threshold, so the present-weighted mean (100)
-        // gets pulled toward 50: 100*0.45 + 50*0.55 = 72.5.
         assert!(
-            (high - 72.5).abs() < 1e-6,
-            "expected partial-coverage shrink to 72.5, got {high}"
+            (high - 100.0).abs() < 0.01,
+            "expected available-evidence estimate near 100, got {high}"
         );
     }
 
@@ -493,5 +942,239 @@ mod tests {
         for v in records[0].groups.values() {
             assert!((*v - 50.0).abs() < 1e-9);
         }
+        for composite in coef.composite_metrics.keys() {
+            assert!(
+                !records[0].metrics.contains_key(composite),
+                "fully missing composite {composite} must remain absent"
+            );
+        }
+        assert!(
+            records[0]
+                .evidence
+                .roles
+                .values()
+                .all(|coverage| coverage.missing > 0.999 && coverage.provisional)
+        );
+    }
+
+    #[test]
+    fn role_evidence_recurses_through_leaf_classes() {
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.evidence = Some(EvidenceConfig {
+            max_family_weight: 1.0,
+            ..Default::default()
+        });
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [
+                ("TerminalBench".to_string(), 0.5),
+                ("SWEBenchPro".to_string(), 0.5),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        coef.final_score_weights.insert(
+            "B_raw".to_string(),
+            [("BUILD".to_string(), 1.0)].into_iter().collect(),
+        );
+        coef.metrics.get_mut("TerminalBench").unwrap().family = Some("terminal".into());
+        coef.metrics.get_mut("SWEBenchPro").unwrap().family = Some("swe".into());
+
+        let mut records = vec![
+            make_record(
+                "low/x",
+                Vendor::Other("a".into()),
+                &[("TerminalBench", 0.0), ("SWEBenchPro", 0.0)],
+            ),
+            make_record(
+                "hi/y",
+                Vendor::Other("b".into()),
+                &[("TerminalBench", 100.0), ("SWEBenchPro", 100.0)],
+            ),
+        ];
+        records[1].override_reported.insert("SWEBenchPro".into());
+        compute_scores_with(&mut records, &coef);
+
+        let evidence = &records[1].evidence.roles["B_raw"];
+        assert!((evidence.direct - 0.5).abs() < 1e-9, "{evidence:?}");
+        assert!((evidence.reported - 0.5).abs() < 1e-9, "{evidence:?}");
+        assert!((evidence.effective - 0.8).abs() < 1e-9, "{evidence:?}");
+        assert_eq!(evidence.direct_families, ["terminal".to_string()].into());
+        assert_eq!(evidence.family_count, 1);
+        assert!(evidence.provisional);
+    }
+
+    #[test]
+    fn anchored_scores_do_not_move_when_unrelated_models_join_cohort() {
+        let mut coef = Coefficients::load_embedded().unwrap();
+        let def = coef.metrics.get_mut("TerminalBench").unwrap();
+        def.anchor_low = Some(0.0);
+        def.anchor_high = Some(100.0);
+        let mut initial = vec![
+            make_record("a", Vendor::Other("a".into()), &[("TerminalBench", 25.0)]),
+            make_record("b", Vendor::Other("b".into()), &[("TerminalBench", 75.0)]),
+        ];
+        compute_scores_with(&mut initial, &coef);
+        let before = initial[1].metrics["TerminalBench"];
+
+        let mut expanded = vec![
+            make_record("a", Vendor::Other("a".into()), &[("TerminalBench", 25.0)]),
+            make_record("b", Vendor::Other("b".into()), &[("TerminalBench", 75.0)]),
+            make_record(
+                "outlier",
+                Vendor::Other("c".into()),
+                &[("TerminalBench", 10_000.0)],
+            ),
+        ];
+        compute_scores_with(&mut expanded, &coef);
+        assert!((expanded[1].metrics["TerminalBench"] - before).abs() < 1e-12);
+    }
+
+    #[test]
+    fn family_cap_water_fills_excess_weight() {
+        let weights = [
+            ("a".to_string(), 0.70),
+            ("b".to_string(), 0.10),
+            ("c".to_string(), 0.10),
+            ("d".to_string(), 0.10),
+        ]
+        .into_iter()
+        .collect();
+        let capped = cap_family_weights(&weights, 0.30);
+        assert!((capped.values().sum::<f64>() - 1.0).abs() < 1e-9);
+        assert!((capped["a"] - 0.30).abs() < 1e-9);
+        for family in ["b", "c", "d"] {
+            assert!((capped[family] - 0.70 / 3.0).abs() < 1e-9);
+        }
+    }
+
+    #[test]
+    fn precedence_composite_uses_official_then_fallback_without_missing_penalty() {
+        let coef = Coefficients::load_embedded().unwrap();
+        let mut records = vec![
+            make_record(
+                "both",
+                Vendor::Other("a".into()),
+                &[("TerminalBench21", 70.0), ("AATerminalBench21", 40.0)],
+            ),
+            make_record(
+                "fallback",
+                Vendor::Other("b".into()),
+                &[("AATerminalBench21", 70.0)],
+            ),
+        ];
+        compute_scores_with(&mut records, &coef);
+        assert_eq!(
+            records[0].metrics["TerminalBench21Composite"],
+            records[0].metrics["TerminalBench21"]
+        );
+        assert_eq!(
+            records[1].metrics["TerminalBench21Composite"],
+            records[1].metrics["AATerminalBench21"]
+        );
+    }
+
+    #[test]
+    fn sibling_value_changes_cannot_change_primary_role_scores() {
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
+
+        fn scored(raw: f64) -> RoleScores {
+            let mut coef = Coefficients::load_embedded().unwrap();
+            coef.group_weights.insert(
+                "BUILD".to_string(),
+                [("SWEBenchPro".to_string(), 1.0)].into_iter().collect(),
+            );
+            coef.final_score_weights.insert(
+                "B_raw".to_string(),
+                [("BUILD".to_string(), 1.0)].into_iter().collect(),
+            );
+            let mut target = make_record(
+                "target",
+                Vendor::Other("target".into()),
+                &[("SWEBenchPro", raw)],
+            );
+            target.synthesized.insert(
+                "SWEBenchPro".into(),
+                SynthesisProvenance {
+                    source_id: "swebench_pro".into(),
+                    from: "donor".into(),
+                    category: SynthesisCategory::StrongerSuccessor,
+                },
+            );
+            let mut records = vec![
+                make_record("low", Vendor::Other("low".into()), &[("SWEBenchPro", 0.0)]),
+                make_record(
+                    "high",
+                    Vendor::Other("high".into()),
+                    &[("SWEBenchPro", 100.0)],
+                ),
+                target,
+            ];
+            compute_scores_with(&mut records, &coef);
+            records.pop().unwrap().scores
+        }
+
+        let low = scored(1.0);
+        let high = scored(99.0);
+        assert!((low.b_raw - high.b_raw).abs() < 1e-12);
+        assert!((low.b_raw - 50.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn synthesis_dominance_uses_weighted_scored_leaves_not_raw_metadata() {
+        use crate::model::{SynthesisCategory, SynthesisProvenance};
+
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.synthesis = Some(crate::coefficients::SynthesisConfig {
+            per_source_cap: 1.0,
+            per_model_cap: 0.50,
+        });
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [("TerminalBench".to_string(), 1.0)].into_iter().collect(),
+        );
+        coef.final_score_weights.insert(
+            "B_raw".to_string(),
+            [("BUILD".to_string(), 1.0)].into_iter().collect(),
+        );
+
+        let mut synthesized = make_record(
+            "synth",
+            Vendor::Other("s".into()),
+            &[("TerminalBench", 80.0)],
+        );
+        synthesized.synthesized.insert(
+            "TerminalBench".into(),
+            SynthesisProvenance {
+                source_id: "terminal_bench".into(),
+                from: "donor".into(),
+                category: SynthesisCategory::Conservative,
+            },
+        );
+        for idx in 0..100 {
+            synthesized
+                .raw_metrics
+                .insert(format!("UnscoredMetadata{idx}"), idx as f64);
+        }
+        let mut records = vec![synthesized];
+        compute_scores_with(&mut records, &coef);
+        assert!(records[0].missing.synthesis_dominant);
+
+        let mut direct = make_record(
+            "direct",
+            Vendor::Other("d".into()),
+            &[("TerminalBench", 80.0), ("UnscoredSynthetic", 99.0)],
+        );
+        direct.synthesized.insert(
+            "UnscoredSynthetic".into(),
+            SynthesisProvenance {
+                source_id: "metadata".into(),
+                from: "donor".into(),
+                category: SynthesisCategory::Conservative,
+            },
+        );
+        let mut records = vec![direct];
+        compute_scores_with(&mut records, &coef);
+        assert!(!records[0].missing.synthesis_dominant);
     }
 }

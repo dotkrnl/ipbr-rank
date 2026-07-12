@@ -47,6 +47,7 @@ body {
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+.muted { color: var(--muted); }
 
 .shell { max-width: 1200px; margin: 0 auto; padding: 28px 32px; }
 
@@ -96,6 +97,7 @@ nav a:hover { color: var(--text-strong); }
   margin: 0; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 8px;
   align-items: center;
 }
+.snapshot-label { color: var(--build); font-weight: 700; }
 .live-dot {
   display: inline-block; width: 8px; height: 8px; border-radius: 50%;
   background: var(--build); margin-right: 4px;
@@ -267,9 +269,26 @@ table.leaderboard th.num button.sort::before { content: "▼ "; visibility: hidd
 table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibility: visible; }
 table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.leaderboard td.model-name { font: inherit; }
+table.leaderboard td.model-name .status-badge { margin-left: 5px; }
 table.leaderboard td.num .cell-score { display: inline-block; }
 table.leaderboard td.num[data-tier="high"] .cell-score { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }
+table.leaderboard .provisional-score em { font-style: italic; }
+.status-marker {
+  display: inline-block; margin-left: 2px; color: var(--muted); font-size: 0.75em;
+  vertical-align: top; text-transform: uppercase;
+}
+.provisional-note {
+  margin: 8px 0 0; color: var(--muted); font-size: 0.78rem; font-style: italic;
+}
+.status-badge {
+  display: inline-block; border: 1px solid var(--line); border-radius: 999px;
+  padding: 0 5px; color: var(--muted); font-size: 0.72em; line-height: 1.5;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.status-badge.ranked { border-color: var(--build); color: var(--build); }
+.status-badge.provisional { border-color: var(--idea); color: var(--idea); }
 table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
 table.leaderboard tr.expand.open { display: table-row; background: var(--panel); }
@@ -301,7 +320,12 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
   gap: 5px 14px;
   align-items: center;
 }
+.expand .exp-metric-table {
+  grid-template-columns: minmax(170px, 1.2fr) 72px minmax(90px, 1.4fr) 52px minmax(150px, 1fr) 64px;
+}
 .expand .exp-label { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.expand .exp-raw { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.expand .evidence-kind { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .expand .exp-bar { display: block; background: var(--line); height: 6px; border-radius: 2px; }
 .expand .exp-bar-fill { display: block; background: var(--accent); height: 100%; border-radius: 2px; }
 .expand .exp-value { font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
@@ -309,6 +333,14 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .expand .exp-value[data-tier="low"] { color: var(--muted); }
 .expand .exp-rank { font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
 .expand .exp-rank.top { color: var(--accent); font-weight: 700; }
+
+.expand .evidence-table {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(90px, auto)) minmax(78px, auto);
+  gap: 6px 14px;
+  align-items: center;
+}
+.expand .evidence-value { color: var(--text); font-variant-numeric: tabular-nums; }
 
 .expand .exp-meta { color: var(--muted); }
 .expand .exp-meta-label {
@@ -393,6 +425,13 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
     grid-template-columns: minmax(0, 1.4fr) minmax(50px, 1fr) 46px 52px;
     gap: 4px 8px;
   }
+  .expand .exp-metric-table {
+    grid-template-columns: minmax(110px, 1.2fr) 58px minmax(45px, 0.8fr) 42px minmax(105px, 1fr) 46px;
+  }
+  .expand .evidence-table {
+    grid-template-columns: minmax(90px, 1fr) repeat(2, minmax(75px, auto));
+  }
+  .expand .evidence-table .evidence-value:nth-of-type(3) { display: none; }
   .expand h4 { margin-top: 6px; }
   .expand .exp-meta-label:not(:first-child) { margin-left: 0; display: block; margin-top: 6px; }
 

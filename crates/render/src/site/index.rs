@@ -26,13 +26,18 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
 }
 
 fn render_hero(scoreboard: &Scoreboard) -> String {
-    let mut by_composite: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
-    by_composite.sort_by(|a, b| {
-        composite(b)
-            .partial_cmp(&composite(a))
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    let top3: Vec<&ipbr_core::ModelRecord> = by_composite.into_iter().take(3).collect();
+    let top3: Vec<&ipbr_core::ModelRecord> = dense_ranked_models(
+        scoreboard
+            .models
+            .iter()
+            .filter(|model| !balanced_is_provisional(model))
+            .collect(),
+        composite,
+    )
+    .into_iter()
+    .take(3)
+    .map(|(_, model)| model)
+    .collect();
 
     let radar_slices: Vec<RadarSlice> = top3
         .iter()
@@ -65,7 +70,7 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
     let leaders = render_leaders(scoreboard);
 
     format!(
-        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Agents battle.</span> <span class="beat beat-final">Math decides.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models</p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
+        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="snapshot-label">snapshot</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models · best-available/max-effort per model</p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
         generated_at = html_escape(&scoreboard.generated_at),
         sources = scoreboard.source_summary.len(),
         models = scoreboard.models.len(),
@@ -74,14 +79,16 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
 
 fn render_leaders(scoreboard: &Scoreboard) -> String {
     let mut html =
-        String::from(r#"<h3 class="leaders-title">leaders now</h3><div class="leaders-grid">"#);
+        String::from(r#"<h3 class="leaders-title">ranked leaders</h3><div class="leaders-grid">"#);
     for spec in role_specs() {
-        let mut ranked: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
-        ranked.sort_by(|a, b| {
-            (spec.from_record)(b)
-                .partial_cmp(&(spec.from_record)(a))
-                .unwrap_or(std::cmp::Ordering::Equal)
-        });
+        let ranked = dense_ranked_models(
+            scoreboard
+                .models
+                .iter()
+                .filter(|model| !role_is_provisional(model, spec.evidence_key))
+                .collect(),
+            spec.from_record,
+        );
         write!(
             html,
             r#"<div class="role {role_id}"><div class="role-head">[ {label} ]</div><ol class="role-list">"#,
@@ -89,9 +96,8 @@ fn render_leaders(scoreboard: &Scoreboard) -> String {
             label = spec.label,
         )
         .unwrap();
-        for (idx, model) in ranked.iter().take(3).enumerate() {
-            let pos = idx + 1;
-            let row_class = if idx == 0 { "row top" } else { "row" };
+        for (pos, model) in ranked.iter().take(3) {
+            let row_class = if *pos == 1 { "row top" } else { "row" };
             let score = (spec.from_record)(model);
             let prev = scoreboard
                 .prev_scores
@@ -118,6 +124,50 @@ fn composite(model: &ipbr_core::ModelRecord) -> f64 {
     (s.i_raw + s.p_raw + s.b_raw + s.r) / 4.0
 }
 
+const DISPLAY_TIE_EPSILON: f64 = 0.05;
+
+/// Dense ranks aligned with the one-decimal score display: values that round
+/// to the same displayed tenth share a rank, and the next distinct score gets
+/// the next integer (1, 1, 2 rather than 1, 2, 3).
+fn dense_ranked_models(
+    mut models: Vec<&ipbr_core::ModelRecord>,
+    score: fn(&ipbr_core::ModelRecord) -> f64,
+) -> Vec<(usize, &ipbr_core::ModelRecord)> {
+    models.sort_by(|a, b| {
+        score(b)
+            .partial_cmp(&score(a))
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| a.canonical_id.cmp(&b.canonical_id))
+    });
+    let mut dense_rank = 0;
+    let mut previous: Option<f64> = None;
+    models
+        .into_iter()
+        .map(|model| {
+            let value = score(model);
+            if previous.is_none_or(|prior| (prior - value).abs() >= DISPLAY_TIE_EPSILON) {
+                dense_rank += 1;
+                previous = Some(value);
+            }
+            (dense_rank, model)
+        })
+        .collect()
+}
+
+fn role_is_provisional(model: &ipbr_core::ModelRecord, role: &str) -> bool {
+    model
+        .evidence
+        .roles
+        .get(role)
+        .is_some_and(|coverage| coverage.provisional)
+}
+
+fn balanced_is_provisional(model: &ipbr_core::ModelRecord) -> bool {
+    ["I_raw", "P_raw", "B_raw", "R"]
+        .iter()
+        .any(|role| role_is_provisional(model, role))
+}
+
 fn rank_class(rank: usize) -> &'static str {
     match rank {
         0 => "rank-1",
@@ -139,6 +189,7 @@ fn score_tier(score: f64) -> &'static str {
 struct RoleSpec {
     id: &'static str,
     label: &'static str,
+    evidence_key: &'static str,
     from_record: fn(&ipbr_core::ModelRecord) -> f64,
     from_scores: fn(&ipbr_core::RoleScores) -> f64,
 }
@@ -148,24 +199,28 @@ fn role_specs() -> [RoleSpec; 4] {
         RoleSpec {
             id: "idea",
             label: "idea",
+            evidence_key: "I_raw",
             from_record: |m| m.scores.i_raw,
             from_scores: |s| s.i_raw,
         },
         RoleSpec {
             id: "plan",
             label: "plan",
+            evidence_key: "P_raw",
             from_record: |m| m.scores.p_raw,
             from_scores: |s| s.p_raw,
         },
         RoleSpec {
             id: "build",
             label: "build",
+            evidence_key: "B_raw",
             from_record: |m| m.scores.b_raw,
             from_scores: |s| s.b_raw,
         },
         RoleSpec {
             id: "review",
-            label: "review",
+            label: "review proxy",
+            evidence_key: "R",
             from_record: |m| m.scores.r,
             from_scores: |s| s.r,
         },
@@ -196,12 +251,11 @@ fn render_delta(current: f64, prev: Option<f64>) -> String {
 
 fn render_leaderboard(scoreboard: &Scoreboard) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
-    // Default order: descending by build raw (most-asked role for "best coder").
+    // Default order: the explicitly named, equal-weight balanced capability
+    // view. Individual role columns remain independently sortable.
     models.sort_by(|left, right| {
-        right
-            .scores
-            .b_raw
-            .partial_cmp(&left.scores.b_raw)
+        composite(right)
+            .partial_cmp(&composite(left))
             .unwrap_or(std::cmp::Ordering::Equal)
             .then_with(|| left.canonical_id.cmp(&right.canonical_id))
     });
@@ -231,9 +285,14 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         r#"<th scope="col" data-sort="vendor" aria-sort="none"><button type="button" class="sort" aria-label="sort by vendor descending">vendor</button></th>"#,
     );
 
-    // Score columns — build is the default sort, marked active on initial render.
-    for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
-        let (active_attr, aria_sort) = if key == "b" {
+    // Score columns — balanced capability is the default sort.
+    for (label, key) in [
+        ("balanced", "balanced"),
+        ("idea", "i"),
+        ("plan", "p"),
+        ("build", "b"),
+    ] {
+        let (active_attr, aria_sort) = if key == "balanced" {
             (r#" data-sort-active="desc""#, "descending")
         } else {
             ("", "none")
@@ -251,7 +310,9 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         html.push_str(&render_row(scoreboard, model));
     }
 
-    html.push_str("</tbody></table></div></section>");
+    html.push_str(
+        r#"</tbody></table></div><p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met.</p></section>"#,
+    );
     html
 }
 
@@ -261,6 +322,13 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     let id = html_escape(&model.canonical_id);
     let vendor = html_escape(model.vendor.as_str());
     let name = html_escape(&model.display_name);
+    let balanced = composite(model);
+    let balanced_provisional = balanced_is_provisional(model);
+    let balanced_status = if balanced_provisional {
+        r#"<span class="status-badge provisional" title="One or more roles lack the minimum direct evidence">provisional</span>"#
+    } else {
+        r#"<span class="status-badge ranked" title="All roles meet the direct-evidence gate">ranked</span>"#
+    };
     let prev = scoreboard
         .prev_scores
         .as_ref()
@@ -268,7 +336,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name}</td><td>{vendor}</td>"#,
+        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-balanced="{balanced:.4}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name} {balanced_status}</td><td>{vendor}</td>"#,
         name_lc = name.to_lowercase(),
         i = s.i_raw,
         p = s.p_raw,
@@ -277,20 +345,39 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     )
     .unwrap();
 
+    let balanced_delta =
+        prev.map(|scores| (scores.i_raw + scores.p_raw + scores.b_raw + scores.r) / 4.0);
+    write!(
+        html,
+        r#"<td class="num" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
+        tier = score_tier(balanced),
+        status = if balanced_provisional {
+            "provisional"
+        } else {
+            "ranked"
+        },
+        score = render_score_value(balanced, balanced_provisional),
+        delta = render_delta(balanced, balanced_delta),
+    )
+    .unwrap();
+
     type ScoreAccessor = fn(&ipbr_core::RoleScores) -> f64;
-    let columns: [(f64, ScoreAccessor); 4] = [
-        (s.i_raw, |x| x.i_raw),
-        (s.p_raw, |x| x.p_raw),
-        (s.b_raw, |x| x.b_raw),
-        (s.r, |x| x.r),
+    let columns: [(f64, ScoreAccessor, &str); 4] = [
+        (s.i_raw, |x| x.i_raw, "I_raw"),
+        (s.p_raw, |x| x.p_raw, "P_raw"),
+        (s.b_raw, |x| x.b_raw, "B_raw"),
+        (s.r, |x| x.r, "R"),
     ];
-    for (raw, accessor) in columns {
+    for (raw, accessor, role) in columns {
+        let provisional = role_is_provisional(model, role);
         let prev_score = prev.map(accessor);
         let delta = render_delta(raw, prev_score);
         write!(
             html,
-            r#"<td class="num" data-tier="{tier}"><span class="cell-score">{raw:.1}</span>{delta}</td>"#,
+            r#"<td class="num" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
             tier = score_tier(raw),
+            status = if provisional { "provisional" } else { "ranked" },
+            score = render_score_value(raw, provisional),
         )
         .unwrap();
     }
@@ -315,7 +402,8 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="10"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing</span> {missing}</section></div></div></td></tr>"#,
+        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
+        evidence = render_role_evidence(model),
         groups = render_group_table(scoreboard, model),
         metrics = render_metric_table(scoreboard, model),
         sources = render_source_pills(scoreboard, model),
@@ -324,6 +412,16 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     .unwrap();
 
     html
+}
+
+fn render_score_value(value: f64, provisional: bool) -> String {
+    if provisional {
+        format!(
+            r#"<span class="cell-score provisional-score"><em>{value:.1}</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span>"#
+        )
+    } else {
+        format!(r#"<span class="cell-score">{value:.1}</span>"#)
+    }
 }
 
 fn rank_for(
@@ -339,9 +437,23 @@ fn rank_for(
     if scored.is_empty() {
         return None;
     }
-    scored.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
-    let pos = scored.iter().position(|(_, id)| *id == canonical_id)?;
-    Some((pos + 1, scored.len()))
+    scored.sort_by(|a, b| {
+        b.0.partial_cmp(&a.0)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| a.1.cmp(b.1))
+    });
+    let mut dense_rank = 0;
+    let mut previous: Option<f64> = None;
+    for (score, id) in &scored {
+        if previous.is_none_or(|prior| (prior - score).abs() >= DISPLAY_TIE_EPSILON) {
+            dense_rank += 1;
+            previous = Some(*score);
+        }
+        if *id == canonical_id {
+            return Some((dense_rank, scored.len()));
+        }
+    }
+    None
 }
 
 fn rank_bar_width(rank: Option<(usize, usize)>) -> f64 {
@@ -381,11 +493,44 @@ fn render_group_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -
     html
 }
 
+fn render_role_evidence(model: &ipbr_core::ModelRecord) -> String {
+    if model.evidence.roles.is_empty() {
+        return r#"<div class="muted">evidence summary unavailable</div>"#.to_string();
+    }
+    let mut html = String::from(r#"<div class="evidence-table">"#);
+    for (label, key) in [
+        ("idea", "I_raw"),
+        ("plan", "P_raw"),
+        ("build", "B_raw"),
+        ("review proxy", "R"),
+    ] {
+        let Some(coverage) = model.evidence.roles.get(key) else {
+            continue;
+        };
+        let status = if coverage.provisional {
+            "provisional"
+        } else {
+            "ranked"
+        };
+        write!(
+            html,
+            r#"<span class="exp-label">{label}</span><span class="evidence-value">{direct:.0}% direct</span><span class="evidence-value">{effective:.0}% confidence</span><span class="evidence-value">{families} families</span><span class="status-badge {status}">{status}</span>"#,
+            direct = coverage.direct * 100.0,
+            effective = coverage.effective * 100.0,
+            families = coverage.family_count,
+        )
+        .unwrap();
+    }
+    html.push_str("</div>");
+    html
+}
+
 fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
     if model.metrics.is_empty() {
         return r#"<div class="muted">no metrics</div>"#.to_string();
     }
-    let mut html = String::from(r#"<div class="exp-table">"#);
+    let ranked_metrics = ranked_metric_keys(&scoreboard.coefficients);
+    let mut html = String::from(r#"<div class="exp-table exp-metric-table">"#);
     for (key, value) in &model.metrics {
         let key_owned = key.clone();
         let rank = rank_for(scoreboard, &model.canonical_id, |m| {
@@ -393,14 +538,107 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
         });
         let bar_width = rank_bar_width(rank);
         let (rank_label, rank_class) = rank_text(rank);
+        let raw = model
+            .raw_metrics
+            .get(key)
+            .map(|raw| format_raw_metric(*raw))
+            .unwrap_or_else(|| "derived".to_string());
+        let (evidence_class, evidence_title) = metric_evidence(model, key);
+        let use_class = if ranked_metrics.contains(key) {
+            "rank input"
+        } else {
+            "reference"
+        };
         html.push_str(&format!(
-            r#"<span class="exp-label">{key}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{value:.1}</span><span class="{rank_class}">{rank_label}</span>"#,
+            r#"<span class="exp-label">{key}</span><span class="exp-raw">{raw}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{value:.1}</span><span class="evidence-kind" title="{evidence_title}">{evidence_class} · {use_class}</span><span class="{rank_class}">{rank_label}</span>"#,
             key = html_escape(key),
+            raw = html_escape(&raw),
             tier = score_tier(*value),
+            evidence_title = html_escape(&evidence_title),
         ));
     }
     html.push_str("</div>");
     html
+}
+
+fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static str, String) {
+    if let Some(provenance) = model.synthesized.get(metric) {
+        return (
+            "synthesized · prior-only",
+            format!(
+                "Borrowed from {} via {}",
+                provenance.from, provenance.source_id
+            ),
+        );
+    }
+    if model.override_reported.contains(metric) {
+        return (
+            "reported",
+            "Cited reported observation; full citation is in scoreboard.toml".to_string(),
+        );
+    }
+    if model.raw_metrics.contains_key(metric) {
+        let source = model
+            .metric_sources
+            .get(metric)
+            .map(String::as_str)
+            .unwrap_or("direct source");
+        return ("direct", format!("Direct observation from {source}"));
+    }
+    ("derived", "Composite of normalized inputs".to_string())
+}
+
+fn format_raw_metric(value: f64) -> String {
+    if value.abs() >= 1_000.0 {
+        format!("{value:.1}")
+    } else if value.abs() >= 100.0 {
+        format!("{value:.2}")
+    } else {
+        format!("{value:.3}")
+    }
+}
+
+fn ranked_metric_keys(
+    coefficients: &ipbr_core::Coefficients,
+) -> std::collections::BTreeSet<String> {
+    fn expand(
+        metric: &str,
+        coefficients: &ipbr_core::Coefficients,
+        keys: &mut std::collections::BTreeSet<String>,
+        visiting: &mut std::collections::BTreeSet<String>,
+    ) {
+        keys.insert(metric.to_string());
+        if coefficients.precedence_composites.contains(metric) {
+            return;
+        }
+        let Some(inputs) = coefficients.composite_metrics.get(metric) else {
+            return;
+        };
+        if !visiting.insert(metric.to_string()) {
+            return;
+        }
+        for input in inputs.keys() {
+            expand(input, coefficients, keys, visiting);
+        }
+        visiting.remove(metric);
+    }
+
+    let mut keys = std::collections::BTreeSet::new();
+    for groups in coefficients.final_score_weights.values() {
+        for group in groups.keys() {
+            if let Some(metrics) = coefficients.group_weights.get(group) {
+                for metric in metrics.keys() {
+                    expand(
+                        metric,
+                        coefficients,
+                        &mut keys,
+                        &mut std::collections::BTreeSet::new(),
+                    );
+                }
+            }
+        }
+    }
+    keys
 }
 
 fn render_source_pills(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
@@ -440,13 +678,16 @@ fn render_missing_pills(model: &ipbr_core::ModelRecord) -> String {
 const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <summary>how scoring works</summary>
 <div class="scoring-body">
-<p>Each model gets four role scores from public benchmarks. <strong>Idea</strong> measures open-ended creativity. <strong>Plan</strong> measures structured reasoning, function-calling, and multi-step decomposition. <strong>Build</strong> measures implementation skill — SWE-bench, LiveCodeBench, terminal tasks. <strong>Review</strong> is currently a proxy built from plan/build evidence plus LM Arena search/document preferences; a direct code-review benchmark is not yet ingested.</p>
+<p>Each model gets four capability proxies from public benchmarks. <strong>Idea</strong> includes EQ-Bench Creative Writing, preference, and novel-reasoning evidence. <strong>Plan</strong> measures structured reasoning, tool use, and multi-step execution. <strong>Build</strong> emphasizes software and terminal tasks. <strong>Review</strong> remains a proxy, now anchored by EQ-Bench Judgemark plus planning, building, search, and document evidence; no public code-review benchmark is treated as direct code-review evidence.</p>
 
 <h3>scoring</h3>
-<p>Each role score is the benchmark composite for that role, normalized to 0-100 and combined via weighted average of group scores. See the about page for the full math.</p>
+<p>Ranked metrics use versioned fixed raw-score anchors and an asymptotic 0-100 logistic map. Direct observations count fully and cited same-model reports are discounted. Sibling fills are visible but prior-only, so donor values cannot move primary ranks. Correlated metrics are collapsed by benchmark family, and no family may carry more than 30% of a role.</p>
 
 <h3>missing data</h3>
-<p>If a model is missing some metrics within a group, the group score blends from shrink-to-50 to trusting the present metrics across 60-80% group coverage. At 80% coverage and above, the present-weight mean is trusted directly.</p>
+<p>Capability is estimated from available same-model evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Roles below 60% direct weight or three independent direct families are shown as provisional and excluded from official leader ranks.</p>
+
+<h3>configuration and diagnostics</h3>
+<p>There is one record per model. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, Review, or balanced capability.</p>
 
 <p><a href="about.html">Full math, role definitions, and source list →</a></p>
 </div>

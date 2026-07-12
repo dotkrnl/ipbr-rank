@@ -5,28 +5,54 @@ use std::collections::BTreeMap;
 const EPS: f64 = 1e-12;
 pub const SHRINK_TARGET: f64 = 50.0;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AggregateResult {
+    /// `None` means every positively weighted input was absent. Callers that
+    /// must expose a numeric compatibility value may substitute `prior` while
+    /// still preserving the absence bit.
+    pub value: Option<f64>,
+    pub observed_coverage: f64,
+    pub shrunk: bool,
+}
+
 pub fn shrink_coverage_cutoff(cfg: &AggregationConfig) -> f64 {
     (cfg.trust_threshold + cfg.trust_transition_width / 2.0).clamp(0.0, 1.0)
 }
 
-/// Returns the missing-safe weighted average and whether the group was
-/// shrunk (present weight below the configured transition ceiling).
-pub fn missing_safe_avg(
+/// Continuous prior-replacement aggregation. Every missing nominal weight is
+/// assigned the prior; there is no threshold at which the missing penalty
+/// suddenly disappears. Consequently, observing a below-prior result cannot
+/// raise a score merely by crossing a coverage threshold.
+pub fn prior_replacement_avg(
     metrics: &BTreeMap<String, f64>,
     weights: &BTreeMap<String, f64>,
     missing_info: &mut MissingInfo,
     prefix: &str,
+    prior: f64,
     cfg: &AggregationConfig,
-) -> (f64, bool) {
-    let total_weight: f64 = weights.values().copied().filter(|w| w.is_finite()).sum();
+) -> AggregateResult {
+    let prior = if prior.is_finite() {
+        prior.clamp(0.0, 100.0)
+    } else {
+        SHRINK_TARGET
+    };
+    let total_weight: f64 = weights
+        .values()
+        .copied()
+        .filter(|w| w.is_finite() && *w > 0.0)
+        .sum();
     if total_weight.abs() < EPS {
-        return (SHRINK_TARGET, true);
+        return AggregateResult {
+            value: None,
+            observed_coverage: 0.0,
+            shrunk: true,
+        };
     }
 
     let mut present_weight = 0.0;
     let mut weighted_sum = 0.0;
     for (key, w) in weights {
-        if !w.is_finite() {
+        if !w.is_finite() || *w <= 0.0 {
             continue;
         }
         match metrics.get(key) {
@@ -40,26 +66,28 @@ pub fn missing_safe_avg(
         }
     }
 
-    if present_weight.abs() < EPS {
-        return (SHRINK_TARGET, true);
-    }
-
-    let present_mean = weighted_sum / present_weight;
     let w_present = present_weight / total_weight;
-
-    // Old hard-step formula: shrink toward 50 proportional to missing weight.
-    let shrink_value = present_mean * w_present + SHRINK_TARGET * (1.0 - w_present);
-
-    // Smooth transition from full-shrink to no-shrink across
-    // [threshold - width/2, threshold + width/2].
-    let t = ((w_present - (cfg.trust_threshold - cfg.trust_transition_width / 2.0))
-        / cfg.trust_transition_width)
-        .clamp(0.0, 1.0);
-    let smooth_t = t * t * (3.0 - 2.0 * t);
-    let value = shrink_value * (1.0 - smooth_t) + present_mean * smooth_t;
-
     let shrunk = w_present < shrink_coverage_cutoff(cfg);
-    (value.clamp(0.0, 100.0), shrunk)
+    let value = (weighted_sum + prior * (total_weight - present_weight)) / total_weight;
+    AggregateResult {
+        value: (present_weight >= EPS).then(|| value.clamp(0.0, 100.0)),
+        observed_coverage: w_present.clamp(0.0, 1.0),
+        shrunk,
+    }
+}
+
+/// Backwards-compatible numeric wrapper around [`prior_replacement_avg`].
+/// Fully absent aggregates still return 50 here, but callers that need to
+/// propagate missingness (notably composite scoring) use the richer API.
+pub fn missing_safe_avg(
+    metrics: &BTreeMap<String, f64>,
+    weights: &BTreeMap<String, f64>,
+    missing_info: &mut MissingInfo,
+    prefix: &str,
+    cfg: &AggregationConfig,
+) -> (f64, bool) {
+    let result = prior_replacement_avg(metrics, weights, missing_info, prefix, SHRINK_TARGET, cfg);
+    (result.value.unwrap_or(SHRINK_TARGET), result.shrunk)
 }
 
 #[cfg(test)]
@@ -111,11 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn near_full_coverage_uses_present_mean() {
-        // 80 % of weight present — at or above the trust threshold, so we
-        // skip the shrink and report the present-weight mean directly.
-        // Without this, models missing one minor source would be pulled
-        // toward 50 even though the bulk of their coverage is intact.
+    fn near_full_coverage_still_replaces_missing_weight_with_prior() {
         let metrics: BTreeMap<String, f64> = [("a".to_string(), 80.0), ("b".to_string(), 100.0)]
             .into_iter()
             .collect();
@@ -123,8 +147,8 @@ mod tests {
         let mut missing = MissingInfo::new();
         let cfg = AggregationConfig::default();
         let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
-        // Present weighted mean: (0.4*80 + 0.4*100) / 0.8 = 90.
-        assert!((v - 90.0).abs() < 1e-9, "expected 90, got {v}");
+        // Nominal score: .4*80 + .4*100 + .2*50 = 82.
+        assert!((v - 82.0).abs() < 1e-9, "expected 82, got {v}");
         assert!(!shrunk, "80 % coverage should not be shrunk");
         assert!(missing.metrics.contains("c"));
     }
@@ -171,5 +195,37 @@ mod tests {
         let (v, shrunk) = missing_safe_avg(&metrics, &w, &mut missing, "", &cfg);
         assert!((v - 50.0).abs() < 1e-9);
         assert!(shrunk, "empty weights should be marked shrunk");
+    }
+
+    #[test]
+    fn rich_result_preserves_fully_missing_state() {
+        let metrics = BTreeMap::new();
+        let w = weights(&[("a", 1.0)]);
+        let mut missing = MissingInfo::new();
+        let result = prior_replacement_avg(
+            &metrics,
+            &w,
+            &mut missing,
+            "",
+            50.0,
+            &AggregationConfig::default(),
+        );
+        assert_eq!(result.value, None);
+        assert_eq!(result.observed_coverage, 0.0);
+    }
+
+    #[test]
+    fn adding_below_prior_observation_cannot_raise_score() {
+        let w = weights(&[("a", 0.7), ("b", 0.1), ("c", 0.2)]);
+        let before: BTreeMap<String, f64> = [("a".to_string(), 100.0)].into_iter().collect();
+        let after: BTreeMap<String, f64> = [("a".to_string(), 100.0), ("b".to_string(), 0.0)]
+            .into_iter()
+            .collect();
+        let cfg = AggregationConfig::default();
+        let mut missing = MissingInfo::new();
+        let (before, _) = missing_safe_avg(&before, &w, &mut missing, "", &cfg);
+        let mut missing = MissingInfo::new();
+        let (after, _) = missing_safe_avg(&after, &w, &mut missing, "", &cfg);
+        assert!(after < before, "before={before}, after={after}");
     }
 }

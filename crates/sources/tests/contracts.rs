@@ -2,10 +2,11 @@ use std::path::Path;
 
 use ipbr_core::{ModelRecord, ingest_rows, required_aliases};
 use ipbr_sources::{
-    AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, FetchOptions, Http,
-    LiveCodeBenchSource, LmArenaSource, OpenRouterSource, SecretStore, Source, SourceError,
-    SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource,
-    SweRebenchSource, VerificationStatus, registry::registry,
+    AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, EqBenchCreativeWritingSource,
+    EqBenchJudgemarkSource, FetchOptions, Http, LiveCodeBenchSource, LmArenaSource,
+    OpenRouterSource, SecretStore, Source, SourceError, SweAtlasQnaSource,
+    SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource, SweRebenchSource,
+    VerificationStatus, registry::registry,
 };
 
 struct OfflineOnlyHttp;
@@ -159,9 +160,11 @@ async fn lmarena_fixture_contract() {
         text_rows >= 50,
         "expected ≥50 rows to carry LMArenaText, got {text_rows}"
     );
-    assert!(rows.iter().any(|row| {
-        row.model_name.contains("thinking") && row.fields.contains_key("LMArenaCreativeOrOpenEnded")
-    }));
+    assert!(
+        rows.iter()
+            .all(|row| !row.fields.contains_key("LMArenaCreativeOrOpenEnded")),
+        "text Elo must not be duplicated under a fake creativity metric"
+    );
     assert!(
         rows.iter()
             .any(|row| row.fields.contains_key("LMArenaSearch")),
@@ -178,12 +181,11 @@ async fn lmarena_fixture_contract() {
         matched >= 20,
         "expected at least 20 known models, got {matched}"
     );
-    assert!(records.iter().any(|record| {
-        record.raw_metrics.contains_key("LMArenaText")
-            || record
-                .raw_metrics
-                .contains_key("LMArenaCreativeOrOpenEnded")
-    }));
+    assert!(
+        records
+            .iter()
+            .any(|record| record.raw_metrics.contains_key("LMArenaText"))
+    );
 }
 
 #[tokio::test]
@@ -228,17 +230,23 @@ async fn artificial_analysis_fixture_contract() {
         "expected core fields on >=45% of rows, got {core_rows}/{}",
         rows.len()
     );
-    // Reasoning is now blended from gpqa+hle, so it's only emitted when at
-    // least one of those is present in the upstream payload. We require
-    // that *most* rows carry it, not all.
+    // GPQA and HLE stay as independent observations. Most current AA rows
+    // carry at least one, while sparse/older evaluation rows may carry neither.
     let reasoning_rows = rows
         .iter()
-        .filter(|row| row.fields.contains_key("ArtificialAnalysisReasoning"))
+        .filter(|row| row.fields.contains_key("GPQA") || row.fields.contains_key("HLE"))
         .count();
     assert!(
         reasoning_rows * 2 >= rows.len(),
-        "expected reasoning blend on majority of rows, got {reasoning_rows}/{}",
+        "expected GPQA or HLE on majority of rows, got {reasoning_rows}/{}",
         rows.len()
+    );
+    assert!(
+        rows.iter().all(|row| {
+            !row.fields.contains_key("ArtificialAnalysisReasoning")
+                && !row.fields.contains_key("GPQA_HLE_Reasoning")
+        }),
+        "AA must not duplicate one reasoning blend under two metric names"
     );
     assert!(
         rows.iter().any(|row| row.fields.contains_key("AIME25")),
@@ -258,6 +266,67 @@ async fn artificial_analysis_fixture_contract() {
             && record.raw_metrics.contains_key("OutputSpeed")
             && record.raw_metrics.contains_key("TTFT")
             && record.raw_metrics.contains_key("BlendedCost")
+    }));
+}
+
+#[tokio::test]
+async fn eqbench_creative_writing_fixture_contract() {
+    let rows = EqBenchCreativeWritingSource
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("EQ-Bench Creative Writing fixture should parse");
+
+    assert!(rows.len() >= 100, "expected broad model coverage");
+    assert!(
+        rows.iter()
+            .all(|row| row.fields.contains_key("EQBenchCreativeWriting"))
+    );
+    let (records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= 20,
+        "expected at least 20 alias matches, got {matched}"
+    );
+    assert!(records.iter().any(|record| {
+        record.canonical_id == "anthropic/claude-fable-5"
+            && record.raw_metrics.contains_key("EQBenchCreativeWriting")
+    }));
+}
+
+#[tokio::test]
+async fn eqbench_judgemark_fixture_contract() {
+    let rows = EqBenchJudgemarkSource
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("EQ-Bench Judgemark fixture should parse");
+
+    assert!(rows.len() >= 30, "expected broad model coverage");
+    assert!(rows.iter().all(|row| {
+        row.fields.contains_key("EQBenchJudgemark")
+            && row.fields.contains_key("EQBenchJudgemarkCILow")
+            && row.fields.contains_key("EQBenchJudgemarkCIHigh")
+    }));
+    let (records, matched) = ingest_fixture_rows(rows);
+    assert!(
+        matched >= 10,
+        "expected at least 10 alias matches, got {matched}"
+    );
+    assert!(records.iter().any(|record| {
+        record.canonical_id == "openai/gpt-5.5"
+            && record.raw_metrics.contains_key("EQBenchJudgemark")
     }));
 }
 

@@ -466,9 +466,6 @@ fn map_rating(config: &str, rating: f64, fields: &mut BTreeMap<String, Value>) {
     match config {
         "text" => {
             fields.insert("LMArenaText".to_string(), Value::from(rating));
-            fields
-                .entry("LMArenaCreativeOrOpenEnded".to_string())
-                .or_insert_with(|| Value::from(rating));
         }
         "webdev" => {
             fields.insert("CopilotArenaOrLMArenaCode".to_string(), Value::from(rating));
@@ -990,13 +987,7 @@ mod tests {
             rows[0].fields.get("LMArenaText").and_then(number_like),
             Some(1000.0)
         );
-        assert_eq!(
-            rows[0]
-                .fields
-                .get("LMArenaCreativeOrOpenEnded")
-                .and_then(number_like),
-            Some(1000.0)
-        );
+        assert!(!rows[0].fields.contains_key("LMArenaCreativeOrOpenEnded"));
     }
 
     #[test]

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -27,6 +27,125 @@ pub struct MetricDef {
     pub groups: Vec<String>,
     #[serde(default = "default_transform")]
     pub transform: MetricTransform,
+    /// Stable raw-unit anchors. When both are configured, the lower and
+    /// upper anchors map to approximately 5 and 95 through an asymptotic
+    /// logistic curve. They are transformed into log space when `log_scale`
+    /// is true.
+    #[serde(default)]
+    pub anchor_low: Option<f64>,
+    #[serde(default)]
+    pub anchor_high: Option<f64>,
+    /// Independent benchmark/source family used to collapse correlated
+    /// observations and cap family influence in final role scores.
+    #[serde(default)]
+    pub family: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EvidenceConfig {
+    #[serde(default = "default_prior_score")]
+    pub prior_score: f64,
+    #[serde(default = "default_direct_reliability")]
+    pub direct_reliability: f64,
+    #[serde(default = "default_reported_reliability")]
+    pub reported_reliability: f64,
+    #[serde(default = "default_conservative_synthesis_reliability")]
+    pub conservative_synthesis_reliability: f64,
+    #[serde(default = "default_same_series_synthesis_reliability")]
+    pub same_series_synthesis_reliability: f64,
+    #[serde(default = "default_stronger_successor_synthesis_reliability")]
+    pub stronger_successor_synthesis_reliability: f64,
+    #[serde(default = "default_provisional_min_direct")]
+    pub provisional_min_direct: f64,
+    #[serde(default = "default_provisional_min_families")]
+    pub provisional_min_families: usize,
+    #[serde(default = "default_max_family_weight")]
+    pub max_family_weight: f64,
+}
+
+/// Metadata for the fixed raw-unit normalization anchors embedded in the
+/// coefficient set. The values live on each `MetricDef`; this block makes the
+/// derivation cohort and policy explicit for API consumers and audits.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizationConfig {
+    pub anchor_version: String,
+    pub snapshot_date: String,
+    pub derivation: String,
+    pub low_quantile: f64,
+    pub high_quantile: f64,
+    #[serde(default)]
+    pub reported_fallback: bool,
+}
+
+fn default_prior_score() -> f64 {
+    50.0
+}
+
+fn default_direct_reliability() -> f64 {
+    1.0
+}
+
+fn default_reported_reliability() -> f64 {
+    0.60
+}
+
+fn default_conservative_synthesis_reliability() -> f64 {
+    0.0
+}
+
+fn default_same_series_synthesis_reliability() -> f64 {
+    0.0
+}
+
+fn default_stronger_successor_synthesis_reliability() -> f64 {
+    0.0
+}
+
+fn default_provisional_min_direct() -> f64 {
+    0.60
+}
+
+fn default_provisional_min_families() -> usize {
+    3
+}
+
+fn default_max_family_weight() -> f64 {
+    1.0
+}
+
+impl Default for EvidenceConfig {
+    fn default() -> Self {
+        Self {
+            prior_score: default_prior_score(),
+            direct_reliability: default_direct_reliability(),
+            reported_reliability: default_reported_reliability(),
+            conservative_synthesis_reliability: default_conservative_synthesis_reliability(),
+            same_series_synthesis_reliability: default_same_series_synthesis_reliability(),
+            stronger_successor_synthesis_reliability:
+                default_stronger_successor_synthesis_reliability(),
+            provisional_min_direct: default_provisional_min_direct(),
+            provisional_min_families: default_provisional_min_families(),
+            max_family_weight: default_max_family_weight(),
+        }
+    }
+}
+
+impl EvidenceConfig {
+    pub fn prior(&self) -> f64 {
+        if self.prior_score.is_finite() {
+            self.prior_score.clamp(0.0, 100.0)
+        } else {
+            default_prior_score()
+        }
+    }
+
+    pub fn reliability(&self, value: f64) -> f64 {
+        if value.is_finite() {
+            value.clamp(0.0, 1.0)
+        } else {
+            0.0
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -175,12 +294,21 @@ pub struct Coefficients {
     /// composites (kept simple on purpose).
     #[serde(default)]
     pub composite_metrics: BTreeMap<String, BTreeMap<String, f64>>,
+    /// Composites whose weights encode source precedence. The scorer selects
+    /// the highest-weight available input rather than averaging duplicate
+    /// observations of the same benchmark.
+    #[serde(default)]
+    pub precedence_composites: BTreeSet<String>,
     #[serde(default)]
     pub synthesis: Option<SynthesisConfig>,
     #[serde(default)]
     pub penalties: Option<PenaltiesConfig>,
     #[serde(default)]
     pub aggregation: Option<AggregationConfig>,
+    #[serde(default)]
+    pub evidence: Option<EvidenceConfig>,
+    #[serde(default)]
+    pub normalization: Option<NormalizationConfig>,
     #[serde(default)]
     pub effort_policy: EffortPolicy,
 }
@@ -200,6 +328,45 @@ impl Coefficients {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn ranked_leaves(c: &Coefficients) -> BTreeSet<String> {
+        fn expand(
+            metric: &str,
+            c: &Coefficients,
+            out: &mut BTreeSet<String>,
+            visiting: &mut BTreeSet<String>,
+        ) {
+            let Some(parts) = c
+                .composite_metrics
+                .get(metric)
+                .filter(|_| !c.precedence_composites.contains(metric))
+            else {
+                out.insert(metric.to_string());
+                return;
+            };
+            assert!(
+                visiting.insert(metric.to_string()),
+                "composite cycle at {metric}"
+            );
+            for part in parts.keys() {
+                expand(part, c, out, visiting);
+            }
+            visiting.remove(metric);
+        }
+
+        let mut out = BTreeSet::new();
+        for groups in c.final_score_weights.values() {
+            for group in groups.keys() {
+                let metrics = c
+                    .group_weights
+                    .get(group)
+                    .unwrap_or_else(|| panic!("role references unknown group {group}"));
+                for metric in metrics.keys() {
+                    expand(metric, c, &mut out, &mut BTreeSet::new());
+                }
+            }
+        }
+        out
+    }
 
     #[test]
     fn embedded_coefficients_parse() {
@@ -208,7 +375,7 @@ mod tests {
             c.ai_stupid_perspective_weights.is_empty(),
             "AISL perspective weights should remain retired from active scoring"
         );
-        assert_eq!(c.group_weights.len(), 8);
+        assert!(c.group_weights.len() >= 8);
         assert_eq!(c.final_score_weights.len(), 4);
         assert!(
             c.metrics.len() >= 20,
@@ -271,5 +438,64 @@ mod tests {
                 "{name} composite weights sum to {sum}, expected 1.0"
             );
         }
+    }
+
+    #[test]
+    fn every_ranked_leaf_has_fixed_anchors_and_family() {
+        let c = Coefficients::load_embedded().unwrap();
+        for metric in ranked_leaves(&c) {
+            let def = c
+                .metrics
+                .get(&metric)
+                .unwrap_or_else(|| panic!("ranked leaf {metric} has no definition"));
+            if !c.precedence_composites.contains(&metric) {
+                assert!(
+                    def.anchor_low.is_some() && def.anchor_high.is_some(),
+                    "ranked leaf {metric} must have fixed v2 anchors"
+                );
+                assert!(
+                    def.anchor_low.unwrap() < def.anchor_high.unwrap(),
+                    "ranked leaf {metric} anchors must be ordered"
+                );
+            }
+            assert!(
+                def.family
+                    .as_deref()
+                    .is_some_and(|family| !family.is_empty()),
+                "ranked leaf {metric} must declare an evidence family"
+            );
+        }
+        assert_eq!(
+            c.normalization.as_ref().map(|n| n.anchor_version.as_str()),
+            Some("2026-07-12.v1")
+        );
+    }
+
+    #[test]
+    fn operations_and_pricing_have_zero_rank_path() {
+        let c = Coefficients::load_embedded().unwrap();
+        let ranked = ranked_leaves(&c);
+        for metric in ["OutputSpeed", "TTFT", "ContextWindow", "BlendedCost"] {
+            assert!(
+                !ranked.contains(metric),
+                "{metric} is diagnostic-only and must never affect a role rank"
+            );
+        }
+        assert!(
+            c.final_score_weights
+                .values()
+                .all(|groups| groups.keys().all(|group| !group.starts_with("OPS_")))
+        );
+    }
+
+    #[test]
+    fn direct_creative_and_judge_signals_replace_old_duplicates() {
+        let c = Coefficients::load_embedded().unwrap();
+        let ranked = ranked_leaves(&c);
+        assert!(ranked.contains("EQBenchCreativeWriting"));
+        assert!(ranked.contains("EQBenchJudgemark"));
+        assert!(!ranked.contains("LMArenaCreativeOrOpenEnded"));
+        assert!(!ranked.contains("ArtificialAnalysisReasoning"));
+        assert!(!ranked.contains("GPQA_HLE_Reasoning"));
     }
 }

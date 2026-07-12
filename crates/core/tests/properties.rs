@@ -108,6 +108,34 @@ proptest! {
         let (v, _) = missing_safe_avg(&m_map, &w_map, &mut missing, "", &cfg);
         prop_assert!((v - 50.0).abs() < 1e-9);
     }
+
+    #[test]
+    fn adding_below_prior_observation_cannot_increase_group(
+        weights in proptest::collection::vec(0.05f64..1.0, 2..7),
+        present_scores in proptest::collection::vec(0.0f64..100.0, 1..6),
+        new_score in 0.0f64..50.0,
+    ) {
+        let n = weights.len();
+        let present_n = present_scores.len().min(n - 1);
+        let mut before_values = vec![None; n];
+        for (slot, score) in before_values.iter_mut().zip(&present_scores).take(present_n) {
+            *slot = Some(*score);
+        }
+        let mut after_values = before_values.clone();
+        after_values[present_n] = Some(new_score);
+
+        let w_map = build_weights(&weights);
+        let cfg = AggregationConfig::default();
+        let mut missing = MissingInfo::new();
+        let (before, _) = missing_safe_avg(
+            &build_metrics(&before_values), &w_map, &mut missing, "", &cfg
+        );
+        let mut missing = MissingInfo::new();
+        let (after, _) = missing_safe_avg(
+            &build_metrics(&after_values), &w_map, &mut missing, "", &cfg
+        );
+        prop_assert!(after <= before + 1e-9, "before={before}, after={after}");
+    }
 }
 
 #[test]
@@ -116,7 +144,11 @@ fn real_rows_always_win_over_synthesized_and_penalty_is_bounded() {
     // clobber a synthesized row regardless of input order, and a synthesized
     // row should be pulled toward 50 by no more than the configured penalty.
     let coef = Coefficients::load_embedded().unwrap();
-    let penalty = coef.penalties.as_ref().map(|p| p.synthesis).unwrap_or(0.15);
+    let reliability = coef
+        .evidence
+        .as_ref()
+        .map(|e| e.conservative_synthesis_reliability)
+        .unwrap_or(0.20);
 
     let make_record = |canonical: &str| {
         let mut r = ModelRecord::new(
@@ -199,11 +231,21 @@ fn real_rows_always_win_over_synthesized_and_penalty_is_bounded() {
         );
         ipbr_core::compute_scores_with(&mut records, &coef);
         let synth_norm = records[1].metrics.get(metric).copied().unwrap_or(50.0);
-        // normalized direct top = 100; conservative synth = 100*(1-p)+50*p
-        let expected = 100.0 * (1.0 - penalty) + 50.0 * penalty;
+        // Conservative synthesis is a reliability-weighted deviation of the
+        // fixed-anchor normalized value from the 50 prior.
+        let def = &coef.metrics[metric];
+        let normalized = ipbr_core::normalize::anchored_logistic_norm(
+            100.0,
+            def.anchor_low.expect("ranked metric has low anchor"),
+            def.anchor_high.expect("ranked metric has high anchor"),
+            def.higher_better,
+            def.log_scale,
+        )
+        .expect("anchored normalization succeeds");
+        let expected = 50.0 + reliability * (normalized - 50.0);
         assert!(
             (synth_norm - expected).abs() < 0.5,
-            "synthesized {metric} should be pulled toward 50 by ~{penalty}, got {synth_norm}"
+            "synthesized {metric} should use reliability {reliability}, got {synth_norm}"
         );
     }
 }

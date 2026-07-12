@@ -7,12 +7,21 @@ regardless. The HTTP layer retries on `429`/`5xx` with exponential backoff
 (honoring `Retry-After`), so HuggingFace datasets-server rate limits don't
 fail the run.
 
+Ingestion produces one canonical record per model under the
+`best_available_max_effort` policy. Within a benchmark, max/xhigh, high,
+thinking/adaptive, medium, then default observations are preferred. The
+winning metric keeps its source and evidence class; direct observations take
+precedence over cited reported overrides, which take precedence over sibling
+synthesis.
+
 ## openrouter
 
 - **Status**: Verified
 - **API**: OpenRouter `/api/v1/models` JSON endpoint
 - **Secret**: `OPENROUTER_API_KEY` (via `--openrouter-api-key-file` or environment variable)
 - **Cache TTL**: 24 h
+- **Metrics emitted**: pricing, provider routing, advertised context, and supported-parameter fields.
+- **Ranking use**: Diagnostic only. Pricing and context metadata have zero path to a methodology-v2 capability rank.
 - **Fixture**: `data/fixtures/openrouter_models.json`
 
 ## lmarena
@@ -21,18 +30,40 @@ fail the run.
 - **API**: LMArena leaderboard via HuggingFace datasets-server `/rows` (paginated, configs `text`, `webdev`, `search`, `document`)
 - **Secret**: None required; if `HF_TOKEN` is set, the fetcher sends it as a HuggingFace bearer token to reduce datasets-server 429s.
 - **Cache TTL**: 24 h
-- **Metrics emitted**: `LMArenaText`, `LMArenaCreativeOrOpenEnded`, `CopilotArenaOrLMArenaCode`, `LMArenaSearch`, and `LMArenaDocument`. Search and document stay separate because their raw Elo scales are not comparable; `LM_ARENA_REVIEW_PROXY` combines them after normalization.
+- **Metrics emitted**: `LMArenaText`, `CopilotArenaOrLMArenaCode`, `LMArenaSearch`, and `LMArenaDocument`. Search and document stay separate because their raw Elo scales are not comparable; `LM_ARENA_REVIEW_PROXY` combines them after normalization. Text Elo is not copied into a fake creativity field.
 - **429 handling**: The HuggingFace datasets-server rate-limits aggressively on deep pagination. The fetcher sleeps 5 s between successful pages, writes `lmarena_overall.partial.json` after every page, resumes from that partial file on the next run, and only promotes a complete payload to `lmarena_overall.json`. If a stale full cache exists and live refresh still fails, scoring falls back to the stale full cache.
 - **Fixture**: `data/fixtures/lmarena_overall.json`
+
+## eqbench_creative_writing
+
+- **Status**: Verified
+- **API**: EQ-Bench Creative Writing v3 JavaScript asset; the source extracts the `leaderboardDataCreativeWritingV3` embedded CSV.
+- **Secret**: None
+- **Cache TTL**: 24 h
+- **Metric**: `EQBenchCreativeWriting` — raw Glicko-derived Elo from the current Creative Writing v3 leaderboard.
+- **Deduplication**: Leading source markers are removed and the best row per canonical model is retained.
+- **Fixture**: `data/fixtures/eqbench_creative_writing_v3.js`
+
+## eqbench_judgemark
+
+- **Status**: Verified
+- **API**: EQ-Bench Judgemark v4 JavaScript asset; the source extracts the `leaderboardDataJudgemarkV4` embedded CSV.
+- **Secret**: None
+- **Cache TTL**: 24 h
+- **Metric**: `EQBenchJudgemark` — judge-discrimination/separability score, scaled from 0–1 to 0–100.
+- **Uncertainty**: `EQBenchJudgemarkCILow` and `EQBenchJudgemarkCIHigh` preserve the prompt-bootstrap 95% interval. They are unscored and never synthesized.
+- **Fixture**: `data/fixtures/eqbench_judgemark_v4.js`
 
 ## artificial_analysis
 
 - **Status**: Verified
 - **API**: Artificial Analysis `/api/v2/data/llms/models`, `x-api-key` header
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
-- **Cache TTL**: 24 h
-- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, `ArtificialAnalysisReasoning` (gpqa+hle blend), `GPQA_HLE_Reasoning` (same blend, different group), `AIME25`, `Tau2Bench`, `TauBanking`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AATerminalBench21`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall` (lcr), and the operational metrics `OutputSpeed` / `TTFT` / `BlendedCost`.
-- **Multi-row dedup**: AA ships several rows per logical model (e.g. "Claude Opus 4.7 (Adaptive Reasoning, Max Effort)" and "(Non-reasoning, High Effort)"). The fetcher sorts ascending by intelligence index so the highest-effort row appears last and wins the last-write merge; speed/ttft sentinel zeros are skipped.
+- **Cache TTL**: 10 min
+- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, separate `GPQA` and `HLE` observations, `AIME25`, `Tau2Bench`, `TauBanking`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AATerminalBench21`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall`, and the diagnostic fields `OutputSpeed`, `TTFT`, and `BlendedCost`.
+- **Duplicate correction**: GPQA and HLE remain independent and feed `AAReasoningComposite` once. The old identical `ArtificialAnalysisReasoning` and `GPQA_HLE_Reasoning` blend is no longer emitted or scored.
+- **Multi-row dedup**: AA ships several rows per logical model. The parser preserves distinct effort rows and ingestion selects the strongest eligible effort; equal-effort duplicate rows keep the highest intelligence observation. Speed/TTFT sentinel zeros are skipped.
+- **Ranking use**: Output speed, TTFT, price, and blended cost are diagnostics only.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
@@ -75,7 +106,7 @@ and agentic tool-use categories.
 - **API**: Terminal-Bench 2.0 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `TerminalBench`
+- **Metric**: `TerminalBench`; `TerminalBenchUncertainty` preserves the published ± value as an unscored auxiliary field.
 - **Fixture**: `data/fixtures/terminal_bench.html`
 
 ## terminal_bench_2_1
@@ -84,7 +115,7 @@ and agentic tool-use categories.
 - **API**: Terminal-Bench 2.1 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. The source canonicalizes duplicate agent rows down to one row per matched model. Scoring consumes it through `TerminalBench21Composite` together with AA's `AATerminalBench21`.
+- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. `TerminalBench21Uncertainty` preserves the published ± value. The source canonicalizes duplicate agent rows to the best row per model. Scoring consumes the primary metric through `TerminalBench21Composite` together with AA's `AATerminalBench21`; uncertainty is unscored.
 - **Fixture**: `data/fixtures/terminal_bench_2_1.html`
 
 ## livecodebench
@@ -103,7 +134,7 @@ and agentic tool-use categories.
 - **Secret**: None
 - **Cache TTL**: 2 d
 - **Fixture**: `data/fixtures/gso.json`
-- **Metric**: `GSO` — pass rate over 102 software-optimization tasks. We ingest the `score_hack_control` field (GSO's contamination-resistant variant, added explicitly to penalize deceptive optimizations) rather than raw `score`, mirroring our portfolio's bias toward contamination-resistant signals (cf. SWERebench preferred over SWE-Bench Verified). Filtered to `setting == "Opt@1"`. Among Opt@1 rows for the same model we keep the one with the lowest `reasoning_effort` so the variant policy (medium/thinking/adaptive only) is honored where possible — with the documented carve-out that GSO publishes only `-high` rows for some frontier models, which we accept rather than synthesize.
+- **Metric**: `GSO` — pass rate over 102 software-optimization tasks. We ingest the contamination-resistant `score_hack_control` field and filter to `setting == "Opt@1"`. Among duplicate Opt@1 rows, max/pro, xhigh, high, thinking/adaptive, medium/default, then low effort is preferred, matching the best-available configuration policy.
 
 ## swerebench
 
@@ -111,7 +142,7 @@ and agentic tool-use categories.
 - **API**: `swe-rebench.com` HTML page (Next.js server-rendered React Server Component blob; we extract the embedded `"items":[…]` array, unescape it, and parse with serde_json).
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `SWERebench` — resolved-rate over each model's full observation window. Prefers the `tools` (agentic) variant per model and falls back to `text`. Continuously-refreshed via a rolling window of post-release GitHub PRs, which removes contamination concerns vs. static SWE-bench.
+- **Metric**: `SWERebench` — resolved rate over the newest, widest range whose start is on or after the model's release. Rows with no uncontaminated post-release range are omitted. Prefers the `tools` (agentic) variant per model and falls back to `text`. `SWERebenchSEM` preserves the selected row's standard error as an unscored auxiliary field.
 - **Fragility note**: Depends on the embedded RSC payload format. If the site switches to client-side hydration or renames `items`/`modelName`/`rangeStats`/`taskRangeTimestamp`, the parser will need updating.
 - **Fixture**: `data/fixtures/swerebench.html`
 
@@ -160,7 +191,7 @@ and agentic tool-use categories.
 - **API**: Berkeley Function Calling Leaderboard V4 `data_overall.csv`
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metrics**: `BFCL` plus category splits `BFCLNonLiveAST`, `BFCLLive`, `BFCLMultiTurn`, `BFCLWebSearch`, `BFCLMemory`, `BFCLRelevanceDetection`, and `BFCLIrrelevanceDetection`. Scoring consumes these through `BFCLComposite`, with the overall leaderboard score kept as the anchor.
+- **Metrics**: `BFCL` plus category splits `BFCLNonLiveAST`, `BFCLLive`, `BFCLMultiTurn`, `BFCLWebSearch`, `BFCLMemory`, `BFCLRelevanceDetection`, and `BFCLIrrelevanceDetection`. The splits remain visible, but `BFCLComposite` scores only the upstream overall value so the headline is not stacked with components from which it is derived.
 - **Fixture**: `data/fixtures/bfcl.csv`
 
 ## arc_agi
@@ -180,7 +211,7 @@ and agentic tool-use categories.
 - **API**: `sonarsource.com/.../leaderboard/data/models.json` plus per-model metrics JSON files under `leaderboard/data/<org>/...`; no auth, no rate limit. Older snapshots used a single flat `leaderboard/data.json`, and the fetcher still reads that cached shape for back-compat.
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metrics**: `SonarFunctionalSkill` (pass rate, higher better), `SonarIssueDensity` (issues per kLOC, lower better), `SonarBugDensity` (bugs per kLOC, lower better), and `SonarVulnerabilityDensity` (vulnerabilities per kLOC, lower better). Lower-is-better metrics are flipped via `higher_better = false`. Sonar is the only public benchmark in our portfolio that measures generated-code quality directly instead of just pass rate.
+- **Metrics**: Diagnostic-only `SonarFunctionalSkill` (pass rate, higher better), `SonarIssueDensity` (issues per kLOC, lower better), `SonarBugDensity`, and `SonarVulnerabilityDensity`. `SonarComposite` combines functional skill and total issue density for inspection; it has no rank path while the published cohort mixes explicit effort levels. Bug and vulnerability density remain descriptive because they are nested within total issue density. A legitimate issue density of zero is retained.
 - **Coverage**: 70 Java rows in the 2026-05-21 live payload, including Opus 4.5/4.6/4.7 Thinking/High variants, GPT-5.2/5.3-Codex/5.4/5.5 variants, Gemini 3 Pro/Flash/3.1 Pro, GLM-5, Kimi K2.5, and MiniMax M2.5/M2.7.
 - **Fixture**: `data/fixtures/sonar.json`
 
@@ -189,46 +220,29 @@ and agentic tool-use categories.
 - **Status**: Verified
 - **API**: None — reads `data/score_overrides.toml` (embedded into the binary at build time).
 - **Purpose**: Hand-curated metric values pulled from vendor system cards, launch posts, and other authoritative secondary sources. Fills coverage gaps for models that public leaderboards have not yet rated (typically newest frontier models — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0, Kimi K2.7 Code launch-card metrics).
-- **Discipline**: Every entry MUST cite its source in the `note` field; values without citations are explicitly disallowed by code review.
-- **Precedence**: Overrides flow through the same ingest path as live sources. They are excluded from direct-source normalization baselines when enough direct data exists, but they no longer receive a post-normalization discount. If a public source later lands the same metric for the same model, the public value overwrites the override on the next run.
+- **Discipline**: Every entry must cite its source in the `note` field. Schema 2.0 publishes the winning note as `citation` in the metric-evidence table.
+- **Precedence and reliability**: Reported overrides beat synthesis but never replace a direct source, independent of ingest order. Their normalized deviation from 50 is multiplied by the default reported reliability of 0.60.
 
 ## Synthesis
 
-`data/synthesis_aliases.toml` lists sibling-substitution pairs. For every
-pair `(target, from)` and every source `S`, a synthesized RawRow is
-emitted carrying the donor (`from`) row's fields, tagged
-`synthesized_from = "<from>"`.
+`data/synthesis_aliases.toml` is the authoritative list of sibling-substitution pairs and rationale. Pairs may apply across sources or be restricted to one narrow leaderboard.
 
-**Field-level fill, not row-level replace.** The ingest layer
-(`ingest_synthesized_row` in `crates/core/src/ingest.rs`) skips any field
-that the target already has a real value for. So a model with partial
-real coverage from a source keeps its real values, and synthesis fills
-only the genuinely missing fields. Synthesis is the last-priority signal:
-real values always win.
+Synthesis is field-level and fill-only. A synthesized row carries the donor ID and category, but ingestion skips any metric for which the target already has a direct or reported observation. Observation-specific metadata such as confidence intervals, standard errors, and evidence notes is never transferred.
 
-The synthesis layer respects per-source caps (configured at 65 %) so a single
-donor can't dominate a model's signal across an entire source. Individual
-pairs can also be source-scoped; the Terminal-Bench 2.1 / HiL-Bench gap-fills
-are restricted to those two narrow new sources.
+Evidence precedence is order-independent:
 
-After per-metric normalization, conservative fields that came in via synthesis
-are pulled toward 50 by 15 % (the **synthesis penalty**, see methodology
-§3.4) so they read as a softer signal than direct measurements. Same-vendor,
-same-series version-advance fills are marked `category = "same_series_forward"`
-in `data/synthesis_aliases.toml` and carry no synthesis penalty. Documented
-stronger targets borrowing stale older-board rows from weaker donors can use
-`category = "stronger_successor"`, also with no synthesis penalty. Cross-vendor,
-cross-series, weaker, uncertain, and older-target-from-newer-donor fills remain
-`category = "conservative"`.
+```text
+direct > reported override > synthesized
+```
 
-Active pairs (target ← donor; see `data/synthesis_aliases.toml` for the
-authoritative list with rationale comments):
+Synthesis categories control reliability, not a hidden claim that the value was directly measured:
 
-- New-source scoped: `gpt-5.5-pro ← gpt-5.5`, `gpt-5.4-pro ← gpt-5.5`, `gpt-5.4-mini ← gpt-5.5`, `gpt-5.3-codex ← gpt-5.5`, `deepseek-v4-flash ← glm-5.1`, `deepseek-v3.2 ← deepseek-v4-flash`, `gemini-3.5-flash ← gemini-3.1-pro-preview`, `gemini-3.1-flash-lite ← gemini-3.5-flash`, `qwen3.6-plus ← glm-5.1`, `qwen3.5-397b-a17b ← qwen3.6-plus`, `qwen3.6-max-preview ← qwen3.5-397b-a17b` (Terminal-Bench 2.1 / HiL-Bench only)
-- OpenAI: `gpt-5.3-codex ← gpt-5.4`, `gpt-5.2-codex ← gpt-5.3-codex`, `gpt-5.2 ← gpt-5.4`, `gpt-5.4 ← gpt-5.3-codex`, `gpt-5.4-pro ← gpt-5.4`, `gpt-5.4-mini ← gpt-5.4`, `gpt-5.5-pro ← gpt-5.4-pro`
-- Anthropic: `claude-opus-4.7 ← claude-opus-4.6`, `claude-opus-4.5 ← claude-opus-4.6`, `claude-sonnet-4.6 ← claude-sonnet-4.5`, `claude-sonnet-4 ← claude-sonnet-4.5`
-- Google: `gemini-3.1-pro-preview ← gemini-3-pro`, `gemini-3.5-flash ← gemini-3-flash`, `gemini-2.5-pro ← gemini-3-pro`, `gemini-2.5-flash ← gemini-3-flash`
-- z.ai / Moonshot / Qwen: `z-ai/glm-5.1 ← moonshotai/kimi-k2.6`, `z-ai/glm-5.2 ← z-ai/glm-5.1`, `moonshotai/kimi-k2.7-code ← moonshotai/kimi-k2.6`, `moonshotai/kimi-k2.5 ← moonshotai/kimi-k2.6`, `z-ai/glm-4.6 ← z-ai/glm-4.7`, `z-ai/glm-5 ← z-ai/glm-5.1`, `qwen/qwen3.6-plus ← z-ai/glm-5`, `qwen/qwen3.7-max ← qwen/qwen3.6-plus`
-- DeepSeek / Xiaomi / MiniMax: `deepseek/deepseek-v4-flash ← moonshotai/kimi-k2.6`, `deepseek/deepseek-v4-pro ← deepseek/deepseek-v4-flash`, `xiaomi/mimo-v2.5-pro ← moonshotai/kimi-k2.5`, `xiaomi/mimo-v2.5 ← xiaomi/mimo-v2.5-pro`, `minimax/minimax-m2.5 ← moonshotai/kimi-k2.5`, `minimax/minimax-m2.7 ← minimax/minimax-m2.5`
-- xAI: `xai/grok-code-fast-1 ← xai/grok-4-latest`, `xai/grok-4.3 ← xai/grok-4-latest`
-- Meta: `meta/muse-spark ← google/gemini-3.5-flash`
+| Category | Default reliability |
+|---|---:|
+| `conservative` | 0.00 (prior-only) |
+| `same_series_forward` | 0.00 (prior-only) |
+| `stronger_successor` | 0.00 (prior-only) |
+
+For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked.
+
+The configured per-source cap limits emitted synthetic rows. After scoring, `synthesis_dominant` is computed from weighted role paths and becomes true when any role's synthesized share exceeds the configured per-model cap. Schema 2.0 publishes each synthesized metric's source, donor, category, and evidence coverage.

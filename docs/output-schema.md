@@ -1,409 +1,399 @@
-# Output Schema Reference
+# Output schema reference
 
-This document describes the TOML output format produced by `ipbr-rank`. The schema is stable for v1; breaking changes require a `schema_version` bump.
+This document describes schema 2.0, the TOML emitted by `ipbr-rank`. Schema
+2.0 adds metric provenance, evidence coverage, provisional role status, raw
+measurement uncertainty, and an explicit best-available configuration policy.
 
----
+## Versioning
 
-## Schema Version
-
-Current version: **1.1.0**
-
-All output files include a `schema_version` field at the top level. Downstream consumers should check this field and error gracefully if the major version differs.
-
----
-
-## Output Files
-
-`ipbr-rank all` produces four outputs in the `--out` directory (default: `out/`):
-
-1. **`scoreboard.toml`** — The primary deliverable. Contains all models with their scores, groups, metrics, and metadata.
-2. **`missing.toml`** — Denormalized view of missing metrics per model (same content as `models.missing` in `scoreboard.toml`, easier to grep).
-3. **`coefficients.toml`** — Echo of the effective coefficients used in the run (matches input when no overrides).
-4. **`site/`** — Static HTML website (separate from TOML schema, not covered here).
-
----
-
-## 1. `scoreboard.toml`
-
-### Top-Level Fields
+Every `scoreboard.toml` begins with a semantic schema version. Consumers must
+reject unsupported major versions and ignore unknown fields within a supported
+major version.
 
 ```toml
-schema_version = "1.1.0"           # String, semver
-generated_at = "2026-04-26T11:35:46Z"  # String, RFC3339 / ISO8601
-generator = "ipbr-rank 0.1.0"      # String, "{binary} {version}"
-methodology = "v1"                 # String, matches docs/methodology.md heading
+schema_version = "2.0.0"
+methodology = "v2"
+configuration_policy = "best_available_max_effort"
 ```
 
-- **`schema_version`**: Semver string. Major version bump = breaking change. Consumers should check this.
-- **`generated_at`**: Timestamp in RFC3339 format (UTC). Overrideable via `--now` for deterministic tests.
-- **`generator`**: Binary name + version from `Cargo.toml`.
-- **`methodology`**: Identifies the scoring methodology version. Currently always `"v1"`.
+`schema_version` describes the file shape. `methodology` describes scoring
+semantics. Either may change independently.
 
-### `[sources]` Table
+## Generated artifacts
 
-Optional. Maps source ID → metadata.
+`ipbr-rank all` writes:
+
+1. `scoreboard.toml` — canonical scores, raw observations, provenance, and
+   evidence coverage.
+2. `missing.toml` — compact missing-data view.
+3. `coefficients.toml` — effective weights, metric families, reliabilities,
+   and versioned normalization anchors.
+4. `site/` — static presentation generated from the same scoreboard.
+
+## `scoreboard.toml`
+
+### Top-level fields
 
 ```toml
-[sources.openrouter]
-status = "verified"               # String, "verified" | "skipped"
-n_rows_ingested = 312             # Integer, total rows fetched
-n_rows_matched = 298              # Integer, rows successfully matched to canonical IDs
-n_rows_unmatched = 14             # Integer, rows that failed alias matching
+schema_version = "2.0.0"
+generated_at = "2026-07-12T19:44:00Z"
+generator = "ipbr-rank 0.1.0"
+methodology = "v2"
+configuration_policy = "best_available_max_effort"
 ```
 
-- **`status`**: Source status at runtime. `"skipped"` if a required secret was missing.
-- **`n_rows_ingested`**: Total number of raw rows fetched from this source.
-- **`n_rows_matched`**: Rows successfully matched to a canonical model ID via the alias matcher.
-- **`n_rows_unmatched`**: Rows that failed matching (logged as warnings, discarded).
+| Field | Meaning |
+|---|---|
+| `schema_version` | Output shape version. |
+| `generated_at` | RFC 3339 generation timestamp. |
+| `generator` | CLI name and version. |
+| `methodology` | Ranking methodology identifier. |
+| `configuration_policy` | One canonical model record using best-available, strongest eligible effort/harness observations. |
 
-### `[[models]]` Array
+The configuration policy means a model record is a capability envelope, not
+necessarily one provider configuration that can be run end to end.
 
-Each model is an entry in the `models` array-of-tables.
+### Source summary
+
+Each fetched source has a table:
+
+```toml
+[sources.eqbench_judgemark]
+status = "verified"
+n_rows_ingested = 33
+n_rows_matched = 18
+n_rows_unmatched = 15
+```
+
+`status` is normally `verified`; it can be `skipped` when a required secret is
+unavailable. Row counts distinguish parsed upstream coverage from canonical
+model matches.
+
+### Model records
+
+Models are repeated TOML array tables sorted deterministically by canonical ID:
 
 ```toml
 [[models]]
 canonical_id = "anthropic/claude-opus-4.7"
 display_name = "Claude Opus 4.7"
 vendor = "anthropic"
-thinking_effort = "default"       # "default" | "low" | "medium" | "high"
-aliases = ["opus 4.7", "claude-opus-4-7", "claude opus 4.7"]
-sources = ["openrouter", "lmarena", "artificial_analysis"]
-
-[models.scores]
-i_raw = 78.4
-p_raw = 81.1
-b_raw = 79.6
-r = 84.0
-i_adj = 78.4
-p_adj = 81.1
-b_adj = 79.6
-
-[models.groups]
-CRE = 80.2
-GEN = 79.1
-PLAN = 75.3
-BUILD = 82.0
-LM_ARENA_REVIEW_PROXY = 84.5
-OPS_long = 71.0
-OPS_precision = 68.5
-OPS_review = 69.2
-
-[models.metrics]
-LMArenaText = 82.5
-SWEBenchVerified = 76.0
-ArtificialAnalysisIntelligence = 78.0
-# ... all normalized metrics populated for this model
-
-[models.missing]
-metrics = ["TerminalBench", "SonarFunctionalSkill"]
-groups_shrunk = ["PLAN"]
+thinking_effort = "best_available"
+aliases = ["claude-opus-4-7", "opus 4.7"]
+sources = ["artificial_analysis", "eqbench_judgemark", "lmarena"]
 ```
 
-#### Model Fields
+| Field | Meaning |
+|---|---|
+| `canonical_id` | Stable `{vendor}/{model}` identity. |
+| `display_name` | Human-readable name. |
+| `vendor` | Normalized vendor slug. |
+| `thinking_effort` | Record-level policy summary: `best_available`, `low`, `medium`, or `high`. `best_available` means individual metrics may use different strongest eligible settings; `configuration_policy` is authoritative. |
+| `aliases` | Source spellings accepted by alias matching. |
+| `sources` | Sources that matched the canonical record. |
 
-- **`canonical_id`**: String, unique identifier in `vendor/model[+thinking-effort]` format.
-- **`display_name`**: String, human-readable name for rendering.
-- **`vendor`**: String, vendor name (lowercase). Possible values: `"openai"`, `"anthropic"`, `"google"`, `"moonshot"`, `"zai"`, `"xai"`, `"alibaba"`, `"deepseek"`, `"mistral"`, `"meta"`, `"minimax"`, `"nvidia"`, `"baidu"`, `"tencent"`, `"inclusionai"`, `"xiaomi"`, or any other vendor as a string.
-- **`thinking_effort`**: String, one of:
-  - `"default"` — No explicit thinking effort level
-  - `"low"` — Low reasoning budget
-  - `"medium"` — Medium reasoning budget
-  - `"high"` — High reasoning budget
-- **`aliases`**: Array of strings, normalized aliases that match this model.
-- **`sources`**: Array of strings, source IDs that contributed data for this model.
-
-#### `[models.scores]` Table
-
-All scores are floats in the range [0.0, 100.0].
-
-- **`i_raw`**: Idea score
-- **`p_raw`**: Planning score
-- **`b_raw`**: Building score
-- **`r`**: Reviewing score
-- **`i_adj`**: Alias of `i_raw` retained for API back-compat (always equals `i_raw`)
-- **`p_adj`**: Alias of `p_raw` retained for API back-compat (always equals `p_raw`)
-- **`b_adj`**: Alias of `b_raw` retained for API back-compat (always equals `b_raw`)
-
-**Note**: The previous reviewer-reservation adjustment that produced distinct `_adj` scores was removed. The `_adj` keys are retained as raw aliases so existing consumers keep parsing.
-
-#### `[models.groups]` Table
-
-Maps group key → group score (float, 0–100).
-
-Possible group keys:
-- **`CRE`** (Creativity)
-- **`GEN`** (General Intelligence)
-- **`PLAN`** (Planning)
-- **`BUILD`** (Building)
-- **`LM_ARENA_REVIEW_PROXY`** (LM Arena search/document review proxy)
-- **`OPS_long`** (Ops for long generation)
-- **`OPS_precision`** (Ops for precise tasks)
-- **`OPS_review`** (Ops for reviewing)
-
-Groups where `present_weight / total_weight` is below the configured transition ceiling are marked as "shrunk" in `models.missing.groups_shrunk`; with the default coefficients, the scoring math blends from shrink-to-50 to trusting the present mean across 0.60-0.80 coverage.
-
-#### `[models.metrics]` Table
-
-Maps metric key → normalized score (float, 0–100).
-
-Metric keys are defined in `data/coefficients.toml` under `[metrics.*]`. See `docs/methodology.md` Appendix A for the complete list.
-
-Only metrics that are *present* for this model appear in this table. Missing metrics are listed in `models.missing.metrics`.
-
-Some metric values are filled from a sibling model when the source did not directly cover this model (sibling synthesis, see methodology §3.4). Synthesis is an internal scoring detail used to compute the final score and is **not** surfaced in the rendered scoreboard — synthesized values appear in `[models.metrics]` indistinguishably from directly-measured values.
-
-#### `[models.missing]` Table
-
-- **`metrics`**: Array of strings, metric keys that are missing for this model.
-- **`groups_shrunk`**: Array of strings, group keys below the configured shrink-reporting coverage cutoff. See methodology §4.2 for the default 0.60-0.80 smooth shrink transition.
-
----
-
-## 2. `missing.toml`
-
-A denormalized view of missing data, easier to query than iterating `scoreboard.toml`.
+### Role scores and status
 
 ```toml
-generated_at = "2026-04-26T11:35:46Z"
+[models.scores]
+i_raw = 78.400000
+p_raw = 81.100000
+b_raw = 79.600000
+r = 84.000000
+i_status = "ranked"
+p_status = "provisional"
+b_status = "ranked"
+r_status = "provisional"
+```
+
+`i_raw`, `p_raw`, `b_raw`, and `r` are the Idea, Planning, Building, and
+Review proxy scores.
+
+Each status is `ranked` or `provisional`. A role is provisional when direct
+coverage is below 60% or direct evidence spans fewer than three independent
+families. The numeric score remains available in either case.
+
+Balanced capability is not stored as a fifth score. Consumers can reproduce
+the presentation view with:
+
+```text
+(i_raw + p_raw + b_raw + r) / 4
+```
+
+Balanced status is provisional if any component role is provisional.
+
+### Groups
+
+```toml
+[models.groups]
+BUILD = 79.200000
+CRE = 80.200000
+GEN = 79.100000
+OPS_precision = 72.300000
+```
+
+Group values are 0–100 diagnostics computed from their configured inputs.
+Operational `OPS_*` groups can appear here, but pricing, speed, latency, TTFT,
+and context have zero path to any capability rank in methodology v2.
+
+Final roles are flattened to leaf metrics and family-capped. Therefore a role
+score cannot always be reproduced by naively averaging the displayed groups.
+
+### Normalized metrics
+
+```toml
+[models.metrics]
+EQBenchCreativeWriting = 86.200000
+SWEBenchVerified = 77.100000
+SWEComposite = 79.400000
+```
+
+`models.metrics` contains normalized, evidence-adjusted 0–100 observations and
+derived composites. Missing leaves and fully absent composites are omitted.
+
+The normalized value already includes evidence reliability:
+
+```text
+adjusted = 50 + reliability × (normalized - 50)
+```
+
+### Raw metrics and uncertainty
+
+```toml
+[models.raw_metrics]
+EQBenchCreativeWriting = 2202.500000
+EQBenchJudgemark = 83.961200
+EQBenchJudgemarkCILow = 80.473100
+EQBenchJudgemarkCIHigh = 89.492300
+SWERebench = 61.500000
+SWERebenchSEM = 0.400000
+TerminalBench21 = 74.600000
+TerminalBench21Uncertainty = 2.200000
+```
+
+`models.raw_metrics` retains native upstream units. Unlike normalized scores,
+raw values are not constrained to 0–100; for example, Creative Writing uses
+Elo units. Auxiliary uncertainty fields are unscored and never transferred by
+sibling synthesis.
+
+Currently preserved auxiliary keys include:
+
+- `TerminalBenchUncertainty`
+- `TerminalBench21Uncertainty`
+- `SWERebenchSEM`
+- `EQBenchJudgemarkCILow`
+- `EQBenchJudgemarkCIHigh`
+
+### Per-metric provenance
+
+Every present public raw metric, including uncertainty auxiliaries, has a
+provenance table.
+
+Direct observation:
+
+```toml
+[models.metric_evidence.EQBenchJudgemark]
+class = "direct"
+source = "eqbench_judgemark"
+```
+
+Reported override:
+
+```toml
+[models.metric_evidence.GDPval]
+class = "reported"
+source = "overrides"
+citation = "Artificial Analysis GDPval-AA leaderboard, accessed ..."
+```
+
+Synthesized observation:
+
+```toml
+[models.metric_evidence.SWERebench]
+class = "synthesized"
+source = "swerebench"
+donor = "openai/gpt-5.4"
+synthesis_category = "same_series_forward"
+```
+
+Valid evidence classes are `direct`, `reported`, and `synthesized`. Valid
+synthesis categories are `conservative`, `same_series_forward`, and
+`stronger_successor`.
+
+Winning-observation precedence is:
+
+```text
+direct > reported > synthesized
+```
+
+### Evidence coverage
+
+Every group and role has an evidence summary:
+
+```toml
+[models.evidence.groups.BUILD]
+direct = 0.640000
+reported = 0.100000
+synthesized = 0.080000
+missing = 0.180000
+effective = 0.700000
+family_count = 5
+direct_families = ["eqbench", "gso", "scale", "sonar", "swe"]
+
+[models.evidence.roles.B_raw]
+direct = 0.620000
+reported = 0.120000
+synthesized = 0.070000
+missing = 0.190000
+effective = 0.692000
+family_count = 5
+direct_families = ["gso", "scale", "sonar", "swe", "terminal_bench"]
+provisional = false
+```
+
+The four nominal shares `direct + reported + synthesized + missing` sum to
+approximately 1. `effective` is the confidence-weighted coverage
+(`direct + 0.60 × reported` in the current methodology); it is not another
+nominal class. `family_count` counts direct families only.
+
+Group summaries describe the displayed group graph. Role summaries describe
+the flattened and family-capped role calculation.
+
+### Missing-data table
+
+```toml
+[models.missing]
+metrics = ["EQBenchCreativeWriting", "SWERebench"]
+groups_shrunk = ["CRE", "BUILD"]
+synthesis_dominant = false
+```
+
+| Field | Meaning |
+|---|---|
+| `metrics` | Active scored leaf metrics with no raw observation. |
+| `groups_shrunk` | Compatibility name for groups with incomplete nominal coverage. Capability uses available same-model evidence; this field does not select a separate score formula. |
+| `synthesis_dominant` | True when any role's weighted synthesized share exceeds the configured per-model cap. |
+
+## `missing.toml`
+
+This file is a denormalized subset for quick inspection:
+
+```toml
+generated_at = "2026-07-12T19:44:00Z"
 
 [models."anthropic/claude-opus-4.7"]
 display_name = "Claude Opus 4.7"
-metrics = ["TerminalBench", "SonarFunctionalSkill"]
-groups_shrunk = ["PLAN"]
+metrics = ["EQBenchCreativeWriting"]
+groups_shrunk = ["CRE"]
 ```
 
-### Fields
+Its version follows the associated `scoreboard.toml`; it does not carry a
+separate `schema_version` field.
 
-- **`generated_at`**: RFC3339 timestamp, matches `scoreboard.toml`.
-- **`[models."<canonical_id>"]`**: One table per model, keyed by canonical ID.
-  - **`display_name`**: Human-readable name (same value as in `scoreboard.toml`).
-  - **`metrics`**: Array of strings, metric keys missing for this model.
-  - **`groups_shrunk`**: Array of strings, groups below the configured shrink-reporting coverage cutoff.
+## `coefficients.toml`
 
-`missing.toml` does not include a `schema_version` field — its shape is
-covered by `scoreboard.toml`'s version bumps.
-
----
-
-## 3. `coefficients.toml`
-
-A verbatim echo of the *effective* coefficients used in the run. When `--coefficients` is not provided, this matches the embedded `data/coefficients.toml`. When coefficients are overridden, this reflects the overrides.
-
-### Structure
-
-Same as `data/coefficients.toml`:
+This is the effective configuration used for the run. Important schema 2.0
+fields include:
 
 ```toml
-[group_weights.CRE]
-LMArenaCreativeOrOpenEnded = 0.50
-LMArenaText = 0.30
-ARC_AGI_2 = 0.20
+[normalization]
+anchor_version = "2026-07-12.v1"
+snapshot_date = "2026-07-12"
+derivation = "direct_p05_p95_with_reported_only_fallback"
+low_quantile = 0.05
+high_quantile = 0.95
+reported_fallback = true
 
-[group_weights.GEN]
-# ... same structure for other groups
-
-[final_score_weights.I_raw]
-CRE = 0.62
-GEN = 0.30
-OPS_long = 0.08
-
-[final_score_weights.P_raw]
-# ... same structure for P_raw, B_raw, R
-
-[metrics.LMArenaText]
+[metrics.EQBenchCreativeWriting]
+family = "eqbench"
 higher_better = true
 log_scale = false
-groups = ["CRE", "GEN"]
 transform = "percentile"
+anchor_low = 1367.42
+anchor_high = 2185.10
+groups = ["CRE"]
 
-[metrics.ArtificialAnalysisIntelligence]
-higher_better = true
-log_scale = false
-groups = ["GEN"]
-
-# ... same structure for all metrics
+[evidence]
+prior_score = 50.0
+direct_reliability = 1.0
+reported_reliability = 0.60
+conservative_synthesis_reliability = 0.0
+same_series_synthesis_reliability = 0.0
+stronger_successor_synthesis_reliability = 0.0
+provisional_min_direct = 0.60
+provisional_min_families = 3
+max_family_weight = 0.30
 ```
 
-See `data/coefficients.toml` in the repository for the authoritative v1 values.
+Consumers must still read the effective file rather than hard-code this
+example. Anchor set `2026-07-12.v1` was derived from the frozen 2026-07-12
+direct-evidence snapshot, with a cited-report fallback for reported-only
+metrics. Active ranked leaves use fixed anchors; explicitly unanchored
+diagnostic or custom metrics may use their configured fallback transform.
 
----
+## Parsing example
 
-## Parsing Examples
-
-### Python
+Python 3.11+:
 
 ```python
-import tomllib  # Python 3.11+
+import tomllib
 
-with open("out/scoreboard.toml", "rb") as f:
-    scoreboard = tomllib.load(f)
+with open("out/scoreboard.toml", "rb") as handle:
+    board = tomllib.load(handle)
 
-for model in scoreboard["models"]:
-    print(f"{model['canonical_id']}: I={model['scores']['i_raw']:.1f}")
+if not board["schema_version"].startswith("2."):
+    raise RuntimeError("unsupported scoreboard schema")
+
+for model in board["models"]:
+    scores = model["scores"]
+    balanced = sum(scores[key] for key in ("i_raw", "p_raw", "b_raw", "r")) / 4
+    status = "provisional" if any(
+        scores[key] == "provisional"
+        for key in ("i_status", "p_status", "b_status", "r_status")
+    ) else "ranked"
+    print(model["canonical_id"], balanced, status)
 ```
 
-### Rust
+## Stability guarantees
 
-```rust
-use serde::Deserialize;
-use std::collections::BTreeMap;
+Non-breaking changes within schema 2 may add models, sources, metrics,
+evidence fields, or optional tables. Consumers should ignore unknown fields
+and not depend on table ordering.
 
-#[derive(Deserialize)]
-struct Scoreboard {
-    schema_version: String,
-    generated_at: String,
-    generator: String,
-    methodology: String,
-    sources: Option<BTreeMap<String, SourceSummary>>,
-    models: Vec<Model>,
-}
+A major bump is required to remove or rename required top-level/model fields,
+change the model identity format, or materially restructure score/evidence
+tables.
 
-#[derive(Deserialize)]
-struct SourceSummary {
-    status: String,
-    n_rows_ingested: usize,
-    n_rows_matched: usize,
-    n_rows_unmatched: usize,
-}
+With `--offline`, a fixed cache, and `--now`, output is deterministic: maps and
+arrays are sorted and floats use fixed precision.
 
-#[derive(Deserialize)]
-struct Model {
-    canonical_id: String,
-    display_name: String,
-    vendor: String,
-    thinking_effort: String,
-    aliases: Vec<String>,
-    sources: Vec<String>,
-    scores: RoleScores,
-    groups: BTreeMap<String, f64>,
-    metrics: BTreeMap<String, f64>,
-    missing: Missing,
-}
+## Constraints
 
-#[derive(Deserialize)]
-struct RoleScores {
-    i_raw: f64,
-    p_raw: f64,
-    b_raw: f64,
-    r: f64,
-    i_adj: f64,
-    p_adj: f64,
-    b_adj: f64,
-}
+- Normalized metrics, composites, groups, and role scores are in `[0, 100]`.
+- Raw metrics use native units and need only be finite.
+- Missing values are represented by absence, not `null` or `NaN`.
+- `generated_at` is RFC 3339.
+- Arrays contain no duplicates.
+- Map keys are case-sensitive.
 
-#[derive(Deserialize)]
-struct Missing {
-    metrics: Vec<String>,
-    groups_shrunk: Vec<String>,
-}
+## Changelog
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let raw = std::fs::read_to_string("out/scoreboard.toml")?;
-    let scoreboard: Scoreboard = toml::from_str(&raw)?;
+### 2.0.0
 
-    for model in scoreboard.models {
-        println!("{}: I={:.1}", model.canonical_id, model.scores.i_raw);
-    }
-
-    Ok(())
-}
-```
-
-### JavaScript / Node.js
-
-```javascript
-const toml = require('@iarna/toml');
-const fs = require('fs');
-
-const raw = fs.readFileSync('out/scoreboard.toml', 'utf8');
-const scoreboard = toml.parse(raw);
-
-for (const model of scoreboard.models) {
-    console.log(`${model.canonical_id}: I=${model.scores.i_raw.toFixed(1)}`);
-}
-```
-
----
-
-## Stability Guarantees
-
-### Non-Breaking Changes (Patch/Minor)
-- Adding optional top-level fields
-- Adding new models to `[[models]]` array
-- Adding new metrics/groups to existing models (downstream parsers ignore unknown keys)
-- Changing float precision (values remain semantically equivalent)
-- Reordering models/metrics/groups (order is not guaranteed)
-
-### Breaking Changes (Major)
-- Renaming or removing top-level fields
-- Changing `models.scores` field names
-- Changing the structure of `models.missing`
-- Changing the format of `canonical_id`
-- Removing required fields
-
-When a breaking change is necessary, `schema_version` major version will be incremented (e.g., `"2.0.0"`).
-
----
-
-## Field Constraints
-
-### Floats
-- All score/metric/group values are floats in the range [0.0, 100.0]
-- Formatted with fixed precision (typically 1 decimal place)
-- Missing values are represented by absence from the table, not `null` or `NaN`
-
-### Strings
-- `canonical_id` format: `{vendor}/{model}` or `{vendor}/{model}+thinking-{level}`
-- `vendor` is lowercase, no spaces
-- `thinking_effort` is one of: `"default"`, `"low"`, `"medium"`, `"high"`
-- `generated_at` is RFC3339 (e.g., `"2026-04-26T11:35:46Z"`)
-
-### Arrays
-- All arrays are sorted deterministically (alphabetical for strings, undefined but stable for models)
-- No duplicates within an array field
-
-### Maps
-- All maps (`groups`, `metrics`, `sources`) are sorted by key (alphabetical)
-- Keys are case-sensitive
-
----
-
-## Determinism
-
-With `--offline --cache <fixtures> --now <timestamp>`:
-- The output is byte-for-byte deterministic across runs
-- Timestamps use the `--now` override
-- All maps are sorted
-- Floats use fixed formatting
-
-This enables golden testing and reproducible builds.
-
----
-
-## Consumption Best Practices
-
-1. **Check `schema_version`** before parsing. Fail gracefully if major version differs.
-2. **Use missing fields defensively**: If a field is documented as optional, handle its absence.
-3. **Ignore unknown fields**: Future minor versions may add new fields.
-4. **Do not rely on ordering**: The order of models, metrics, and groups is not guaranteed (though currently stable for determinism).
-5. **Validate floats are in [0, 100]**: All scores/metrics/groups should be in this range. File a bug if you see values outside.
-
----
-
-## Schema Changelog
+- Added explicit `best_available_max_effort` configuration policy.
+- Added ranked/provisional status per role.
+- Added raw metrics and auxiliary uncertainty fields.
+- Added per-metric evidence class, winning source, donor/category, and override
+  citation.
+- Added recursive group/role evidence coverage and direct-family counts.
+- Restored `synthesis_dominant` as a weighted role-path diagnostic.
+- Changed methodology identifier to `v2`.
 
 ### 1.1.0
 
-- Sibling synthesis became an internal scoring detail. Synthesized metric values are still mixed into `[models.metrics]`, but no `[models.synthesized]` provenance table or `synthesis_dominant` flag is emitted.
-- Pre-1.1.0 consumers that gate on the major version (`1.x.x`) and ignore unknown fields parse 1.1.0 output unchanged.
+- Synthesis provenance was internal and missing-data reporting was limited to
+  metrics and group shrink flags.
 
-### 1.0.0 (Initial)
-- First stable schema
-- All four role scores (I_raw, P_raw, B_raw, R), plus `i_adj`, `p_adj`, `b_adj` retained as raw aliases for API back-compat
-- 8 groups (CRE, GEN, PLAN, BUILD, LM_ARENA_REVIEW_PROXY, OPS_*)
-- Metrics defined in `data/coefficients.toml`
-- Missing-data tracking via `models.missing`
+### 1.0.0
 
----
-
-End of Output Schema Reference.
+- Initial stable four-role scoreboard.
