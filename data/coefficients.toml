@@ -26,7 +26,7 @@ ARC_AGI_2 = 0.30
 # BrowseComp and HLETools remain diagnostics until a neutral direct feed exists.
 LMArenaText = 0.35
 ARC_AGI_2 = 0.30
-AAReasoningComposite = 0.35
+AAGeneralComposite = 0.35
 
 [group_weights.PLAN]
 # PLAN uses current end-to-end agent, tool-use, instruction-following, and
@@ -34,13 +34,13 @@ AAReasoningComposite = 0.35
 # Toolathlon/OSWorld/HLETools/BrowseComp and the construct-mismatched ARC path
 # remain diagnostic rather than affecting the primary rank.
 TerminalBench21Composite = 0.13
-TerminalBenchHard = 0.08
 BFCLComposite = 0.10
 HiLBench = 0.08
-TauComposite = 0.14
-IFBench = 0.11
-LongContextRecall = 0.10
+Tau3Banking = 0.14
+LongContextComposite = 0.10
 MCPAtlas = 0.26
+EnterpriseWorkflowComposite = 0.12
+GDPvalAA2 = 0.07
 
 # BUILD is centered on direct software-work evidence. SWEComposite remains the
 # largest input; SWE Atlas, terminal work, BFCL, GSO, live coding, and MCP
@@ -48,15 +48,15 @@ MCPAtlas = 0.26
 # diagnostic because its current rows mix explicit effort levels and measure a
 # narrower coding-quality profile than the repository/agent benchmarks.
 [group_weights.BUILD]
-SWEComposite = 0.284
+SWEComposite = 0.221
+DeepSWE = 0.120
 SWEAtlasComposite = 0.148
 MCPAtlas = 0.102
 TerminalBench21Composite = 0.080
-TerminalBenchHard = 0.057
 BFCLComposite = 0.068
 HiLBench = 0.045
 GSO = 0.103
-LongContextRecall = 0.045
+LongContextComposite = 0.045
 LiveCodingComposite = 0.068
 
 # Composite metrics — per-model weighted average of normalized input metrics.
@@ -165,8 +165,8 @@ SonarIssueDensity = 0.40
 SciCode = 0.60
 CopilotArenaOrLMArenaCode = 0.40
 
-# GPQA and HLE are distinct observations. Collapse the AA reasoning family
-# exactly once instead of emitting the same blend under two names.
+# Legacy two-leaf AA composite retained for historical consumers only. The
+# primary GEN path uses AAGeneralComposite below.
 [composite_metrics.AAReasoningComposite]
 # AIME 2025 and MMLU-Pro remain visible diagnostics, but AA retired them from
 # its current Intelligence Index. The primary reasoning composite uses the two
@@ -174,12 +174,39 @@ CopilotArenaOrLMArenaCode = 0.40
 GPQA = 0.50
 HLE = 0.50
 
-# TauComposite combines AA's general τ2-bench tool-use score with the newer
-# τ-bench banking field exposed in the same payload. Keep τ2 dominant because
-# it is the broader, historically populated signal.
+# Current AA v4.1 general/scientific evidence. The weights preserve AA's
+# relative 12/6/6/8/4 allocation after moving AA-LCR exclusively into the
+# dedicated long-context composite, so the same observation cannot enter a
+# role twice.
+[composite_metrics.AAGeneralComposite]
+HLE = 0.3333333333333333
+GPQA = 0.16666666666666666
+CritPt = 0.16666666666666666
+AAOmniscienceAccuracy = 0.2222222222222222
+AAOmniscienceNonHallucination = 0.1111111111111111
+
+# Legacy tau2-era composite retained for historical consumers only. It has no
+# path into the primary PLAN score.
 [composite_metrics.TauComposite]
 Tau2Bench = 0.75
 TauBanking = 0.25
+
+# AA kept the `tau_banking` API key after upgrading its public suite. The
+# current tau3 score is used directly; the retired tau2 blend above remains
+# diagnostic for historical consumers only.
+
+# Two independent long-context implementations corroborate the same construct
+# without creating separate role weight. AA-LCR remains the anchor because it
+# has broader tracked-model coverage; MRCRv2 adds current multi-needle stress.
+[composite_metrics.LongContextComposite]
+LongContextRecall = 0.60
+ContextArenaMRCR128k = 0.40
+
+# Stateful enterprise workflow evaluations share an AA/Stirrup execution
+# contour and are therefore collapsed into one PLAN leaf.
+[composite_metrics.EnterpriseWorkflowComposite]
+EnterpriseOpsGymAA = 0.65
+AutomationBenchAA = 0.35
 
 # The weights encode precedence: official Terminal-Bench 2.1 is preferred and
 # AA's observation is a coverage fallback. They are never averaged together.
@@ -187,9 +214,9 @@ TauBanking = 0.25
 TerminalBench21 = 0.55
 AATerminalBench21 = 0.45
 
-# BFCLComposite keeps Berkeley's overall V4 accuracy as the anchor while
-# making the category splits visible to PLAN/BUILD. Overall stays largest
-# because it is the upstream leaderboard headline metric.
+# BFCLComposite keeps Berkeley's overall V4 accuracy as a single leaf. The
+# published category splits remain visible diagnostics and are not stacked
+# with the overall score from which they are derived.
 [composite_metrics.BFCLComposite]
 BFCL = 1.0
 
@@ -275,7 +302,7 @@ max_family_weight = 0.30
 # cohort. Anchors are the direct-evidence p5/p95 values where at least two
 # distinct direct observations existed; reported-only metrics use the same
 # quantiles over cited reports. Future cohorts do not move these anchors.
-anchor_version = "2026-07-12.v1"
+anchor_version = "2026-07-12.v2"
 snapshot_date = "2026-07-12"
 derivation = "direct_p05_p95_with_reported_only_fallback"
 low_quantile = 0.05
@@ -307,7 +334,7 @@ anchor_high = 1559.63
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = []
+groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.LMArenaSearch]
@@ -357,7 +384,7 @@ transform = "percentile"
 family = "artificial_analysis"
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisCoding]
@@ -441,7 +468,7 @@ anchor_low = 57.1325
 anchor_high = 77.85
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.TerminalBench]
@@ -450,7 +477,7 @@ anchor_low = 24.76
 anchor_high = 80.20
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
 transform = "percentile"
 
 # Terminal-Bench 2.1 is a smaller but newer official Terminal-Bench track,
@@ -489,7 +516,7 @@ anchor_low = 23.7879
 anchor_high = 58.0303
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.BFCL]
@@ -499,7 +526,7 @@ anchor_high = 75.778
 # Input to BFCLComposite.
 higher_better = true
 log_scale = false
-groups = []
+groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
 [metrics.BFCLNonLiveAST]
@@ -713,7 +740,7 @@ anchor_high = 56.375
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
-groups = []
+groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.AALiveCodeBench]
@@ -732,7 +759,7 @@ anchor_low = 45.5238
 anchor_high = 80.9524
 higher_better = true
 log_scale = false
-groups = ["PLAN"]
+groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisMath]
@@ -749,7 +776,7 @@ anchor_low = 53.1333
 anchor_high = 97.60
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = []
 transform = "percentile"
 
 [metrics.MMLUPro]
@@ -758,7 +785,7 @@ anchor_low = 78.31
 anchor_high = 89.59
 higher_better = true
 log_scale = false
-groups = ["GEN"]
+groups = []
 transform = "percentile"
 
 [metrics.LongContextRecall]
@@ -807,6 +834,236 @@ log_scale = false
 groups = []
 transform = "percentile"
 
+# DeepSWE v1.1: original long-horizon repository work under one fixed
+# mini-swe-agent harness. This is deliberately its own family rather than
+# another SWE-bench variant.
+[metrics.DeepSWE]
+family = "deepswe"
+anchor_low = 19.933481
+anchor_high = 68.514553
+higher_better = true
+log_scale = false
+groups = ["BUILD"]
+transform = "percentile"
+
+# Current Artificial Analysis v4.1 leaves sourced from their neutral public
+# evaluation pages rather than vendor launch-card overrides.
+[metrics.GDPvalAA2]
+family = "gdpval"
+anchor_low = 782.486
+anchor_high = 1512.132
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.CritPt]
+family = "artificial_analysis"
+anchor_low = 0.114286
+anchor_high = 20.857143
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.AAOmniscienceAccuracy]
+family = "artificial_analysis"
+anchor_low = 19.34
+anchor_high = 54.75
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.AAOmniscienceNonHallucination]
+family = "artificial_analysis"
+anchor_low = 6.715907
+anchor_high = 76.415078
+higher_better = true
+log_scale = false
+groups = ["GEN"]
+transform = "percentile"
+
+[metrics.EnterpriseOpsGymAA]
+family = "enterprise_workflow"
+anchor_low = 27.757386
+anchor_high = 47.157565
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.AutomationBenchAA]
+family = "enterprise_workflow"
+anchor_low = 9.482192
+anchor_high = 42.932138
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.ContextArenaMRCR128k]
+family = "context_arena"
+anchor_low = 25.953719
+anchor_high = 86.698585
+higher_better = true
+log_scale = false
+groups = ["PLAN", "BUILD"]
+transform = "percentile"
+
+[metrics.ContextArenaMRCR1M]
+family = "context_arena"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.Tau3Banking]
+family = "artificial_analysis"
+anchor_low = 8.659794
+anchor_high = 30.381443
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+# Newly available diagnostics. They are ingested and published for inspection
+# but deliberately have no path into the primary roles yet.
+[metrics.ARC_AGI_3]
+family = "arc_agi"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AGCBench]
+family = "agc_bench"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.FactoryCodeReviewF1]
+family = "factory_code_review"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.FactoryCodeReviewPrecision]
+family = "factory_code_review"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.FactoryCodeReviewRecall]
+family = "factory_code_review"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.FactoryCodeReviewF1Stdev]
+family = "factory_code_review"
+higher_better = false
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.DeepSWEPassAt4]
+family = "deepswe"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.DeepSWECILow]
+family = "deepswe"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.DeepSWECIHigh]
+family = "deepswe"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AAOmniscienceIndex]
+family = "artificial_analysis"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.GDPvalAA2CILow]
+family = "gdpval"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.GDPvalAA2CIHigh]
+family = "gdpval"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+# Explicitly hybrid upstream observations remain visible without ever being
+# mistaken for pure Fable/model-only evidence.
+[metrics.GDPvalAA2HybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.CritPtHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AAOmniscienceIndexHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AAOmniscienceAccuracyHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AAOmniscienceNonHallucinationHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.EnterpriseOpsGymAAHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AutomationBenchAAHybridFallback]
+family = "hybrid_fallback"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
 # GDPval-AA measures real-world economic-value workflows across 44 knowledge-
 # work occupations via blind pairwise comparison (Elo). Currently sourced
 # only via overrides because AA's GDPval endpoint isn't exposed through the
@@ -817,7 +1074,7 @@ anchor_low = 869.95
 anchor_high = 1782.90
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 # Toolathlon measures long-horizon tool-use across realistic applications.
@@ -829,7 +1086,7 @@ anchor_low = 31.61
 anchor_high = 58.345
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
 transform = "percentile"
 
 # OSWorld-Verified measures desktop/computer-use agent tasks. It is useful
@@ -841,7 +1098,7 @@ anchor_low = 59.26
 anchor_high = 83.48
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
 transform = "percentile"
 
 # BrowseComp is an agentic browsing/search benchmark. It broadens GEN and
@@ -853,7 +1110,7 @@ anchor_low = 49.585
 anchor_high = 86.04
 higher_better = true
 log_scale = false
-groups = ["GEN", "PLAN"]
+groups = []
 transform = "percentile"
 
 # Tool-assisted Humanity's Last Exam. Kept separate from the no-tools GPQA and
@@ -864,7 +1121,7 @@ anchor_low = 36.34
 anchor_high = 55.78
 higher_better = true
 log_scale = false
-groups = ["GEN", "PLAN"]
+groups = []
 transform = "percentile"
 
 # Reference-only operational metrics use the `tail_penalty` transform: the top 80 % of

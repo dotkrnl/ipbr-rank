@@ -72,7 +72,7 @@ donor and synthesis category. See `docs/output-schema.md`.
 ### 4.1 Versioned raw anchors
 
 Every active ranked leaf has `anchor_low` and `anchor_high` in the versioned
-coefficient set. Anchor set `2026-07-12.v1` freezes the direct-evidence p5/p95
+coefficient set. Anchor set `2026-07-12.v2` freezes the direct-evidence p5/p95
 raw values from the refreshed 2026-07-12 snapshot. Metrics available only as
 cited reports use the same quantiles over reported evidence. Adding or
 removing unrelated models from the current cohort therefore does not move
@@ -178,8 +178,9 @@ counted repeatedly.
 | `SWEAtlasComposite` | Q&A .30, test writing .30, refactoring .40 |
 | `SonarComposite` | diagnostic only: functional skill .60, total issue density .40 |
 | `LiveCodingComposite` | SciCode .60, LM Arena code .40 |
-| `AAReasoningComposite` | GPQA .50, HLE .50 |
-| `TauComposite` | Tau2 .75, Tau Banking .25 |
+| `AAGeneralComposite` | HLE .333, GPQA .167, CritPt .167, Omniscience accuracy .222, non-hallucination .111 |
+| `LongContextComposite` | AA-LCR .60, Context Arena MRCRv2 AUC@128k .40 |
+| `EnterpriseWorkflowComposite` | EnterpriseOps-Gym-AA .65, AutomationBench-AA .35 |
 | `TerminalBench21Composite` | official Terminal-Bench 2.1, with AA as fallback |
 | `BFCLComposite` | BFCL overall 1.00 |
 
@@ -195,10 +196,22 @@ Important v2 corrections:
   vulnerability components.
 - Aggregate AA intelligence/coding indices are not stacked with their
   component evaluations in the same role path.
-- AIME 2025, MMLU-Pro, AA LiveCodeBench, Terminal-Bench 2.0, and SWE-bench
-  Verified remain available as diagnostics but have no primary rank path.
-- BrowseComp, HLE-with-tools, Toolathlon, OSWorld, and GDPval remain diagnostic
-  until a neutral direct feed replaces the current reported-only coverage.
+- AA-LCR appears only inside `LongContextComposite`, not again inside the AA
+  general composite, so planning and building never count one observation
+  twice.
+- AA v4.1 retired tau2 and Terminal-Bench Hard in favor of tau3-Banking and
+  Terminal-Bench 2.1, and removed saturated IFBench. The retired fields remain
+  readable diagnostics but have no primary path.
+- GDPval-AA v2 now uses a neutral direct source; the older reported GDPval
+  overrides remain diagnostic and are not stacked with it.
+- AIME 2025, MMLU-Pro, AA LiveCodeBench, Terminal-Bench 2.0, SWE-bench
+  Verified, BrowseComp, HLE-with-tools, Toolathlon, and OSWorld remain
+  diagnostics with no primary rank path.
+- DeepSWE v1.1 supplies direct long-horizon BUILD evidence under one fixed
+  harness. Its weight replaces Terminal-Bench Hard and part of the correlated
+  SWE composite rather than simply increasing the total SWE-family mass.
+- Explicit upstream model+fallback observations are published under
+  `*HybridFallback` diagnostic keys. They never count as pure model evidence.
 - Current sparse signals such as BFCL, GSO, HiL-Bench, Judgemark, and SWE
   Atlas remain active; lack of a row lowers confidence rather than ability.
 - Sonar remains diagnostic because current rows mix explicit Medium and
@@ -215,9 +228,9 @@ The active capability groups are:
 | Group | Purpose |
 |---|---|
 | `CRE` | Direct creative writing, text preference, and novel pattern induction |
-| `GEN` | General/reasoning breadth from independent families |
-| `PLAN` | Multi-step reasoning, tool use, escalation, and long-context planning |
-| `BUILD` | Software implementation, terminal work, tool orchestration, and code quality |
+| `GEN` | General/reasoning breadth, factual calibration, and research reasoning |
+| `PLAN` | Multi-step reasoning, enterprise workflows, tool use, escalation, and long-context planning |
+| `BUILD` | Long-horizon software implementation, terminal work, tool orchestration, and code quality |
 | `REVIEW_DIRECT` | EQ-Bench Judgemark judge discrimination |
 | `LM_ARENA_REVIEW_PROXY` | Search/document preference proxy |
 

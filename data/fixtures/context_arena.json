@@ -1,0 +1,12 @@
+{
+  "request_params": {"needles": 8, "mode": "full", "model_slugs": null},
+  "available_bins": [8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576],
+  "models": [
+    {"model_slug":"openai/gpt-5.5","reasoning_mode":"medium","overall_metrics":{"auc_128k":0.8745,"auc_1m":0.5091}},
+    {"model_slug":"openai/gpt-5.5","reasoning_mode":"xhigh","overall_metrics":{"auc_128k":0.9171,"auc_1m":0.5054}},
+    {"model_slug":"openai/gpt-5.4","reasoning_mode":"xhigh","overall_metrics":{"auc_128k":0.8058,"auc_1m":0.3823}},
+    {"model_slug":"anthropic/claude-opus-4.8","reasoning_mode":"max","overall_metrics":{"auc_128k":0.8778,"auc_1m":0.4184}},
+    {"model_slug":"anthropic/claude-opus-4.7","reasoning_mode":"xhigh","overall_metrics":{"auc_128k":0.3039,"auc_1m":0.0729}},
+    {"model_slug":"google/gemini-3.1-pro-preview","reasoning_mode":"high","overall_metrics":{"auc_128k":0.7735,"auc_1m":0.3998}}
+  ]
+}

@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
+pub mod evaluations;
+
 use ipbr_core::{AliasIndex, RawRow, normalize_name};
 use serde_json::Value;
 
@@ -104,6 +106,18 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     let alias_index = AliasIndex::build(&alias_records);
     let mut best_by_model: BTreeMap<(String, AaVariantPreference), (f64, RawRow)> = BTreeMap::new();
     for item in sorted {
+        // The public Fable observation is explicitly labelled as using an
+        // Opus 4.8 fallback. That is valuable system evidence, but it is not a
+        // pure same-model observation. The primary product is intentionally a
+        // model-only ranking, so exclude hybrid/fallback rows from this source
+        // instead of silently attributing their scores to Fable.
+        if item
+            .get("name")
+            .and_then(Value::as_str)
+            .is_some_and(|name| name.to_ascii_lowercase().contains("fallback"))
+        {
+            continue;
+        }
         // AA's `id` is a UUID; use the human-readable `slug` (e.g.
         // "claude-opus-4-7") for alias matching, then fall back to `name`,
         // and finally the UUID `id` to keep parsing infallible.
@@ -176,6 +190,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         if let Some(tau_banking) =
             number_at_paths(item, &[&["evaluations", "tau_banking"], &["tau_banking"]])
         {
+            // AA retained the historical payload key when the public suite
+            // upgraded from tau2 to tau3-Banking. Emit the current semantic
+            // name for scoring and the old name only for schema compatibility.
+            fields.insert("Tau3Banking".to_string(), Value::from(tau_banking * 100.0));
             fields.insert("TauBanking".to_string(), Value::from(tau_banking * 100.0));
         }
         if let Some(scicode) = number_at_paths(item, &[&["evaluations", "scicode"], &["scicode"]]) {
@@ -554,6 +572,10 @@ mod tests {
             Some(50.0)
         );
         assert_eq!(
+            row.fields.get("Tau3Banking").and_then(number_like),
+            Some(50.0)
+        );
+        assert_eq!(
             row.fields.get("Tau2Bench").and_then(number_like),
             Some(64.0)
         );
@@ -611,6 +633,29 @@ mod tests {
         let rows = parse_rows(&payload).expect("payload should parse");
         assert_eq!(rows.len(), 1);
         assert!(!rows[0].fields.contains_key("BlendedCost"));
+    }
+
+    #[test]
+    fn excludes_explicit_fallback_hybrid_from_model_only_rows() {
+        let payload = json!({
+            "data": [
+                {
+                    "slug": "claude-fable-5",
+                    "name": "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
+                    "model_creator": {"slug": "anthropic"},
+                    "evaluations": {"intelligence_index": 60.0}
+                },
+                {
+                    "slug": "gpt-5-5",
+                    "name": "GPT-5.5 (xhigh)",
+                    "model_creator": {"slug": "openai"},
+                    "evaluations": {"intelligence_index": 55.0}
+                }
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "gpt-5-5");
     }
 
     #[test]

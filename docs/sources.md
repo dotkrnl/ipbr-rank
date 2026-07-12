@@ -60,12 +60,62 @@ synthesis.
 - **API**: Artificial Analysis `/api/v2/data/llms/models`, `x-api-key` header
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
 - **Cache TTL**: 10 min
-- **Metrics emitted**: `ArtificialAnalysisIntelligence`, `ArtificialAnalysisCoding`, separate `GPQA` and `HLE` observations, `AIME25`, `Tau2Bench`, `TauBanking`, `SciCode`, `IFBench`, `TerminalBenchHard`, `AATerminalBench21`, `AALiveCodeBench`, `ArtificialAnalysisMath`, `MMLUPro`, `LongContextRecall`, and the diagnostic fields `OutputSpeed`, `TTFT`, and `BlendedCost`.
-- **Duplicate correction**: GPQA and HLE remain independent and feed `AAReasoningComposite` once. The old identical `ArtificialAnalysisReasoning` and `GPQA_HLE_Reasoning` blend is no longer emitted or scored.
+- **Metrics emitted**: current `GPQA`, `HLE`, `Tau3Banking`, `SciCode`, `AATerminalBench21`, and `LongContextRecall`, plus aggregate, legacy, operational, and pricing diagnostics. The upstream `tau_banking` payload key is emitted under the current tau3 semantic name; `Tau2Bench`, `TauBanking`, `IFBench`, and `TerminalBenchHard` remain historical diagnostics.
+- **Duplicate correction**: current AA general/scientific leaves feed `AAGeneralComposite` once. Aggregate Intelligence/Coding indices do not stack with their components.
 - **Multi-row dedup**: AA ships several rows per logical model. The parser preserves distinct effort rows and ingestion selects the strongest eligible effort; equal-effort duplicate rows keep the highest intelligence observation. Speed/TTFT sentinel zeros are skipped.
+- **Product tiers**: reasoning labels such as `xhigh` and `max` are eligible configurations of a canonical model. Separately named products such as `GPT-5.5 Pro` are not silently folded into the base `GPT-5.5` record; they require their own catalog entry before ranking.
+- **Model-only guard**: upstream rows whose labels explicitly disclose a fallback model are excluded from the pure model API source.
 - **Ranking use**: Output speed, TTFT, price, and blended cost are diagnostics only.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
+
+## Artificial Analysis evaluation pages
+
+- **Status**: Verified
+- **APIs**: server-rendered JSON-LD plus complete model objects on the official GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA evaluation pages
+- **Secret**: None
+- **Cache TTL**: 24 h
+- **Metrics**: `GDPvalAA2`, `CritPt`, `AAOmniscienceAccuracy`, `AAOmniscienceNonHallucination`, `EnterpriseOpsGymAA`, and `AutomationBenchAA`; GDPval confidence bounds and the Omniscience index are retained as diagnostics.
+- **Composites**: EnterpriseOps and AutomationBench form one correlated enterprise-workflow PLAN family. The Omniscience components join HLE, GPQA, and CritPt inside `AAGeneralComposite`; AA-LCR is used only in the dedicated long-context composite.
+- **Fallback guard**: scores labelled with another model as fallback are renamed to `*HybridFallback`, remain visible, and have no ranking path.
+- **Fixtures**: `data/fixtures/aa_*.html`
+
+## deep_swe_v1_1
+
+- **Status**: Verified
+- **API**: official DeepSWE v1.1 machine-readable leaderboard JSON
+- **Secret**: None
+- **Cache TTL**: 24 h
+- **Metric**: `DeepSWE` pass@1 across 113 original long-horizon repository tasks.
+- **Configuration**: fixed `mini-swe-agent` harness; max, xhigh, high, thinking/adaptive, medium/default, then low effort is preferred. Pass@4, confidence interval, attempts, task count, run count, and configuration provenance stay attached to the selected row.
+- **Fixture**: `data/fixtures/deep_swe_v1_1.json`
+
+## context_arena
+
+- **Status**: Verified
+- **API**: Context Arena `/api/needle-summary?needles=8`
+- **Secret**: None
+- **Cache TTL**: 24 h
+- **Metrics**: `ContextArenaMRCR128k` (active inside `LongContextComposite`) and diagnostic `ContextArenaMRCR1M`.
+- **Configuration**: one strongest published reasoning mode per model; AUC@128k is used for broad comparability rather than rewarding only models that expose a 1M window.
+
+## agc_bench
+
+- **Status**: Experimental
+- **API**: official AGC-Bench Hugging Face leaderboard CSV
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metric**: `AGCBench` mean calibrated creativity z-score.
+- **Ranking use**: Diagnostic while the newly released meta-benchmark and current-model coverage mature.
+
+## factory_code_review
+
+- **Status**: Experimental
+- **API**: official Factory research results table
+- **Secret**: None
+- **Cache TTL**: 7 d
+- **Metrics**: F1, precision, recall, and F1 standard deviation over 50 real PRs with human-curated bugs and repeated runs.
+- **Ranking use**: Diagnostic until broader current max-effort coverage is available. Cost fields are intentionally not ingested.
 
 ## aistupidlevel
 
@@ -200,7 +250,7 @@ and agentic tool-use categories.
 - **API**: ARC Prize static JSON — `arcprize.org/media/data/models.json` + `evaluations.json`. Combined into one cached payload `{models, evaluations}`.
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `ARC_AGI_2` — score on the **v2_Semi_Private** track (contamination-controlled). Scores are 0-1 in the JSON; rescaled to 0-100 to align with the rest of the metric population. The other tracks (Public, Private) are skipped because Public is leaky and Private is closed to most of our flagships.
+- **Metrics**: active `ARC_AGI_2` from **v2_Semi_Private**, plus diagnostic `ARC_AGI_3` from **v3_Semi_Private**. Scores are rescaled from 0–1 to 0–100. ARC-AGI-3 remains unweighted while tracked-model coverage is sparse and current scores are tightly floor-compressed.
 - **Why we ingest it**: ARC-AGI v2 is the only public benchmark that explicitly tests *novel pattern induction* — every task is unfamiliar at evaluation time. Orthogonal to GPQA/HLE which test learned knowledge. Frontier models sit around 75-85% while humans top out at 100%, so it discriminates well at the very top.
 - **Fragility note**: Depends on the static JSON URLs the leaderboard's bundled JS fetches. If ARC Prize moves the data-pack path, the constants need updating.
 - **Fixture**: `data/fixtures/arc_agi.json`

@@ -217,6 +217,18 @@ def fetch_csv(key, url):
     write_csv(key, get_text(url))
 
 
+def fetch_json_simple(key, url):
+    print(f"[{key}]")
+    write_json(key, get_json(url))
+
+
+def fetch_arc_agi():
+    print("[arc_agi]")
+    models = get_json("https://arcprize.org/media/data/models.json")
+    evaluations = get_json("https://arcprize.org/media/data/evaluations.json")
+    write_json("arc_agi", {"models": models, "evaluations": evaluations})
+
+
 FETCHERS = {
     "swebench": fetch_swebench,
     "openrouter": fetch_openrouter,
@@ -230,6 +242,16 @@ FETCHERS = {
     "terminal_bench": lambda: fetch_html("terminal_bench", "https://www.tbench.ai/leaderboard/terminal-bench/2.0"),
     "livecodebench": lambda: fetch_html("livecodebench", "https://livecodebench.github.io/leaderboard.html"),
     "aider_polyglot": lambda: fetch_html("aider_polyglot", "https://aider.chat/docs/leaderboards/"),
+    "arc_agi": fetch_arc_agi,
+    "deep_swe_v1_1": lambda: fetch_json_simple("deep_swe_v1_1", "https://deepswe.datacurve.ai/artifacts/v1.1/leaderboard-live.json"),
+    "context_arena": lambda: fetch_json_simple("context_arena", "https://contextarena.ai/api/needle-summary?needles=8"),
+    "agc_bench": lambda: fetch_csv("agc_bench", "https://huggingface.co/datasets/agcbench-2026/AGC-Bench/resolve/main/release_data/leaderboard.csv"),
+    "factory_code_review": lambda: fetch_html("factory_code_review", "https://factory.ai/news/code-review-benchmark"),
+    "aa_gdpval_v2": lambda: fetch_html("aa_gdpval_v2", "https://artificialanalysis.ai/evaluations/gdpval-aa"),
+    "aa_critpt": lambda: fetch_html("aa_critpt", "https://artificialanalysis.ai/evaluations/critpt"),
+    "aa_omniscience": lambda: fetch_html("aa_omniscience", "https://artificialanalysis.ai/evaluations/omniscience"),
+    "aa_enterprise_ops_gym": lambda: fetch_html("aa_enterprise_ops_gym", "https://artificialanalysis.ai/evaluations/enterprise-ops-gym-aa"),
+    "aa_automation_bench": lambda: fetch_html("aa_automation_bench", "https://artificialanalysis.ai/evaluations/automationbench-aa"),
 }
 
 

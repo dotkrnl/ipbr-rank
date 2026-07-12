@@ -297,7 +297,7 @@ fields include:
 
 ```toml
 [normalization]
-anchor_version = "2026-07-12.v1"
+anchor_version = "2026-07-12.v2"
 snapshot_date = "2026-07-12"
 derivation = "direct_p05_p95_with_reported_only_fallback"
 low_quantile = 0.05
@@ -326,7 +326,7 @@ max_family_weight = 0.30
 ```
 
 Consumers must still read the effective file rather than hard-code this
-example. Anchor set `2026-07-12.v1` was derived from the frozen 2026-07-12
+example. Anchor set `2026-07-12.v2` was derived from the frozen 2026-07-12
 direct-evidence snapshot, with a cited-report fallback for reported-only
 metrics. Active ranked leaves use fixed anchors; explicitly unanchored
 diagnostic or custom metrics may use their configured fallback transform.

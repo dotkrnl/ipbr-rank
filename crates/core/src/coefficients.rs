@@ -467,7 +467,7 @@ mod tests {
         }
         assert_eq!(
             c.normalization.as_ref().map(|n| n.anchor_version.as_str()),
-            Some("2026-07-12.v1")
+            Some("2026-07-12.v2")
         );
     }
 
@@ -486,6 +486,53 @@ mod tests {
                 .values()
                 .all(|groups| groups.keys().all(|group| !group.starts_with("OPS_")))
         );
+    }
+
+    #[test]
+    fn metric_group_metadata_matches_the_actual_scoring_graph() {
+        fn expand(
+            metric: &str,
+            c: &Coefficients,
+            out: &mut BTreeSet<String>,
+            visiting: &mut BTreeSet<String>,
+        ) {
+            let Some(parts) = c
+                .composite_metrics
+                .get(metric)
+                .filter(|_| !c.precedence_composites.contains(metric))
+            else {
+                out.insert(metric.to_string());
+                return;
+            };
+            assert!(
+                visiting.insert(metric.to_string()),
+                "composite cycle at {metric}"
+            );
+            for part in parts.keys() {
+                expand(part, c, out, visiting);
+            }
+            visiting.remove(metric);
+        }
+
+        let c = Coefficients::load_embedded().unwrap();
+        let mut actual: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for (group, metrics) in &c.group_weights {
+            for metric in metrics.keys() {
+                let mut leaves = BTreeSet::new();
+                expand(metric, &c, &mut leaves, &mut BTreeSet::new());
+                for leaf in leaves {
+                    actual.entry(leaf).or_default().insert(group.clone());
+                }
+            }
+        }
+        for (metric, def) in &c.metrics {
+            let declared: BTreeSet<_> = def.groups.iter().cloned().collect();
+            let reached = actual.get(metric).cloned().unwrap_or_default();
+            assert_eq!(
+                declared, reached,
+                "{metric} groups metadata must mirror its flattened group path"
+            );
+        }
     }
 
     #[test]

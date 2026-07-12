@@ -83,15 +83,17 @@ def report(before: dict, after: dict, top: int) -> str:
         after_ranks, after_scores = dense_ranks(
             list(after_by_id.values()), role, eligible_only=True
         )
-        estimate_positions, _ = dense_ranks(list(after_by_id.values()), role)
+        before_estimate_positions, _ = dense_ranks(list(before_by_id.values()), role)
+        after_estimate_positions, _ = dense_ranks(list(after_by_id.values()), role)
         selected = sorted(
             common,
             key=lambda canonical_id: (
                 min(
                     before_ranks.get(canonical_id, 10**9),
-                    estimate_positions[canonical_id],
+                    before_estimate_positions[canonical_id],
+                    after_estimate_positions[canonical_id],
                 ),
-                estimate_positions[canonical_id],
+                after_estimate_positions[canonical_id],
                 canonical_id,
             ),
         )
@@ -99,15 +101,16 @@ def report(before: dict, after: dict, top: int) -> str:
             canonical_id
             for canonical_id in selected
             if before_ranks.get(canonical_id, 10**9) <= top
-            or estimate_positions[canonical_id] <= top
+            or before_estimate_positions[canonical_id] <= top
+            or after_estimate_positions[canonical_id] <= top
         ]
         lines.extend(
             (
                 "",
                 f"## {label}",
                 "",
-                "| Model | Official before | Official after | Estimate position | Change | Score before | Score after | Delta | Status |",
-                "|---|---:|---:|---:|---:|---:|---:|---:|---|",
+                "| Model | Official before | Official after | Official Δ | Estimate before | Estimate after | Estimate Δ | Score before | Score after | Score Δ | Status before → after |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
             )
         )
         for canonical_id in selected:
@@ -116,12 +119,25 @@ def report(before: dict, after: dict, top: int) -> str:
             old_label = str(old_rank) if old_rank is not None else "—"
             new_label = str(new_rank) if new_rank is not None else "—"
             movement = f"{old_rank - new_rank:+d}" if old_rank and new_rank else "—"
-            status = "provisional" if is_provisional(after_by_id[canonical_id], role) else "ranked"
+            old_estimate = before_estimate_positions[canonical_id]
+            new_estimate = after_estimate_positions[canonical_id]
+            estimate_movement = f"{old_estimate - new_estimate:+d}"
+            old_status = (
+                "provisional"
+                if is_provisional(before_by_id[canonical_id], role)
+                else "ranked"
+            )
+            new_status = (
+                "provisional"
+                if is_provisional(after_by_id[canonical_id], role)
+                else "ranked"
+            )
             lines.append(
-                f"| `{canonical_id}` | {old_label} | {new_label} | "
-                f"{estimate_positions[canonical_id]} | {movement} | "
+                f"| `{canonical_id}` | {old_label} | {new_label} | {movement} | "
+                f"{old_estimate} | {new_estimate} | {estimate_movement} | "
                 f"{before_scores[canonical_id]:.2f} | {after_scores[canonical_id]:.2f} | "
-                f"{after_scores[canonical_id] - before_scores[canonical_id]:+.2f} | {status} |"
+                f"{after_scores[canonical_id] - before_scores[canonical_id]:+.2f} | "
+                f"{old_status} → {new_status} |"
             )
     return "\n".join(lines) + "\n"
 

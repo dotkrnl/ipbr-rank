@@ -76,7 +76,12 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - LM Arena — text, code, search, and document preference ratings
 - EQ-Bench Creative Writing v3 — direct creative-writing Elo
 - EQ-Bench Judgemark v4 — judge-discrimination score with a published 95% confidence interval
-- Artificial Analysis — intelligence/coding/math indices plus separate GPQA and HLE observations, AIME 2025, tau2/tau-banking, scicode, ifbench, Terminal-Bench fields, livecodebench, mmlu-pro, lcr, speed, TTFT, and pricing diagnostics
+- Artificial Analysis model API — GPQA, HLE, SciCode, AA-LCR, current tau3-Banking, Terminal-Bench 2.1 fallback, and legacy/operational diagnostics. Explicit model+fallback rows are excluded from pure model evidence.
+- Artificial Analysis evaluation pages — direct GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA observations
+- DeepSWE v1.1 — original long-horizon repository work under one fixed mini-swe-agent harness; active BUILD evidence
+- Context Arena — eight-needle GDM-MRCRv2 AUC through 128k, combined with AA-LCR as one long-context signal
+- AGC-Bench — broad creativity meta-benchmark, currently diagnostic while the new suite matures
+- Factory Code Review — direct precision/recall/F1 on human-curated PR bugs, diagnostic pending broader max-effort frontier coverage
 - SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
 - SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
 - SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
@@ -89,8 +94,8 @@ All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sou
 - Sonar Code Quality — diagnostic functional pass rate plus issue, bug, and vulnerability density; excluded from rank while published effort levels are not comparable across models
 - MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - HiL-Bench (Scale) — human-in-the-loop escalation accuracy for ambiguous or blocked agent tasks
-- ARC-AGI v2 — novel pattern-induction benchmark from ARC Prize (semi-private track)
-- Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metric values (SWE-bench, Terminal-Bench, GDPval, MCP-Atlas, and reported-only launch-card metrics) for models the public leaderboards have not yet rated
+- ARC-AGI v2 — active novel pattern-induction benchmark; ARC-AGI-3 is ingested separately as a floor-compressed diagnostic
+- Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metrics for models neutral public leaderboards have not yet rated. Historical GDPval reports remain diagnostic now that GDPval-AA v2 has a direct source.
 
 ## Math Summary
 

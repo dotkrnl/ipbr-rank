@@ -3,11 +3,15 @@ use std::time::{Duration, SystemTime};
 
 use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name, required_aliases};
 
+pub mod agc_bench;
 pub mod aistupidlevel;
 pub mod arc_agi;
 pub mod artificial_analysis;
 pub mod bfcl;
+pub mod context_arena;
+pub mod deep_swe;
 pub mod eqbench;
+pub mod factory_code_review;
 pub mod gso;
 pub mod http;
 pub mod livecodebench;
@@ -24,11 +28,19 @@ pub mod swebench_pro;
 pub mod swerebench;
 pub mod terminal_bench;
 
+pub use agc_bench::AgcBenchSource;
 pub use aistupidlevel::AiStupidLevelSource;
 pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
+pub use artificial_analysis::evaluations::{
+    AaAutomationBenchSource, AaCritPtSource, AaEnterpriseOpsGymSource, AaGdpvalV2Source,
+    AaOmniscienceSource,
+};
 pub use bfcl::BfclSource;
+pub use context_arena::ContextArenaSource;
+pub use deep_swe::DeepSweV11Source;
 pub use eqbench::{EqBenchCreativeWritingSource, EqBenchJudgemarkSource};
+pub use factory_code_review::FactoryCodeReviewSource;
 pub use gso::GsoSource;
 pub use http::ReqwestHttp;
 pub use livecodebench::LiveCodeBenchSource;

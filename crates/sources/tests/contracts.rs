@@ -2,11 +2,11 @@ use std::path::Path;
 
 use ipbr_core::{ModelRecord, ingest_rows, required_aliases};
 use ipbr_sources::{
-    AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, EqBenchCreativeWritingSource,
-    EqBenchJudgemarkSource, FetchOptions, Http, LiveCodeBenchSource, LmArenaSource,
-    OpenRouterSource, SecretStore, Source, SourceError, SweAtlasQnaSource,
-    SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource, SweRebenchSource,
-    VerificationStatus, registry::registry,
+    AgcBenchSource, AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, ContextArenaSource,
+    EqBenchCreativeWritingSource, EqBenchJudgemarkSource, FactoryCodeReviewSource, FetchOptions,
+    Http, LiveCodeBenchSource, LmArenaSource, OpenRouterSource, SecretStore, Source, SourceError,
+    SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource,
+    SweRebenchSource, VerificationStatus, registry::registry,
 };
 
 struct OfflineOnlyHttp;
@@ -826,6 +826,92 @@ async fn livecodebench_fixture_contract() {
     // reflects the genuinely-frozen flagship subset after strict distinct-
     // variant filtering.
     assert_flagship_matches(&records, "LiveCodeBench", 1);
+}
+
+#[tokio::test]
+async fn context_arena_fixture_contract() {
+    let rows = ContextArenaSource
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("Context Arena fixture should parse");
+
+    assert_eq!(rows.len(), 5, "effort variants should collapse per model");
+    assert!(rows.iter().all(|row| {
+        row.fields
+            .get("ContextArenaMRCR128k")
+            .and_then(number_like)
+            .is_some_and(|value| (0.0..=100.0).contains(&value))
+    }));
+    let (records, matched) = ingest_fixture_rows(rows);
+    assert_eq!(matched, 5);
+    assert!(records.iter().any(|record| {
+        record.canonical_id == "openai/gpt-5.5"
+            && record
+                .raw_metrics
+                .get("ContextArenaMRCR128k")
+                .is_some_and(|value| (*value - 91.71).abs() < 1e-9)
+    }));
+}
+
+#[tokio::test]
+async fn agc_bench_fixture_contract() {
+    let rows = AgcBenchSource
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("AGC-Bench fixture should parse");
+
+    assert_eq!(rows.len(), 20);
+    assert!(rows.iter().any(|row| {
+        row.fields
+            .get("AGCBench")
+            .and_then(number_like)
+            .is_some_and(|value| value < 0.0)
+    }));
+    let (_records, matched) = ingest_fixture_rows(rows);
+    assert_eq!(matched, 5);
+}
+
+#[tokio::test]
+async fn factory_code_review_fixture_contract() {
+    let rows = FactoryCodeReviewSource
+        .fetch(
+            &OfflineOnlyHttp,
+            FetchOptions {
+                cache_dir: Some(fixture_dir()),
+                offline: true,
+            },
+            &SecretStore::default(),
+        )
+        .await
+        .expect("Factory code-review fixture should parse");
+
+    assert_eq!(rows.len(), 5);
+    assert!(rows.iter().all(|row| {
+        [
+            "FactoryCodeReviewF1",
+            "FactoryCodeReviewF1Stdev",
+            "FactoryCodeReviewPrecision",
+            "FactoryCodeReviewRecall",
+        ]
+        .iter()
+        .all(|metric| row.fields.contains_key(*metric))
+    }));
+    let (_records, matched) = ingest_fixture_rows(rows);
+    assert_eq!(matched, 5);
 }
 
 fn number_like(value: &serde_json::Value) -> Option<f64> {

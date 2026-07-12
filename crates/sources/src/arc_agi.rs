@@ -10,10 +10,11 @@
 //!   * `https://arcprize.org/media/data/models.json`      — id → display name
 //!   * `https://arcprize.org/media/data/evaluations.json` — score per dataset
 //!
-//! We pull both, join on `modelId`, and emit `ARC_AGI_2` for every model that
-//! has a `v2_Semi_Private` evaluation (the contamination-controlled track).
-//! `v2_Public_Eval` numbers exist too but are inflated by training-set
-//! exposure on some models, so we skip them.
+//! We pull both, join on `modelId`, and emit `ARC_AGI_2` / `ARC_AGI_3` for
+//! every model that has a semi-private evaluation. Public ARC-AGI-2 numbers
+//! exist too but are inflated by training-set exposure on some models, so we
+//! skip them. ARC-AGI-3 remains diagnostic while its extremely low scores and
+//! small model cohort make rank-sensitive weighting premature.
 
 use std::collections::BTreeMap;
 use std::time::Duration;
@@ -31,6 +32,12 @@ const CACHE_KEY: &str = "arc_agi";
 const MODELS_URL: &str = "https://arcprize.org/media/data/models.json";
 const EVALS_URL: &str = "https://arcprize.org/media/data/evaluations.json";
 const PRIMARY_DATASET: &str = "v2_Semi_Private";
+const DIAGNOSTIC_DATASET: &str = "v3_Semi_Private";
+
+const DATASETS: [(&str, &str); 2] = [
+    (PRIMARY_DATASET, "ARC_AGI_2"),
+    (DIAGNOSTIC_DATASET, "ARC_AGI_3"),
+];
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct ArcAgiSource;
@@ -117,12 +124,16 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 
     let alias_records = crate::embedded_alias_records();
     let alias_index = AliasIndex::build(&alias_records);
-    let mut best_by_model: BTreeMap<(String, ArcVariantPreference), (f64, RawRow)> =
+    let mut best_by_model: BTreeMap<(String, String, ArcVariantPreference), (f64, RawRow)> =
         BTreeMap::new();
     for e in evals {
-        if e.get("datasetId").and_then(Value::as_str) != Some(PRIMARY_DATASET) {
+        let Some((_, metric)) = e
+            .get("datasetId")
+            .and_then(Value::as_str)
+            .and_then(|dataset| DATASETS.iter().find(|(id, _)| *id == dataset))
+        else {
             continue;
-        }
+        };
         let Some(model_id) = e.get("modelId").and_then(Value::as_str) else {
             continue;
         };
@@ -136,7 +147,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         }
         let display_name = display.get(model_id).copied().unwrap_or(model_id);
         let mut fields = BTreeMap::new();
-        fields.insert("ARC_AGI_2".to_string(), Value::from(score_raw * 100.0));
+        fields.insert((*metric).to_string(), Value::from(score_raw * 100.0));
         let row = RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: display_name.to_string(),
@@ -148,20 +159,20 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         let key = crate::alias_dedupe_key(&alias_records, &alias_index, display_name, None);
         let preference = ArcVariantPreference::from_text(display_name);
         let score = score_raw * 100.0;
-        match best_by_model.get_mut(&(key.clone(), preference)) {
+        match best_by_model.get_mut(&(key.clone(), (*metric).to_string(), preference)) {
             Some((best_score, best_row)) if score > *best_score => {
                 *best_score = score;
                 *best_row = row;
             }
             Some(_) => {}
             None => {
-                best_by_model.insert((key, preference), (score, row));
+                best_by_model.insert((key, (*metric).to_string(), preference), (score, row));
             }
         }
     }
 
     let rows: Vec<RawRow> = best_by_model.into_values().map(|(_, row)| row).collect();
-    if rows.is_empty() {
+    if !rows.iter().any(|row| row.fields.contains_key("ARC_AGI_2")) {
         return Err(SourceError::Parse(
             "ARC-AGI evaluations yielded no v2 semi-private rows".into(),
         ));
@@ -224,7 +235,8 @@ mod tests {
         let payload: Value = serde_json::from_slice(bytes).expect("fixture must parse");
         let rows = parse_rows(&payload).expect("rows expected");
         assert!(rows.len() >= 10, "got {} rows", rows.len());
-        assert!(rows.iter().all(|r| r.fields.contains_key("ARC_AGI_2")));
+        assert!(rows.iter().any(|r| r.fields.contains_key("ARC_AGI_2")));
+        assert!(rows.iter().any(|r| r.fields.contains_key("ARC_AGI_3")));
 
         let records = load_embedded().expect("aliases must load");
         let idx = AliasIndex::build(&records);
@@ -259,5 +271,35 @@ mod tests {
             rows[0].fields.get("ARC_AGI_2").and_then(Value::as_f64),
             Some(5.0)
         );
+    }
+
+    #[test]
+    fn parses_arc_agi_3_as_a_separate_diagnostic_metric() {
+        let payload = json!({
+            "models": [
+                {"id": "a", "displayName": "GPT-5.5 (High)"},
+                {"id": "b", "displayName": "Claude Opus 4.8 (High)"},
+                {"id": "v2", "displayName": "GPT-5.5 (High)"}
+            ],
+            "evaluations": [
+                {"modelId": "a", "datasetId": DIAGNOSTIC_DATASET, "score": 0.0043},
+                {"modelId": "b", "datasetId": DIAGNOSTIC_DATASET, "score": 0.0152},
+                {"modelId": "v2", "datasetId": PRIMARY_DATASET, "score": 0.80}
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        let gpt_v3 = rows
+            .iter()
+            .find(|row| row.model_name == "GPT-5.5 (High)" && row.fields.contains_key("ARC_AGI_3"))
+            .expect("GPT-5.5 ARC-AGI-3 row");
+        assert_eq!(
+            gpt_v3.fields.get("ARC_AGI_3").and_then(Value::as_f64),
+            Some(0.43)
+        );
+        assert!(!gpt_v3.fields.contains_key("ARC_AGI_2"));
+        assert!(rows.iter().any(|row| {
+            row.model_name == "Claude Opus 4.8 (High)"
+                && row.fields.get("ARC_AGI_3").and_then(Value::as_f64) == Some(1.52)
+        }));
     }
 }
