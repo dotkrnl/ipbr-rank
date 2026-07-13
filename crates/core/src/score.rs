@@ -353,9 +353,7 @@ fn compute_role_scores(
             // evidence, while coverage always retains the full nominal path,
             // including prior-only sibling fills and truly missing leaves.
             let mut coverage = aggregate_evidence(&family_evidence, &capped_weights);
-            coverage.provisional = coverage.direct + EPS
-                < evidence_cfg.provisional_min_direct.clamp(0.0, 1.0)
-                || coverage.family_count < evidence_cfg.provisional_min_families;
+            coverage.provisional = role_is_provisional(&coverage, evidence_cfg);
             r.evidence.roles.insert(role.to_string(), coverage);
             role_values.insert(role, value);
         }
@@ -364,6 +362,16 @@ fn compute_role_scores(
         r.scores.b_raw = *role_values.get("B_raw").unwrap_or(&50.0);
         r.scores.r = *role_values.get("R").unwrap_or(&50.0);
     }
+}
+
+fn role_is_provisional(coverage: &EvidenceCoverage, config: &EvidenceConfig) -> bool {
+    let standard_path = coverage.direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
+        && coverage.family_count >= config.provisional_min_families;
+    let breadth_path = coverage.direct + EPS
+        >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
+        && coverage.family_count >= config.provisional_breadth_min_families;
+
+    !(standard_path || breadth_path)
 }
 
 fn aggregate_signals(
@@ -605,6 +613,22 @@ mod tests {
             r.raw_metrics.insert(k.to_string(), *v);
         }
         r
+    }
+
+    #[test]
+    fn role_qualification_accepts_standard_or_breadth_path() {
+        let config = EvidenceConfig::default();
+        let coverage = |direct, family_count| EvidenceCoverage {
+            direct,
+            family_count,
+            ..Default::default()
+        };
+
+        assert!(!role_is_provisional(&coverage(0.60, 3), &config));
+        assert!(!role_is_provisional(&coverage(0.35, 5), &config));
+        assert!(role_is_provisional(&coverage(0.59, 4), &config));
+        assert!(role_is_provisional(&coverage(0.34, 8), &config));
+        assert!(role_is_provisional(&coverage(0.80, 2), &config));
     }
 
     #[test]

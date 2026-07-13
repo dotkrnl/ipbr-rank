@@ -59,6 +59,10 @@ pub struct EvidenceConfig {
     pub provisional_min_direct: f64,
     #[serde(default = "default_provisional_min_families")]
     pub provisional_min_families: usize,
+    #[serde(default = "default_provisional_breadth_min_direct")]
+    pub provisional_breadth_min_direct: f64,
+    #[serde(default = "default_provisional_breadth_min_families")]
+    pub provisional_breadth_min_families: usize,
     #[serde(default = "default_max_family_weight")]
     pub max_family_weight: f64,
 }
@@ -109,6 +113,14 @@ fn default_provisional_min_families() -> usize {
     3
 }
 
+fn default_provisional_breadth_min_direct() -> f64 {
+    0.35
+}
+
+fn default_provisional_breadth_min_families() -> usize {
+    5
+}
+
 fn default_max_family_weight() -> f64 {
     1.0
 }
@@ -125,6 +137,8 @@ impl Default for EvidenceConfig {
                 default_stronger_successor_synthesis_reliability(),
             provisional_min_direct: default_provisional_min_direct(),
             provisional_min_families: default_provisional_min_families(),
+            provisional_breadth_min_direct: default_provisional_breadth_min_direct(),
+            provisional_breadth_min_families: default_provisional_breadth_min_families(),
             max_family_weight: default_max_family_weight(),
         }
     }
@@ -382,6 +396,11 @@ mod tests {
             "expected >=20 metrics, got {}",
             c.metrics.len()
         );
+        let evidence = c.evidence.expect("embedded evidence policy");
+        assert_eq!(evidence.provisional_min_direct, 0.60);
+        assert_eq!(evidence.provisional_min_families, 3);
+        assert_eq!(evidence.provisional_breadth_min_direct, 0.35);
+        assert_eq!(evidence.provisional_breadth_min_families, 5);
     }
 
     #[test]

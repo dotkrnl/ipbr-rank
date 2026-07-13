@@ -14,6 +14,9 @@ pub struct RadarSlice<'a> {
     pub review: f64,
     pub class: &'a str,
     pub label: Option<&'a str>,
+    /// Whether this shape represents an estimate that does not yet meet the
+    /// direct-evidence requirements. Provisional shapes use a dotted outline.
+    pub provisional: bool,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -26,9 +29,10 @@ pub enum RadarVariant {
 
 /// Inline SVG for a 4-axis radar chart (Idea/Plan/Build/Review).
 ///
-/// All polygons share a single coordinate system: the axes go to radius 50
-/// at score=100. Tick rings sit at 25/50/75/100. Hero variant places axis
-/// labels at radius 60; mini variant omits them.
+/// Each render scales its observed score range to radius 50 so differences
+/// among the displayed models remain visible. Tick rings divide that scaled
+/// range into quarters. Hero variant places axis labels at radius 60; mini
+/// variant omits them.
 pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String {
     let (class, view_box) = match variant {
         RadarVariant::Hero => ("radar radar-hero", "-62 -62 124 124"),
@@ -56,18 +60,27 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
         .unwrap();
     }
 
+    // Per-render range scale. Mapping the displayed [min - 10, max] range to
+    // the full radius keeps nearby frontier-model scores distinguishable.
+    let scale = compute_scale(slices);
+
     // Polygons, one per slice. Drawn in supplied order so callers control
     // z-stacking (e.g. rank-1 last so it sits on top).
     for slice in slices {
-        let points = polygon_points(slice);
+        let points = polygon_points(slice, scale);
         let title = slice
             .label
             .map(|label| format!("<title>{}</title>", html_escape(label)))
             .unwrap_or_default();
         write!(
             svg,
-            r#"<polygon class="radar-poly {cls}" points="{points}">{title}</polygon>"#,
+            r#"<polygon class="radar-poly {cls}{provisional}" points="{points}">{title}</polygon>"#,
             cls = slice.class,
+            provisional = if slice.provisional {
+                " provisional"
+            } else {
+                ""
+            },
         )
         .unwrap();
     }
@@ -93,11 +106,43 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
 
 const RADAR_RADIUS: f64 = 50.0;
 
-/// Use the same absolute 0-100 scale for every radar. A dynamic per-model or
-/// per-cohort scale exaggerates small differences and makes two polygons with
-/// the same geometry represent different scores.
-fn polygon_points(slice: &RadarSlice<'_>) -> String {
-    let r = |score: f64| score.clamp(0.0, 100.0) / 100.0 * RADAR_RADIUS;
+/// Minimum span between baseline and ceiling. Without this, a slice whose
+/// scores are identical would yield a zero-width range and a degenerate
+/// polygon at the centre.
+const RADAR_MIN_RANGE: f64 = 10.0;
+
+#[derive(Clone, Copy, Debug)]
+struct RadarScale {
+    baseline: f64,
+    ceiling: f64,
+}
+
+fn compute_scale(slices: &[RadarSlice<'_>]) -> RadarScale {
+    let mut min_score = f64::INFINITY;
+    let mut max_score = f64::NEG_INFINITY;
+    for slice in slices {
+        for value in [slice.idea, slice.plan, slice.build, slice.review] {
+            min_score = min_score.min(value);
+            max_score = max_score.max(value);
+        }
+    }
+    if !min_score.is_finite() || !max_score.is_finite() {
+        return RadarScale {
+            baseline: 60.0,
+            ceiling: 100.0,
+        };
+    }
+    let baseline = (min_score - 10.0).clamp(0.0, 90.0);
+    let ceiling = max_score.max(baseline + RADAR_MIN_RANGE).min(100.0);
+    RadarScale { baseline, ceiling }
+}
+
+fn polygon_points(slice: &RadarSlice<'_>, scale: RadarScale) -> String {
+    let range = (scale.ceiling - scale.baseline).max(RADAR_MIN_RANGE);
+    let r = |score: f64| {
+        let clamped = score.clamp(scale.baseline, scale.ceiling);
+        ((clamped - scale.baseline) / range) * RADAR_RADIUS
+    };
     let (idea, plan, build, review) = (
         r(slice.idea),
         r(slice.plan),
@@ -112,4 +157,33 @@ fn polygon_points(slice: &RadarSlice<'_>) -> String {
         bb = build,
         rl = -review,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn slice(provisional: bool) -> RadarSlice<'static> {
+        RadarSlice {
+            idea: 80.0,
+            plan: 81.0,
+            build: 82.0,
+            review: 83.0,
+            class: "solo",
+            label: Some("Example"),
+            provisional,
+        }
+    }
+
+    #[test]
+    fn range_scales_each_render() {
+        let svg = render_radar(&[slice(false)], RadarVariant::Mini);
+        assert!(svg.contains(r#"points="0,-38.5 42.3,0 0,46.2 -50.0,0""#));
+    }
+
+    #[test]
+    fn provisional_slices_use_a_dedicated_class() {
+        let svg = render_radar(&[slice(true)], RadarVariant::Mini);
+        assert!(svg.contains(r#"class="radar-poly solo provisional""#));
+    }
 }

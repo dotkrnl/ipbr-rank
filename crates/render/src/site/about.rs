@@ -16,7 +16,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <h2>The four roles</h2>
 <ul>
 <li><strong>Idea</strong> — open-ended generation and novel problem solving. EQ-Bench Creative Writing v3 supplies a direct creativity signal; LM Arena Text and ARC-AGI add preference and abstraction evidence.</li>
-<li><strong>Plan</strong> — structured reasoning, function calling, tool orchestration, and multi-step execution. Terminal-Bench, BFCL, MCP-Atlas, tau, IFBench, and related agentic tasks contribute.</li>
+<li><strong>Plan</strong> — structured reasoning, function calling, tool orchestration, and multi-step execution. Terminal-Bench, BFCL, MCP-Atlas, tau3, long-context, and enterprise-workflow tasks contribute.</li>
 <li><strong>Build</strong> — implementing and repairing software. SWE-bench variants, SWE-rebench, SWE Atlas, GSO, terminal tasks, live coding, and MCP orchestration dominate. Sonar code-quality data remains diagnostic.</li>
 <li><strong>Review proxy</strong> — judge calibration and review-adjacent capability. EQ-Bench Judgemark v4 is direct judge evidence; search/document preference and Plan/Build signals broaden it. It is not claimed to be a direct code-review benchmark.</li>
 </ul>
@@ -27,7 +27,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Normalize on fixed anchors</strong> — ranked leaves use raw-unit p5/p95 anchors frozen from the 2026-07-12 refreshed cohort. Anchors map near 5 and 95 through an asymptotic logistic curve, so future model additions do not rescale earlier observations and extreme values do not hard-clip.</li>
 <li><strong>Apply evidence reliability</strong> — direct observations count at 1.00 reliability and cited same-model reports at 0.60. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
 <li><strong>Separate capability from confidence</strong> — the point estimate averages available same-model evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
-<li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%. Roles below 60% direct nominal weight or three independent direct families are marked provisional.</li>
+<li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%. A role qualifies through either 60% direct nominal weight across three families or 35% across five; provisional estimates remain visible in the same rank order.</li>
 </ol>
 
 <h2>What never affects rank</h2>
@@ -58,7 +58,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <ul>
 <li><strong>Direct coverage</strong> — the share of a role's nominal path supported by direct benchmark observations.</li>
 <li><strong>Confidence</strong> — evidence coverage after cited reports are discounted; sibling fills contribute no confidence.</li>
-<li><strong>Provisional</strong> — a numeric role score that does not yet meet the minimum direct-coverage and independent-family gate.</li>
+<li><strong>Provisional</strong> — a numeric role score that meets neither the standard direct-coverage gate nor the broader five-family corroboration gate.</li>
 <li><strong>Composite</strong> — a weighted blend used to collapse overlapping components before role aggregation, such as the SWE, Sonar, or AA reasoning families.</li>
 <li><strong>Fixed anchor</strong> — a versioned raw benchmark value used to keep normalization stable across changing model cohorts.</li>
 </ul>

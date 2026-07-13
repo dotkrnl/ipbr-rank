@@ -134,8 +134,9 @@ enough independent families exist.
 - **R** = 0.20×REVIEW_DIRECT + 0.20×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.30×PLAN
 
 The displayed **Balanced capability** rank is the unweighted mean of the four
-role proxies. A role is marked provisional when direct coverage is below 60%
-or spans fewer than three direct benchmark families.
+role proxies. A role is ranked through either the standard evidence path
+(at least 60% direct weight across three families) or the breadth path (at
+least 35% direct weight across five families); otherwise it is provisional.
 
 Pricing, speed, latency, TTFT, and context-window values are diagnostics only.
 They have zero path to any role or Balanced capability rank.

@@ -295,6 +295,8 @@ same_series_synthesis_reliability = 0.0
 stronger_successor_synthesis_reliability = 0.0
 provisional_min_direct = 0.60
 provisional_min_families = 3
+provisional_breadth_min_direct = 0.35
+provisional_breadth_min_families = 5
 max_family_weight = 0.30
 
 [normalization]

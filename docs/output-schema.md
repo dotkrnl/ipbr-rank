@@ -109,9 +109,10 @@ r_status = "provisional"
 `i_raw`, `p_raw`, `b_raw`, and `r` are the Idea, Planning, Building, and
 Review proxy scores.
 
-Each status is `ranked` or `provisional`. A role is provisional when direct
-coverage is below 60% or direct evidence spans fewer than three independent
-families. The numeric score remains available in either case.
+Each status is `ranked` or `provisional`. A role is ranked with either at least
+60% direct coverage across three independent families or at least 35% direct
+coverage across five independent families. The numeric score remains available
+in either case.
 
 Balanced capability is not stored as a fifth score. Consumers can reproduce
 the presentation view with:
@@ -322,6 +323,8 @@ same_series_synthesis_reliability = 0.0
 stronger_successor_synthesis_reliability = 0.0
 provisional_min_direct = 0.60
 provisional_min_families = 3
+provisional_breadth_min_direct = 0.35
+provisional_breadth_min_families = 5
 max_family_weight = 0.30
 ```
 

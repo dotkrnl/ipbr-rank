@@ -39,6 +39,8 @@ fn provisional_scores_are_italicized_starred_and_explained() {
         r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met.</p>"#
     ));
     assert!(index.contains(r#"<span class="cell-score">81.0</span>"#));
+    assert!(index.contains(r#"<td class="model-name">Claude Opus 4.7</td>"#));
+    assert!(!index.contains(r#"<td class="model-name">Claude Opus 4.7 <span"#));
 }
 
 #[test]
@@ -308,7 +310,10 @@ fn leaderboard_has_row_and_expansion_per_model() {
     // Sort buttons emit data-sort attribute on header
     assert!(index.contains("data-sort=\"balanced\""));
     assert!(index.contains("data-sort-balanced="));
-    assert!(index.contains("status-badge"));
+    assert!(
+        !index.contains(r#"Claude Opus 4.7 <span class="status-badge"#),
+        "model rows must not carry ranked/provisional label tags"
+    );
     assert!(index.contains("data-sort=\"i\""));
     assert!(index.contains("data-sort=\"r\""));
     assert!(index.contains("role evidence"));
@@ -481,7 +486,8 @@ fn scoring_panel_has_role_definitions_and_link() {
     assert!(index.contains("href=\"about.html\""));
     assert!(index.contains("missing and sibling-only leaves reduce confidence"));
     assert!(index.contains("never enter Idea, Plan, Build, Review"));
-    assert!(index.contains("best-available/max-effort"));
+    assert!(!index.contains("best-available/max-effort per model"));
+    assert!(index.contains("best available max/high-effort"));
 }
 
 #[test]
@@ -512,14 +518,18 @@ fn hero_renders_title_tagline_radar_and_per_role_leaders() {
         "hero must not duplicate the brand h1"
     );
 
-    // Snapshot status block must not imply continuous live state.
+    // Live status uses the established pulsing dot treatment.
     assert!(
-        index.contains("snapshot-label"),
-        "missing snapshot indicator"
+        index.contains(r#"<span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span>"#),
+        "missing live indicator"
     );
     assert!(
-        !index.contains("live-dot"),
-        "snapshot must not claim to be live"
+        !index.contains("snapshot-label"),
+        "stale snapshot indicator must not render"
+    );
+    assert!(
+        !index.contains("best-available/max-effort per model"),
+        "configuration detail must not clutter the live headline"
     );
 
     // Hero radar SVG with single-letter axis labels (one per role class).
@@ -559,6 +569,33 @@ fn hero_renders_title_tagline_radar_and_per_role_leaders() {
 }
 
 #[test]
+fn provisional_models_remain_in_hero_rankings_with_marked_scores() {
+    let mut scoreboard = sample_scoreboard();
+    scoreboard.models[0].scores.b_raw = 99.0;
+    scoreboard.models[0].evidence.roles.insert(
+        "B_raw".to_string(),
+        ipbr_core::EvidenceCoverage {
+            provisional: true,
+            ..Default::default()
+        },
+    );
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+    let index = read(site_dir.join("index.html"));
+
+    assert!(index.contains(
+        r#"<span class="legend-score"><span class="provisional-score"><em>85.8</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span></span>"#
+    ));
+    assert!(index.contains(
+        r#"<span class="score" data-tier="high"><span class="provisional-score"><em>99.0</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span></span>"#
+    ));
+    assert!(index.contains(r#"<div class="role-head">[ review ]</div>"#));
+    assert!(!index.contains(r#"<div class="role-head">[ review proxy ]</div>"#));
+}
+
+#[test]
 fn expansion_includes_mini_radar() {
     let scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
@@ -573,8 +610,8 @@ fn expansion_includes_mini_radar() {
         "expected one mini radar per model row, got {mini_count}"
     );
     assert!(
-        index.contains(r#"points="0,-40.0 40.5,0 0,41.0 -41.5,0""#),
-        "80/81/82/83 fixture scores must use the absolute 0-100 radar scale"
+        index.contains(r#"points="0,-38.5 42.3,0 0,46.2 -50.0,0""#),
+        "80/81/82/83 fixture scores must use the restored range-scaled radar"
     );
 }
 

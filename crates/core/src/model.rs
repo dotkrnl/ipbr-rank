@@ -31,8 +31,8 @@ pub struct EvidenceCoverage {
     pub direct_families: BTreeSet<String>,
     #[serde(default)]
     pub family_count: usize,
-    /// Role scores that fail the configured direct-coverage or independent-
-    /// family gate remain computable, but must be presented as provisional.
+    /// Role scores that fail both configured direct-coverage/independent-
+    /// family qualification paths remain computable, but are provisional.
     #[serde(default)]
     pub provisional: bool,
 }

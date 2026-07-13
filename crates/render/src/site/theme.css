@@ -97,7 +97,6 @@ nav a:hover { color: var(--text-strong); }
   margin: 0; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 8px;
   align-items: center;
 }
-.snapshot-label { color: var(--build); font-weight: 700; }
 .live-dot {
   display: inline-block; width: 8px; height: 8px; border-radius: 50%;
   background: var(--build); margin-right: 4px;
@@ -159,6 +158,7 @@ nav a:hover { color: var(--text-strong); }
 .radar-grid { fill: none; stroke: var(--line); stroke-width: 0.6; opacity: 0.7; }
 .radar-axis { stroke: var(--line); stroke-width: 0.6; opacity: 0.5; }
 .radar-poly { stroke-width: 1.4; stroke-linejoin: round; }
+.radar-poly.provisional { stroke-dasharray: 3 2; }
 .radar-poly.rank-1 { fill: var(--accent); fill-opacity: 0.22; stroke: var(--accent); }
 .radar-poly.rank-2 { fill: var(--idea);   fill-opacity: 0.18; stroke: var(--idea); }
 .radar-poly.rank-3 { fill: var(--muted);  fill-opacity: 0.16; stroke: var(--muted); }
@@ -269,11 +269,10 @@ table.leaderboard th.num button.sort::before { content: "▼ "; visibility: hidd
 table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibility: visible; }
 table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.leaderboard td.model-name { font: inherit; }
-table.leaderboard td.model-name .status-badge { margin-left: 5px; }
 table.leaderboard td.num .cell-score { display: inline-block; }
 table.leaderboard td.num[data-tier="high"] .cell-score { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }
-table.leaderboard .provisional-score em { font-style: italic; }
+.provisional-score em { font-style: italic; }
 .status-marker {
   display: inline-block; margin-left: 2px; color: var(--muted); font-size: 0.75em;
   vertical-align: top; text-transform: uppercase;

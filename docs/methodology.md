@@ -145,10 +145,11 @@ they remain in the separate nominal evidence summary. A fully unsupported
 aggregate uses 50 only as a compatibility fallback and is provisional.
 
 This prevents benchmark availability from being mistaken for low capability.
-It can make sparse estimates more extreme, which is why official ordinal ranks
-require at least 60% direct role weight and three independent direct families.
-A fully absent composite remains absent; a partially observed composite uses
-available evidence and carries recursive coverage separately.
+It can make sparse estimates more extreme, which is why ordinal qualification
+requires either concentrated direct coverage (at least 60% across three
+independent families) or broader corroboration (at least 35% across five
+families). A fully absent composite remains absent; a partially observed
+composite uses available evidence and carries recursive coverage separately.
 
 `groups_shrunk` remains a compatibility name for groups with incomplete
 nominal coverage; it does not select a different scoring formula.
@@ -262,13 +263,15 @@ provisional if any of the four role proxies is provisional.
 
 ## 9. Ranked versus provisional
 
-A role remains computable when evidence is sparse, but it is marked
-`provisional` unless both conditions hold:
+A role remains computable when evidence is sparse. Its status is `ranked` when
+either qualification path holds:
 
-- at least 60% of its family-capped nominal weight is direct evidence; and
-- direct evidence spans at least three independent families.
+- standard: at least 60% of its family-capped nominal weight is direct evidence
+  spanning at least three independent families; or
+- breadth: at least 35% is direct evidence spanning at least five independent
+  families.
 
-Otherwise its status is `ranked`. Cited same-model reports help produce a
+Otherwise it is `provisional`. Cited same-model reports help produce a
 discounted estimate. Sibling fills are prior-only; neither reports nor fills
 count as direct families or can qualify a role by themselves.
 
