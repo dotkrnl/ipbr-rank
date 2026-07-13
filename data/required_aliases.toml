@@ -475,6 +475,16 @@ aliases = [
     "x-ai/grok-4.3", "x-ai/grok-4-3", "xai/grok-4.3", "xai/grok-4-3",
 ]
 
+# Grok 4.5 is a distinct July 2026 product, not an alias of Grok 4.3 or the
+# rolling Grok 4 route. The dated OpenRouter slug identifies the same release.
+[models."xai/grok-4.5"]
+vendor = "xai"
+aliases = [
+    "grok-4.5", "grok 4.5", "grok-4-5",
+    "x-ai/grok-4.5", "xai/grok-4.5", "x-ai/grok-4.5-20260708",
+    "Grok 4.5 (high)", "grok-4-5-high",
+]
+
 [models."xai/grok-4.20"]
 vendor = "xai"
 aliases = [
@@ -686,4 +696,15 @@ vendor = "meta"
 aliases = [
     "muse-spark", "muse spark",
     "meta/muse-spark", "Meta Muse Spark",
+]
+
+# Muse Spark 1.1 is the July 2026 successor, with materially different direct
+# benchmark results. Keep it separate from the original Muse Spark record.
+[models."meta/muse-spark-1.1"]
+vendor = "meta"
+aliases = [
+    "muse-spark-1.1", "muse spark 1.1", "muse-spark-1-1",
+    "meta/muse-spark-1.1", "Meta Muse Spark 1.1",
+    "Muse Spark 1.1 (xhigh)",
+    "Muse Spark 1.1 (Mini-SWE-Agent) xHigh",
 ]

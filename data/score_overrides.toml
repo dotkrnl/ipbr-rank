@@ -218,6 +218,12 @@ note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, Terminal Bench 2.0-Term
 # ---------------------------------------------------------------------
 
 [[entries]]
+canonical_id = "xai/grok-4.5"
+metric = "TerminalBench21"
+value = 83.3
+note = "SpaceXAI Grok 4.5 launch benchmark table, Terminal-Bench 2.1, https://x.ai/news/grok-4-5, 2026-07-08"
+
+[[entries]]
 canonical_id = "minimax/minimax-m3"
 metric = "TerminalBench21"
 value = 66.0
@@ -400,6 +406,12 @@ note = "GDPval-AA Elo (Reasoning), artificialanalysis.ai/evaluations/gdpval-aa, 
 # ---------------------------------------------------------------------
 
 [[entries]]
+canonical_id = "xai/grok-4.5"
+metric = "SWEBenchPro"
+value = 64.7
+note = "SpaceXAI Grok 4.5 launch benchmark table, SWE-Bench Pro resolve rate, https://x.ai/news/grok-4-5, 2026-07-08"
+
+[[entries]]
 canonical_id = "anthropic/claude-opus-4.7"
 metric = "SWEBenchPro"
 value = 64.3
@@ -548,6 +560,17 @@ canonical_id = "openai/gpt-5.6-luna"
 metric = "SWEBenchPro"
 value = 62.7
 note = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro Luna; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+# ---------------------------------------------------------------------
+# DeepSWE v1.1 — vendor-reported fixed mini-swe-agent result not yet in the
+# public v1.1 artifact consumed by the native source.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "xai/grok-4.5"
+metric = "DeepSWE"
+value = 53.0
+note = "SpaceXAI Grok 4.5 launch benchmark table, DeepSWE v1.1 with mini-swe-agent, https://x.ai/news/grok-4-5, 2026-07-08"
 
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures

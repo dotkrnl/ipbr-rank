@@ -68,30 +68,34 @@ def dense_ranks(models: list[dict], role: str) -> tuple[dict[str, int], dict[str
 def report(before: dict, after: dict, top: int) -> str:
     before_by_id = {model["canonical_id"]: model for model in before["models"]}
     after_by_id = {model["canonical_id"]: model for model in after["models"]}
-    common = set(before_by_id) & set(after_by_id)
+    all_ids = set(before_by_id) | set(after_by_id)
     lines = [
         "# Ranking changes",
         "",
         f"Before: `{before.get('generated_at', 'unknown')}` / `{before.get('methodology', 'unknown')}`  ",
         f"After: `{after.get('generated_at', 'unknown')}` / `{after.get('methodology', 'unknown')}`",
         "",
-        "Dense ties use the displayed 0.1-point precision. Every model remains in the rank order; provisional status is reported separately.",
+        "Dense ties use the displayed 0.1-point precision. Added and removed models are shown explicitly; provisional status is reported separately.",
     ]
     for role, label in ROLES:
         before_ranks, before_scores = dense_ranks(list(before_by_id.values()), role)
         after_ranks, after_scores = dense_ranks(list(after_by_id.values()), role)
         selected = sorted(
-            common,
+            all_ids,
             key=lambda canonical_id: (
-                min(before_ranks[canonical_id], after_ranks[canonical_id]),
-                after_ranks[canonical_id],
+                min(
+                    before_ranks.get(canonical_id, len(before_ranks) + 1),
+                    after_ranks.get(canonical_id, len(after_ranks) + 1),
+                ),
+                after_ranks.get(canonical_id, len(after_ranks) + 1),
                 canonical_id,
             ),
         )
         selected = [
             canonical_id
             for canonical_id in selected
-            if before_ranks[canonical_id] <= top or after_ranks[canonical_id] <= top
+            if before_ranks.get(canonical_id, top + 1) <= top
+            or after_ranks.get(canonical_id, top + 1) <= top
         ]
         lines.extend(
             (
@@ -103,23 +107,42 @@ def report(before: dict, after: dict, top: int) -> str:
             )
         )
         for canonical_id in selected:
-            old_rank = before_ranks[canonical_id]
-            new_rank = after_ranks[canonical_id]
-            movement = f"{old_rank - new_rank:+d}"
-            old_status = (
-                "provisional"
-                if is_provisional(before_by_id[canonical_id], role)
-                else "ranked"
-            )
-            new_status = (
-                "provisional"
-                if is_provisional(after_by_id[canonical_id], role)
-                else "ranked"
+            old_rank = before_ranks.get(canonical_id)
+            new_rank = after_ranks.get(canonical_id)
+            old_score = before_scores.get(canonical_id)
+            new_score = after_scores.get(canonical_id)
+            if old_rank is None:
+                movement = "new"
+            elif new_rank is None:
+                movement = "removed"
+            else:
+                movement = f"{old_rank - new_rank:+d}"
+            old_status = "—"
+            if canonical_id in before_by_id:
+                old_status = (
+                    "provisional"
+                    if is_provisional(before_by_id[canonical_id], role)
+                    else "ranked"
+                )
+            new_status = "—"
+            if canonical_id in after_by_id:
+                new_status = (
+                    "provisional"
+                    if is_provisional(after_by_id[canonical_id], role)
+                    else "ranked"
+                )
+            rank_before = "—" if old_rank is None else str(old_rank)
+            rank_after = "—" if new_rank is None else str(new_rank)
+            score_before = "—" if old_score is None else f"{old_score:.2f}"
+            score_after = "—" if new_score is None else f"{new_score:.2f}"
+            score_delta = (
+                "—"
+                if old_score is None or new_score is None
+                else f"{new_score - old_score:+.2f}"
             )
             lines.append(
-                f"| `{canonical_id}` | {old_rank} | {new_rank} | {movement} | "
-                f"{before_scores[canonical_id]:.2f} | {after_scores[canonical_id]:.2f} | "
-                f"{after_scores[canonical_id] - before_scores[canonical_id]:+.2f} | "
+                f"| `{canonical_id}` | {rank_before} | {rank_after} | {movement} | "
+                f"{score_before} | {score_after} | {score_delta} | "
                 f"{old_status} → {new_status} |"
             )
     return "\n".join(lines) + "\n"

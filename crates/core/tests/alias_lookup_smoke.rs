@@ -144,6 +144,37 @@ fn lookup_2026_05_22_models() {
 }
 
 #[test]
+fn lookup_2026_07_distinct_models() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        ("grok-4.5", Some("xai"), "xai/grok-4.5"),
+        ("x-ai/grok-4.5-20260708", Some("xai"), "xai/grok-4.5"),
+        ("Grok 4.5 (high)", Some("xai"), "xai/grok-4.5"),
+        (
+            "Muse Spark 1.1 (xhigh)",
+            Some("meta"),
+            "meta/muse-spark-1.1",
+        ),
+        (
+            "Muse Spark 1.1 (Mini-SWE-Agent) xHigh",
+            Some("meta"),
+            "meta/muse-spark-1.1",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn lookup_2026_06_12_models() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
