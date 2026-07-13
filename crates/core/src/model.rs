@@ -155,7 +155,7 @@ pub struct ModelRecord {
     /// override source. These are direct same-product observations, but the
     /// marker preserves lower precedence than a native public source and
     /// keeps their citations attached to the winning value.
-    #[serde(default, alias = "override_reported")]
+    #[serde(default)]
     pub curated_overrides: BTreeSet<MetricKey>,
     /// Winning source for each raw metric after evidence and effort
     /// precedence have been applied.
