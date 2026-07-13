@@ -7,6 +7,51 @@
 # suffixes, and common shorthand ("opus 4.7"). Add every observed form so
 # the alias matcher hits exact lookup instead of falling back to fuzzy.
 
+# GPT-5.6 family — released 2026-07-09. Sol is the flagship/API `gpt-5.6`
+# route, Terra the balanced tier, and Luna the fast/cost-efficient tier.
+# Keep Pro/ultra orchestration endpoints out of the model-only comparison;
+# max, then xhigh, are the strongest eligible single-model observations.
+[models."openai/gpt-5.6-sol"]
+vendor = "openai"
+aliases = [
+    "gpt-5.6", "gpt 5.6", "gpt-5-6", "openai/gpt-5.6",
+    "gpt-5.6-sol", "gpt 5.6 sol", "gpt-5-6-sol",
+    "openai/gpt-5.6-sol", "openai:gpt-5.6-sol",
+    "GPT-5.6 Sol", "GPT-5.6 Sol (max)", "GPT-5.6 Sol (xhigh)",
+    "GPT-5.6 Sol (high)", "GPT-5.6 Sol (medium)",
+    "GPT-5.6 Sol (low)", "GPT-5.6 Sol (Non-reasoning)",
+    "gpt-5-6-sol-max", "gpt-5-6-sol-xhigh", "gpt-5-6-sol-high",
+    "gpt-5-6-sol-medium", "gpt-5-6-sol-low",
+    "gpt-5-6-sol-non-reasoning",
+    "gpt-5.6-sol-xhigh (codex-harness)",
+]
+
+[models."openai/gpt-5.6-terra"]
+vendor = "openai"
+aliases = [
+    "gpt-5.6-terra", "gpt 5.6 terra", "gpt-5-6-terra",
+    "openai/gpt-5.6-terra", "openai:gpt-5.6-terra",
+    "GPT-5.6 Terra", "GPT-5.6 Terra (max)", "GPT-5.6 Terra (xhigh)",
+    "GPT-5.6 Terra (high)", "GPT-5.6 Terra (medium)",
+    "GPT-5.6 Terra (low)", "GPT-5.6 Terra (Non-reasoning)",
+    "gpt-5-6-terra-max", "gpt-5-6-terra-xhigh", "gpt-5-6-terra-high",
+    "gpt-5-6-terra-medium", "gpt-5-6-terra-low",
+    "gpt-5-6-terra-non-reasoning",
+]
+
+[models."openai/gpt-5.6-luna"]
+vendor = "openai"
+aliases = [
+    "gpt-5.6-luna", "gpt 5.6 luna", "gpt-5-6-luna",
+    "openai/gpt-5.6-luna", "openai:gpt-5.6-luna",
+    "GPT-5.6 Luna", "GPT-5.6 Luna (max)", "GPT-5.6 Luna (xhigh)",
+    "GPT-5.6 Luna (high)", "GPT-5.6 Luna (medium)",
+    "GPT-5.6 Luna (low)", "GPT-5.6 Luna (Non-reasoning)",
+    "gpt-5-6-luna-max", "gpt-5-6-luna-xhigh", "gpt-5-6-luna-high",
+    "gpt-5-6-luna-medium", "gpt-5-6-luna-low",
+    "gpt-5-6-luna-non-reasoning",
+]
+
 [models."openai/gpt-5.5"]
 vendor = "openai"
 aliases = [

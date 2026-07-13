@@ -300,13 +300,14 @@ fn ingest_real_row(
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum EffortPreference {
     Max = 0,
-    High = 1,
-    Thinking = 2,
-    Medium = 3,
-    Default = 4,
-    Other = 5,
-    Low = 6,
-    NonReasoning = 7,
+    XHigh = 1,
+    High = 2,
+    Thinking = 3,
+    Medium = 4,
+    Default = 5,
+    Other = 6,
+    Low = 7,
+    NonReasoning = 8,
 }
 
 impl EffortPreference {
@@ -348,8 +349,10 @@ impl EffortPreference {
             Self::NonReasoning
         } else if contains("low") {
             Self::Low
-        } else if contains("max") || contains("xhigh") {
+        } else if contains("max") {
             Self::Max
+        } else if contains("xhigh") {
+            Self::XHigh
         } else if contains("high") {
             Self::High
         } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
@@ -364,7 +367,7 @@ impl EffortPreference {
     fn is_scoring_allowed(self) -> bool {
         matches!(
             self,
-            Self::Default | Self::Medium | Self::Thinking | Self::High | Self::Max
+            Self::Default | Self::Medium | Self::Thinking | Self::High | Self::XHigh | Self::Max
         )
     }
 }
@@ -404,7 +407,7 @@ fn evidence_note_metric(key: &str) -> Option<&str> {
 }
 
 /// Variant policy driven by `[effort_policy]` in `coefficients.toml`. The
-/// default scoring set is `default | medium | thinking | high | max/xhigh`.
+/// default scoring set is `default | medium | thinking | high | xhigh | max`.
 /// Exceptions remain for intentionally blocked variants, currently low and
 /// non-reasoning rows.
 fn is_scoring_allowed_for(
@@ -419,6 +422,7 @@ fn is_scoring_allowed_for(
     }
     let effort_name = match preference {
         EffortPreference::High => "high",
+        EffortPreference::XHigh => "xhigh",
         EffortPreference::Max => "max",
         EffortPreference::Thinking => "thinking",
         EffortPreference::Low => "low",
@@ -854,6 +858,66 @@ mod tests {
                 "max effort must win independently of row order"
             );
         }
+    }
+
+    #[test]
+    fn real_rows_prefer_explicit_max_over_xhigh_regardless_of_score_or_order() {
+        for max_first in [false, true] {
+            let mut record = ModelRecord::new(
+                "openai/gpt-5.6-sol".to_string(),
+                "gpt-5.6-sol".to_string(),
+                Vendor::Openai,
+            );
+            record.aliases.insert("gpt-5-6-sol-max".to_string());
+            record.aliases.insert("gpt-5-6-sol-xhigh".to_string());
+            let max = raw(
+                "benchmark",
+                "gpt-5-6-sol-max",
+                &[("TerminalBench", json!(80.0))],
+            );
+            let xhigh = raw(
+                "benchmark",
+                "gpt-5-6-sol-xhigh",
+                &[("TerminalBench", json!(90.0))],
+            );
+            let rows = if max_first {
+                vec![max, xhigh]
+            } else {
+                vec![xhigh, max]
+            };
+            let mut records = vec![record];
+
+            ingest_rows(&mut records, rows);
+
+            assert_eq!(
+                records[0].raw_metrics.get("TerminalBench"),
+                Some(&80.0),
+                "explicit max must beat a numerically higher xhigh row independently of order"
+            );
+        }
+    }
+
+    #[test]
+    fn unlabeled_default_rows_remain_eligible() {
+        let mut record = ModelRecord::new(
+            "openai/gpt-5.6-sol".to_string(),
+            "gpt-5.6-sol".to_string(),
+            Vendor::Openai,
+        );
+        record.aliases.insert("gpt-5-6-sol".to_string());
+        let mut records = vec![record];
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "benchmark-without-effort-metadata",
+                "gpt-5-6-sol",
+                &[("TerminalBench", json!(88.0))],
+            )],
+        );
+
+        assert_eq!(stats.matched, 1);
+        assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&88.0));
     }
 
     #[test]

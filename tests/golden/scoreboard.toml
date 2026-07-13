@@ -13,8 +13,8 @@ n_rows_unmatched = 1
 [sources."aa_critpt"]
 status = "verified"
 n_rows_ingested = 3
-n_rows_matched = 1
-n_rows_unmatched = 2
+n_rows_matched = 2
+n_rows_unmatched = 1
 
 [sources."aa_enterprise_ops_gym"]
 status = "verified"
@@ -126,8 +126,8 @@ n_rows_unmatched = 287
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 182
-n_rows_matched = 182
+n_rows_ingested = 194
+n_rows_matched = 194
 n_rows_unmatched = 0
 
 [sources."sonar"]
@@ -16473,6 +16473,655 @@ provisional = false
 [models.missing]
 metrics = ["CritPt", "SWEBenchMultilingual", "Tau3Banking"]
 groups_shrunk = []
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.6-luna"
+display_name = "gpt-5.6-luna"
+vendor = "openai"
+thinking_effort = "best_available"
+aliases = ["GPT-5.6 Luna", "GPT-5.6 Luna (Non-reasoning)", "GPT-5.6 Luna (high)", "GPT-5.6 Luna (low)", "GPT-5.6 Luna (max)", "GPT-5.6 Luna (medium)", "GPT-5.6 Luna (xhigh)", "gpt 5.6 luna", "gpt-5-6-luna", "gpt-5-6-luna-high", "gpt-5-6-luna-low", "gpt-5-6-luna-max", "gpt-5-6-luna-medium", "gpt-5-6-luna-non-reasoning", "gpt-5-6-luna-xhigh", "gpt-5.6-luna", "openai/gpt-5.6-luna", "openai:gpt-5.6-luna"]
+sources = ["overrides"]
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 96.539557
+b_raw = 97.792321
+r = 97.601100
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 97.847970
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 96.539557
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+BrowseComp = 92.426960
+SWEBenchPro = 98.147036
+SWEComposite = 98.147036
+TerminalBench21 = 96.539557
+TerminalBench21Composite = 96.539557
+Toolathlon = 86.473781
+
+[models.raw_metrics]
+BrowseComp = 83.300000
+SWEBenchPro = 62.700000
+TerminalBench21 = 84.700000
+Toolathlon = 53.400000
+
+[models.metric_evidence."BrowseComp"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, BrowseComp Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."SWEBenchPro"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro Luna; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."TerminalBench21"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."Toolathlon"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Toolathlon Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.evidence.groups."BUILD"]
+direct = 0.237500
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.762500
+effective = 0.237500
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.100000
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.900000
+effective = 0.100000
+family_count = 1
+direct_families = ["terminal_bench"]
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.219944
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.780056
+effective = 0.219944
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.176087
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.066038
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.933962
+effective = 0.066038
+family_count = 1
+direct_families = ["terminal_bench"]
+core_direct = 0.114754
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.123047
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.876953
+effective = 0.123047
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.139130
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+groups_shrunk = ["BUILD", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.6-sol"
+display_name = "gpt-5.6-sol"
+vendor = "openai"
+thinking_effort = "best_available"
+aliases = ["GPT-5.6 Sol", "GPT-5.6 Sol (Non-reasoning)", "GPT-5.6 Sol (high)", "GPT-5.6 Sol (low)", "GPT-5.6 Sol (max)", "GPT-5.6 Sol (medium)", "GPT-5.6 Sol (xhigh)", "gpt 5.6", "gpt 5.6 sol", "gpt-5-6", "gpt-5-6-sol", "gpt-5-6-sol-high", "gpt-5-6-sol-low", "gpt-5-6-sol-max", "gpt-5-6-sol-medium", "gpt-5-6-sol-non-reasoning", "gpt-5-6-sol-xhigh", "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-sol-xhigh (codex-harness)", "openai/gpt-5.6", "openai/gpt-5.6-sol", "openai:gpt-5.6-sol"]
+sources = ["aa_critpt", "overrides"]
+
+[models.scores]
+i_raw = 99.795232
+p_raw = 99.626279
+b_raw = 98.695702
+r = 98.720589
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 98.688459
+CRE = 50.000000
+GEN = 99.795232
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 98.858746
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+AAGeneralComposite = 99.795232
+BrowseComp = 97.463631
+CritPt = 99.795232
+SWEBenchPro = 98.649536
+SWEComposite = 98.649536
+TerminalBench21 = 98.858746
+TerminalBench21Composite = 98.858746
+Toolathlon = 94.626440
+
+[models.raw_metrics]
+BrowseComp = 90.400000
+CritPt = 32.285714
+SWEBenchPro = 64.600000
+TerminalBench21 = 88.800000
+Toolathlon = 58.000000
+
+[models.metric_evidence."BrowseComp"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, BrowseComp single-agent Sol (not Ultra; effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."CritPt"]
+class = "direct"
+source = "aa_critpt"
+
+[models.metric_evidence."SWEBenchPro"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro single-model Sol; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."TerminalBench21"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 single-model Sol (not the four-agent Ultra result; effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."Toolathlon"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Toolathlon single-model Sol (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.evidence.groups."BUILD"]
+direct = 0.237500
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.762500
+effective = 0.237500
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.058333
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.941667
+effective = 0.058333
+family_count = 1
+direct_families = ["artificial_analysis"]
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.100000
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.900000
+effective = 0.100000
+family_count = 1
+direct_families = ["terminal_bench"]
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.219944
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.780056
+effective = 0.219944
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.176087
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.021778
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.978222
+effective = 0.021778
+family_count = 1
+direct_families = ["artificial_analysis"]
+core_direct = 0.021778
+core_family_count = 1
+core_direct_families = ["artificial_analysis"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.085732
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.914268
+effective = 0.085732
+family_count = 2
+direct_families = ["artificial_analysis", "terminal_bench"]
+core_direct = 0.134449
+core_family_count = 2
+core_direct_families = ["artificial_analysis", "terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.123047
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.876953
+effective = 0.123047
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.139130
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+groups_shrunk = ["BUILD", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+synthesis_dominant = false
+
+[[models]]
+canonical_id = "openai/gpt-5.6-terra"
+display_name = "gpt-5.6-terra"
+vendor = "openai"
+thinking_effort = "best_available"
+aliases = ["GPT-5.6 Terra", "GPT-5.6 Terra (Non-reasoning)", "GPT-5.6 Terra (high)", "GPT-5.6 Terra (low)", "GPT-5.6 Terra (max)", "GPT-5.6 Terra (medium)", "GPT-5.6 Terra (xhigh)", "gpt 5.6 terra", "gpt-5-6-terra", "gpt-5-6-terra-high", "gpt-5-6-terra-low", "gpt-5-6-terra-max", "gpt-5-6-terra-medium", "gpt-5-6-terra-non-reasoning", "gpt-5-6-terra-xhigh", "gpt-5.6-terra", "openai/gpt-5.6-terra", "openai:gpt-5.6-terra"]
+sources = ["overrides"]
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 98.328650
+b_raw = 98.345732
+r = 98.343124
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 98.346490
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 98.328650
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+BrowseComp = 96.008558
+SWEBenchPro = 98.350568
+SWEComposite = 98.350568
+TerminalBench21 = 98.328650
+TerminalBench21Composite = 98.328650
+Toolathlon = 85.682067
+
+[models.raw_metrics]
+BrowseComp = 87.500000
+SWEBenchPro = 63.400000
+TerminalBench21 = 87.400000
+Toolathlon = 53.100000
+
+[models.metric_evidence."BrowseComp"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, BrowseComp Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."SWEBenchPro"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro Terra; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."TerminalBench21"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."Toolathlon"]
+class = "direct"
+source = "overrides"
+citation = "OpenAI GPT-5.6 launch evaluations, Toolathlon Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.evidence.groups."BUILD"]
+direct = 0.237500
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.762500
+effective = 0.237500
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.100000
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.900000
+effective = 0.100000
+family_count = 1
+direct_families = ["terminal_bench"]
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.219944
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.780056
+effective = 0.219944
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.176087
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+reported = 0.000000
+synthesized = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.066038
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.933962
+effective = 0.066038
+family_count = 1
+direct_families = ["terminal_bench"]
+core_direct = 0.114754
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.123047
+reported = 0.000000
+synthesized = 0.000000
+missing = 0.876953
+effective = 0.123047
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.139130
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+groups_shrunk = ["BUILD", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 synthesis_dominant = false
 
 [[models]]

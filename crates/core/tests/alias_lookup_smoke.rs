@@ -1,6 +1,40 @@
 use ipbr_core::{alias::AliasIndex, required_aliases};
 
 #[test]
+fn lookup_gpt_56_family() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        ("gpt-5.6", Some("openai"), "openai/gpt-5.6-sol"),
+        (
+            "gpt-5.6-sol-xhigh (codex-harness)",
+            Some("openai"),
+            "openai/gpt-5.6-sol",
+        ),
+        (
+            "GPT-5.6 Terra (max)",
+            Some("openai"),
+            "openai/gpt-5.6-terra",
+        ),
+        (
+            "gpt-5-6-luna-non-reasoning",
+            Some("openai"),
+            "openai/gpt-5.6-luna",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn lookup_new_2026_05_07_models() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);

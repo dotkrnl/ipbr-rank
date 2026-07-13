@@ -187,6 +187,7 @@ enum ArcVariantPreference {
     Thinking,
     Low,
     High,
+    XHigh,
     Max,
     Other,
 }
@@ -202,8 +203,10 @@ impl ArcVariantPreference {
             Self::Default
         } else if contains("low") {
             Self::Low
-        } else if contains("max") || contains("xhigh") {
+        } else if contains("max") {
             Self::Max
+        } else if contains("xhigh") {
+            Self::XHigh
         } else if contains("high") {
             Self::High
         } else if contains("thinking") {
@@ -301,5 +304,25 @@ mod tests {
             row.model_name == "Claude Opus 4.8 (High)"
                 && row.fields.get("ARC_AGI_3").and_then(Value::as_f64) == Some(1.52)
         }));
+    }
+
+    #[test]
+    fn keeps_explicit_max_and_xhigh_as_distinct_effort_rows() {
+        let payload = json!({
+            "models": [
+                {"id": "max", "displayName": "claude-opus-4-8 (max)"},
+                {"id": "xhigh", "displayName": "claude-opus-4-8-xhigh"}
+            ],
+            "evaluations": [
+                {"modelId": "max", "datasetId": PRIMARY_DATASET, "score": 0.80},
+                {"modelId": "xhigh", "datasetId": PRIMARY_DATASET, "score": 0.90}
+            ]
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+
+        assert_eq!(rows.len(), 2);
+        assert!(rows.iter().any(|row| row.model_name.ends_with("(max)")));
+        assert!(rows.iter().any(|row| row.model_name.ends_with("-xhigh")));
     }
 }

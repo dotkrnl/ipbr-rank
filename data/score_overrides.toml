@@ -235,6 +235,24 @@ metric = "TerminalBench21"
 value = 80.4
 note = "Anthropic Claude Sonnet 5 System Card Section 8.3, Terminal-Bench 2.1 mean reward over 445 trials, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
+[[entries]]
+canonical_id = "openai/gpt-5.6-sol"
+metric = "TerminalBench21"
+value = 88.8
+note = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 single-model Sol (not the four-agent Ultra result; effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-terra"
+metric = "TerminalBench21"
+value = 87.4
+note = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-luna"
+metric = "TerminalBench21"
+value = 84.7
+note = "OpenAI GPT-5.6 launch evaluations, Terminal-Bench 2.1 Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
 # ---------------------------------------------------------------------
 # GDPval-AA (Artificial Analysis hosted variant of OpenAI's GDPval) —
 # Elo ratings from blind pairwise comparison on real-world knowledge-
@@ -512,6 +530,24 @@ canonical_id = "qwen/qwen3.7-plus"
 metric = "SWEBenchPro"
 value = 57.6
 note = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, SWE-Pro, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-sol"
+metric = "SWEBenchPro"
+value = 64.6
+note = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro single-model Sol; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-terra"
+metric = "SWEBenchPro"
+value = 63.4
+note = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro Terra; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-luna"
+metric = "SWEBenchPro"
+value = 62.7
+note = "OpenAI GPT-5.6 general-availability launch Coding table, SWE-Bench Pro Luna; effort, harness, and public/private split not separately specified, https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
 
 # ---------------------------------------------------------------------
 # SWE-Bench Multilingual — vendor-reported figures
@@ -948,6 +984,24 @@ metric = "Toolathlon"
 value = 54.3
 note = "Anthropic Claude Sonnet 5 System Card Section 8.11.5, Toolathlon Pass@1, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
+[[entries]]
+canonical_id = "openai/gpt-5.6-sol"
+metric = "Toolathlon"
+value = 58.0
+note = "OpenAI GPT-5.6 launch evaluations, Toolathlon single-model Sol (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-terra"
+metric = "Toolathlon"
+value = 53.1
+note = "OpenAI GPT-5.6 launch evaluations, Toolathlon Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-luna"
+metric = "Toolathlon"
+value = 53.4
+note = "OpenAI GPT-5.6 launch evaluations, Toolathlon Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
 # ---------------------------------------------------------------------
 # OSWorld-Verified — official release/model-card figures for computer use.
 # ---------------------------------------------------------------------
@@ -1093,6 +1147,24 @@ canonical_id = "z-ai/glm-4.7"
 metric = "BrowseComp"
 value = 52.0
 note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-sol"
+metric = "BrowseComp"
+value = 90.4
+note = "OpenAI GPT-5.6 launch evaluations, BrowseComp single-agent Sol (not Ultra; effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-terra"
+metric = "BrowseComp"
+value = 87.5
+note = "OpenAI GPT-5.6 launch evaluations, BrowseComp Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[[entries]]
+canonical_id = "openai/gpt-5.6-luna"
+metric = "BrowseComp"
+value = 83.3
+note = "OpenAI GPT-5.6 launch evaluations, BrowseComp Luna (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
 
 # ---------------------------------------------------------------------
 # HLE with tools — official release/model-card figures. Kept separate from

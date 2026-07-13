@@ -20,7 +20,7 @@ available for that canonical model. Reasoning effort is preferred in this
 order:
 
 ```text
-max/xhigh → high → thinking/adaptive → medium → default
+max → xhigh → high → thinking/adaptive → medium → default
 ```
 
 Low and non-reasoning variants are excluded unless an explicit effort-policy

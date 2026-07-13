@@ -105,7 +105,7 @@ reported in the output):
 ### Ranked entity
 
 Each canonical model has one record. For each metric, the scorer keeps the
-best eligible model-level observation, preferring max/xhigh, high,
+best eligible model-level observation, preferring max, then xhigh, high,
 thinking/adaptive, medium, then default effort. This is a capability envelope,
 not necessarily one runnable endpoint configuration.
 

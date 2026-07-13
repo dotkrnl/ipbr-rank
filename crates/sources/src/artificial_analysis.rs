@@ -386,6 +386,7 @@ enum AaVariantPreference {
     NonReasoning,
     Low,
     High,
+    XHigh,
     Max,
     Other,
 }
@@ -426,8 +427,10 @@ impl AaVariantPreference {
             Self::NonReasoning
         } else if contains("low") {
             Self::Low
-        } else if contains("max") || contains("xhigh") {
+        } else if contains("max") {
             Self::Max
+        } else if contains("xhigh") {
+            Self::XHigh
         } else if contains("high") {
             Self::High
         } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
@@ -690,5 +693,31 @@ mod tests {
                 .and_then(number_like),
             Some(34.6)
         );
+    }
+
+    #[test]
+    fn keeps_explicit_max_and_xhigh_as_distinct_effort_rows() {
+        let payload = json!({
+            "data": [
+                {
+                    "slug": "claude-opus-4-8-max",
+                    "name": "Claude Opus 4.8 (max)",
+                    "model_creator": {"slug": "anthropic"},
+                    "evaluations": {"intelligence_index": 40.0}
+                },
+                {
+                    "slug": "claude-opus-4-8-xhigh",
+                    "name": "Claude Opus 4.8 (xhigh)",
+                    "model_creator": {"slug": "anthropic"},
+                    "evaluations": {"intelligence_index": 50.0}
+                }
+            ]
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+
+        assert_eq!(rows.len(), 2);
+        assert!(rows.iter().any(|row| row.model_name.ends_with("-max")));
+        assert!(rows.iter().any(|row| row.model_name.ends_with("-xhigh")));
     }
 }

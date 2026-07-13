@@ -67,7 +67,7 @@ LongContextComposite = 0.05
 # Active composites and precedence fallbacks are defined below.
 [effort_policy]
 # Exceptions to the default scoring effort set
-# (default | medium | thinking | high | max/xhigh). These are retained for
+# (default | medium | thinking | high | xhigh | max). These are retained for
 # product-tier aliases and any future explicitly blocked variants.
 
 # Qwen "Max" is a product tier, not a reasoning-effort marker.
@@ -475,7 +475,7 @@ transform = "percentile"
 # contamination-resistant variant, added specifically to penalize
 # deceptive optimizations — rather than raw `score`. Filtered to the
 # `Opt@1` setting; among Opt@1 rows for the same model we keep the one
-# with the highest reasoning_effort (max/xhigh before high before default).
+# with the highest reasoning_effort (max before xhigh before high before default).
 [metrics.GSO]
 family = "gso"
 eligibility = "supplemental"

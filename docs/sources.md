@@ -8,7 +8,7 @@ regardless. The HTTP layer retries on `429`/`5xx` with exponential backoff
 fail the run.
 
 Ingestion produces one canonical record per model under the
-`best_available_max_effort` policy. Within a benchmark, max/xhigh, high,
+`best_available_max_effort` policy. Within a benchmark, max, then xhigh, high,
 thinking/adaptive, medium, then default observations are preferred. The
 winning metric keeps its source and evidence class; direct observations take
 precedence by provenance: a native public row replaces a duplicate manual

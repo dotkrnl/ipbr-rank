@@ -151,7 +151,7 @@ extract the specifically named payload rather than scraping unrelated script
 text. `eqbench.rs` is the reference implementation.
 
 Before returning rows, canonicalize aliases and keep one best model-level row.
-The project policy prefers max/xhigh, high, thinking/adaptive, medium, then
+The project policy prefers max, then xhigh, high, thinking/adaptive, medium, then
 default effort. If the source publishes agent/harness submissions rather than
 effort labels, document the best-row rule in `docs/sources.md`.
 

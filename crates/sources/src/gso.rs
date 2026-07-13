@@ -82,7 +82,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 
     // GSO publishes one row per (model, scaffold, setting, reasoning_effort).
     // We only consume Opt@1 rows; among multiple Opt@1 rows for the same model
-    // we prefer the highest reasoning_effort (max/xhigh before high before
+    // we prefer the highest reasoning_effort (max before xhigh before high before
     // medium/default) so GSO matches the global scoring variant policy.
     //
     // We use `score_hack_control` (the contamination-resistant variant) over

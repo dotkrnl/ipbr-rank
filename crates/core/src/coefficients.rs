@@ -329,7 +329,7 @@ impl Default for PenaltiesConfig {
 }
 
 /// Per-source/vendor/canonical effort carve-outs. The default scoring set
-/// is `default | medium | thinking | high | max/xhigh`; exceptions listed
+/// is `default | medium | thinking | high | xhigh | max`; exceptions listed
 /// here allow otherwise blocked variants to score when explicitly intended.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EffortPolicy {
