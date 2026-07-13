@@ -49,7 +49,7 @@ fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
             review: model.scores.r,
             class: rank_class(idx),
             label: Some(model.display_name.as_str()),
-            provisional: balanced_is_provisional(model),
+            provisional: ipbr_core::balanced_is_provisional(model),
         })
         .rev() // draw rank-3 first so rank-1 sits on top
         .collect();
@@ -194,10 +194,6 @@ fn role_is_provisional(model: &ipbr_core::ModelRecord, role: &str) -> bool {
         .roles
         .get(role)
         .is_some_and(|coverage| coverage.provisional)
-}
-
-fn balanced_is_provisional(model: &ipbr_core::ModelRecord) -> bool {
-    ipbr_core::balanced_is_provisional(model)
 }
 
 fn rank_class(rank: usize) -> &'static str {
@@ -404,7 +400,7 @@ fn render_row(
             review: s.r,
             class: "solo",
             label: Some(model.display_name.as_str()),
-            provisional: balanced_is_provisional(model),
+            provisional: ipbr_core::balanced_is_provisional(model),
         }],
         RadarVariant::Mini,
         radar_scales,
