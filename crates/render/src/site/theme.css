@@ -296,6 +296,12 @@ table.leaderboard td.model-name { font: inherit; }
 table.leaderboard td.num .cell-score { display: inline-block; }
 table.leaderboard td.num[data-tier="high"] .cell-score { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }
+/* Provisional role scores are greyed out regardless of tier: sparse direct
+   evidence should not read as a confident high score. */
+table.leaderboard td.num[data-status="provisional"] .cell-score {
+  color: var(--muted); font-weight: 400;
+}
+.provisional-score { color: var(--muted); }
 .provisional-score em { font-style: italic; }
 .status-marker {
   display: inline-block; margin-left: 2px; color: var(--muted); font-size: 0.75em;
