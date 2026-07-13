@@ -28,7 +28,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Apply evidence reliability</strong> — every actual same-model observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
 <li><strong>Separate capability from confidence</strong> — the point estimate averages available same-model evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
 <li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%.</li>
-<li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Direct retired evidence may support an established model's coverage history but never its current score. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</li>
+<li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Total-portfolio qualification still requires at least 35% direct core weight across three core families, so a favorable specialist subset cannot qualify by itself. Direct retired evidence may support an established model's coverage history but never its current score. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</li>
 </ol>
 
 <h2>What never affects rank</h2>

@@ -87,6 +87,14 @@ pub struct EvidenceConfig {
     pub provisional_breadth_min_direct: f64,
     #[serde(default = "default_provisional_breadth_min_families")]
     pub provisional_breadth_min_families: usize,
+    /// Minimum direct share among role-relevant core metrics required before
+    /// total-coverage Standard or Breadth qualification can apply.
+    #[serde(default = "default_representative_min_core_direct")]
+    pub representative_min_core_direct: f64,
+    /// Minimum number of directly covered core families required before
+    /// total-coverage Standard or Breadth qualification can apply.
+    #[serde(default = "default_representative_min_core_families")]
+    pub representative_min_core_families: usize,
     #[serde(default = "default_core_corroborated_min_direct")]
     pub core_corroborated_min_direct: f64,
     #[serde(default = "default_core_corroborated_min_families")]
@@ -159,6 +167,14 @@ fn default_provisional_breadth_min_families() -> usize {
     5
 }
 
+fn default_representative_min_core_direct() -> f64 {
+    0.35
+}
+
+fn default_representative_min_core_families() -> usize {
+    3
+}
+
 fn default_core_corroborated_min_direct() -> f64 {
     0.50
 }
@@ -205,6 +221,8 @@ impl Default for EvidenceConfig {
             provisional_min_families: default_provisional_min_families(),
             provisional_breadth_min_direct: default_provisional_breadth_min_direct(),
             provisional_breadth_min_families: default_provisional_breadth_min_families(),
+            representative_min_core_direct: default_representative_min_core_direct(),
+            representative_min_core_families: default_representative_min_core_families(),
             core_corroborated_min_direct: default_core_corroborated_min_direct(),
             core_corroborated_min_families: default_core_corroborated_min_families(),
             historical_min_current_direct: default_historical_min_current_direct(),
@@ -476,6 +494,8 @@ mod tests {
         assert_eq!(evidence.core_corroborated_min_families, 4);
         assert_eq!(evidence.provisional_breadth_min_direct, 0.35);
         assert_eq!(evidence.provisional_breadth_min_families, 5);
+        assert_eq!(evidence.representative_min_core_direct, 0.35);
+        assert_eq!(evidence.representative_min_core_families, 3);
     }
 
     #[test]

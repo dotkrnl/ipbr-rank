@@ -9527,9 +9527,9 @@ b_raw = 91.510695
 r = 88.293475
 i_status = "ranked"
 p_status = "ranked"
-b_status = "ranked"
-r_status = "ranked"
-balanced_status = "ranked"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
 
 [models.groups]
 BUILD = 91.215485
@@ -9935,8 +9935,8 @@ core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
 historical_family_count = 0
 historical_direct_families = []
-qualification_path = "breadth"
-provisional = false
+qualification_path = "unqualified"
+provisional = true
 
 [models.evidence.roles."I_raw"]
 direct = 0.634667
@@ -9983,8 +9983,8 @@ core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
 historical_family_count = 0
 historical_direct_families = []
-qualification_path = "breadth"
-provisional = false
+qualification_path = "unqualified"
+provisional = true
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "GDPvalAA2", "Tau3Banking"]

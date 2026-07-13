@@ -285,8 +285,9 @@ one eligibility class:
 
 The role is `ranked` when any of these auditable paths holds:
 
-- full-current compatibility path: at least 60% direct current weight across
-  three families, or at least 35% across five;
+- full-current path: at least 60% direct current weight across three families,
+  or at least 35% across five, plus a representative base of at least 35%
+  direct core weight across three core families;
 - core-current path: after renormalizing the role's core leaves, at least 60%
   direct core weight across three families, at least 50% across four, or at
   least 35% across five; or
@@ -299,6 +300,9 @@ direct, including a cited manual override from a vendor report or system card.
 Sibling fills and any future rank-derived estimates are non-direct and cannot
 qualify a role by themselves. Historical support must also be a same-model
 observation; its score is never blended into the capability point estimate.
+The representative-core floor prevents a model evaluated only on a favorable
+specialist subset from using those observations to fill the entire confidence
+claim; it does not change the model's numeric capability estimate.
 
 The v3 historical portfolio is deliberately restricted to stable retired
 metrics: AIME 2025 and MMLU-Pro for Idea; tau2, IFBench, and Terminal-Bench 2.0

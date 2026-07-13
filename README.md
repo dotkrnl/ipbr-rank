@@ -140,9 +140,11 @@ role proxies. Methodology v3 separates score contribution from ranking
 eligibility: broad core benchmarks establish current coverage, sparse
 supplemental benchmarks may improve the score without making their absence a
 penalty, and retired-but-valid direct observations may support the coverage
-history without entering the current score. The legacy full-portfolio gate is
-retained as a compatibility path. Balanced is ranked when at least three roles
-are ranked and the fourth has at least 20% current direct coverage.
+history without entering the current score. Total-portfolio qualification also
+requires a representative base of at least 35% direct core weight across three
+core families, so a favorable specialist subset cannot qualify by itself.
+Balanced is ranked when at least three roles are ranked and the fourth has at
+least 20% current direct coverage.
 
 Pricing, speed, latency, TTFT, and context-window values are diagnostics only.
 They have zero path to any role or Balanced capability rank.

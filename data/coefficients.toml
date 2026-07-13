@@ -300,6 +300,11 @@ provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
 provisional_breadth_min_families = 5
+# Total-coverage paths must also establish a representative core base. This
+# prevents a favorable collection of specialist/supplemental results from
+# qualifying an otherwise sparsely measured model.
+representative_min_core_direct = 0.35
+representative_min_core_families = 3
 # Four independent core families at 50% direct coverage are also sufficient.
 # This path is core-only so sparse supplemental evidence cannot qualify a new
 # model merely by accumulating narrow leaderboards.

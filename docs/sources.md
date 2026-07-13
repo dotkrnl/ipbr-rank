@@ -18,10 +18,13 @@ and cited manual observations count as direct coverage.
 Methodology v3 also separates score use from eligibility use. `core` metrics
 are broad enough to establish current ranking coverage. `supplemental` metrics
 still affect a role score when observed, but a missing row on their narrow
-leaderboards does not count against eligibility. `historical_support` metrics
-are retired from scoring and can only corroborate that an established model
-has direct role-relevant evidence. Operational and other diagnostic metrics
-affect neither scores nor eligibility.
+leaderboards does not count against eligibility. A total-portfolio
+qualification path still needs at least 35% direct core weight across three
+core families, so supplemental observations cannot form an unrepresentative
+qualifying subset. `historical_support` metrics are retired from scoring and
+can only corroborate that an established model has direct role-relevant
+evidence. Operational and other diagnostic metrics affect neither scores nor
+eligibility.
 
 ## openrouter
 

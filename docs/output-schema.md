@@ -113,7 +113,9 @@ Review proxy scores.
 Each status is `ranked` or `provisional`. Methodology v3 can qualify a role
 through the full current score path, a core-only current path that is not
 diluted by sparse specialist benchmarks, or a current-plus-historical breadth
-path. The numeric score remains available in every case.
+path. Full-current qualification also requires at least 35% direct core weight
+across three core families, preventing a favorable specialist subset from
+qualifying by itself. The numeric score remains available in every case.
 
 Balanced capability is not stored as a fifth score. Consumers can reproduce
 the presentation view with:
@@ -354,6 +356,8 @@ provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
 provisional_breadth_min_families = 5
+representative_min_core_direct = 0.35
+representative_min_core_families = 3
 core_corroborated_min_direct = 0.50
 core_corroborated_min_families = 4
 historical_min_current_direct = 0.25

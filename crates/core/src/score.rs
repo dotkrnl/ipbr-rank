@@ -434,12 +434,17 @@ fn role_qualification_path(
     coverage: &EvidenceCoverage,
     config: &EvidenceConfig,
 ) -> EligibilityQualificationPath {
-    if coverage.direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
+    let has_representative_core = coverage.core_direct + EPS
+        >= config.representative_min_core_direct.clamp(0.0, 1.0)
+        && coverage.core_family_count >= config.representative_min_core_families;
+    if has_representative_core
+        && coverage.direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
         && coverage.family_count >= config.provisional_min_families
     {
         return EligibilityQualificationPath::Standard;
     }
-    if coverage.direct + EPS >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
+    if has_representative_core
+        && coverage.direct + EPS >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
         && coverage.family_count >= config.provisional_breadth_min_families
     {
         return EligibilityQualificationPath::Breadth;
@@ -822,6 +827,8 @@ mod tests {
         let coverage = |direct, family_count| EvidenceCoverage {
             direct,
             family_count,
+            core_direct: config.representative_min_core_direct,
+            core_family_count: config.representative_min_core_families,
             ..Default::default()
         };
 
@@ -852,6 +859,45 @@ mod tests {
         assert_eq!(
             role_qualification_path(&corroborated, &config),
             EligibilityQualificationPath::CoreCorroborated
+        );
+
+        let core_breadth = EvidenceCoverage {
+            direct: 0.20,
+            family_count: 5,
+            core_direct: 0.35,
+            core_family_count: 5,
+            ..Default::default()
+        };
+        assert_eq!(
+            role_qualification_path(&core_breadth, &config),
+            EligibilityQualificationPath::CoreBreadth
+        );
+    }
+
+    #[test]
+    fn supplemental_favorable_subset_does_not_bypass_representative_core_gate() {
+        let config = EvidenceConfig::default();
+        let favorable_supplemental_subset = EvidenceCoverage {
+            direct: 0.64,
+            family_count: 5,
+            core_direct: 0.34,
+            core_family_count: 3,
+            ..Default::default()
+        };
+
+        assert_eq!(
+            role_qualification_path(&favorable_supplemental_subset, &config),
+            EligibilityQualificationPath::Unqualified
+        );
+
+        let too_few_core_families = EvidenceCoverage {
+            core_direct: 0.60,
+            core_family_count: 2,
+            ..favorable_supplemental_subset
+        };
+        assert_eq!(
+            role_qualification_path(&too_few_core_families, &config),
+            EligibilityQualificationPath::Unqualified
         );
     }
 
