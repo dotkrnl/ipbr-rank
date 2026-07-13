@@ -34,7 +34,7 @@ AAGeneralComposite = 0.35
 # supplemental planning input because knowing when to escalate is useful but
 # specialized. BFCL remains ingested as a diagnostic: its narrow, overlapping
 # cohort no longer affects the primary rank. Terminal-Bench 2.0 is superseded
-# by 2.1; the reported-only Toolathlon/OSWorld/HLETools/BrowseComp and
+# by 2.1; the manually curated Toolathlon/OSWorld/HLETools/BrowseComp and
 # construct-mismatched ARC paths likewise remain diagnostic.
 MCPAtlas = 0.30
 Tau3Banking = 0.20
@@ -277,18 +277,21 @@ PLAN = 0.35
 
 [aggregation]
 # Presentation-only threshold for the legacy `groups_shrunk` diagnostic.
-# Numeric v2 capability uses available same-model evidence; it never switches
+# Methodology-v3 capability uses available same-model evidence; it never switches
 # behavior at this threshold.
 trust_threshold = 0.75
 trust_transition_width = 0.10
 
 [evidence]
-# Ranking v2 separates score from evidence quality. Same-model cited reports
-# are discounted; sibling values are published only as provenance/sensitivity
-# and contribute exactly the neutral prior to the primary score. No single
-# correlated source/benchmark family may exceed 30% of role leaf weight.
+# Ranking v3 separates score from evidence quality. Every actual same-model
+# observation has full direct reliability, including cited manual overrides.
+# Sibling values are published only as provenance/sensitivity and contribute
+# exactly the neutral prior to the primary score. No single correlated
+# source/benchmark family may exceed 30% of role leaf weight.
 prior_score = 50.0
 direct_reliability = 1.0
+# Reserved for rehydrating older schema-2.1 snapshots. Fresh actual
+# observations, including manual overrides, use `direct_reliability`.
 reported_reliability = 0.60
 conservative_synthesis_reliability = 0.0
 same_series_synthesis_reliability = 0.0
@@ -316,8 +319,10 @@ max_family_weight = 0.30
 [normalization]
 # v2 freezes each ranked metric's raw-unit scale to the refreshed 2026-07-12
 # cohort. Anchors are the direct-evidence p5/p95 values where at least two
-# distinct direct observations existed; reported-only metrics use the same
-# quantiles over cited reports. Future cohorts do not move these anchors.
+# distinct same-model observations existed; manually curated observations were
+# included where native feeds had gaps. Future cohorts do not move these
+# anchors. The `reported_*` names below are retained as compatibility metadata
+# for the frozen v2 anchor derivation and older schema consumers.
 anchor_version = "2026-07-12.v2"
 snapshot_date = "2026-07-12"
 derivation = "direct_p05_p95_with_reported_only_fallback"
@@ -704,7 +709,7 @@ log_scale = false
 groups = ["PLAN", "BUILD"]
 transform = "percentile"
 
-# Kimi K2.7 Code launch-card auxiliary metrics. These are useful reported
+# Kimi K2.7 Code launch-card auxiliary metrics. These are useful vendor-published
 # measurements, but not yet part of role scoring: some are Moonshot-internal
 # harnesses and the public third-party boards are not yet ingested here.
 # `groups = []` keeps them descriptively available without changing weights.
@@ -1152,8 +1157,9 @@ groups = []
 transform = "percentile"
 
 # Toolathlon measures long-horizon tool-use across realistic applications.
-# Values currently come from official release/model-card tables, so they are
-# treated as override-reported rather than direct leaderboard measurements.
+# Values currently come from official release/model-card tables. They are
+# direct same-model observations with curated-override provenance rather than
+# native leaderboard provenance.
 [metrics.Toolathlon]
 family = "vendor_reported"
 anchor_low = 31.61

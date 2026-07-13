@@ -12,8 +12,9 @@ pub struct MissingInfo {
 /// Evidence coverage carried from leaf benchmark observations through
 /// composites, groups, and role scores. The four evidence-class shares are
 /// nominal path weights and sum to one (within floating-point tolerance).
-/// `effective` additionally discounts reported and synthesized observations
-/// by their configured reliability.
+/// `effective` applies the configured reliability to each class. Current
+/// same-model observations are direct at full reliability, synthesis is
+/// prior-only, and `reported` remains for older snapshot compatibility.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct EvidenceCoverage {
     #[serde(default)]

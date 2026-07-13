@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 const NON_SYNTHESIZED_METRICS: &[&str] = &[
     "AI_canary_health",
-    // Launch-card reported-only metrics are specific measured rows, not
+    // Launch-card metrics are specific same-model observations, not
     // sibling priors. Keep them from propagating through synthesis.
     "KimiCodeBenchV2",
     "ProgramBench",
