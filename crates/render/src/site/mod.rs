@@ -42,7 +42,7 @@ pub fn render_site(scoreboard: &Scoreboard, out: &Path) -> Result<(), RenderErro
     Ok(())
 }
 
-pub(crate) fn layout(title: &str, _scoreboard: &Scoreboard, body: &str) -> String {
+pub(crate) fn layout(title: &str, body: &str) -> String {
     format!(
         r#"<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>{critical_css}</style><link rel="stylesheet" href="{style_href}"><script defer src="assets/app.js"></script></head><body data-mode="raw"><div class="shell"><header><div class="brand"><a class="brand-link" href="index.html"><span class="prompt">$</span>ipbr</a><span class="brand-strap">Live LLM coding scoreboard.</span></div><nav><a href="about.html">about</a><a href="scoreboard.toml">api</a><a href="https://github.com/dotkrnl/ipbr-rank" rel="noopener noreferrer">github</a></nav></header><main>{body}</main></div></body></html>"#,
         title = html_escape(title),

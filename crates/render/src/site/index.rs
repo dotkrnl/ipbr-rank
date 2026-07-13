@@ -28,7 +28,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
     )
     .unwrap();
 
-    layout("ipbr · live llm coding scoreboard", scoreboard, &body)
+    layout("ipbr · live llm coding scoreboard", &body)
 }
 
 fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {

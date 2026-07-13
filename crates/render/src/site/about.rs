@@ -68,5 +68,5 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <p><a href="index.html">← back to scoreboard</a></p>
 </div>"#);
 
-    layout("ipbr · about", scoreboard, &body)
+    layout("ipbr · about", &body)
 }
