@@ -28,11 +28,6 @@ struct AggregateEvaluation {
     evidence: EvidenceCoverage,
 }
 
-pub fn compute_scores(records: &mut [ModelRecord]) {
-    let coef = Coefficients::load_embedded().expect("embedded coefficients are valid");
-    compute_scores_with(records, &coef);
-}
-
 pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     let aggregation = coef.aggregation.clone().unwrap_or_default();
     let evidence_cfg = coef.evidence.clone().unwrap_or_default();
