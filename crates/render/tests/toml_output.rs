@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use ipbr_core::{
-    Coefficients, ModelRecord, RawRow, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
+    Coefficients, ModelRecord, RawRow, SourceSummary, Vendor, compute_scores_with,
     ingest_rows_with_policy, required_aliases,
 };
 use ipbr_render::{
@@ -117,7 +117,7 @@ fn writes_valid_nested_scoreboard_toml() {
         .iter()
         .find(|model| model["canonical_id"].as_str() == Some("openai/gpt-5.5"))
         .unwrap();
-    assert_eq!(openai["thinking_effort"].as_str(), Some("high"));
+    assert_eq!(openai["thinking_effort"].as_str(), Some("best_available"));
     assert_eq!(
         openai["raw_metrics"]["TerminalBenchUncertainty"].as_float(),
         Some(1.25)
@@ -229,7 +229,6 @@ fn sample_scoreboard() -> Scoreboard {
         "GPT-5.5".to_string(),
         Vendor::Openai,
     );
-    model_b.thinking_effort = Some(ThinkingEffort::High);
     model_b.aliases.insert("gpt-5-5".to_string());
     model_b.aliases.insert("gpt-5.5".to_string());
     model_b.sources.insert("openrouter".to_string());

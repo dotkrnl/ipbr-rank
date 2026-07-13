@@ -611,7 +611,6 @@ struct ModelToml {
     canonical_id: String,
     display_name: String,
     vendor: String,
-    thinking_effort: String,
     aliases: Vec<String>,
     sources: Vec<String>,
     scores: ipbr_core::RoleScores,
@@ -678,15 +677,7 @@ impl ModelToml {
             other => ipbr_core::Vendor::Other(other.to_string()),
         };
 
-        let thinking_effort = match self.thinking_effort.as_str() {
-            "low" => Some(ipbr_core::ThinkingEffort::Low),
-            "medium" => Some(ipbr_core::ThinkingEffort::Medium),
-            "high" => Some(ipbr_core::ThinkingEffort::High),
-            _ => None,
-        };
-
         let mut record = ModelRecord::new(self.canonical_id, self.display_name, vendor);
-        record.thinking_effort = thinking_effort;
         record.aliases = self.aliases.into_iter().collect();
         record.sources = self.sources.into_iter().collect();
         record.scores = self.scores;

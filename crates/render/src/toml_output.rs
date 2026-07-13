@@ -88,9 +88,11 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
             "vendor = {}\n",
             toml_string(model.vendor.as_str())
         ));
+        // The ranked record is a best-available capability envelope, not one
+        // runnable effort; the field is always the same policy string.
         out.push_str(&format!(
             "thinking_effort = {}\n",
-            toml_string(serialize_thinking_effort(model.thinking_effort.as_ref()))
+            toml_string("best_available")
         ));
         out.push_str(&format!(
             "aliases = {}\n",
@@ -370,15 +372,6 @@ fn qualification_path(path: EligibilityQualificationPath) -> &'static str {
         EligibilityQualificationPath::CoreBreadth => "core_breadth",
         EligibilityQualificationPath::HistoricalBreadth => "historical_breadth",
         EligibilityQualificationPath::Unqualified => "unqualified",
-    }
-}
-
-fn serialize_thinking_effort(effort: Option<&ipbr_core::ThinkingEffort>) -> &'static str {
-    match effort {
-        Some(ipbr_core::ThinkingEffort::Low) => "low",
-        Some(ipbr_core::ThinkingEffort::Medium) => "medium",
-        Some(ipbr_core::ThinkingEffort::High) => "high",
-        None => "best_available",
     }
 }
 

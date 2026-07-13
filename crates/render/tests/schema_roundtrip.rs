@@ -4,9 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use ipbr_core::{
-    Coefficients, ModelRecord, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
-};
+use ipbr_core::{Coefficients, ModelRecord, SourceSummary, Vendor, compute_scores_with};
 use ipbr_render::{Scoreboard, toml_output::write_scoreboard};
 use serde::Deserialize;
 use tempfile::tempdir;
@@ -164,7 +162,6 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
         "GPT-5.5".to_string(),
         Vendor::Openai,
     );
-    openai.thinking_effort = Some(ThinkingEffort::Medium);
     openai.aliases.insert("gpt-5-5".to_string());
     openai.sources.insert("lmarena".to_string());
     openai.raw_metrics.insert("LMArenaText".to_string(), 1500.0);
@@ -281,5 +278,5 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
         .iter()
         .find(|model| model.canonical_id == "openai/gpt-5.5")
         .expect("OpenAI model present");
-    assert_eq!(openai.thinking_effort, "medium");
+    assert_eq!(openai.thinking_effort, "best_available");
 }

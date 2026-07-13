@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
-use ipbr_core::{Coefficients, ModelRecord, SourceSummary, ThinkingEffort, Vendor};
+use ipbr_core::{Coefficients, ModelRecord, SourceSummary, Vendor};
 use ipbr_render::{Scoreboard, site::render_site};
 use tempfile::tempdir;
 
@@ -138,7 +138,6 @@ fn sample_scoreboard() -> Scoreboard {
                 canonical_id: "anthropic/claude-opus-4.7",
                 display_name: "Claude Opus 4.7",
                 vendor: Vendor::Anthropic,
-                thinking_effort: None,
                 groups: &[
                     ("CRE", 81.25),
                     ("BUILD", 76.5),
@@ -152,7 +151,6 @@ fn sample_scoreboard() -> Scoreboard {
                 canonical_id: "openai/gpt-5.5+thinking-high",
                 display_name: "GPT-5.5 High",
                 vendor: Vendor::Openai,
-                thinking_effort: Some(ThinkingEffort::High),
                 groups: &[
                     ("CRE", 79.0),
                     ("BUILD", 88.25),
@@ -166,7 +164,6 @@ fn sample_scoreboard() -> Scoreboard {
                 canonical_id: "google/gemini-3.1-pro",
                 display_name: "Gemini 3.1 Pro",
                 vendor: Vendor::Google,
-                thinking_effort: None,
                 groups: &[
                     ("CRE", 85.0),
                     ("BUILD", 84.0),
@@ -193,7 +190,6 @@ struct ModelFixture<'a> {
     canonical_id: &'a str,
     display_name: &'a str,
     vendor: Vendor,
-    thinking_effort: Option<ThinkingEffort>,
     groups: &'a [(&'a str, f64)],
     metrics: &'a [(&'a str, f64)],
     sources: &'a [&'a str],
@@ -206,7 +202,6 @@ fn model(fixture: ModelFixture<'_>) -> ModelRecord {
         fixture.display_name.to_string(),
         fixture.vendor,
     );
-    record.thinking_effort = fixture.thinking_effort;
     record.groups = fixture
         .groups
         .iter()

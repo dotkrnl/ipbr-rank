@@ -20,7 +20,7 @@ pub use ingest::{
 };
 pub use model::{
     EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, GroupKey, MetricKey,
-    MissingInfo, ModelRecord, RawRow, RoleScores, SourceId, ThinkingEffort, Vendor,
+    MissingInfo, ModelRecord, RawRow, RoleScores, SourceId, Vendor,
 };
 pub use score::{
     balanced_is_provisional, balanced_is_provisional_with, compute_scores, compute_scores_with,

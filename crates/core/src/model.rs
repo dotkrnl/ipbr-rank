@@ -129,14 +129,6 @@ impl Vendor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum ThinkingEffort {
-    Low,
-    Medium,
-    High,
-}
-
 pub type SourceId = String;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -152,7 +144,6 @@ pub struct ModelRecord {
     pub canonical_id: String,
     pub display_name: String,
     pub vendor: Vendor,
-    pub thinking_effort: Option<ThinkingEffort>,
     pub aliases: BTreeSet<String>,
     pub sources: BTreeSet<SourceId>,
     pub raw_metrics: BTreeMap<MetricKey, f64>,
@@ -185,7 +176,6 @@ impl ModelRecord {
             canonical_id,
             display_name,
             vendor,
-            thinking_effort: None,
             aliases: BTreeSet::new(),
             sources: BTreeSet::new(),
             raw_metrics: BTreeMap::new(),
