@@ -277,13 +277,13 @@ PLAN = 0.35
 
 [aggregation]
 # Presentation-only threshold for the legacy `groups_shrunk` diagnostic.
-# Methodology-v3 capability uses available same-model evidence; it never switches
+# Methodology-v3 capability uses available same-product evidence; it never switches
 # behavior at this threshold.
 trust_threshold = 0.75
 trust_transition_width = 0.10
 
 [evidence]
-# Ranking v3 separates score from evidence quality. Every actual same-model
+# Ranking v3 separates score from evidence quality. Every actual same-product
 # observation has full direct reliability, including cited manual overrides.
 # Sibling values are published only as provenance/sensitivity and contribute
 # exactly the neutral prior to the primary score. No single correlated
@@ -324,7 +324,7 @@ max_family_weight = 0.30
 [normalization]
 # v2 freezes each ranked metric's raw-unit scale to the refreshed 2026-07-12
 # cohort. Anchors are the direct-evidence p5/p95 values where at least two
-# distinct same-model observations existed; manually curated observations were
+# distinct same-product observations existed; manually curated observations were
 # included where native feeds had gaps. Future cohorts do not move these
 # anchors. The `reported_*` names below are retained as compatibility metadata
 # for the frozen v2 anchor derivation and older schema consumers.
@@ -1097,8 +1097,9 @@ log_scale = false
 groups = []
 transform = "percentile"
 
-# Explicitly hybrid upstream observations remain visible without ever being
-# mistaken for pure Fable/model-only evidence.
+# Legacy schema keys retained so older snapshots with pre-routing-policy
+# fallback diagnostics remain readable. Fresh automatic-fallback observations
+# use the primary metric and carry a routing citation.
 [metrics.GDPvalAA2HybridFallback]
 family = "hybrid_fallback"
 higher_better = true
@@ -1163,7 +1164,7 @@ transform = "percentile"
 
 # Toolathlon measures long-horizon tool-use across realistic applications.
 # Values currently come from official release/model-card tables. They are
-# direct same-model observations with curated-override provenance rather than
+# direct same-product observations with curated-override provenance rather than
 # native leaderboard provenance.
 [metrics.Toolathlon]
 family = "vendor_reported"

@@ -13,7 +13,7 @@ pub struct MissingInfo {
 /// composites, groups, and role scores. The four evidence-class shares are
 /// nominal path weights and sum to one (within floating-point tolerance).
 /// `effective` applies the configured reliability to each class. Current
-/// same-model observations are direct at full reliability, synthesis is
+/// same-product observations are direct at full reliability, synthesis is
 /// prior-only, and `reported` remains for older snapshot compatibility.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct EvidenceCoverage {
@@ -203,7 +203,7 @@ pub struct ModelRecord {
     pub missing: MissingInfo,
     pub synthesized: BTreeMap<MetricKey, SynthesisProvenance>,
     /// Metrics whose winning observation came from the checked-in curated
-    /// override source. These are direct same-model observations, but the
+    /// override source. These are direct same-product observations, but the
     /// marker preserves lower precedence than a native public source and
     /// keeps their citations attached to the winning value.
     #[serde(default, alias = "override_reported")]
@@ -212,9 +212,9 @@ pub struct ModelRecord {
     /// precedence have been applied.
     #[serde(default)]
     pub metric_sources: BTreeMap<MetricKey, SourceId>,
-    /// Human-readable citations/notes emitted by the override source. Notes
-    /// are retained only while the corresponding override remains the
-    /// winning observation.
+    /// Human-readable citations/notes emitted by the winning observation.
+    /// The legacy field name is retained for snapshot compatibility; native
+    /// sources may also attach provenance such as automatic product routing.
     #[serde(default)]
     pub override_notes: BTreeMap<MetricKey, String>,
     #[serde(default)]

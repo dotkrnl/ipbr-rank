@@ -65,7 +65,7 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
     let leaders = render_leaders(scoreboard);
 
     format!(
-        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models</p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
+        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models · <span class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</span></p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
         generated_at = html_escape(&scoreboard.generated_at),
         sources = scoreboard.source_summary.len(),
         models = scoreboard.models.len(),
@@ -297,9 +297,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         html.push_str(&render_row(scoreboard, model));
     }
 
-    html.push_str(
-        r#"</tbody></table></div><p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met.</p></section>"#,
-    );
+    html.push_str(r#"</tbody></table></div></section>"#);
     html
 }
 
@@ -572,6 +570,8 @@ fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static st
             .unwrap_or("direct source");
         let detail = if model.curated_overrides.contains(metric) {
             "Curated direct observation; full citation is in scoreboard.toml".to_string()
+        } else if let Some(note) = model.override_notes.get(metric) {
+            format!("Direct observation from {source}: {note}")
         } else {
             format!("Direct observation from {source}")
         };
@@ -673,13 +673,13 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <p>Each model gets four capability proxies from public benchmarks. <strong>Idea</strong> includes EQ-Bench Creative Writing, preference, and novel-reasoning evidence. <strong>Plan</strong> measures structured reasoning, tool use, and multi-step execution. <strong>Build</strong> emphasizes software and terminal tasks. <strong>Review</strong> remains a proxy combining planning, building, search, and document evidence. Judgemark is diagnostic because judge discrimination is not code review, and no currently broad code-review benchmark is treated as direct evidence.</p>
 
 <h3>scoring</h3>
-<p>Ranked metrics use versioned fixed raw-score anchors and an asymptotic 0-100 logistic map. Every actual same-model observation counts fully, including cited vendor or system-card observations curated as overrides. Sibling fills are visible but prior-only, so donor values cannot move primary ranks. Correlated metrics are collapsed by benchmark family, and no family may carry more than 30% of a role.</p>
+<p>Ranked metrics use versioned fixed raw-score anchors and an asymptotic 0-100 logistic map. Every actual same-product observation counts fully, including vendor-automatic fallback with an explicit routing citation and cited vendor or system-card observations curated as overrides. Sibling fills are visible but prior-only, so donor values cannot move primary ranks. Correlated metrics are collapsed by benchmark family, and no family may carry more than 30% of a role.</p>
 
 <h3>missing data</h3>
-<p>Capability is estimated from available same-model evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Eligibility is separate: broad core benchmarks establish current coverage, narrow supplemental benchmarks affect scores without making every missing row a penalty, and total-portfolio qualification still needs at least 35% direct core weight across three core families. Direct retired evidence can corroborate coverage history without entering the current score. Estimates that meet none of these gates remain in the same rank order but are italicized, starred, and shown with dotted radar outlines as provisional. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</p>
+<p>Capability is estimated from available same-product evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Eligibility is separate: broad core benchmarks establish current coverage, narrow supplemental benchmarks affect scores without making every missing row a penalty, and total-portfolio qualification still needs at least 35% direct core weight across three core families. Direct retired evidence can corroborate coverage history without entering the current score. Estimates that meet none of these gates remain in the same rank order but are italicized, starred, and shown with dotted radar outlines as provisional. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</p>
 
 <h3>configuration and diagnostics</h3>
-<p>There is one record per model. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, Review, or balanced capability.</p>
+<p>There is one record per served product. Vendor-automatic fallback is included, while separately named multi-agent or premium endpoints remain distinct. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, Review, or balanced capability.</p>
 
 <p><a href="about.html">Full math, role definitions, and source list →</a></p>
 </div>

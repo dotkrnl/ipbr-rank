@@ -278,7 +278,7 @@ table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }
   vertical-align: top; text-transform: uppercase;
 }
 .provisional-note {
-  margin: 8px 0 0; color: var(--muted); font-size: 0.78rem; font-style: italic;
+  color: var(--muted); font-size: 0.78rem; font-style: italic;
 }
 .status-badge {
   display: inline-block; border: 1px solid var(--line); border-radius: 999px;

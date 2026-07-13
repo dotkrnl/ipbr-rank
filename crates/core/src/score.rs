@@ -399,7 +399,7 @@ fn compute_role_scores(
                 .as_ref()
                 .map(|signal| signal.value)
                 .unwrap_or(prior);
-            // Numeric capability is estimated from available same-model
+            // Numeric capability is estimated from available same-product
             // evidence, while coverage always retains the full nominal path,
             // including prior-only sibling fills and truly missing leaves.
             let mut coverage = aggregate_evidence(&family_evidence, &capped_weights);
@@ -1200,7 +1200,7 @@ mod tests {
         assert!(direct > 95.0, "direct={direct}");
         assert!(
             (curated - direct).abs() < 1e-9,
-            "curated same-model observations should use full direct reliability, got curated={curated}, direct={direct}"
+            "curated same-product observations should use full direct reliability, got curated={curated}, direct={direct}"
         );
     }
 
@@ -1358,7 +1358,7 @@ mod tests {
         );
 
         // Only one of the three SWE inputs is present. Capability remains the
-        // available same-model estimate; coverage carries the uncertainty.
+        // available same-product estimate; coverage carries the uncertainty.
         let mut records = vec![
             make_record("low/x", Vendor::Other("a".into()), &[("SWERebench", 0.0)]),
             make_record("hi/y", Vendor::Other("b".into()), &[("SWERebench", 100.0)]),

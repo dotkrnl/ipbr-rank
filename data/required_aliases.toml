@@ -9,8 +9,8 @@
 
 # GPT-5.6 family — released 2026-07-09. Sol is the flagship/API `gpt-5.6`
 # route, Terra the balanced tier, and Luna the fast/cost-efficient tier.
-# Keep Pro/ultra orchestration endpoints out of the model-only comparison;
-# max, then xhigh, are the strongest eligible single-model observations.
+# Keep Pro/Ultra orchestration endpoints out of the single-product comparison;
+# max, then xhigh, are the strongest eligible base-product observations.
 [models."openai/gpt-5.6-sol"]
 vendor = "openai"
 aliases = [

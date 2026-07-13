@@ -203,7 +203,7 @@ class = "direct"
 source = "eqbench_judgemark"
 ```
 
-Manually curated same-model observation:
+Manually curated same-product observation:
 
 ```toml
 [models.metric_evidence.GDPval]
@@ -222,12 +222,14 @@ donor = "openai/gpt-5.4"
 synthesis_category = "same_series_forward"
 ```
 
-Actual same-model observations use `direct`, whether their winning source is a
+Actual same-product observations use `direct`, whether their winning source is a
 native public feed or the cited manual `overrides` source. `synthesized` is
 used for sibling substitutions. The `reported` value and coverage field remain
 only for compatibility with older schema-2.1 snapshots; current output does
 not emit that evidence class. A vendor-published measurement is not classified
-as `reported` merely because it was curated manually. Valid synthesis
+as `reported` merely because it was curated manually. Vendor-automatic routing
+and fallback remain part of the same ranked product and retain a citation on
+the affected direct metrics. Valid synthesis
 categories are `conservative`, `same_series_forward`, and
 `stronger_successor`.
 
@@ -273,7 +275,7 @@ provisional = false
 
 The four nominal shares `direct + reported + synthesized + missing` sum to
 approximately 1. `reported` is retained only for compatibility; current actual
-same-model observations, including manual overrides, contribute to `direct`.
+same-product observations, including manual overrides, contribute to `direct`.
 `effective` is confidence-weighted coverage rather than another nominal class.
 `family_count` counts direct families only.
 
@@ -302,7 +304,7 @@ synthesis_dominant = false
 | Field | Meaning |
 |---|---|
 | `metrics` | Active scored leaf metrics with no raw observation. |
-| `groups_shrunk` | Compatibility name for groups with incomplete nominal coverage. Capability uses available same-model evidence; this field does not select a separate score formula. |
+| `groups_shrunk` | Compatibility name for groups with incomplete nominal coverage. Capability uses available same-product evidence; this field does not select a separate score formula. |
 | `synthesis_dominant` | True when any role's weighted synthesized share exceeds the configured per-model cap. |
 
 ## `missing.toml`

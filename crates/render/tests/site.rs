@@ -36,8 +36,9 @@ fn provisional_scores_are_italicized_starred_and_explained() {
         r#"<span class="cell-score provisional-score"><em>82.0</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span>"#
     ));
     assert!(index.contains(
-        r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met.</p>"#
+        r#"models · <span class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</span></p></div><div class="hero-body">"#
     ));
+    assert!(!index.contains(r#"</table></div><p class="provisional-note">"#));
     assert!(index.contains(r#"<span class="cell-score">81.0</span>"#));
     assert!(index.contains(r#"<td class="model-name">Claude Opus 4.7</td>"#));
     assert!(!index.contains(r#"<td class="model-name">Claude Opus 4.7 <span"#));
@@ -65,6 +66,29 @@ fn site_emits_pages_api_toml_and_assets() {
     assert!(!site_dir.join("sources.html").exists());
     assert!(!site_dir.join("model").exists());
     assert!(!site_dir.join("assets/sort.js").exists());
+}
+
+#[test]
+fn native_direct_provenance_note_is_visible_in_metric_tooltip() {
+    let mut scoreboard = sample_scoreboard();
+    let model = &mut scoreboard.models[0];
+    model.raw_metrics.insert("LMArenaText".into(), 1450.0);
+    model
+        .metric_sources
+        .insert("LMArenaText".into(), "artificial_analysis".into());
+    model.override_notes.insert(
+        "LMArenaText".into(),
+        "served product with automatic fallback".into(),
+    );
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+    let index = read(site_dir.join("index.html"));
+
+    assert!(index.contains(
+        "Direct observation from artificial_analysis: served product with automatic fallback"
+    ));
 }
 
 fn find_style_css(site_dir: &Path) -> PathBuf {

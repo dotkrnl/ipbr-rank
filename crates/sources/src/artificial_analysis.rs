@@ -15,6 +15,12 @@ const SOURCE_ID: &str = "artificial_analysis";
 const CACHE_KEY: &str = "artificial_analysis_llms";
 const URL: &str = "https://artificialanalysis.ai/api/v2/data/llms/models";
 
+pub(crate) fn automatic_fallback_note(label: &str) -> String {
+    format!(
+        "Routed-product observation: Artificial Analysis labels this configuration {label:?}; its vendor-automatic fallback is part of the served product."
+    )
+}
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct ArtificialAnalysisSource;
 
@@ -82,7 +88,7 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     // effort variants) and the alias matcher may collapse them into the same
     // canonical_id. Preserve one row per distinct effort here; the ingest
     // layer intentionally selects the strongest available effort
-    // (max → high → thinking → medium → default). This sort only
+    // (max → xhigh → high → thinking → medium → default). This sort only
     // keeps equal-effort duplicate ties deterministic.
     let mut sorted: Vec<&Value> = data.iter().collect();
     sorted.sort_by(|a, b| {
@@ -106,18 +112,13 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     let alias_index = AliasIndex::build(&alias_records);
     let mut best_by_model: BTreeMap<(String, AaVariantPreference), (f64, RawRow)> = BTreeMap::new();
     for item in sorted {
-        // The public Fable observation is explicitly labelled as using an
-        // Opus 4.8 fallback. That is valuable system evidence, but it is not a
-        // pure same-model observation. The primary product is intentionally a
-        // model-only ranking, so exclude hybrid/fallback rows from this source
-        // instead of silently attributing their scores to Fable.
-        if item
+        // Automatic fallback is part of the served product users invoke, so a
+        // disclosed fallback row is direct ranked-product evidence. Preserve
+        // that disclosure as an evidence note on every emitted observation.
+        let automatic_fallback = item
             .get("name")
             .and_then(Value::as_str)
-            .is_some_and(|name| name.to_ascii_lowercase().contains("fallback"))
-        {
-            continue;
-        }
+            .is_some_and(|name| name.to_ascii_lowercase().contains("fallback"));
         // AA's `id` is a UUID; use the human-readable `slug` (e.g.
         // "claude-opus-4-7") for alias matching, then fall back to `name`,
         // and finally the UUID `id` to keep parsing infallible.
@@ -341,6 +342,28 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         .filter(|value| *value > 0.0)
         {
             fields.insert("BlendedCost".to_string(), Value::from(blended));
+        }
+
+        if automatic_fallback {
+            let fallback_note = item
+                .get("name")
+                .and_then(Value::as_str)
+                .map(automatic_fallback_note)
+                .unwrap_or_else(|| automatic_fallback_note(model_name));
+            let observed_metrics: Vec<String> = fields
+                .iter()
+                .filter_map(|(key, value)| value.as_f64().map(|_| key.clone()))
+                .collect();
+            for metric in observed_metrics {
+                fields.insert(
+                    format!("{metric}__evidence_note"),
+                    Value::from(fallback_note.clone()),
+                );
+            }
+            fields.insert(
+                "UpstreamModelFallback".to_string(),
+                Value::from("Upstream label discloses automatic product fallback"),
+            );
         }
 
         let row = RawRow {
@@ -639,7 +662,7 @@ mod tests {
     }
 
     #[test]
-    fn excludes_explicit_fallback_hybrid_from_model_only_rows() {
+    fn retains_automatic_fallback_as_direct_product_evidence() {
         let payload = json!({
             "data": [
                 {
@@ -657,8 +680,29 @@ mod tests {
             ]
         });
         let rows = parse_rows(&payload).expect("payload should parse");
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].model_name, "gpt-5-5");
+        assert_eq!(rows.len(), 2);
+        let fable = rows
+            .iter()
+            .find(|row| row.model_name == "claude-fable-5")
+            .expect("Fable routed-product row should remain");
+        assert_eq!(
+            fable
+                .fields
+                .get("ArtificialAnalysisIntelligence")
+                .and_then(number_like),
+            Some(60.0)
+        );
+        assert_eq!(
+            fable
+                .fields
+                .get("ArtificialAnalysisIntelligence__evidence_note")
+                .and_then(Value::as_str),
+            Some(automatic_fallback_note(
+                "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)"
+            ))
+            .as_deref()
+        );
+        assert!(fable.fields.contains_key("UpstreamModelFallback"));
     }
 
     #[test]

@@ -11,7 +11,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 
 <h2>What this is</h2>
 <p>ipbr combines public benchmark observations into four 0-100 role proxies: Idea, Plan, Build, and Review. <strong>Balanced capability</strong> is the unweighted mean of those four scores; it is a summary view, not a fifth measured construct.</p>
-<p>Inputs, fixed normalization anchors, evidence classes, family caps, and weights are versioned in the repository. Native public observations take precedence over duplicate manually curated observations; both count as direct same-model evidence and take precedence over synthesized sibling fills. No score is manually reranked.</p>
+<p>Inputs, fixed normalization anchors, evidence classes, family caps, and weights are versioned in the repository. Native public observations take precedence over duplicate manually curated observations; both count as direct same-product evidence and take precedence over synthesized sibling fills. Vendor-automatic fallback is part of the served ranked product and retains explicit provenance; separately named multi-agent or premium endpoints remain distinct. No score is manually reranked.</p>
 
 <h2>The four roles</h2>
 <ul>
@@ -23,10 +23,10 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 
 <h2>How scores are built</h2>
 <ol>
-<li><strong>Select one model record</strong> — observations are combined under the canonical model. Where effort is published, best-available max/high effort is preferred; sources without effort metadata keep their reported configuration.</li>
+<li><strong>Select one product record</strong> — observations are combined under the canonical ranked product, including vendor-automatic routing. Where effort is published, best-available max/high effort is preferred; sources without effort metadata keep their reported configuration.</li>
 <li><strong>Normalize on fixed anchors</strong> — scored leaves use raw-unit p5/p95 anchors frozen from the 2026-07-12 refreshed cohort. Anchors map near 5 and 95 through an asymptotic logistic curve, so future model additions do not rescale earlier observations and extreme values do not hard-clip.</li>
-<li><strong>Apply evidence reliability</strong> — every actual same-model observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
-<li><strong>Separate capability from confidence</strong> — the point estimate averages available same-model evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
+<li><strong>Apply evidence reliability</strong> — every actual same-product observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
+<li><strong>Separate capability from confidence</strong> — the point estimate averages available same-product evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
 <li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%.</li>
 <li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Total-portfolio qualification still requires at least 35% direct core weight across three core families, so a favorable specialist subset cannot qualify by itself. Direct retired evidence may support an established model's coverage history but never its current score. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</li>
 </ol>
@@ -35,7 +35,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <p>Price, output throughput, time to first token, and advertised context window remain available as reference diagnostics. Their path weight into Idea, Plan, Build, Review, and balanced capability is exactly zero.</p>
 
 <h2>Configuration policy</h2>
-<p>The ranking intentionally compares models, not every effort or agent-harness permutation. A score can therefore combine the best available public observation from benchmarks that expose different configuration detail. The API labels this policy <code>best_available_max_effort</code>; it should not be read as a controlled same-harness experiment.</p>
+<p>The ranking intentionally compares served products, not every effort or agent-harness permutation. Automatic vendor routing is included; separately named multi-agent or premium endpoints remain distinct. A score can therefore combine the best available public observation from benchmarks that expose different configuration detail. The API labels this policy <code>best_available_max_effort</code>; it should not be read as a controlled same-harness experiment.</p>
 
 <h2>Sources</h2>
 <div class="doc-scroll"><table><thead><tr><th>source</th><th>status</th><th>rows</th><th>matched</th><th>unmatched</th></tr></thead><tbody>"#);
@@ -58,7 +58,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <h2>Glossary</h2>
 <ul>
 <li><strong>Direct coverage</strong> — the share of a role's nominal path supported by direct benchmark observations.</li>
-<li><strong>Confidence</strong> — direct same-model evidence coverage; sibling fills contribute no confidence.</li>
+<li><strong>Confidence</strong> — direct same-product evidence coverage; sibling fills contribute no confidence.</li>
 <li><strong>Provisional</strong> — a numeric role score that meets none of the full-current, core-current, or established-history evidence gates. It remains in the same rank order, italicized and starred, with a dotted radar outline.</li>
 <li><strong>Core / supplemental / historical support</strong> — eligibility classes for broad current evidence, narrow scored evidence, and unscored retired direct evidence respectively.</li>
 <li><strong>Composite</strong> — a weighted blend used to collapse overlapping components before role aggregation, such as the SWE, Sonar, or AA reasoning families.</li>

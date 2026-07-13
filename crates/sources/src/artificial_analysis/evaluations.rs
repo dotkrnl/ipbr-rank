@@ -339,9 +339,9 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
                     fields: BTreeMap::new(),
                     hybrid_fallback: is_hybrid_fallback_label(label),
                 });
-                merge_identity_label(row, label, config.datasets);
+                merge_identity_label(row, label);
 
-                let metric = metric_name(spec.metric, row.hybrid_fallback);
+                let metric = spec.metric.to_string();
                 row.fields.insert(metric.clone(), Value::from(mid));
                 if let Some(lower) = score.lower.and_then(|value| spec.transform.apply(value)) {
                     row.fields
@@ -389,10 +389,19 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
                     .insert("DetailsUrl".to_string(), Value::from(details_url));
             }
             if row.hybrid_fallback {
+                let fallback_note = super::automatic_fallback_note(&row.label);
                 row.fields.insert(
                     "UpstreamModelFallback".to_string(),
-                    Value::from("Upstream label discloses a fallback model"),
+                    Value::from("Upstream label discloses automatic product fallback"),
                 );
+                for spec in config.datasets {
+                    if row.fields.contains_key(spec.metric) {
+                        row.fields.insert(
+                            format!("{}__evidence_note", spec.metric),
+                            Value::from(fallback_note.clone()),
+                        );
+                    }
+                }
             }
             RawRow {
                 source_id: config.source_id.to_string(),
@@ -492,13 +501,13 @@ fn merge_rsc_rows(
             fields: BTreeMap::new(),
             hybrid_fallback: is_hybrid_fallback_label(label),
         });
-        merge_identity_label(row, label, config.datasets);
+        merge_identity_label(row, label);
         for (spec, mid, lower, upper) in observations {
             let Some(mid) = spec.rsc_transform.apply(mid) else {
                 continue;
             };
             useful_observations += 1;
-            let metric = metric_name(spec.metric, row.hybrid_fallback);
+            let metric = spec.metric.to_string();
             row.fields.insert(metric.clone(), Value::from(mid));
             if let Some(lower) = lower.and_then(|value| spec.rsc_transform.apply(value)) {
                 row.fields
@@ -651,31 +660,21 @@ fn number_like(value: &Value) -> Option<f64> {
     }
 }
 
-/// Upstream sometimes evaluates Fable with an explicit Opus fallback. Those
-/// observations are hybrid-system results, not direct Fable model evidence.
-/// Keep them under a distinct diagnostic metric so registering this source
-/// cannot silently admit them into a model-only primary coefficient.
+/// Upstream sometimes evaluates a served product with its automatic fallback.
+/// The fallback disclosure remains sticky and is attached to each primary
+/// observation as provenance because the routed endpoint is the ranked unit.
 pub fn is_hybrid_fallback_label(label: &str) -> bool {
     normalize_name(label).contains("fallback")
 }
 
-fn metric_name(metric: &str, hybrid_fallback: bool) -> String {
-    if hybrid_fallback {
-        format!("{metric}HybridFallback")
-    } else {
-        metric.to_string()
-    }
-}
-
 /// Fallback is sticky for a model identity. The page can abbreviate a label in
 /// one transport while spelling out the fallback disclosure in another; once
-/// either transport identifies the row as hybrid, no primary metric from that
-/// identity may survive.
-fn merge_identity_label(row: &mut PendingRow, label: &str, datasets: &[DatasetMetric]) {
+/// either transport identifies the row as routed, its provenance remains
+/// attached even when another transport abbreviates the label.
+fn merge_identity_label(row: &mut PendingRow, label: &str) {
     let incoming_hybrid = is_hybrid_fallback_label(label);
     if incoming_hybrid && !row.hybrid_fallback {
         row.hybrid_fallback = true;
-        rekey_primary_metrics_as_hybrid(&mut row.fields, datasets);
     }
 
     // Prefer a disclosed fallback label over an abbreviated one, then the more
@@ -685,21 +684,6 @@ fn merge_identity_label(row: &mut PendingRow, label: &str, datasets: &[DatasetMe
             && label.len() > row.label.len())
     {
         row.label = label.to_string();
-    }
-}
-
-fn rekey_primary_metrics_as_hybrid(
-    fields: &mut BTreeMap<String, Value>,
-    datasets: &[DatasetMetric],
-) {
-    for spec in datasets {
-        for suffix in ["", "CILow", "CIHigh"] {
-            let primary = format!("{}{suffix}", spec.metric);
-            let hybrid = format!("{}HybridFallback{suffix}", spec.metric);
-            if let Some(value) = fields.remove(&primary) {
-                fields.entry(hybrid).or_insert(value);
-            }
-        }
     }
 }
 
@@ -732,7 +716,7 @@ mod tests {
     }
 
     #[test]
-    fn parses_gdpval_interval_and_separates_fallback() {
+    fn parses_gdpval_interval_and_keeps_routed_product_primary() {
         let rows = parse_evaluation_rows(
             include_str!("../../../../data/fixtures/aa_gdpval_v2.html"),
             GDPVAL_CONFIG,
@@ -751,8 +735,19 @@ mod tests {
             .iter()
             .find(|row| row.model_name.contains("Fable"))
             .expect("Fable fallback row should remain visible");
-        assert!(!fable.fields.contains_key("GDPvalAA2"));
-        assert_eq!(numeric(fable, "GDPvalAA2HybridFallback"), Some(1759.6));
+        assert_eq!(numeric(fable, "GDPvalAA2"), Some(1759.6));
+        assert_eq!(numeric(fable, "GDPvalAA2CILow"), Some(1740.2));
+        assert_eq!(numeric(fable, "GDPvalAA2CIHigh"), Some(1779.0));
+        assert_eq!(
+            fable
+                .fields
+                .get("GDPvalAA2__evidence_note")
+                .and_then(Value::as_str),
+            Some(super::super::automatic_fallback_note(
+                "Claude Fable 5 (with fallback)"
+            ))
+            .as_deref()
+        );
         assert!(fable.fields.contains_key("UpstreamModelFallback"));
     }
 
@@ -790,11 +785,16 @@ mod tests {
             .iter()
             .find(|row| row.model_name.contains("Fable"))
             .expect("Fable row");
-        assert!(!fable.fields.contains_key("AAOmniscienceAccuracy"));
-        assert!(
+        assert_eq!(numeric(fable, "AAOmniscienceAccuracy"), Some(61.35));
+        assert_eq!(
             fable
                 .fields
-                .contains_key("AAOmniscienceAccuracyHybridFallback")
+                .get("AAOmniscienceAccuracy__evidence_note")
+                .and_then(Value::as_str),
+            Some(super::super::automatic_fallback_note(
+                "Claude Fable 5 (with fallback)"
+            ))
+            .as_deref()
         );
     }
 
@@ -855,12 +855,10 @@ mod tests {
         assert_eq!(rows.len(), 2);
         for row in &rows {
             assert!(row.model_name.contains("fallback"));
-            assert!(!row.fields.contains_key("GDPvalAA2"));
-            assert!(!row.fields.contains_key("GDPvalAA2CILow"));
-            assert!(!row.fields.contains_key("GDPvalAA2CIHigh"));
-            assert!(row.fields.contains_key("GDPvalAA2HybridFallback"));
-            assert!(row.fields.contains_key("GDPvalAA2HybridFallbackCILow"));
-            assert!(row.fields.contains_key("GDPvalAA2HybridFallbackCIHigh"));
+            assert!(row.fields.contains_key("GDPvalAA2"));
+            assert!(row.fields.contains_key("GDPvalAA2CILow"));
+            assert!(row.fields.contains_key("GDPvalAA2CIHigh"));
+            assert!(row.fields.contains_key("GDPvalAA2__evidence_note"));
             assert!(row.fields.contains_key("UpstreamModelFallback"));
         }
         let a = rows
@@ -871,8 +869,8 @@ mod tests {
             .iter()
             .find(|row| row.model_name.contains("Test B"))
             .expect("test B row");
-        assert_eq!(numeric(a, "GDPvalAA2HybridFallback"), Some(1200.0));
-        assert_eq!(numeric(b, "GDPvalAA2HybridFallback"), Some(1300.0));
+        assert_eq!(numeric(a, "GDPvalAA2"), Some(1200.0));
+        assert_eq!(numeric(b, "GDPvalAA2"), Some(1300.0));
     }
 
     #[test]

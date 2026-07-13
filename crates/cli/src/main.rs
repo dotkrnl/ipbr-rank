@@ -745,9 +745,11 @@ fn restore_metric_evidence(record: &mut ModelRecord, metric: String, evidence: M
         && matches!(evidence.class.as_str(), "direct" | "reported");
     if is_curated_override {
         record.curated_overrides.insert(metric.clone());
-        if let Some(citation) = evidence.citation {
-            record.override_notes.insert(metric.clone(), citation);
-        }
+    }
+    if matches!(evidence.class.as_str(), "direct" | "reported")
+        && let Some(citation) = evidence.citation
+    {
+        record.override_notes.insert(metric.clone(), citation);
     }
     if evidence.class == "synthesized"
         && let Some(donor) = evidence.donor
@@ -812,5 +814,29 @@ mod tests {
         assert!(!record.curated_overrides.contains("TerminalBench"));
         assert!(!record.override_notes.contains_key("TerminalBench"));
         assert!(record.synthesized.contains_key("TerminalBench"));
+    }
+
+    #[test]
+    fn scoreboard_rehydrate_preserves_native_direct_provenance_note() {
+        let mut record = ModelRecord::new(
+            "anthropic/claude-fable-5".into(),
+            "Claude Fable 5".into(),
+            ipbr_core::Vendor::Anthropic,
+        );
+        let evidence = MetricEvidenceToml {
+            class: "direct".to_string(),
+            source: Some("artificial_analysis".to_string()),
+            donor: None,
+            synthesis_category: None,
+            citation: Some("served product with automatic fallback".to_string()),
+        };
+
+        restore_metric_evidence(&mut record, "GPQA".into(), evidence);
+
+        assert!(!record.curated_overrides.contains("GPQA"));
+        assert_eq!(
+            record.override_notes.get("GPQA").map(String::as_str),
+            Some("served product with automatic fallback")
+        );
     }
 }

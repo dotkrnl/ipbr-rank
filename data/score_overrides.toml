@@ -1,4 +1,4 @@
-# Hand-curated actual same-model benchmark observations from vendor reports,
+# Hand-curated actual same-product benchmark observations from vendor reports,
 # system cards, launch announcements, benchmark operators, and other cited
 # sources. Used to fill gaps that native public feeds miss.
 #
@@ -7,8 +7,8 @@
 # `overrides` source. Values are normalized with the rest of the population
 # with direct reliability and count as direct coverage, including values
 # published by the model vendor. Native public sources retain precedence: if
-# one also supplies the same metric for the same model, its row wins without
-# changing the override's status as an actual observation.
+# one also supplies the same metric for the same product, its row wins without
+# changing the override's status as an actual product observation.
 #
 # IMPORTANT: every entry MUST cite its source in the `note` field. Numbers
 # without a citation rot quickly and become indistinguishable from typos.

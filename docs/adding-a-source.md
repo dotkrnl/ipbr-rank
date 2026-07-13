@@ -317,7 +317,7 @@ If your source contributes new metrics not in `data/coefficients.toml`:
 
 4. Confirm the new metric has an intentional score and eligibility path.
    Missing weight is tracked separately from capability, every actual
-   same-model observation counts as direct (including cited manual overrides),
+   same-product observation counts as direct (including cited manual overrides),
    and sibling fills are prior-only. A metric with no final role path is a
    diagnostic unless it is explicitly declared as coverage-only historical
    support. Run eligibility tests with at least one established model and one

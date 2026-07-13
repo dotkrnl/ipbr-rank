@@ -1,4 +1,4 @@
-//! Manual overrides source — cited, actual same-model metric values.
+//! Manual overrides source — cited, actual same-product metric values.
 //!
 //! Some metrics on some models are absent from public leaderboards (because
 //! the model launched after the leaderboard's last refresh, the vendor never
@@ -12,7 +12,7 @@
 //! Provenance is preserved: every override row carries `source_id =
 //! "overrides"`, so its origin is visible in the scoreboard's source summary
 //! and per-metric provenance trails. A native public row still takes
-//! precedence when it supplies the same model and metric.
+//! precedence when it supplies the same product and metric.
 //!
 //! Schema (`data/score_overrides.toml`):
 //!

@@ -12,7 +12,7 @@ Ingestion produces one canonical record per model under the
 thinking/adaptive, medium, then default observations are preferred. The
 winning metric keeps its source and evidence class; direct observations take
 precedence by provenance: a native public row replaces a duplicate manual
-same-model override, and either replaces sibling synthesis. Both native rows
+same-product override, and either replaces sibling synthesis. Both native rows
 and cited manual observations count as direct coverage.
 
 Methodology v3 also separates score use from eligibility use. `core` metrics
@@ -78,14 +78,15 @@ eligibility.
 - **Duplicate correction**: current AA general/scientific leaves feed `AAGeneralComposite` once. Aggregate Intelligence/Coding indices do not stack with their components.
 - **Multi-row dedup**: AA ships several rows per logical model. The parser preserves distinct effort rows and ingestion selects the strongest eligible effort; equal-effort duplicate rows keep the highest intelligence observation. Speed/TTFT sentinel zeros are skipped.
 - **Product tiers**: reasoning labels such as `xhigh` and `max` are eligible configurations of a canonical model. Separately named products such as `GPT-5.5 Pro` are not silently folded into the base `GPT-5.5` record; they require their own catalog entry before ranking.
-- **Model-only guard**: upstream rows whose labels explicitly disclose a fallback model are excluded from the pure model API source.
+- **Ranked-product routing**: vendor-automatic fallback is part of the served product and counts as direct evidence. The fallback disclosure is retained as the winning observation's citation; separately named multi-agent or premium endpoints remain distinct.
 - **Ranking use**: Output speed, TTFT, price, and blended cost are diagnostics only.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
 The five Artificial Analysis evaluation-page sources below parse official
 server-rendered model objects, need no secret, cache for 24 hours, and rename
-fallback-assisted observations to unranked `*HybridFallback` diagnostics.
+fallback-assisted observations to primary direct metrics with an explicit
+routing citation.
 
 ## aa_gdpval_v2
 
@@ -326,15 +327,15 @@ their correlated tracks do not stack as independent weights.
 
 - **Status**: Verified
 - **API**: None — reads `data/score_overrides.toml` (embedded into the binary at build time).
-- **Purpose**: Hand-curated same-model metric values pulled from vendor system cards, launch posts, benchmark operators, and other authoritative sources. Fills coverage gaps for models that native public feeds have not yet rated (typically newest frontier models — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0, Kimi K2.7 Code launch-card metrics).
+- **Purpose**: Hand-curated same-product metric values pulled from vendor system cards, launch posts, benchmark operators, and other authoritative sources. Fills coverage gaps for products that native public feeds have not yet rated (typically newest frontier releases — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0, Kimi K2.7 Code launch-card metrics).
 - **Discipline**: Every entry must cite its source in the `note` field. Schema 2.1 publishes the winning note as `citation` in the metric-evidence table.
-- **Precedence and reliability**: An override is an actual same-model observation and therefore has direct reliability and direct coverage, including when published by the model vendor. It beats synthesis but never replaces a duplicate native public row, independent of ingest order.
+- **Precedence and reliability**: An override is an actual same-product observation and therefore has direct reliability and direct coverage, including when published by the vendor. It beats synthesis but never replaces a duplicate native public row, independent of ingest order.
 
 ## Synthesis
 
 `data/synthesis_aliases.toml` is the authoritative list of sibling-substitution pairs and rationale. Pairs may apply across sources or be restricted to one narrow leaderboard.
 
-Synthesis is field-level and fill-only. A synthesized row carries the donor ID and category, but ingestion skips any metric for which the target already has an actual same-model observation, whether native or manually curated. Observation-specific metadata such as confidence intervals, standard errors, and evidence notes is never transferred.
+Synthesis is field-level and fill-only. A synthesized row carries the donor ID and category, but ingestion skips any metric for which the target already has an actual same-product observation, whether native or manually curated. Observation-specific metadata such as confidence intervals, standard errors, and evidence notes is never transferred.
 
 Evidence precedence is order-independent:
 
@@ -350,6 +351,6 @@ Synthesis categories control reliability, not a hidden claim that the value was 
 | `same_series_forward` | 0.00 (prior-only) |
 | `stronger_successor` | 0.00 (prior-only) |
 
-For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked. Historical support likewise requires an actual same-model observation; a manual override can establish it, while a sibling fill or future rank-derived estimate cannot.
+For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked. Historical support likewise requires an actual same-product observation; a manual override can establish it, while a sibling fill or future rank-derived estimate cannot.
 
 The configured per-source cap limits emitted synthetic rows. After scoring, `synthesis_dominant` is computed from weighted role paths and becomes true when any role's synthesized share exceeds the configured per-model cap. Schema 2.1 publishes each synthesized metric's source, donor, category, and evidence coverage.

@@ -79,7 +79,7 @@ reported in the output):
 - LM Arena — text, code, search, and document preference ratings
 - EQ-Bench Creative Writing v3 — direct creative-writing Elo
 - EQ-Bench Judgemark v4 — diagnostic judge-discrimination score with a published 95% confidence interval
-- Artificial Analysis model API — GPQA, HLE, SciCode, AA-LCR, current tau3-Banking, Terminal-Bench 2.1 fallback, and legacy/operational diagnostics. Explicit model+fallback rows are excluded from pure model evidence.
+- Artificial Analysis model API — GPQA, HLE, SciCode, AA-LCR, current tau3-Banking, Terminal-Bench 2.1 fallback, and legacy/operational diagnostics. Vendor-automatic fallback is part of the served ranked product and counts as direct evidence with explicit provenance.
 - Artificial Analysis evaluation pages — direct GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA observations
 - DeepSWE v1.1 — original long-horizon repository work under one fixed mini-swe-agent harness; supplemental Build evidence
 - Context Arena — eight-needle GDM-MRCRv2 AUC through 128k, combined with AA-LCR as one long-context signal
@@ -98,14 +98,14 @@ reported in the output):
 - MCP-Atlas (Scale) — supplemental Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - HiL-Bench (Scale) — human-in-the-loop escalation accuracy; a small Plan-only signal
 - ARC-AGI v2 — active novel pattern-induction benchmark; ARC-AGI-3 is ingested separately as a floor-compressed diagnostic
-- Manual overrides (`data/score_overrides.toml`) — cited, hand-curated same-model benchmark observations for gaps that native public feeds have not yet filled. Vendor and system-card observations count as direct coverage; a native public row still replaces a duplicate override. Historical GDPval overrides remain diagnostic now that GDPval-AA v2 has a native source.
+- Manual overrides (`data/score_overrides.toml`) — cited, hand-curated same-product benchmark observations for gaps that native public feeds have not yet filled. Vendor and system-card observations count as direct coverage; a native public row still replaces a duplicate override. Historical GDPval overrides remain diagnostic now that GDPval-AA v2 has a native source.
 
 ## Math Summary
 
 ### Ranked entity
 
-Each canonical model has one record. For each metric, the scorer keeps the
-best eligible model-level observation, preferring max, then xhigh, high,
+Each canonical ranked product has one record. For each metric, the scorer keeps
+the best eligible product-level observation, preferring max, then xhigh, high,
 thinking/adaptive, medium, then default effort. This is a capability envelope,
 not necessarily one runnable endpoint configuration.
 
@@ -118,10 +118,12 @@ cohort.
 
 Evidence is reliability-weighted toward the neutral prior of 50:
 
-- actual same-model observation, whether fetched or manually curated: **1.00**
+- actual same-product observation, whether fetched or manually curated: **1.00**
 - sibling synthesis (all categories): **0.00 / prior-only**
 
-Capability is averaged over available direct same-model observations; missing
+The ranked product includes vendor-automatic routing and fallback behavior;
+separately named multi-agent or premium endpoints remain distinct. Capability
+is averaged over available direct same-product observations; missing
 and sibling-only leaves do not depress the point estimate. Their nominal weight
 remains visible as confidence/coverage, and a fully unsupported role falls
 back to 50. Final role paths are flattened to unique leaves, and no source

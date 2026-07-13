@@ -47,7 +47,7 @@ setting.
    reliability.
 5. Build non-overlapping composites and diagnostic groups.
 6. Flatten each role to scored leaf metrics, cap correlated source families,
-   and estimate capability from available same-model evidence.
+   and estimate capability from available same-product evidence.
 7. Publish role scores together with provenance, evidence coverage, and
    ranked/provisional status.
 
@@ -56,12 +56,12 @@ setting.
 Evidence precedence is order-independent:
 
 ```text
-native public observation > manual same-model observation > sibling synthesis
+native public observation > manual same-product observation > sibling synthesis
 ```
 
 A native leaderboard observation always replaces a manual override for the
-same model and metric. This is a source-precedence rule, not an evidence-class
-difference: a cited override is still an actual same-model observation and
+same ranked product and metric. This is a source-precedence rule, not an evidence-class
+difference: a cited override is still an actual same-product observation and
 counts as direct coverage, including when the model vendor published it. An
 override replaces a synthesized fill. Synthesis is fill-only.
 
@@ -76,7 +76,7 @@ synthesized values retain the donor and synthesis category. See
 
 Every active scored leaf has `anchor_low` and `anchor_high` in the versioned
 coefficient set. Anchor set `2026-07-12.v2` freezes the direct-evidence p5/p95
-raw values from the refreshed 2026-07-12 snapshot. Manually curated same-model
+raw values from the refreshed 2026-07-12 snapshot. Manually curated same-product
 observations are direct evidence too. Adding or removing unrelated models from
 the current cohort therefore does not move another model's normalized score.
 
@@ -125,7 +125,7 @@ Default v3 reliabilities are:
 
 | Evidence class | Reliability |
 |---|---:|
-| Actual same-model observation, native or manually curated | 1.00 |
+| Actual same-product observation, native or manually curated | 1.00 |
 | Sibling synthesis, any category | 0.00 |
 
 Sibling fills remain published for provenance and sensitivity analysis, but
@@ -134,7 +134,7 @@ therefore cannot change a model's official point score.
 
 ### 5.1 Missing weight and confidence
 
-The capability point estimate is conditional on available direct same-model
+The capability point estimate is conditional on available direct same-product
 evidence. For observed weights `w_i`:
 
 ```text
@@ -217,8 +217,10 @@ Important v3 corrections:
 - DeepSWE v1.1 supplies direct long-horizon BUILD evidence under one fixed
   harness. Its weight replaces Terminal-Bench Hard and part of the correlated
   SWE composite rather than simply increasing the total SWE-family mass.
-- Explicit upstream model+fallback observations are published under
-  `*HybridFallback` diagnostic keys. They never count as pure model evidence.
+- Vendor-automatic fallback is part of the served ranked product. Upstream
+  fallback-labelled observations therefore use the primary metric keys, count
+  as direct evidence, and retain a routing citation. Separately named
+  multi-agent or premium endpoints remain distinct products.
 - BFCL, GSO, and Judgemark remain available as diagnostics but have no path to
   a role score. HiL-Bench contributes only a small Plan signal.
 - DeepSWE and SWE Atlas remain scored Build evidence, but are supplemental for
@@ -295,10 +297,10 @@ The role is `ranked` when any of these auditable paths holds:
   current families, direct historical support from at least two relevant
   families, and at least five current-plus-historical families in union.
 
-Otherwise it is `provisional`. Every actual same-model observation counts as
+Otherwise it is `provisional`. Every actual same-product observation counts as
 direct, including a cited manual override from a vendor report or system card.
 Sibling fills and any future rank-derived estimates are non-direct and cannot
-qualify a role by themselves. Historical support must also be a same-model
+qualify a role by themselves. Historical support must also be a same-product
 observation; its score is never blended into the capability point estimate.
 The representative-core floor prevents a model evaluated only on a favorable
 specialist subset from using those observations to fill the entire confidence
