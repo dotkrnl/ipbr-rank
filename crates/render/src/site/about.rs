@@ -25,8 +25,8 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <ol>
 <li><strong>Select one product record</strong> — observations are combined under the canonical ranked product, including vendor-automatic routing. Where effort is published, best-available max/high effort is preferred; sources without effort metadata keep their reported configuration.</li>
 <li><strong>Normalize on fixed anchors</strong> — scored leaves use raw-unit p5/p95 anchors frozen from the 2026-07-12 refreshed cohort. Anchors map near 5 and 95 through an asymptotic logistic curve, so future model additions do not rescale earlier observations and extreme values do not hard-clip.</li>
-<li><strong>Apply evidence reliability</strong> — every actual same-product observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
-<li><strong>Separate capability from confidence</strong> — the point estimate averages available same-product evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
+<li><strong>Apply evidence reliability</strong> — every actual same-product observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Every scored value is a direct same-product measurement.</li>
+<li><strong>Separate capability from confidence</strong> — the point estimate averages available same-product evidence. Missing leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
 <li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%.</li>
 <li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Total-portfolio qualification still requires at least 35% direct core weight across three core families, so a favorable specialist subset cannot qualify by itself. Direct retired evidence may support an established model's coverage history but never its current score. The radar outline renders as ranked once three roles are ranked and the fourth carries at least 20% current direct coverage.</li>
 </ol>
@@ -58,7 +58,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <h2>Glossary</h2>
 <ul>
 <li><strong>Direct coverage</strong> — the share of a role's nominal path supported by direct benchmark observations.</li>
-<li><strong>Confidence</strong> — direct same-product evidence coverage; sibling fills contribute no confidence.</li>
+<li><strong>Confidence</strong> — direct same-product evidence coverage; missing leaves contribute no confidence.</li>
 <li><strong>Provisional</strong> — a numeric role score that meets none of the full-current, core-current, or established-history evidence gates. It remains in the same rank order, italicized and starred, with a dotted radar outline.</li>
 <li><strong>Core / supplemental / historical support</strong> — eligibility classes for broad current evidence, narrow scored evidence, and unscored retired direct evidence respectively.</li>
 <li><strong>Composite</strong> — a weighted blend used to collapse overlapping components before role aggregation, such as the SWE, Sonar, or AA reasoning families.</li>

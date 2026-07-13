@@ -207,7 +207,6 @@ source = "eqbench_judgemark"
 
 [models.evidence.roles.R]
 direct = 0.70
-reported = 0.00
 missing = 0.30
 effective = 0.70
 family_count = 2

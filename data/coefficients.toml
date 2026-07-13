@@ -327,14 +327,12 @@ max_family_weight = 0.30
 # cohort. Anchors are the direct-evidence p5/p95 values where at least two
 # distinct same-product observations existed; manually curated observations were
 # included where native feeds had gaps. Future cohorts do not move these
-# anchors. The `reported_*` names below are retained as compatibility metadata
-# for the frozen v2 anchor derivation and older schema consumers.
+# anchors.
 anchor_version = "2026-07-12.v2"
 snapshot_date = "2026-07-12"
-derivation = "direct_p05_p95_with_reported_only_fallback"
+derivation = "direct_p05_p95"
 low_quantile = 0.05
 high_quantile = 0.95
-reported_fallback = true
 
 [metrics.LMArenaText]
 family = "lmarena"

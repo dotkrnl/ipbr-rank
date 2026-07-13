@@ -226,13 +226,10 @@ citation = "Artificial Analysis GDPval-AA leaderboard, accessed ..."
 
 Every scored observation is an actual same-product measurement and uses
 `direct`, whether its winning source is a native public feed or the cited
-manual `overrides` source. The `reported` value and coverage field remain only
-for compatibility with older schema-2.1 snapshots; current output does not emit
-that evidence class. A vendor-published measurement is not classified as
-`reported` merely because it was curated manually. Vendor-automatic routing and
-fallback remain part of the same ranked product and retain a citation on the
-affected direct metrics. Native sources may likewise retain the winning
-agent/harness label as a citation.
+manual `overrides` source. Vendor-automatic routing and fallback remain part of
+the same ranked product and retain a citation on the affected direct metrics.
+Native sources may likewise retain the winning agent/harness label as a
+citation.
 
 Winning-observation precedence is:
 
@@ -250,7 +247,6 @@ Every group and role has an evidence summary:
 ```toml
 [models.evidence.groups.BUILD]
 direct = 0.820000
-reported = 0.000000
 missing = 0.180000
 effective = 0.820000
 family_count = 5
@@ -258,7 +254,6 @@ direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
 
 [models.evidence.roles.B_raw]
 direct = 0.810000
-reported = 0.000000
 missing = 0.190000
 effective = 0.810000
 family_count = 5
@@ -272,9 +267,8 @@ qualification_path = "core_standard"
 provisional = false
 ```
 
-The nominal shares `direct + reported + missing` sum to approximately 1.
-`reported` is retained only for compatibility; current actual same-product
-observations, including manual overrides, contribute to `direct`.
+The nominal shares `direct + missing` sum to approximately 1. Every actual
+same-product observation, including manual overrides, contributes to `direct`.
 `effective` is confidence-weighted coverage rather than another nominal class.
 `family_count` counts direct families only.
 
@@ -329,10 +323,9 @@ fields include:
 [normalization]
 anchor_version = "2026-07-12.v2"
 snapshot_date = "2026-07-12"
-derivation = "direct_p05_p95_with_reported_only_fallback"
+derivation = "direct_p05_p95"
 low_quantile = 0.05
 high_quantile = 0.95
-reported_fallback = true
 
 [metrics.EQBenchCreativeWriting]
 family = "eqbench"
@@ -428,10 +421,11 @@ arrays are sorted and floats use fixed precision.
   path to role evidence.
 - Added `balanced_status`; Balanced now requires three ranked roles and 20%
   current direct evidence in the fourth instead of an all-four-role veto.
-- Retired sibling synthesis: removed the `synthesized` evidence class and
-  coverage share, the `donor`/`synthesis_category` metric-evidence keys, and
-  the `synthesis_dominant` missing-data flag. Every scored observation is now a
-  direct same-product measurement.
+- Retired sibling synthesis: removed the `synthesized` and `reported` evidence
+  classes and their coverage shares, the `donor`/`synthesis_category`
+  metric-evidence keys, and the `synthesis_dominant` missing-data flag. Every
+  scored observation is now a direct same-product measurement, so evidence
+  coverage carries only `direct` and `missing` shares.
 
 ### 2.0.0
 

@@ -9,16 +9,13 @@ pub struct MissingInfo {
 
 /// Evidence coverage carried from leaf benchmark observations through
 /// composites, groups, and role scores. The evidence-class shares are nominal
-/// path weights and sum to one (within floating-point tolerance). `effective`
-/// applies the configured reliability to each class. Current same-product
-/// observations are direct at full reliability; `reported` remains for older
-/// snapshot compatibility.
+/// path weights: `direct` and `missing` sum to one (within floating-point
+/// tolerance). `effective` applies the configured reliability to the direct
+/// share. Every scored observation is a direct same-product measurement.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct EvidenceCoverage {
     #[serde(default)]
     pub direct: f64,
-    #[serde(default)]
-    pub reported: f64,
     #[serde(default)]
     pub missing: f64,
     #[serde(default)]

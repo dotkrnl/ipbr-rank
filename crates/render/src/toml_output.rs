@@ -322,7 +322,6 @@ fn render_evidence_summary(out: &mut String, model: &ModelRecord) {
 
 fn render_coverage(out: &mut String, coverage: &EvidenceCoverage, include_status: bool) {
     out.push_str(&format!("direct = {}\n", format_float(coverage.direct)));
-    out.push_str(&format!("reported = {}\n", format_float(coverage.reported)));
     out.push_str(&format!("missing = {}\n", format_float(coverage.missing)));
     out.push_str(&format!(
         "effective = {}\n",

@@ -115,8 +115,6 @@ pub struct NormalizationConfig {
     pub derivation: String,
     pub low_quantile: f64,
     pub high_quantile: f64,
-    #[serde(default)]
-    pub reported_fallback: bool,
 }
 
 fn default_prior_score() -> f64 {

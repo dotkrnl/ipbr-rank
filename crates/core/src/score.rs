@@ -344,7 +344,7 @@ fn compute_role_scores(
                 .unwrap_or(prior);
             // Numeric capability is estimated from available same-product
             // evidence, while coverage always retains the full nominal path,
-            // including prior-only sibling fills and truly missing leaves.
+            // including truly missing leaves.
             let mut coverage = aggregate_evidence(&family_evidence, &capped_weights);
             let core = core_role_coverage(
                 coef,
@@ -550,7 +550,6 @@ fn aggregate_signals(
                 value_sum += weight * signal.value;
             }
             evidence.direct += weight * signal.evidence.direct;
-            evidence.reported += weight * signal.evidence.reported;
             evidence.missing += weight * signal.evidence.missing;
             evidence.effective += weight * signal.evidence.effective;
             evidence
@@ -565,7 +564,6 @@ fn aggregate_signals(
     }
 
     evidence.direct /= total;
-    evidence.reported /= total;
     evidence.missing /= total;
     evidence.effective /= total;
     evidence.family_count = evidence.direct_families.len();
@@ -594,7 +592,6 @@ fn aggregate_evidence(
         }
         if let Some(evidence) = evidence_by_key.get(key) {
             result.direct += weight * evidence.direct;
-            result.reported += weight * evidence.reported;
             result.missing += weight * evidence.missing;
             result.effective += weight * evidence.effective;
             result
@@ -605,7 +602,6 @@ fn aggregate_evidence(
         }
     }
     result.direct /= total;
-    result.reported /= total;
     result.missing /= total;
     result.effective /= total;
     result.family_count = result.direct_families.len();
@@ -1207,7 +1203,6 @@ mod tests {
 
         let evidence = &records[1].evidence.roles["B_raw"];
         assert!((evidence.direct - 1.0).abs() < 1e-9, "{evidence:?}");
-        assert!(evidence.reported.abs() < 1e-9, "{evidence:?}");
         assert!((evidence.effective - 1.0).abs() < 1e-9, "{evidence:?}");
         assert_eq!(
             evidence.direct_families,

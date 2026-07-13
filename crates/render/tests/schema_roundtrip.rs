@@ -81,7 +81,6 @@ struct EvidenceTables {
 #[serde(deny_unknown_fields)]
 struct Coverage {
     direct: f64,
-    reported: f64,
     missing: f64,
     effective: f64,
     family_count: usize,

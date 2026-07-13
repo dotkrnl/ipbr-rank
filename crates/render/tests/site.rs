@@ -504,7 +504,7 @@ fn scoring_panel_has_role_definitions_and_link() {
     }
     // Link to full methodology page
     assert!(index.contains("href=\"about.html\""));
-    assert!(index.contains("missing and sibling-only leaves reduce confidence"));
+    assert!(index.contains("missing leaves reduce confidence"));
     assert!(index.contains("never enter Idea, Plan, Build, or Review"));
     assert!(!index.contains("best-available/max-effort per model"));
     assert!(index.contains("best available max/high-effort"));

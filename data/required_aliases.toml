@@ -485,8 +485,7 @@ aliases = [
 ]
 
 # DeepSeek V4-Pro. Sibling flagship to V4-Flash (1.6T/49B-active MoE vs
-# Flash's 284B/13B-active), released 2026-04-24. V4-Pro borrows sparse
-# public-leaderboard rows from V4-Flash via sibling synthesis.
+# Flash's 284B/13B-active), released 2026-04-24.
 [models."deepseek/deepseek-v4-pro"]
 vendor = "deepseek"
 aliases = [
