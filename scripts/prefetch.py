@@ -5,8 +5,8 @@ to a cache directory in the exact layout expected by ipbr-rank's --offline
 mode. Used as a workaround when the Rust binary's outbound network is
 blocked but Python/curl work.
 
-Reads AA_API_KEY, OPENROUTER_API_KEY, HF_TOKEN from the environment
-(typically loaded from .env).
+Reads AA_API_KEY and HF_TOKEN, plus an optional OPENROUTER_API_KEY, from the
+environment (typically loaded from .env).
 """
 import json
 import os

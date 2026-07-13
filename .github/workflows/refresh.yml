@@ -101,7 +101,6 @@ jobs:
       - name: Run pipeline
         env:
           AA_API_KEY: ${{ secrets.AA_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: ./target/release/ipbr-rank --cache cache --out out all ${{ steps.prev-fetch.outputs.prev_arg }}
 

@@ -7,7 +7,7 @@
 //!
 //! The ranking compares models at their strongest published effort. We pick
 //! one complete configuration per canonical model here (max, then xhigh,
-//! high, thinking/adaptive, medium/default, low) instead of letting ingestion
+//! high, thinking/adaptive, medium, default, low) instead of letting ingestion
 //! choose every numeric field independently. That keeps the headline score,
 //! confidence interval, and configuration provenance attached to the same
 //! observation.
@@ -221,10 +221,11 @@ fn effort_priority(effort: &str) -> u8 {
         "xhigh" | "x high" => 1,
         "high" => 2,
         "adaptive" | "thinking" => 3,
-        "medium" | "default" | "" => 4,
-        "low" => 5,
-        "non reasoning" | "none" => 6,
-        _ => 7,
+        "medium" => 4,
+        "default" | "" => 5,
+        "low" => 6,
+        "non reasoning" | "none" => 7,
+        _ => 8,
     }
 }
 
@@ -260,6 +261,12 @@ fn copy_string(entry: &Value, source: &str, target: &str, fields: &mut BTreeMap<
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn medium_effort_precedes_default() {
+        assert!(effort_priority("medium") < effort_priority("default"));
+        assert!(effort_priority("default") < effort_priority("low"));
+    }
 
     fn fixture() -> Value {
         serde_json::from_str(include_str!("../../../data/fixtures/deep_swe_v1_1.json"))

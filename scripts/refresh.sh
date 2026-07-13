@@ -10,7 +10,7 @@
 #   scripts/refresh.sh --publish   # also deploy out/site to Cloudflare Pages
 #
 # Reads from .env:
-#   AA_API_KEY, OPENROUTER_API_KEY, HF_TOKEN — pipeline source credentials
+#   AA_API_KEY, HF_TOKEN                     — pipeline source credentials
 #   CLOUDFLARE_ACCOUNT_ID                    — required for --publish
 #   CLOUDFLARE_PAGES_PROJECT (optional, default "ipbr")
 #
@@ -40,7 +40,7 @@ if [[ -f .env ]]; then
   set +a
 fi
 
-for var in AA_API_KEY OPENROUTER_API_KEY HF_TOKEN; do
+for var in AA_API_KEY HF_TOKEN; do
   if [[ -z "${!var:-}" ]]; then
     echo "warning: $var is not set — sources that depend on it will degrade" >&2
   fi

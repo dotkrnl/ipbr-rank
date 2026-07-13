@@ -23,8 +23,10 @@ order:
 max → xhigh → high → thinking/adaptive → medium → default
 ```
 
-Low and non-reasoning variants are excluded unless an explicit effort-policy
-exception permits them. Sources that publish several agents or harnesses
+Low, explicit `minimal`, and non-reasoning variants are excluded unless an
+explicit effort-policy exception permits them. `instant` is not a global
+effort suffix: it remains part of product identity unless a source-audited
+endpoint uses it for a Low mode. Sources that publish several agents or harnesses
 likewise retain their best model-level row. The resulting record is therefore
 a best-available capability envelope, not necessarily one runnable
 configuration. Schema 2.0 makes this explicit with:
@@ -345,6 +347,9 @@ native raw fields:
 - `SWERebenchSEM`
 - `EQBenchJudgemarkCILow`
 - `EQBenchJudgemarkCIHigh`
+- `DeepSWECILow` and `DeepSWECIHigh`
+- `GDPvalAA2CILow` and `GDPvalAA2CIHigh`
+- `FactoryCodeReviewF1Stdev`
 
 These fields are observation-specific, unscored, and never transferred by
 sibling synthesis. They support auditing and future interval-aware ranking;

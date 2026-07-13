@@ -155,11 +155,13 @@ fn top10_axis_scales(scoreboard: &Scoreboard) -> RadarScales {
     }
 }
 
-const DISPLAY_TIE_EPSILON: f64 = 0.05;
-
 /// Dense ranks aligned with the one-decimal score display: values that round
 /// to the same displayed tenth share a rank, and the next distinct score gets
 /// the next integer (1, 1, 2 rather than 1, 2, 3).
+fn display_score_key(value: f64) -> String {
+    format!("{value:.1}")
+}
+
 fn dense_ranked_models(
     mut models: Vec<&ipbr_core::ModelRecord>,
     score: fn(&ipbr_core::ModelRecord) -> f64,
@@ -171,14 +173,15 @@ fn dense_ranked_models(
             .then_with(|| a.canonical_id.cmp(&b.canonical_id))
     });
     let mut dense_rank = 0;
-    let mut previous: Option<f64> = None;
+    let mut previous: Option<String> = None;
     models
         .into_iter()
         .map(|model| {
             let value = score(model);
-            if previous.is_none_or(|prior| (prior - value).abs() >= DISPLAY_TIE_EPSILON) {
+            let display_key = display_score_key(value);
+            if previous.as_ref() != Some(&display_key) {
                 dense_rank += 1;
-                previous = Some(value);
+                previous = Some(display_key);
             }
             (dense_rank, model)
         })
@@ -460,11 +463,12 @@ fn rank_for(
             .then_with(|| a.1.cmp(b.1))
     });
     let mut dense_rank = 0;
-    let mut previous: Option<f64> = None;
+    let mut previous: Option<String> = None;
     for (score, id) in &scored {
-        if previous.is_none_or(|prior| (prior - score).abs() >= DISPLAY_TIE_EPSILON) {
+        let display_key = display_score_key(*score);
+        if previous.as_ref() != Some(&display_key) {
             dense_rank += 1;
-            previous = Some(*score);
+            previous = Some(display_key);
         }
         if *id == canonical_id {
             return Some((dense_rank, scored.len()));
@@ -561,6 +565,7 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
             .map(|raw| format_raw_metric(*raw))
             .unwrap_or_else(|| "derived".to_string());
         let (evidence_class, evidence_title) = metric_evidence(model, key);
+        let evidence_title = sanitize_evidence_tooltip(&evidence_title);
         let use_class = if ranked_metrics.contains(key) {
             "rank input"
         } else {
@@ -604,6 +609,38 @@ fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static st
         return ("direct", detail);
     }
     ("derived", "Composite of normalized inputs".to_string())
+}
+
+/// Evidence notes retain full upstream URLs in `scoreboard.toml`, but the
+/// static HTML deliberately has no external-reference markers. Sanitize those
+/// marker strings in tooltip text while preserving surrounding provenance.
+fn sanitize_evidence_tooltip(input: &str) -> String {
+    let mut remaining = input;
+    let mut output = String::with_capacity(input.len());
+    loop {
+        let http = remaining.find("http://");
+        let https = remaining.find("https://");
+        let Some(start) = (match (http, https) {
+            (Some(a), Some(b)) => Some(a.min(b)),
+            (Some(a), None) | (None, Some(a)) => Some(a),
+            (None, None) => None,
+        }) else {
+            output.push_str(remaining);
+            break;
+        };
+
+        output.push_str(&remaining[..start]);
+        output.push_str("[upstream URL in scoreboard.toml]");
+        let url = &remaining[start..];
+        let end = url
+            .find(|c: char| c.is_whitespace() || matches!(c, ';' | ',' | ')' | ']'))
+            .unwrap_or(url.len());
+        remaining = &url[end..];
+    }
+    // `data:` is also rejected by the self-contained-site validator. It can
+    // occur innocently inside prose such as `metadata:` even when no data URI
+    // exists, so keep the wording while changing the delimiter.
+    output.replace("data:", "data —")
 }
 
 fn format_raw_metric(value: f64) -> String {
@@ -710,3 +747,28 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <p><a href="about.html">Full math, role definitions, and source list →</a></p>
 </div>
 </details>"##;
+
+#[cfg(test)]
+mod tests {
+    use super::{display_score_key, sanitize_evidence_tooltip};
+
+    #[test]
+    fn dense_tie_key_matches_the_rendered_tenth() {
+        assert_ne!(display_score_key(10.051), display_score_key(10.049));
+        assert_eq!(display_score_key(10.04), display_score_key(9.96));
+    }
+
+    #[test]
+    fn evidence_tooltips_redact_urls_but_keep_provenance() {
+        assert_eq!(
+            sanitize_evidence_tooltip(
+                "submission metadata: Model: https://huggingface.co/zai-org/GLM-4.6; Org: Z.ai"
+            ),
+            "submission metadata — Model: [upstream URL in scoreboard.toml]; Org: Z.ai"
+        );
+        assert_eq!(
+            sanitize_evidence_tooltip("source=http://example.test/model, agent=foo"),
+            "source=[upstream URL in scoreboard.toml], agent=foo"
+        );
+    }
+}

@@ -332,7 +332,6 @@ impl EffortPreference {
             "medium",
             "non reasoning",
             "minimal",
-            "instant",
             "low",
             "high",
             "thinking",
@@ -343,16 +342,20 @@ impl EffortPreference {
         ]
         .iter()
         .any(|phrase| contains(phrase));
+        let known_low_instant_endpoint = ["kimi k2.5 instant", "kimi k2 5 instant"]
+            .iter()
+            .any(|phrase| normalized.contains(phrase));
+        let has_effort_marker = has_effort_marker || known_low_instant_endpoint;
 
         if contains("default") || !has_effort_marker {
             Self::Default
         } else if contains("non reasoning") {
             Self::NonReasoning
-        } else if contains("minimal") || contains("instant") || contains("low") {
-            // `thinking-minimal` and same-product `-instant` endpoints are
-            // explicitly below the default reasoning tier. Keep them out of
-            // max-effort scoring even though their labels also contain a
-            // generic `thinking` marker (or no other effort marker at all).
+        } else if contains("minimal") || contains("low") || known_low_instant_endpoint {
+            // `thinking-minimal` and Kimi K2.5's audited `-instant` endpoint
+            // are explicitly below the default reasoning tier. `Instant` is
+            // otherwise identity-bearing (for example GPT-5.5 Instant), so
+            // do not interpret it as a global effort token.
             Self::Low
         } else if contains("max") {
             Self::Max
@@ -899,11 +902,20 @@ mod tests {
     }
 
     #[test]
-    fn effort_classifier_keeps_minimal_and_instant_out_of_max_effort_scoring() {
+    fn effort_classifier_keeps_audited_low_endpoints_out_of_max_effort_scoring() {
         for label in ["gemini-3-flash (thinking-minimal)", "kimi-k2.5-instant"] {
             let preference = EffortPreference::from_text(label);
             assert_eq!(preference, EffortPreference::Low, "label={label:?}");
             assert!(!preference.is_scoring_allowed(), "label={label:?}");
+        }
+    }
+
+    #[test]
+    fn instant_product_names_are_not_globally_treated_as_low_effort() {
+        for label in ["GPT-5.5 Instant (June 2026)", "Claude Instant"] {
+            let preference = EffortPreference::from_text(label);
+            assert_eq!(preference, EffortPreference::Default, "label={label:?}");
+            assert!(preference.is_scoring_allowed(), "label={label:?}");
         }
     }
 

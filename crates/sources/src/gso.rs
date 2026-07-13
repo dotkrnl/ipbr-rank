@@ -83,13 +83,13 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     // GSO publishes one row per (model, scaffold, setting, reasoning_effort).
     // We only consume Opt@1 rows; among multiple Opt@1 rows for the same model
     // we prefer the highest reasoning_effort (max before xhigh before high before
-    // medium/default) so GSO matches the global scoring variant policy.
+    // medium, then default) so GSO matches the global scoring variant policy.
     //
     // We use `score_hack_control` (the contamination-resistant variant) over
     // raw `score`: GSO added the hack-control column specifically to penalize
     // deceptive optimizations, mirroring the rationale that already drove our
     // SWEComposite to favor SWERebench/Pro over Verified.
-    let mut best: BTreeMap<String, (i64, f64)> = BTreeMap::new();
+    let mut best: BTreeMap<String, (i64, f64, String)> = BTreeMap::new();
     for entry in models {
         let setting = entry.get("setting").and_then(Value::as_str).unwrap_or("");
         if !setting.eq_ignore_ascii_case("Opt@1") {
@@ -115,17 +115,18 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         let priority = effort_priority(effort);
         let key = name.trim().to_string();
         match best.get(&key) {
-            Some(&(existing_priority, _)) if existing_priority <= priority => {}
+            Some((existing_priority, _, _)) if *existing_priority <= priority => {}
             _ => {
-                best.insert(key, (priority, score));
+                best.insert(key, (priority, score, effort.to_string()));
             }
         }
     }
 
     let mut rows = Vec::with_capacity(best.len());
-    for (name, (_priority, score)) in best {
+    for (name, (_priority, score, effort)) in best {
         let mut fields = BTreeMap::new();
         fields.insert("GSO".to_string(), Value::from(score));
+        fields.insert("GSOReasoningEffort".to_string(), Value::from(effort));
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name: name,
@@ -139,22 +140,51 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
 }
 
 /// Lower priority wins when picking between Opt@1 rows for the same model.
-/// Max/pro beats xhigh beats high beats medium/default.
+/// Max/pro beats xhigh beats high beats thinking/adaptive beats medium, then
+/// an unlabeled/default observation.
 fn effort_priority(effort: &str) -> i64 {
     match effort.to_ascii_lowercase().as_str() {
         "max" | "pro" => 0,
         "xhigh" | "x-high" => 1,
         "high" => 2,
         "adaptive" | "thinking" => 3,
-        "" | "?" | "default" | "medium" => 4,
-        "low" => 5,
-        _ => 6,
+        "medium" => 4,
+        "" | "?" | "default" => 5,
+        "low" => 6,
+        _ => 7,
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn medium_effort_precedes_default_and_is_retained() {
+        let payload = json!({
+            "models": [
+                {
+                    "name": "example-model",
+                    "setting": "Opt@1",
+                    "reasoning_effort": "default",
+                    "score_hack_control": 99.0
+                },
+                {
+                    "name": "example-model",
+                    "setting": "Opt@1",
+                    "reasoning_effort": "medium",
+                    "score_hack_control": 42.0
+                }
+            ]
+        });
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows[0].fields.get("GSO"), Some(&Value::from(42.0)));
+        assert_eq!(
+            rows[0].fields.get("GSOReasoningEffort"),
+            Some(&Value::from("medium"))
+        );
+    }
 
     #[test]
     fn parse_gso_fixture() {

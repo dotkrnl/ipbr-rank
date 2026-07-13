@@ -30,20 +30,22 @@ eligibility.
 
 - **Status**: Verified
 - **API**: OpenRouter `/api/v1/models` JSON endpoint
-- **Secret**: `OPENROUTER_API_KEY` (via `--openrouter-api-key-file` or environment variable)
+- **Secret**: None; the public model endpoint is fetched without authentication.
 - **Cache TTL**: 24 h
 - **Metrics emitted**: pricing, provider routing, advertised context, and supported-parameter fields.
 - **Ranking use**: Diagnostic only. Pricing and context metadata have zero path to a methodology-v3 capability rank.
+- **Identity guard**: a same-provider `canonical_slug` is preferred over a rolling public ID. Explicit model-generation conflicts are kept unmatched, so a V3 slug cannot be folded into DeepSeek V4 Flash; separately named Multi-Agent products likewise remain distinct.
 - **Fixture**: `data/fixtures/openrouter_models.json`
 
 ## lmarena
 
 - **Status**: Verified
-- **API**: LMArena leaderboard via HuggingFace datasets-server `/rows` (paginated, configs `text`, `webdev`, `search`, `document`)
+- **API**: LMArena via HuggingFace datasets-server `/rows` (paginated configs `text`, `webdev`, `search`, `document`), supplemented by the live text and code leaderboard pages.
 - **Secret**: None required; if `HF_TOKEN` is set, the fetcher sends it as a HuggingFace bearer token to reduce datasets-server 429s.
 - **Cache TTL**: 24 h
 - **Metrics emitted**: `LMArenaText`, `CopilotArenaOrLMArenaCode`, `LMArenaSearch`, and `LMArenaDocument`. Search and document stay separate because their raw Elo scales are not comparable; `LM_ARENA_REVIEW_PROXY` combines them after normalization. Text Elo is not copied into a fake creativity field.
 - **429 handling**: The HuggingFace datasets-server rate-limits aggressively on deep pagination. The fetcher sleeps 5 s between successful pages, writes `lmarena_overall.partial.json` after every page, resumes from that partial file on the next run, and only promotes a complete payload to `lmarena_overall.json`. If a stale full cache exists and live refresh still fails, scoring falls back to the stale full cache.
+- **Identity and precedence**: deduplication uses normalized canonical identity plus effort tier, including case-insensitive vendor hints. Per field, a current live-page observation outranks a lagging dataset observation while default, thinking, and low-effort variants remain separate for the global effort policy.
 - **Fixture**: `data/fixtures/lmarena_overall.json`
 
 ## eqbench_creative_writing
@@ -86,7 +88,9 @@ eligibility.
 The five Artificial Analysis evaluation-page sources below parse official
 server-rendered model objects, need no secret, cache for 24 hours, and rename
 fallback-assisted observations to primary direct metrics with an explicit
-routing citation.
+routing citation. Their stable `/models/...` details slug defines identity;
+the newest explicit label revision and release date win atomically, and the
+upstream display label is retained as provenance.
 
 ## aa_gdpval_v2
 
@@ -137,6 +141,7 @@ routing citation.
 - **Cache TTL**: 24 h
 - **Metrics**: `ContextArenaMRCR128k` (active inside `LongContextComposite`) and diagnostic `ContextArenaMRCR1M`.
 - **Configuration**: one strongest published reasoning mode per model; AUC@128k is used for broad comparability rather than rewarding only models that expose a 1M window.
+- **Fixture**: `data/fixtures/context_arena.json`
 
 ## agc_bench
 
@@ -146,6 +151,7 @@ routing citation.
 - **Cache TTL**: 7 d
 - **Metric**: `AGCBench` mean calibrated creativity z-score.
 - **Ranking use**: Diagnostic while the newly released meta-benchmark and current-model coverage mature.
+- **Fixture**: `data/fixtures/agc_bench.csv`
 
 ## factory_code_review
 
@@ -155,6 +161,7 @@ routing citation.
 - **Cache TTL**: 7 d
 - **Metrics**: F1, precision, recall, and F1 standard deviation over 50 real PRs with human-curated bugs and repeated runs.
 - **Ranking use**: Diagnostic until broader current max-effort coverage is available. Cost fields are intentionally not ingested.
+- **Fixture**: `data/fixtures/factory_code_review.html`
 
 ## Removed sources
 
@@ -279,7 +286,7 @@ their correlated tracks do not stack as independent weights.
 - **Cache TTL**: 7 d
 - **Metric**: `MCPAtlas` — pass rate over 1,000 tasks across 36 real Model Context Protocol servers / 220 tools. Each task asks the agent to identify the right servers, sequence 3-6 tool calls across multiple servers, and produce a correct end-state. Closest public proxy for "real Claude Code / Codex tool-use loops" we can ingest. Feeds both `PLAN` (multi-step tool sequencing) and `BUILD` (real coding agents *are* tool-orchestration loops).
 - **Ranking use**: Supplemental current evidence. It affects Plan and Build scores when present without burdening eligibility when absent.
-- **Coverage**: 19 models, all 14 flagships matched directly (opus-4.7 max=79.1%, gemini-3.1-pro=78.2%, glm-5.1=75.6%, gpt-5.4=70.6%, …, haiku-4.5=40.2%).
+- **Fixture coverage**: 23 parsed rows, of which 21 match the current catalog. Live coverage is snapshot-dependent.
 - **Fragility note**: Same as `swebench_pro` — RSC field names.
 - **Fixture**: `data/fixtures/mcp_atlas.html`
 
@@ -321,7 +328,7 @@ their correlated tracks do not stack as independent weights.
 - **Secret**: None
 - **Cache TTL**: 7 d
 - **Metrics**: Diagnostic-only `SonarFunctionalSkill` (pass rate, higher better), `SonarIssueDensity` (issues per kLOC, lower better), `SonarBugDensity`, and `SonarVulnerabilityDensity`. `SonarComposite` combines functional skill and total issue density for inspection; it has no rank path while the published cohort mixes explicit effort levels. Bug and vulnerability density remain descriptive because they are nested within total issue density. A legitimate issue density of zero is retained.
-- **Coverage**: 70 Java rows in the 2026-05-21 live payload, including Opus 4.5/4.6/4.7 Thinking/High variants, GPT-5.2/5.3-Codex/5.4/5.5 variants, Gemini 3 Pro/Flash/3.1 Pro, GLM-5, Kimi K2.5, and MiniMax M2.5/M2.7.
+- **Fixture coverage**: 65 parsed Java rows, of which 24 match the current catalog. Live coverage is snapshot-dependent.
 - **Fixture**: `data/fixtures/sonar.json`
 
 ## overrides

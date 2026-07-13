@@ -22,13 +22,13 @@ scripts/refresh.sh --only artificial_analysis,lmarena
 scripts/refresh.sh --publish       # also deploy out/site to Cloudflare Pages
 ```
 
-`.env` is sourced for credentials:
+`.env` is sourced for credentials. OpenRouter's public model endpoint does not
+require a key:
 
-| variable | needed for |
+| variable | purpose |
 |---|---|
 | `AA_API_KEY` | Artificial Analysis fetcher |
-| `OPENROUTER_API_KEY` | OpenRouter pricing/context |
-| `HF_TOKEN` | LMArena via HuggingFace |
+| `HF_TOKEN` | optional HuggingFace bearer token that reduces LMArena rate limits |
 | `CLOUDFLARE_ACCOUNT_ID` | only required for `--publish` |
 | `CLOUDFLARE_PAGES_PROJECT` | optional, default `ipbr` |
 
@@ -41,8 +41,9 @@ cargo build --release -p ipbr-rank-cli
 
 ## Deployment
 
-The rendered site lives at `out/site/` and is fully static (no external
-network deps; the validator rejects `http://`, `https://`, and `data:` URLs).
+The rendered site lives at `out/site/` and is fully static, with no runtime
+network dependencies. The validator rejects external resource URLs and `data:`
+URLs; the explicit GitHub navigation link is allowlisted.
 
 `scripts/refresh.sh --publish` deploys it to Cloudflare Pages via wrangler:
 
@@ -266,9 +267,10 @@ cache regardless of mtime.
 | source | TTL | rationale |
 |---|---|---|
 | artificial_analysis | 10m | high-churn live model/perf payload |
-| openrouter, lmarena, eqbench_creative_writing, eqbench_judgemark | 24h | daily refresh |
+| openrouter, lmarena, EQ-Bench, AA evaluation pages, context_arena, deep_swe_v1_1 | 24h | daily refresh |
 | livecodebench, gso | 2d | weekly-ish leaderboard refreshes |
-| swebench, swebench_pro, swerebench, terminal_bench, mcp_atlas, arc_agi, sonar | 7d | infrequent updates |
+| all other network sources | 7d | infrequent updates |
+| overrides | n/a | embedded local data; no fetch cache |
 
 To force a refresh of one source, delete its cache file (or `touch -t` it to
 the past) and rerun.
@@ -281,12 +283,15 @@ aggressively while paginating LMArena, so set `HF_TOKEN` when available.
 ### Offline Mode (for CI/tests)
 
 ```bash
-# Deterministic golden test against fixtures
+# Deterministic fixture render
 ipbr-rank all \
   --offline \
   --cache data/fixtures \
-  --out tests/golden/out \
+  --out /tmp/ipbr-fixture-out \
   --now 2026-01-01T00:00:00Z
+
+# Compare the same fixture pipeline with the tracked golden
+cargo test -p ipbr-rank-cli --test golden
 ```
 
 ## Overriding Coefficients
@@ -347,11 +352,12 @@ pre-commit run --all-files  # one-shot full sweep
 # All unit + contract + golden tests
 cargo test --workspace
 
-# Live smoke (best-effort, network-dependent)
-cargo test --workspace --features live
+# Live source verification (best-effort, network-dependent)
+cargo run -p ipbr-rank-cli -- --cache /tmp/ipbr-live-cache verify-sources
 
-# Update golden files (review diff before committing)
-UPDATE_GOLDEN=1 cargo test
+# Update the deterministic scoreboard golden, then verify it through the CLI
+UPDATE_GOLDEN=1 cargo test -p ipbr-rank-render --test toml_output golden_scoreboard_matches_fixture_pipeline
+cargo test -p ipbr-rank-cli --test golden
 ```
 
 ## License

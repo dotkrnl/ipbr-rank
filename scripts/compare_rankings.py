@@ -16,9 +16,10 @@ ROLES = (
     ("r", "Review proxy"),
 )
 
-# Match the site's one-decimal display: values within half a displayed point
-# share a dense rank (1, 1, 2 rather than 1, 2, 3).
-DISPLAY_TIE_EPSILON = 0.05
+
+def display_score_key(value: float) -> str:
+    """Use the same one-decimal key shown on the leaderboard."""
+    return format(value, ".1f")
 
 
 def load(path: pathlib.Path) -> dict:
@@ -53,13 +54,14 @@ def dense_ranks(models: list[dict], role: str) -> tuple[dict[str, int], dict[str
     scores = {model["canonical_id"]: score(model, role) for model in models}
     ordered = sorted(models, key=lambda model: (-score(model, role), model["canonical_id"]))
     ranks: dict[str, int] = {}
-    previous: float | None = None
+    previous: str | None = None
     rank = 0
     for model in ordered:
         value = score(model, role)
-        if previous is None or abs(value - previous) >= DISPLAY_TIE_EPSILON:
+        display_key = display_score_key(value)
+        if previous != display_key:
             rank += 1
-            previous = value
+            previous = display_key
         canonical_id = model["canonical_id"]
         ranks[canonical_id] = rank
     return ranks, scores

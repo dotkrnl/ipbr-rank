@@ -65,9 +65,9 @@ n_rows_matched = 18
 n_rows_unmatched = 15
 ```
 
-`status` is normally `verified`; it can be `skipped` when a required secret is
-unavailable. Row counts distinguish parsed upstream coverage from canonical
-model matches.
+`status` is `verified` or `experimental` according to the registered parser; it
+can be `skipped` when a required secret is unavailable. Row counts distinguish
+parsed upstream coverage from canonical model matches.
 
 ### Model records
 
@@ -189,6 +189,9 @@ Currently preserved auxiliary keys include:
 - `SWERebenchSEM`
 - `EQBenchJudgemarkCILow`
 - `EQBenchJudgemarkCIHigh`
+- `DeepSWECILow` and `DeepSWECIHigh`
+- `GDPvalAA2CILow` and `GDPvalAA2CIHigh`
+- `FactoryCodeReviewF1Stdev`
 
 ### Per-metric provenance
 
@@ -265,7 +268,7 @@ synthesized = 0.080000
 missing = 0.180000
 effective = 0.740000
 family_count = 5
-direct_families = ["eqbench", "gso", "scale", "sonar", "swe"]
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 
 [models.evidence.roles.B_raw]
 direct = 0.740000
@@ -274,7 +277,7 @@ synthesized = 0.070000
 missing = 0.190000
 effective = 0.740000
 family_count = 5
-direct_families = ["artificial_analysis", "deepswe", "lmarena", "scale", "swe"]
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.700000
 core_family_count = 4
 core_direct_families = ["artificial_analysis", "lmarena", "swe", "terminal_bench"]
