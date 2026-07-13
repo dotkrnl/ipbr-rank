@@ -507,6 +507,9 @@ vendor = "xai"
 aliases = [
     "grok-4.20", "grok 4.20", "grok-4-20",
     "x-ai/grok-4.20", "xai/grok-4.20",
+    # EQBench Creative Writing v3 publishes the single-model beta under this
+    # spelling. Keep the separately named Multi-Agent product distinct.
+    "grok-4.20-beta", "x-ai/grok-4.20-beta", "xai/grok-4.20-beta",
     "grok-4.20-beta1", "grok-4.20-0309",
     "grok-4.20-beta-0309-reasoning", "grok-4.20-0309-reasoning",
     "Grok 4.20 Reasoning", "Grok 4.20 (Reasoning)",

@@ -198,6 +198,8 @@ fn lookup_2026_07_distinct_models() {
             Some("meta"),
             "meta/muse-spark-1.1",
         ),
+        ("grok-4.20-beta", Some("xai"), "xai/grok-4.20"),
+        ("x-ai/grok-4.20-beta", None, "xai/grok-4.20"),
     ];
     for &(input, vendor, expected) in cases {
         let matched = idx
