@@ -153,8 +153,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name: display_name.to_string(),
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         let key = crate::alias_dedupe_key(&alias_records, &alias_index, display_name, None);
         let preference = ArcVariantPreference::from_text(display_name);

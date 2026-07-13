@@ -300,8 +300,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name: model_name.to_string(),
             vendor_hint,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
 

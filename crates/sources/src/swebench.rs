@@ -163,8 +163,6 @@ fn extract_board(
             model_name,
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
     Ok(())

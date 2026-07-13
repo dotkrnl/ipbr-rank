@@ -11,7 +11,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 
 <h2>What this is</h2>
 <p>ipbr combines public benchmark observations into four 0-100 role proxies: Idea, Plan, Build, and Review.</p>
-<p>Inputs, fixed normalization anchors, evidence classes, family caps, and weights are versioned in the repository. Native public observations take precedence over duplicate manually curated observations; both count as direct same-product evidence and take precedence over synthesized sibling fills. Vendor-automatic fallback is part of the served ranked product and retains explicit provenance; separately named multi-agent or premium endpoints remain distinct. No score is manually reranked.</p>
+<p>Inputs, fixed normalization anchors, evidence classes, family caps, and weights are versioned in the repository. Native public observations take precedence over duplicate manually curated observations; both count as direct same-product evidence. Vendor-automatic fallback is part of the served ranked product and retains explicit provenance; separately named multi-agent or premium endpoints remain distinct. No score is manually reranked.</p>
 
 <h2>The four roles</h2>
 <ul>

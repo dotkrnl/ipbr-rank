@@ -190,8 +190,6 @@ fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, 
             model_name: model_name.to_string(),
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
         match best_by_model.get_mut(&key) {

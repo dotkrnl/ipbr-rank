@@ -120,13 +120,12 @@ cohort.
 Evidence is reliability-weighted toward the neutral prior of 50:
 
 - actual same-product observation, whether fetched or manually curated: **1.00**
-- sibling synthesis (all categories): **0.00 / prior-only**
 
 The ranked product includes vendor-automatic routing and fallback behavior;
 separately named multi-agent or premium endpoints remain distinct. Capability
-is averaged over available direct same-product observations; missing
-and sibling-only leaves do not depress the point estimate. Their nominal weight
-remains visible as confidence/coverage, and a fully unsupported role falls
+is averaged over available direct same-product observations; missing leaves do
+not depress the point estimate. Their nominal weight remains visible as
+confidence/coverage, and a fully unsupported role falls
 back to 50. Final role paths are flattened to unique leaves, and no source
 family may carry more than 30% of a role when enough independent families
 exist.
@@ -207,11 +206,10 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.evidence.roles.R]
-direct = 0.65
+direct = 0.70
 reported = 0.00
-synthesized = 0.05
 missing = 0.30
-effective = 0.65
+effective = 0.70
 family_count = 2
 direct_families = ["lmarena", "scale"]
 core_direct = 0.42
@@ -225,7 +223,6 @@ provisional = true
 [models.missing]
 metrics = []
 groups_shrunk = []
-synthesis_dominant = false
 ```
 
 See [`docs/output-schema.md`](docs/output-schema.md) for the complete TOML schema reference.

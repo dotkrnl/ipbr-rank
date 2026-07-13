@@ -131,8 +131,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name,
             vendor_hint: (!vendor.is_empty()).then(|| vendor.to_string()),
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         let priority = effort_priority(mode);
         match best.get(slug) {

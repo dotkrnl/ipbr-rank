@@ -584,15 +584,6 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
 }
 
 fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static str, String) {
-    if let Some(provenance) = model.synthesized.get(metric) {
-        return (
-            "synthesized · prior-only",
-            format!(
-                "Borrowed from {} via {}",
-                provenance.from, provenance.source_id
-            ),
-        );
-    }
     if model.raw_metrics.contains_key(metric) {
         let source = model
             .metric_sources

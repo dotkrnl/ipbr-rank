@@ -73,12 +73,6 @@ pub struct EvidenceConfig {
     pub direct_reliability: f64,
     #[serde(default = "default_reported_reliability")]
     pub reported_reliability: f64,
-    #[serde(default = "default_conservative_synthesis_reliability")]
-    pub conservative_synthesis_reliability: f64,
-    #[serde(default = "default_same_series_synthesis_reliability")]
-    pub same_series_synthesis_reliability: f64,
-    #[serde(default = "default_stronger_successor_synthesis_reliability")]
-    pub stronger_successor_synthesis_reliability: f64,
     #[serde(default = "default_provisional_min_direct")]
     pub provisional_min_direct: f64,
     #[serde(default = "default_provisional_min_families")]
@@ -137,18 +131,6 @@ fn default_direct_reliability() -> f64 {
 
 fn default_reported_reliability() -> f64 {
     0.60
-}
-
-fn default_conservative_synthesis_reliability() -> f64 {
-    0.0
-}
-
-fn default_same_series_synthesis_reliability() -> f64 {
-    0.0
-}
-
-fn default_stronger_successor_synthesis_reliability() -> f64 {
-    0.0
 }
 
 fn default_provisional_min_direct() -> f64 {
@@ -213,10 +195,6 @@ impl Default for EvidenceConfig {
             prior_score: default_prior_score(),
             direct_reliability: default_direct_reliability(),
             reported_reliability: default_reported_reliability(),
-            conservative_synthesis_reliability: default_conservative_synthesis_reliability(),
-            same_series_synthesis_reliability: default_same_series_synthesis_reliability(),
-            stronger_successor_synthesis_reliability:
-                default_stronger_successor_synthesis_reliability(),
             provisional_min_direct: default_provisional_min_direct(),
             provisional_min_families: default_provisional_min_families(),
             provisional_breadth_min_direct: default_provisional_breadth_min_direct(),
@@ -254,31 +232,6 @@ impl EvidenceConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SynthesisConfig {
-    #[serde(default = "default_per_source_cap")]
-    pub per_source_cap: f64,
-    #[serde(default = "default_per_model_cap")]
-    pub per_model_cap: f64,
-}
-
-fn default_per_source_cap() -> f64 {
-    0.30
-}
-
-fn default_per_model_cap() -> f64 {
-    0.50
-}
-
-impl Default for SynthesisConfig {
-    fn default() -> Self {
-        Self {
-            per_source_cap: default_per_source_cap(),
-            per_model_cap: default_per_model_cap(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AggregationConfig {
     #[serde(default = "default_trust_threshold")]
     pub trust_threshold: f64,
@@ -299,31 +252,6 @@ impl Default for AggregationConfig {
         Self {
             trust_threshold: default_trust_threshold(),
             trust_transition_width: default_trust_width(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PenaltiesConfig {
-    #[serde(default = "default_synthesis_penalty")]
-    pub synthesis: f64,
-    #[serde(default = "default_override_penalty")]
-    pub override_reported: f64,
-}
-
-fn default_synthesis_penalty() -> f64 {
-    0.15
-}
-
-fn default_override_penalty() -> f64 {
-    0.0
-}
-
-impl Default for PenaltiesConfig {
-    fn default() -> Self {
-        Self {
-            synthesis: default_synthesis_penalty(),
-            override_reported: default_override_penalty(),
         }
     }
 }
@@ -404,10 +332,6 @@ pub struct Coefficients {
     /// observations of the same benchmark.
     #[serde(default)]
     pub precedence_composites: BTreeSet<String>,
-    #[serde(default)]
-    pub synthesis: Option<SynthesisConfig>,
-    #[serde(default)]
-    pub penalties: Option<PenaltiesConfig>,
     #[serde(default)]
     pub aggregation: Option<AggregationConfig>,
     #[serde(default)]

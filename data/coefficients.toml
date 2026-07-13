@@ -129,16 +129,6 @@ source = "sweatlas_*"
 effort = "thinking"
 source = "sweatlas_*"
 
-[synthesis]
-# Sibling rows remain available for provenance and sensitivity views but have
-# zero reliability in the primary score. These caps bound emitted fills and
-# drive the weighted `synthesis_dominant` diagnostic.
-per_model_cap = 0.50
-# Several public sources have narrower coverage than the ranked model
-# set. 0.65 prevents a single source from dominating through synthesis
-# while still letting the curated frontier-model fills run.
-per_source_cap = 0.65
-
 [composite_metrics.SWEComposite]
 # SWE-bench Verified is retained as a diagnostic but retired from the primary
 # rank because it is static, saturated at the frontier, and redundant with the
@@ -297,17 +287,13 @@ trust_transition_width = 0.10
 [evidence]
 # Ranking v3 separates score from evidence quality. Every actual same-product
 # observation has full direct reliability, including cited manual overrides.
-# Sibling values are published only as provenance/sensitivity and contribute
-# exactly the neutral prior to the primary score. No single correlated
-# source/benchmark family may exceed 30% of role leaf weight.
+# No single correlated source/benchmark family may exceed 30% of role leaf
+# weight.
 prior_score = 50.0
 direct_reliability = 1.0
 # Reserved for rehydrating older schema-2.1 snapshots. Fresh actual
 # observations, including manual overrides, use `direct_reliability`.
 reported_reliability = 0.60
-conservative_synthesis_reliability = 0.0
-same_series_synthesis_reliability = 0.0
-stronger_successor_synthesis_reliability = 0.0
 provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35

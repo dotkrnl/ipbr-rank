@@ -632,8 +632,6 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
                 model_name: row.model_name,
                 vendor_hint: infer_vendor(&row.label).map(ToOwned::to_owned),
                 fields: row.fields,
-                synthesized_from: None,
-                synthesis_category: None,
             }
         })
         .collect())

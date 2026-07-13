@@ -146,8 +146,6 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
                 model_name,
                 vendor_hint: None,
                 fields,
-                synthesized_from: None,
-                synthesis_category: None,
             }
         })
         .collect())

@@ -167,8 +167,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name: identity.output_name,
             vendor_hint: identity.vendor_hint,
             fields: BTreeMap::new(),
-            synthesized_from: None,
-            synthesis_category: None,
         });
         for (key, value) in fields {
             merge_openrouter_field(&mut row.fields, key, value);

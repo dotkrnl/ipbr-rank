@@ -184,8 +184,6 @@ fn parse_creative_rows(js: &str) -> Result<Vec<RawRow>, SourceError> {
             model_name: model_name.clone(),
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         keep_best_row(
             &mut best_by_model,
@@ -256,8 +254,6 @@ fn parse_judgemark_rows(js: &str) -> Result<Vec<RawRow>, SourceError> {
             model_name: model_name.clone(),
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         keep_best_row(
             &mut best_by_model,

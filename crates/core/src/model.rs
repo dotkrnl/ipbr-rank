@@ -5,24 +5,20 @@ use std::collections::{BTreeMap, BTreeSet};
 pub struct MissingInfo {
     pub metrics: BTreeSet<MetricKey>,
     pub groups_shrunk: BTreeSet<GroupKey>,
-    #[serde(default)]
-    pub synthesis_dominant: bool,
 }
 
 /// Evidence coverage carried from leaf benchmark observations through
-/// composites, groups, and role scores. The four evidence-class shares are
-/// nominal path weights and sum to one (within floating-point tolerance).
-/// `effective` applies the configured reliability to each class. Current
-/// same-product observations are direct at full reliability, synthesis is
-/// prior-only, and `reported` remains for older snapshot compatibility.
+/// composites, groups, and role scores. The evidence-class shares are nominal
+/// path weights and sum to one (within floating-point tolerance). `effective`
+/// applies the configured reliability to each class. Current same-product
+/// observations are direct at full reliability; `reported` remains for older
+/// snapshot compatibility.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct EvidenceCoverage {
     #[serde(default)]
     pub direct: f64,
     #[serde(default)]
     pub reported: f64,
-    #[serde(default)]
-    pub synthesized: f64,
     #[serde(default)]
     pub missing: f64,
     #[serde(default)]
@@ -80,43 +76,6 @@ pub struct EvidenceSummary {
 impl MissingInfo {
     pub fn new() -> Self {
         Self::default()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct SynthesisProvenance {
-    pub source_id: SourceId,
-    pub from: String,
-    #[serde(default)]
-    pub category: SynthesisCategory,
-}
-
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum SynthesisCategory {
-    #[default]
-    Conservative,
-    SameSeriesForward,
-    StrongerSuccessor,
-}
-
-impl SynthesisCategory {
-    pub fn penalty(self, conservative_penalty: f64) -> f64 {
-        match self {
-            Self::Conservative => conservative_penalty,
-            Self::SameSeriesForward | Self::StrongerSuccessor => 0.0,
-        }
-    }
-
-    pub fn chain(self, next: Self) -> Self {
-        if matches!(self, Self::Conservative) || matches!(next, Self::Conservative) {
-            Self::Conservative
-        } else if matches!(self, Self::StrongerSuccessor) || matches!(next, Self::StrongerSuccessor)
-        {
-            Self::StrongerSuccessor
-        } else {
-            Self::SameSeriesForward
-        }
     }
 }
 
@@ -201,7 +160,6 @@ pub struct ModelRecord {
     pub groups: BTreeMap<GroupKey, f64>,
     pub scores: RoleScores,
     pub missing: MissingInfo,
-    pub synthesized: BTreeMap<MetricKey, SynthesisProvenance>,
     /// Metrics whose winning observation came from the checked-in curated
     /// override source. These are direct same-product observations, but the
     /// marker preserves lower precedence than a native public source and
@@ -235,7 +193,6 @@ impl ModelRecord {
             groups: BTreeMap::new(),
             scores: RoleScores::default(),
             missing: MissingInfo::new(),
-            synthesized: BTreeMap::new(),
             curated_overrides: BTreeSet::new(),
             metric_sources: BTreeMap::new(),
             override_notes: BTreeMap::new(),
@@ -250,8 +207,4 @@ pub struct RawRow {
     pub model_name: String,
     pub vendor_hint: Option<String>,
     pub fields: BTreeMap<String, serde_json::Value>,
-    #[serde(default)]
-    pub synthesized_from: Option<String>,
-    #[serde(default)]
-    pub synthesis_category: Option<SynthesisCategory>,
 }

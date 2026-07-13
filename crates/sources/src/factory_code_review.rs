@@ -142,8 +142,6 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
                 model_name: model_name.to_string(),
                 vendor_hint: vendor_hint(model_name).map(str::to_string),
                 fields,
-                synthesized_from: None,
-                synthesis_category: None,
             });
         }
 

@@ -297,8 +297,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name: trimmed.to_string(),
             vendor_hint: vendor_hint.clone(),
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         };
         let key = crate::alias_dedupe_key(
             &alias_records,

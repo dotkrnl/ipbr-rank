@@ -114,8 +114,6 @@ fn parse_rows(csv: &str) -> Result<Vec<RawRow>, SourceError> {
                 .split_once('/')
                 .map(|(vendor, _)| vendor.to_string()),
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
 

@@ -179,8 +179,7 @@ TerminalBench21Uncertainty = 2.200000
 
 `models.raw_metrics` retains native upstream units. Unlike normalized scores,
 raw values are not constrained to 0–100; for example, Creative Writing uses
-Elo units. Auxiliary uncertainty fields are unscored and never transferred by
-sibling synthesis.
+Elo units. Auxiliary uncertainty fields are unscored.
 
 Currently preserved auxiliary keys include:
 
@@ -225,36 +224,24 @@ source = "overrides"
 citation = "Artificial Analysis GDPval-AA leaderboard, accessed ..."
 ```
 
-Synthesized observation:
-
-```toml
-[models.metric_evidence.SWERebench]
-class = "synthesized"
-source = "swerebench"
-donor = "openai/gpt-5.4"
-synthesis_category = "same_series_forward"
-```
-
-Actual same-product observations use `direct`, whether their winning source is a
-native public feed or the cited manual `overrides` source. `synthesized` is
-used for sibling substitutions. The `reported` value and coverage field remain
-only for compatibility with older schema-2.1 snapshots; current output does
-not emit that evidence class. A vendor-published measurement is not classified
-as `reported` merely because it was curated manually. Vendor-automatic routing
-and fallback remain part of the same ranked product and retain a citation on
-the affected direct metrics. Native sources may likewise retain the winning
-agent/harness label as a citation. Valid synthesis
-categories are `conservative`, `same_series_forward`, and
-`stronger_successor`.
+Every scored observation is an actual same-product measurement and uses
+`direct`, whether its winning source is a native public feed or the cited
+manual `overrides` source. The `reported` value and coverage field remain only
+for compatibility with older schema-2.1 snapshots; current output does not emit
+that evidence class. A vendor-published measurement is not classified as
+`reported` merely because it was curated manually. Vendor-automatic routing and
+fallback remain part of the same ranked product and retain a citation on the
+affected direct metrics. Native sources may likewise retain the winning
+agent/harness label as a citation.
 
 Winning-observation precedence is:
 
 ```text
-native public direct > manual override direct > synthesized
+native public direct > manual override direct
 ```
 
-There are currently no rank-derived estimates. If introduced later, they must
-remain explicitly non-direct and cannot qualify a role.
+There are currently no synthesized or rank-derived estimates. If introduced
+later, they must remain explicitly non-direct and cannot qualify a role.
 
 ### Evidence coverage
 
@@ -262,34 +249,32 @@ Every group and role has an evidence summary:
 
 ```toml
 [models.evidence.groups.BUILD]
-direct = 0.740000
+direct = 0.820000
 reported = 0.000000
-synthesized = 0.080000
 missing = 0.180000
-effective = 0.740000
+effective = 0.820000
 family_count = 5
-direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
+direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
 
 [models.evidence.roles.B_raw]
-direct = 0.740000
+direct = 0.810000
 reported = 0.000000
-synthesized = 0.070000
 missing = 0.190000
-effective = 0.740000
+effective = 0.810000
 family_count = 5
-direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
+direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
 core_direct = 0.700000
 core_family_count = 4
-core_direct_families = ["artificial_analysis", "lmarena", "swe", "terminal_bench"]
+core_direct_families = ["aa_coding", "lmarena", "scale", "swe"]
 historical_family_count = 2
 historical_direct_families = ["livecodebench", "swe"]
 qualification_path = "core_standard"
 provisional = false
 ```
 
-The four nominal shares `direct + reported + synthesized + missing` sum to
-approximately 1. `reported` is retained only for compatibility; current actual
-same-product observations, including manual overrides, contribute to `direct`.
+The nominal shares `direct + reported + missing` sum to approximately 1.
+`reported` is retained only for compatibility; current actual same-product
+observations, including manual overrides, contribute to `direct`.
 `effective` is confidence-weighted coverage rather than another nominal class.
 `family_count` counts direct families only.
 
@@ -312,14 +297,12 @@ also expose:
 [models.missing]
 metrics = ["EQBenchCreativeWriting", "SWERebench"]
 groups_shrunk = ["CRE", "BUILD"]
-synthesis_dominant = false
 ```
 
 | Field | Meaning |
 |---|---|
 | `metrics` | Active scored leaf metrics with no raw observation. |
 | `groups_shrunk` | Compatibility name for groups with incomplete nominal coverage. Capability uses available same-product evidence; this field does not select a separate score formula. |
-| `synthesis_dominant` | True when any role's weighted synthesized share exceeds the configured per-model cap. |
 
 ## `missing.toml`
 
@@ -365,9 +348,6 @@ groups = ["CRE"]
 prior_score = 50.0
 direct_reliability = 1.0
 reported_reliability = 0.60
-conservative_synthesis_reliability = 0.0
-same_series_synthesis_reliability = 0.0
-stronger_successor_synthesis_reliability = 0.0
 provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
@@ -450,6 +430,10 @@ arrays are sorted and floats use fixed precision.
   path to role evidence.
 - Added `balanced_status`; Balanced now requires three ranked roles and 20%
   current direct evidence in the fourth instead of an all-four-role veto.
+- Retired sibling synthesis: removed the `synthesized` evidence class and
+  coverage share, the `donor`/`synthesis_category` metric-evidence keys, and
+  the `synthesis_dominant` missing-data flag. Every scored observation is now a
+  direct same-product measurement.
 
 ### 2.0.0
 

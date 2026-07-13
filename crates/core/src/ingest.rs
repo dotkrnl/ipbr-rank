@@ -2,42 +2,6 @@ use crate::alias::{AliasIndex, normalize_name};
 use crate::model::{ModelRecord, RawRow, SourceId, Vendor};
 use std::collections::{BTreeMap, BTreeSet};
 
-const NON_SYNTHESIZED_METRICS: &[&str] = &[
-    "AI_canary_health",
-    // Launch-card metrics are specific same-product observations, not
-    // sibling priors. Keep them from propagating through synthesis.
-    "KimiCodeBenchV2",
-    "ProgramBench",
-    "MLSBenchLite",
-    "KimiClaw247Bench",
-    "MCPMarkVerified",
-    // Observation-specific uncertainty metadata must stay attached to the
-    // measured row and never transfer to a sibling model.
-    "TerminalBenchUncertainty",
-    "TerminalBench21Uncertainty",
-    "SWERebenchSEM",
-    "EQBenchJudgemarkCILow",
-    "EQBenchJudgemarkCIHigh",
-    "DeepSWECILow",
-    "DeepSWECIHigh",
-    "DeepSWEPassAt4",
-    "DeepSWEAttempts",
-    "DeepSWETasksAttempted",
-    "DeepSWERuns",
-    "FactoryCodeReviewF1Stdev",
-    "GDPvalAA2CILow",
-    "GDPvalAA2CIHigh",
-    "GDPvalAA2HybridFallback",
-    "GDPvalAA2HybridFallbackCILow",
-    "GDPvalAA2HybridFallbackCIHigh",
-    "CritPtHybridFallback",
-    "AAOmniscienceIndexHybridFallback",
-    "AAOmniscienceAccuracyHybridFallback",
-    "AAOmniscienceNonHallucinationHybridFallback",
-    "EnterpriseOpsGymAAHybridFallback",
-    "AutomationBenchAAHybridFallback",
-];
-
 const EVIDENCE_NOTE_SUFFIX: &str = "__evidence_note";
 
 #[derive(Debug, Default, Clone)]
@@ -60,11 +24,7 @@ pub fn ingest_rows_with_policy(
     let index = AliasIndex::build(&snapshot);
     let mut real_metric_choices: BTreeMap<(usize, String), EffortPreference> = BTreeMap::new();
 
-    let (real_rows, synthesized_rows): (Vec<_>, Vec<_>) = rows
-        .into_iter()
-        .partition(|row| row.synthesized_from.is_none());
-
-    for row in real_rows {
+    for row in rows {
         ingest_real_row(
             records,
             &index,
@@ -73,9 +33,6 @@ pub fn ingest_rows_with_policy(
             &mut real_metric_choices,
             effort_policy,
         );
-    }
-    for row in synthesized_rows {
-        ingest_synthesized_row(records, &index, row, &mut stats, effort_policy);
     }
 
     stats
@@ -97,9 +54,6 @@ pub fn warn_stale_overrides(
     let mut by_pair: BTreeMap<(usize, String), BTreeSet<String>> = BTreeMap::new();
     for (source_id, rows) in rows_by_source {
         for row in rows {
-            if row.synthesized_from.is_some() {
-                continue;
-            }
             let Some(i) = index.match_record(&row.model_name, row.vendor_hint.as_deref()) else {
                 continue;
             };
@@ -151,9 +105,6 @@ pub fn audit_fuzzy_matches(
     let mut seen: BTreeSet<(String, String, String)> = BTreeSet::new();
     for (source_id, rows) in rows_by_source {
         for row in rows {
-            if row.synthesized_from.is_some() {
-                continue;
-            }
             let vendor = row.vendor_hint.as_deref();
             if index.lookup_exact(&row.model_name, vendor).is_some() {
                 continue;
@@ -174,72 +125,6 @@ pub fn audit_fuzzy_matches(
         }
     }
     audited
-}
-
-pub fn mark_synthesis_dominant(records: &mut [ModelRecord], per_model_cap: f64) {
-    let coefficients = crate::coefficients::Coefficients::load_embedded()
-        .expect("embedded coefficients are valid");
-    mark_synthesis_dominant_with_coefficients(records, per_model_cap, &coefficients);
-}
-
-/// Preliminary pre-score synthesis diagnostic using only leaf metrics that
-/// can reach a configured role. `compute_scores_with` replaces this with the
-/// authoritative family-capped role-weight calculation after scoring.
-pub fn mark_synthesis_dominant_with_coefficients(
-    records: &mut [ModelRecord],
-    per_model_cap: f64,
-    coefficients: &crate::coefficients::Coefficients,
-) {
-    let scored_metrics = scored_leaf_metrics(coefficients);
-    for record in records {
-        let total_cells = record
-            .raw_metrics
-            .keys()
-            .filter(|metric| scored_metrics.contains(*metric))
-            .count();
-        let synthesized_cells = record
-            .synthesized
-            .keys()
-            .filter(|metric| scored_metrics.contains(*metric))
-            .count();
-        record.missing.synthesis_dominant =
-            total_cells > 0 && (synthesized_cells as f64 / total_cells as f64) > per_model_cap;
-    }
-}
-
-fn scored_leaf_metrics(coefficients: &crate::coefficients::Coefficients) -> BTreeSet<String> {
-    fn expand(
-        metric: &str,
-        coefficients: &crate::coefficients::Coefficients,
-        out: &mut BTreeSet<String>,
-        visiting: &mut BTreeSet<String>,
-    ) {
-        let Some(inputs) = coefficients.composite_metrics.get(metric) else {
-            if coefficients.metrics.contains_key(metric) {
-                out.insert(metric.to_string());
-            }
-            return;
-        };
-        if !visiting.insert(metric.to_string()) {
-            return;
-        }
-        for input in inputs.keys() {
-            expand(input, coefficients, out, visiting);
-        }
-        visiting.remove(metric);
-    }
-
-    let mut out = BTreeSet::new();
-    for groups in coefficients.final_score_weights.values() {
-        for group in groups.keys() {
-            if let Some(metrics) = coefficients.group_weights.get(group) {
-                for metric in metrics.keys() {
-                    expand(metric, coefficients, &mut out, &mut BTreeSet::new());
-                }
-            }
-        }
-    }
-    out
 }
 
 fn ingest_real_row(
@@ -316,7 +201,6 @@ fn ingest_real_row(
                     }
                     metric_choices.insert(choice_key, preference);
                     record.raw_metrics.insert(key.clone(), num);
-                    record.synthesized.remove(&key);
                     record.metric_sources.insert(key.clone(), source_id.clone());
                     if is_override {
                         record.curated_overrides.insert(key.clone());
@@ -440,16 +324,13 @@ impl EffortPreference {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum EvidencePriority {
-    Synthesized,
     CuratedDirect,
     Direct,
 }
 
 fn evidence_priority(record: &ModelRecord, metric: &str) -> Option<EvidencePriority> {
     record.raw_metrics.contains_key(metric).then(|| {
-        if record.synthesized.contains_key(metric) {
-            EvidencePriority::Synthesized
-        } else if record.curated_overrides.contains(metric) {
+        if record.curated_overrides.contains(metric) {
             EvidencePriority::CuratedDirect
         } else {
             EvidencePriority::Direct
@@ -459,12 +340,6 @@ fn evidence_priority(record: &ModelRecord, metric: &str) -> Option<EvidencePrior
 
 pub(crate) fn is_evidence_note_key(key: &str) -> bool {
     evidence_note_metric(key).is_some()
-}
-
-pub(crate) fn is_synthesizable_field(key: &str) -> bool {
-    key != "SynthesizedFromModelName"
-        && !is_evidence_note_key(key)
-        && !NON_SYNTHESIZED_METRICS.contains(&key)
 }
 
 fn evidence_note_metric(key: &str) -> Option<&str> {
@@ -525,65 +400,6 @@ fn should_replace_metric_value(metric: &str, existing: f64, incoming: f64) -> bo
     }
 }
 
-fn ingest_synthesized_row(
-    records: &mut [ModelRecord],
-    index: &AliasIndex<'_>,
-    row: RawRow,
-    stats: &mut IngestStats,
-    effort_policy: &crate::coefficients::EffortPolicy,
-) {
-    match index.match_record(&row.model_name, row.vendor_hint.as_deref()) {
-        Some(i) => {
-            let record = &mut records[i];
-            let from = row
-                .synthesized_from
-                .clone()
-                .expect("synthesized rows must carry synthesized_from");
-            let category = row.synthesis_category.unwrap_or_default();
-            let preference = EffortPreference::from_row(&row);
-            let source_id = row.source_id.clone();
-            let canonical_id = record.canonical_id.clone();
-            let vendor = record.vendor.clone();
-            for (key, value) in row.fields {
-                if is_evidence_note_key(&key) {
-                    continue;
-                }
-                if !is_synthesizable_field(&key) {
-                    continue;
-                }
-                if !is_scoring_allowed_for(
-                    preference,
-                    &source_id,
-                    &canonical_id,
-                    &vendor,
-                    effort_policy,
-                ) {
-                    continue;
-                }
-                if record.raw_metrics.contains_key(&key) {
-                    continue;
-                }
-                if let Some(num) = json_to_f64(&value) {
-                    record.raw_metrics.insert(key.clone(), num);
-                    record
-                        .metric_sources
-                        .insert(key.clone(), row.source_id.clone());
-                    record.synthesized.insert(
-                        key,
-                        crate::model::SynthesisProvenance {
-                            source_id: row.source_id.clone(),
-                            from: from.clone(),
-                            category,
-                        },
-                    );
-                }
-            }
-            stats.matched += 1;
-        }
-        None => stats.unmatched.push(row),
-    }
-}
-
 fn json_to_f64(v: &serde_json::Value) -> Option<f64> {
     match v {
         serde_json::Value::Number(n) => n.as_f64(),
@@ -610,8 +426,6 @@ mod tests {
             model_name: name.to_string(),
             vendor_hint: None,
             fields: map,
-            synthesized_from: None,
-            synthesis_category: None,
         }
     }
 
@@ -853,75 +667,6 @@ mod tests {
         let stats = ingest_rows(&mut records, rows);
         assert_eq!(stats.matched, 0);
         assert_eq!(stats.unmatched.len(), 1);
-    }
-
-    #[test]
-    fn synthesized_rows_skip_non_transferable_signals() {
-        let mut records = vec![{
-            let mut r = ModelRecord::new(
-                "openai/gpt-5.5".to_string(),
-                "gpt-5.5".to_string(),
-                Vendor::Openai,
-            );
-            r.aliases.insert("gpt-5.5".to_string());
-            r
-        }];
-        let mut row = raw(
-            "aistupidlevel",
-            "gpt-5.5",
-            &[
-                ("AI_canary_health", json!(42.0)),
-                ("KimiCodeBenchV2", json!(62.0)),
-                ("TerminalBenchUncertainty", json!(1.2)),
-                ("SWERebenchSEM", json!(0.7)),
-                ("AI_correctness", json!(80.0)),
-            ],
-        );
-        row.synthesized_from = Some("openai/gpt-5.4".to_string());
-
-        let stats = ingest_rows(&mut records, vec![row]);
-
-        assert_eq!(stats.matched, 1);
-        assert!(!records[0].raw_metrics.contains_key("AI_canary_health"));
-        assert!(!records[0].synthesized.contains_key("AI_canary_health"));
-        assert!(!records[0].raw_metrics.contains_key("KimiCodeBenchV2"));
-        assert!(!records[0].synthesized.contains_key("KimiCodeBenchV2"));
-        assert!(
-            !records[0]
-                .raw_metrics
-                .contains_key("TerminalBenchUncertainty")
-        );
-        assert!(!records[0].raw_metrics.contains_key("SWERebenchSEM"));
-        assert_eq!(records[0].raw_metrics.get("AI_correctness"), Some(&80.0));
-        assert!(records[0].synthesized.contains_key("AI_correctness"));
-    }
-
-    #[test]
-    fn synthesized_rows_never_carry_curated_override_flag() {
-        let mut records = vec![{
-            let mut r = ModelRecord::new(
-                "openai/gpt-5.5".to_string(),
-                "gpt-5.5".to_string(),
-                Vendor::Openai,
-            );
-            r.aliases.insert("gpt-5.5".to_string());
-            r
-        }];
-        let mut row = raw("overrides", "gpt-5.5", &[("TerminalBench", json!(80.0))]);
-        row.synthesized_from = Some("openai/gpt-5.4".to_string());
-
-        let stats = ingest_rows(&mut records, vec![row]);
-
-        assert_eq!(stats.matched, 1);
-        assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&80.0));
-        assert!(
-            records[0].synthesized.contains_key("TerminalBench"),
-            "synthesized flag should be set"
-        );
-        assert!(
-            !records[0].curated_overrides.contains("TerminalBench"),
-            "synthesized rows must not be marked as curated overrides"
-        );
     }
 
     #[test]
@@ -1177,39 +922,6 @@ mod tests {
     }
 
     #[test]
-    fn real_rows_replace_synthesized_operational_values() {
-        let mut records = vec![{
-            let mut r = ModelRecord::new(
-                "openai/gpt-5.5".to_string(),
-                "gpt-5.5".to_string(),
-                Vendor::Openai,
-            );
-            r.aliases.insert("gpt-5.5".to_string());
-            r
-        }];
-        let mut synthesized = raw("openrouter", "gpt-5.5", &[("BlendedCost", json!(0.50))]);
-        synthesized.synthesized_from = Some("openai/gpt-5.4".to_string());
-
-        let stats = ingest_rows(&mut records, vec![synthesized]);
-        assert_eq!(stats.matched, 1);
-        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&0.50));
-        assert!(records[0].synthesized.contains_key("BlendedCost"));
-
-        let stats = ingest_rows(
-            &mut records,
-            vec![raw(
-                "artificial_analysis",
-                "gpt-5.5",
-                &[("BlendedCost", json!(0.90))],
-            )],
-        );
-
-        assert_eq!(stats.matched, 1);
-        assert_eq!(records[0].raw_metrics.get("BlendedCost"), Some(&0.90));
-        assert!(!records[0].synthesized.contains_key("BlendedCost"));
-    }
-
-    #[test]
     fn real_rows_prefer_high_variant_when_default_is_absent() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
@@ -1362,12 +1074,10 @@ mod tests {
                 r.aliases.insert(display.to_string());
                 r
             }];
-            let mut synthesized = raw("swerebench", display, &[("SWERebench", json!(72.0))]);
-            synthesized.synthesized_from = Some("qwen/qwen3.6-plus".to_string());
             let rows = vec![
                 raw("overrides", canonical, &[("SWEBenchPro", json!(60.6))]),
                 raw("lmarena", preview_alias, &[("LMArenaText", json!(91.0))]),
-                synthesized,
+                raw("swerebench", display, &[("SWERebench", json!(72.0))]),
             ];
 
             let stats = ingest_rows_with_policy(
@@ -1381,42 +1091,6 @@ mod tests {
             assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&91.0));
             assert_eq!(records[0].raw_metrics.get("SWERebench"), Some(&72.0));
             assert!(records[0].curated_overrides.contains("SWEBenchPro"));
-            assert!(records[0].synthesized.contains_key("SWERebench"));
         }
-    }
-
-    #[test]
-    fn synthesized_rows_allow_high_effort_values() {
-        let mut records = vec![{
-            let mut r = ModelRecord::new(
-                "anthropic/claude-opus-4.7".to_string(),
-                "claude-opus-4.7".to_string(),
-                Vendor::Anthropic,
-            );
-            r.aliases.insert("claude-opus-4-7".to_string());
-            r
-        }];
-        let mut row = raw(
-            "artificial_analysis",
-            "claude-opus-4.7",
-            &[
-                ("DisplayName", json!("Claude Opus 4.6 (High Effort)")),
-                ("ArtificialAnalysisIntelligence", json!(80.0)),
-            ],
-        );
-        row.synthesized_from = Some("anthropic/claude-opus-4.6".to_string());
-
-        let stats = ingest_rows(&mut records, vec![row]);
-
-        assert_eq!(stats.matched, 1);
-        assert_eq!(
-            records[0].raw_metrics.get("ArtificialAnalysisIntelligence"),
-            Some(&80.0)
-        );
-        assert!(
-            records[0]
-                .synthesized
-                .contains_key("ArtificialAnalysisIntelligence")
-        );
     }
 }

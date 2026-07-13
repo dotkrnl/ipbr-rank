@@ -2,9 +2,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use ipbr_core::{
-    Coefficients, ModelRecord, RawRow, SourceSummary, SynthesisCategory, SynthesisProvenance,
-    ThinkingEffort, Vendor, compute_scores_with, ingest_rows_with_policy, load_embedded_pairs,
-    required_aliases, synthesize_rows,
+    Coefficients, ModelRecord, RawRow, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
+    ingest_rows_with_policy, required_aliases,
 };
 use ipbr_render::{
     Scoreboard,
@@ -94,11 +93,7 @@ fn writes_valid_nested_scoreboard_toml() {
     );
     assert_eq!(
         anthropic["metric_evidence"]["TerminalBench"]["class"].as_str(),
-        Some("synthesized")
-    );
-    assert_eq!(
-        anthropic["metric_evidence"]["TerminalBench"]["donor"].as_str(),
-        Some("anthropic/claude-sonnet-5")
+        Some("direct")
     );
     assert!(anthropic["evidence"]["groups"].as_table().is_some());
     assert!(anthropic["evidence"]["roles"].as_table().is_some());
@@ -117,10 +112,6 @@ fn writes_valid_nested_scoreboard_toml() {
             .is_some()
     );
     assert!(idea_evidence["qualification_path"].as_str().is_some());
-    assert_eq!(
-        anthropic["missing"]["synthesis_dominant"].as_bool(),
-        Some(true)
-    );
 
     let openai = models
         .iter()
@@ -155,10 +146,6 @@ fn renders_missing_and_coefficients_toml() {
         missing_value["models"]
             .as_table()
             .is_some_and(|models| models.contains_key("anthropic/claude-opus-4.7"))
-    );
-    assert_eq!(
-        missing_value["models"]["anthropic/claude-opus-4.7"]["synthesis_dominant"].as_bool(),
-        Some(true)
     );
 
     let coefficients_value: toml::Value =
@@ -206,10 +193,6 @@ fn missing_output_uses_current_core_missing_diagnostics() {
     assert!(
         groups.iter().any(|group| group.as_str() == Some("CRE")),
         "core evidence marks the partially observed CRE group: {missing}"
-    );
-    assert_eq!(
-        missing_value["models"]["test/model"]["synthesis_dominant"].as_bool(),
-        Some(false)
     );
 }
 
@@ -297,23 +280,9 @@ fn sample_scoreboard() -> Scoreboard {
     model_a
         .metric_sources
         .insert("TerminalBench".to_string(), "terminal_bench".to_string());
-    model_a.synthesized.insert(
-        "TerminalBench".to_string(),
-        SynthesisProvenance {
-            source_id: "terminal_bench".to_string(),
-            from: "anthropic/claude-sonnet-5".to_string(),
-            category: SynthesisCategory::SameSeriesForward,
-        },
-    );
 
     let mut models = vec![model_b, model_a];
     compute_scores_with(&mut models, &coefficients);
-    models
-        .iter_mut()
-        .find(|model| model.canonical_id == "anthropic/claude-opus-4.7")
-        .unwrap()
-        .missing
-        .synthesis_dominant = true;
 
     Scoreboard {
         models,
@@ -332,8 +301,6 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
     let mut source_summary = BTreeMap::new();
     let http = OfflineOnlyHttp;
-    let synthesis_pairs = load_embedded_pairs().expect("embedded synthesis aliases should load");
-    let synthesis_cfg = coefficients.synthesis.clone().unwrap_or_default();
     let mut rows_by_source: BTreeMap<String, Vec<RawRow>> = BTreeMap::new();
     let mut fetched_rows: BTreeMap<String, usize> = BTreeMap::new();
     let mut fetched_statuses: BTreeMap<String, String> = BTreeMap::new();
@@ -357,30 +324,13 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
         rows_by_source.insert(source.id().to_string(), rows);
     }
 
-    let _ = synthesize_rows(
-        &mut rows_by_source,
-        &synthesis_pairs,
-        &records,
-        &synthesis_cfg,
-    );
-
     for (source_id, rows) in rows_by_source {
         let row_count = fetched_rows.get(&source_id).copied().unwrap_or(rows.len());
         let status = fetched_statuses
             .get(&source_id)
             .cloned()
             .unwrap_or_else(|| "verified".to_string());
-        let (direct_rows, synthesized_rows): (Vec<_>, Vec<_>) = rows
-            .into_iter()
-            .partition(|row| row.synthesized_from.is_none());
-        let stats = ingest_rows_with_policy(&mut records, direct_rows, &coefficients.effort_policy);
-        if !synthesized_rows.is_empty() {
-            let _ = ingest_rows_with_policy(
-                &mut records,
-                synthesized_rows,
-                &coefficients.effort_policy,
-            );
-        }
+        let stats = ingest_rows_with_policy(&mut records, rows, &coefficients.effort_policy);
         source_summary.insert(
             source_id,
             SourceSummary {
@@ -392,7 +342,6 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
         );
     }
 
-    ipbr_core::ingest::mark_synthesis_dominant(&mut records, synthesis_cfg.per_model_cap);
     compute_scores_with(&mut records, &coefficients);
 
     Ok(Scoreboard {

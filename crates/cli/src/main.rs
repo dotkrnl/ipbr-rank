@@ -6,7 +6,7 @@ use anyhow::Context;
 use clap::Parser;
 use ipbr_core::{
     Coefficients, IngestStats, ModelRecord, RawRow, SourceSummary, ingest_rows_with_policy,
-    load_embedded_pairs, required_aliases, synthesize_rows,
+    required_aliases,
 };
 use ipbr_render::{
     Scoreboard as RenderScoreboard,
@@ -113,8 +113,7 @@ async fn cmd_triage(cli: &Cli, secrets: &SecretStore, min_count: usize) -> anyho
         .as_deref()
         .context("triage requires --cache DIR")?;
     let records = load_aliases(cli)?;
-    let coefficients = load_coefficients(cli)?;
-    let synthesis_cfg = coefficients.synthesis.clone().unwrap_or_default();
+    let _coefficients = load_coefficients(cli)?;
 
     let http = ReqwestHttp::default();
     let sources = registry();
@@ -136,14 +135,7 @@ async fn cmd_triage(cli: &Cli, secrets: &SecretStore, min_count: usize) -> anyho
         .collect();
 
     triage::cmd_triage(
-        &http,
-        cache_dir,
-        &cli.out,
-        &filtered,
-        records,
-        &synthesis_cfg,
-        min_count,
-        secrets,
+        &http, cache_dir, &cli.out, &filtered, records, min_count, secrets,
     )
     .await
 }
@@ -487,9 +479,6 @@ async fn build_scoreboard(
     let http = ReqwestHttp::default();
     let sources = registry();
     let selected = selected_sources(cli, &sources);
-    let synthesis_cfg = coefficients.synthesis.clone().unwrap_or_default();
-    let synthesis_pairs =
-        load_embedded_pairs().context("failed parsing embedded synthesis aliases")?;
     let mut source_summary = BTreeMap::new();
     let mut rows_by_source: BTreeMap<String, Vec<RawRow>> = BTreeMap::new();
     let mut fetched_rows: BTreeMap<String, usize> = BTreeMap::new();
@@ -530,13 +519,6 @@ async fn build_scoreboard(
         rows_by_source.insert(source.id().to_string(), rows);
     }
 
-    let _synthesis_stats = synthesize_rows(
-        &mut rows_by_source,
-        &synthesis_pairs,
-        &records,
-        &synthesis_cfg,
-    );
-
     // Surface override entries duplicated by a real source — once a public
     // leaderboard catches up, the hand-curated number gets clobbered by
     // ingest precedence and the entry can be retired.
@@ -568,14 +550,6 @@ async fn build_scoreboard(
         );
     }
 
-    ipbr_core::ingest::mark_synthesis_dominant(&mut records, synthesis_cfg.per_model_cap);
-
-    // Surface synthesis pairs that no longer contribute anything — typically
-    // a freshly released model has just landed on the rolling-window
-    // benchmark we'd been borrowing a sibling's row for. Stderr only; tests
-    // assert on the returned list directly via `warn_stale_synthesis_pairs`.
-    let _stale = ipbr_core::warn_stale_synthesis_pairs(&records, &synthesis_pairs);
-
     ipbr_core::compute_scores_with(&mut records, &coefficients);
 
     Ok((
@@ -601,16 +575,7 @@ fn record_source_summary(
     rows: Vec<ipbr_core::RawRow>,
     effort_policy: &ipbr_core::EffortPolicy,
 ) {
-    // Public source counts describe fetched observations, not sibling rows
-    // synthesized after fetch. Ingest direct rows first, then fills, while
-    // reporting match statistics only for the upstream payload.
-    let (direct_rows, synthesized_rows): (Vec<_>, Vec<_>) = rows
-        .into_iter()
-        .partition(|row| row.synthesized_from.is_none());
-    let stats: IngestStats = ingest_rows_with_policy(records, direct_rows, effort_policy);
-    if !synthesized_rows.is_empty() {
-        let _ = ingest_rows_with_policy(records, synthesized_rows, effort_policy);
-    }
+    let stats: IngestStats = ingest_rows_with_policy(records, rows, effort_policy);
     source_summary.insert(
         source_id.to_string(),
         SourceSummary {
@@ -669,10 +634,6 @@ struct MetricEvidenceToml {
     #[serde(default)]
     source: Option<String>,
     #[serde(default)]
-    donor: Option<String>,
-    #[serde(default)]
-    synthesis_category: Option<ipbr_core::SynthesisCategory>,
-    #[serde(default)]
     citation: Option<String>,
 }
 
@@ -682,8 +643,6 @@ struct MissingToml {
     metrics: Vec<String>,
     #[serde(default)]
     groups_shrunk: Vec<String>,
-    #[serde(default)]
-    synthesis_dominant: bool,
 }
 
 impl SourceSummaryToml {
@@ -737,7 +696,6 @@ impl ModelToml {
         record.evidence = self.evidence;
         record.missing.metrics = self.missing.metrics.into_iter().collect();
         record.missing.groups_shrunk = self.missing.groups_shrunk.into_iter().collect();
-        record.missing.synthesis_dominant = self.missing.synthesis_dominant;
         for (metric, evidence) in self.metric_evidence {
             restore_metric_evidence(&mut record, metric, evidence);
         }
@@ -759,30 +717,16 @@ fn restore_metric_evidence(record: &mut ModelRecord, metric: String, evidence: M
     {
         record.override_notes.insert(metric.clone(), citation);
     }
-    if evidence.class == "synthesized"
-        && let Some(donor) = evidence.donor
-    {
-        record.synthesized.insert(
-            metric,
-            ipbr_core::SynthesisProvenance {
-                source_id: evidence.source.unwrap_or_else(|| "unknown".to_string()),
-                from: donor,
-                category: evidence.synthesis_category.unwrap_or_default(),
-            },
-        );
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn evidence(class: &str, donor: Option<&str>) -> MetricEvidenceToml {
+    fn evidence(class: &str) -> MetricEvidenceToml {
         MetricEvidenceToml {
             class: class.to_string(),
             source: Some("overrides".to_string()),
-            donor: donor.map(str::to_string),
-            synthesis_category: None,
             citation: Some("cited source".to_string()),
         }
     }
@@ -795,7 +739,7 @@ mod tests {
                 "GPT-5.5".into(),
                 ipbr_core::Vendor::Openai,
             );
-            restore_metric_evidence(&mut record, "TerminalBench".into(), evidence(class, None));
+            restore_metric_evidence(&mut record, "TerminalBench".into(), evidence(class));
             assert!(record.curated_overrides.contains("TerminalBench"));
             assert_eq!(
                 record
@@ -808,23 +752,6 @@ mod tests {
     }
 
     #[test]
-    fn scoreboard_rehydrate_does_not_mark_synthesized_override_as_curated() {
-        let mut record = ModelRecord::new(
-            "openai/gpt-5.5".into(),
-            "GPT-5.5".into(),
-            ipbr_core::Vendor::Openai,
-        );
-        restore_metric_evidence(
-            &mut record,
-            "TerminalBench".into(),
-            evidence("synthesized", Some("openai/gpt-5.4")),
-        );
-        assert!(!record.curated_overrides.contains("TerminalBench"));
-        assert!(!record.override_notes.contains_key("TerminalBench"));
-        assert!(record.synthesized.contains_key("TerminalBench"));
-    }
-
-    #[test]
     fn scoreboard_rehydrate_preserves_native_direct_provenance_note() {
         let mut record = ModelRecord::new(
             "anthropic/claude-fable-5".into(),
@@ -834,8 +761,6 @@ mod tests {
         let evidence = MetricEvidenceToml {
             class: "direct".to_string(),
             source: Some("artificial_analysis".to_string()),
-            donor: None,
-            synthesis_category: None,
             citation: Some("served product with automatic fallback".to_string()),
         };
 

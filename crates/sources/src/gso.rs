@@ -132,8 +132,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             model_name: name,
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
     Ok(rows)

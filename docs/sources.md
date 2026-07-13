@@ -12,8 +12,8 @@ Ingestion produces one canonical record per model under the
 thinking/adaptive, medium, then default observations are preferred. The
 winning metric keeps its source and evidence class; direct observations take
 precedence by provenance: a native public row replaces a duplicate manual
-same-product override, and either replaces sibling synthesis. Both native rows
-and cited manual observations count as direct coverage.
+same-product override. Both native rows and cited manual observations count as
+direct coverage.
 
 Methodology v3 also separates score use from eligibility use. `core` metrics
 are broad enough to establish current ranking coverage. `supplemental` metrics
@@ -65,7 +65,7 @@ eligibility.
 - **Secret**: None
 - **Cache TTL**: 24 h
 - **Metric**: `EQBenchJudgemark` — judge-discrimination/separability score, scaled from 0–1 to 0–100.
-- **Uncertainty**: `EQBenchJudgemarkCILow` and `EQBenchJudgemarkCIHigh` preserve the prompt-bootstrap 95% interval. They are unscored and never synthesized.
+- **Uncertainty**: `EQBenchJudgemarkCILow` and `EQBenchJudgemarkCIHigh` preserve the prompt-bootstrap 95% interval. They are unscored.
 - **Ranking use**: Diagnostic. Judge discrimination is not direct code review, so methodology v3 removes it from the Review score and eligibility portfolio.
 - **Fixture**: `data/fixtures/eqbench_judgemark_v4.js`
 
@@ -337,28 +337,14 @@ their correlated tracks do not stack as independent weights.
 - **API**: None — reads `data/score_overrides.toml` (embedded into the binary at build time).
 - **Purpose**: Hand-curated same-product metric values pulled from vendor system cards, launch posts, benchmark operators, and other authoritative sources. Fills coverage gaps for products that native public feeds have not yet rated (typically newest frontier releases — e.g. Claude Opus 4.7 SWE-bench Verified, GPT-5.5 Terminal-Bench 2.0, Kimi K2.7 Code launch-card metrics).
 - **Discipline**: Every entry must cite its source in the `note` field. Schema 2.1 publishes the winning note as `citation` in the metric-evidence table.
-- **Precedence and reliability**: An override is an actual same-product observation and therefore has direct reliability and direct coverage, including when published by the vendor. It beats synthesis but never replaces a duplicate native public row, independent of ingest order.
+- **Precedence and reliability**: An override is an actual same-product observation and therefore has direct reliability and direct coverage, including when published by the vendor. It never replaces a duplicate native public row, independent of ingest order.
 
-## Synthesis
+## Evidence precedence
 
-`data/synthesis_aliases.toml` is the authoritative list of sibling-substitution pairs and rationale. Pairs may apply across sources or be restricted to one narrow leaderboard.
-
-Synthesis is field-level and fill-only. A synthesized row carries the donor ID and category, but ingestion skips any metric for which the target already has an actual same-product observation, whether native or manually curated. Observation-specific metadata such as confidence intervals, standard errors, and evidence notes is never transferred.
-
-Evidence precedence is order-independent:
+Every scored observation is a direct same-product measurement. Precedence is order-independent:
 
 ```text
-native public direct > manual override direct > synthesized
+native public direct > manual override direct
 ```
 
-Synthesis categories control reliability, not a hidden claim that the value was directly measured:
-
-| Category | Default reliability |
-|---|---:|
-| `conservative` | 0.00 (prior-only) |
-| `same_series_forward` | 0.00 (prior-only) |
-| `stronger_successor` | 0.00 (prior-only) |
-
-For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked. Historical support likewise requires an actual same-product observation; a manual override can establish it, while a sibling fill or future rank-derived estimate cannot.
-
-The configured per-source cap limits emitted synthetic rows. After scoring, `synthesis_dominant` is computed from weighted role paths and becomes true when any role's synthesized share exceeds the configured per-model cap. Schema 2.1 publishes each synthesized metric's source, donor, category, and evidence coverage.
+For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`, and every direct observation has reliability 1.00. Historical support requires an actual same-product observation; a manual override can establish it, while a future rank-derived estimate cannot.

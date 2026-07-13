@@ -66,19 +66,19 @@ and must carry dated routing provenance.
 Evidence precedence is order-independent:
 
 ```text
-native public observation > manual same-product observation > sibling synthesis
+native public observation > manual same-product observation
 ```
 
 A native leaderboard observation always replaces a manual override for the
 same ranked product and metric. This is a source-precedence rule, not an evidence-class
 difference: a cited override is still an actual same-product observation and
-counts as direct coverage, including when the model vendor published it. An
-override replaces a synthesized fill. Synthesis is fill-only.
+counts as direct coverage, including when the model vendor published it. Every
+scored observation is a direct same-product measurement; there are no
+synthesized sibling fills.
 
 Schema 2.1 records the winning source and evidence class for every scored raw
-metric. Manual observations retain their citation and `source = "overrides"`;
-synthesized values retain the donor and synthesis category. See
-`docs/output-schema.md`.
+metric. Manual observations retain their citation and `source = "overrides"`.
+See `docs/output-schema.md`.
 
 ## 4. Fixed-anchor normalization
 
@@ -136,11 +136,9 @@ Default v3 reliabilities are:
 | Evidence class | Reliability |
 |---|---:|
 | Actual same-product observation, native or manually curated | 1.00 |
-| Sibling synthesis, any category | 0.00 |
 
-Sibling fills remain published for provenance and sensitivity analysis, but
-their primary-score contribution is exactly the neutral prior. Donor choice
-therefore cannot change a model's official point score.
+Every scored observation is a direct same-product measurement, so reliability
+is uniform; the neutral prior only stands in for missing evidence.
 
 ### 5.1 Missing weight and confidence
 
@@ -151,9 +149,9 @@ evidence. For observed weights `w_i`:
 capability = Σ observed w_i S_i / Σ observed w_i
 ```
 
-Missing and sibling-only weights do not enter that numerator or denominator;
-they remain in the separate nominal evidence summary. A fully unsupported
-aggregate uses 50 only as a compatibility fallback and is provisional.
+Missing weights do not enter that numerator or denominator; they remain in the
+separate nominal evidence summary. A fully unsupported aggregate uses 50 only
+as a compatibility fallback and is provisional.
 
 This prevents benchmark availability from being mistaken for low capability.
 It can make sparse estimates more extreme, which is why ordinal qualification
@@ -313,9 +311,9 @@ The role is `ranked` when any of these auditable paths holds:
 
 Otherwise it is `provisional`. Every actual same-product observation counts as
 direct, including a cited manual override from a vendor report or system card.
-Sibling fills and any future rank-derived estimates are non-direct and cannot
-qualify a role by themselves. Historical support must also be a same-product
-observation; its score is never blended into the capability point estimate.
+Any future rank-derived estimates are non-direct and cannot qualify a role by
+themselves. Historical support must also be a same-product observation; its
+score is never blended into the capability point estimate.
 The representative-core floor prevents a model evaluated only on a favorable
 specialist subset from using those observations to fill the entire confidence
 claim; it does not change the model's numeric capability estimate.
@@ -351,10 +349,9 @@ native raw fields:
 - `GDPvalAA2CILow` and `GDPvalAA2CIHigh`
 - `FactoryCodeReviewF1Stdev`
 
-These fields are observation-specific, unscored, and never transferred by
-sibling synthesis. They support auditing and future interval-aware ranking;
-v3 does not claim that all role scores already have statistical confidence
-intervals.
+These fields are observation-specific and unscored. They support auditing and
+future interval-aware ranking; v3 does not claim that all role scores already
+have statistical confidence intervals.
 
 ## 12. Reproducibility and limitations
 

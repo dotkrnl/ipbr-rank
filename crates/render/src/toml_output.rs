@@ -2,7 +2,7 @@ use std::path::Path;
 
 use ipbr_core::{
     Coefficients, EligibilityQualificationPath, EvidenceCoverage, ModelRecord, SCHEMA_VERSION,
-    SynthesisCategory, balanced_is_provisional,
+    balanced_is_provisional,
 };
 
 use crate::Scoreboard;
@@ -158,12 +158,8 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         out.push_str("[models.missing]\n");
         out.push_str(&format!("metrics = {}\n", toml_array(missing.metrics)));
         out.push_str(&format!(
-            "groups_shrunk = {}\n",
+            "groups_shrunk = {}\n\n",
             toml_array(missing.groups_shrunk)
-        ));
-        out.push_str(&format!(
-            "synthesis_dominant = {}\n\n",
-            model.missing.synthesis_dominant
         ));
     }
 
@@ -192,12 +188,8 @@ fn render_missing(scoreboard: &Scoreboard) -> String {
         ));
         out.push_str(&format!("metrics = {}\n", toml_array(missing.metrics)));
         out.push_str(&format!(
-            "groups_shrunk = {}\n",
+            "groups_shrunk = {}\n\n",
             toml_array(missing.groups_shrunk)
-        ));
-        out.push_str(&format!(
-            "synthesis_dominant = {}\n\n",
-            model.missing.synthesis_dominant
         ));
     }
 
@@ -299,24 +291,11 @@ fn render_metric_evidence(out: &mut String, model: &ModelRecord, coefficients: &
             "[models.metric_evidence.{}]\n",
             toml_string(metric)
         ));
-        let (class, donor, category) = if let Some(provenance) = model.synthesized.get(metric) {
-            (
-                "synthesized",
-                Some(provenance.from.as_str()),
-                Some(synthesis_category(provenance.category)),
-            )
-        } else {
-            ("direct", None, None)
-        };
-        out.push_str(&format!("class = {}\n", toml_string(class)));
+        // Every ingested observation is a direct same-product measurement,
+        // including cited manual overrides.
+        out.push_str(&format!("class = {}\n", toml_string("direct")));
         if let Some(source) = model.metric_sources.get(metric) {
             out.push_str(&format!("source = {}\n", toml_string(source)));
-        }
-        if let Some(donor) = donor {
-            out.push_str(&format!("donor = {}\n", toml_string(donor)));
-        }
-        if let Some(category) = category {
-            out.push_str(&format!("synthesis_category = {}\n", toml_string(category)));
         }
         if let Some(note) = model.override_notes.get(metric) {
             out.push_str(&format!("citation = {}\n", toml_string(note)));
@@ -342,10 +321,6 @@ fn render_evidence_summary(out: &mut String, model: &ModelRecord) {
 fn render_coverage(out: &mut String, coverage: &EvidenceCoverage, include_status: bool) {
     out.push_str(&format!("direct = {}\n", format_float(coverage.direct)));
     out.push_str(&format!("reported = {}\n", format_float(coverage.reported)));
-    out.push_str(&format!(
-        "synthesized = {}\n",
-        format_float(coverage.synthesized)
-    ));
     out.push_str(&format!("missing = {}\n", format_float(coverage.missing)));
     out.push_str(&format!(
         "effective = {}\n",
@@ -395,14 +370,6 @@ fn qualification_path(path: EligibilityQualificationPath) -> &'static str {
         EligibilityQualificationPath::CoreBreadth => "core_breadth",
         EligibilityQualificationPath::HistoricalBreadth => "historical_breadth",
         EligibilityQualificationPath::Unqualified => "unqualified",
-    }
-}
-
-fn synthesis_category(category: SynthesisCategory) -> &'static str {
-    match category {
-        SynthesisCategory::Conservative => "conservative",
-        SynthesisCategory::SameSeriesForward => "same_series_forward",
-        SynthesisCategory::StrongerSuccessor => "stronger_successor",
     }
 }
 

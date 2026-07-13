@@ -1,14 +1,11 @@
-//! Triage subcommand — surfaces unmatched rows and synthesis gaps.
+//! Triage subcommand — surfaces unmatched leaderboard rows for alias curation.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
-use ipbr_core::{
-    AliasIndex, ModelRecord, RawRow, SynthesisConfig, load_embedded_pairs, normalize_name,
-    normalize_vendor_hint, synthesize_rows,
-};
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name, normalize_vendor_hint};
 use ipbr_sources::{FetchOptions, Http, SecretStore, Source, SourceError};
 use serde::Serialize;
 use time::OffsetDateTime;
@@ -43,14 +40,11 @@ struct TriageReport {
     provenance: BTreeMap<String, String>,
     summary: Summary,
     sources: BTreeMap<String, SourceReport>,
-    gaps: BTreeMap<String, GapEntry>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 struct Summary {
     total_unmatched_groups: usize,
-    total_synthesis_gaps: usize,
-    total_cap_blocked: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -70,34 +64,12 @@ struct UnmatchedEntry {
     sample_fields: Vec<SampleField>,
 }
 
-#[derive(Debug, Clone, Serialize)]
-struct GapEntry {
-    display_name: String,
-    missing_at: Vec<MissingAt>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-struct MissingAt {
-    source: String,
-    cap_blocked: bool,
-    candidates: Vec<Candidate>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-struct Candidate {
-    canonical_id: String,
-    overlap: f64,
-    present_at_source: bool,
-}
-
-#[allow(clippy::too_many_arguments)]
 pub async fn cmd_triage(
     http: &dyn Http,
     cache_dir: &Path,
     out_dir: &Path,
     sources: &[Box<dyn Source>],
     records: Vec<ModelRecord>,
-    synthesis_cfg: &SynthesisConfig,
     min_count: usize,
     secrets: &SecretStore,
 ) -> anyhow::Result<()> {
@@ -133,10 +105,9 @@ pub async fn cmd_triage(
     }
 
     let index = AliasIndex::build(&records);
-    let synthesis_pairs =
-        load_embedded_pairs().context("failed parsing embedded synthesis aliases")?;
 
     let mut unmatched_groups: BTreeMap<UnmatchedKey, UnmatchedGroup> = BTreeMap::new();
+    let mut matched_counts: BTreeMap<String, usize> = BTreeMap::new();
 
     for (source_id, rows) in &all_rows {
         for row in rows {
@@ -144,6 +115,7 @@ pub async fn cmd_triage(
                 .match_record(&row.model_name, row.vendor_hint.as_deref())
                 .is_some()
             {
+                *matched_counts.entry(source_id.clone()).or_default() += 1;
                 continue;
             }
             let vendor_norm = normalize_vendor_hint(row.vendor_hint.as_deref().unwrap_or(""));
@@ -164,92 +136,6 @@ pub async fn cmd_triage(
                 }
             });
             group.count += 1;
-        }
-    }
-
-    let mut rows_for_synthesis = all_rows.clone();
-    let _stats = synthesize_rows(
-        &mut rows_for_synthesis,
-        &synthesis_pairs,
-        &records,
-        synthesis_cfg,
-    );
-
-    let mut matched_by_source: BTreeMap<String, Vec<(RawRow, usize)>> = BTreeMap::new();
-    let mut matched_counts: BTreeMap<String, usize> = BTreeMap::new();
-
-    for (source_id, rows) in &rows_for_synthesis {
-        for row in rows {
-            if let Some(record_idx) =
-                index.match_record(&row.model_name, row.vendor_hint.as_deref())
-            {
-                matched_by_source
-                    .entry(source_id.clone())
-                    .or_default()
-                    .push((row.clone(), record_idx));
-                *matched_counts.entry(source_id.clone()).or_default() += 1;
-            }
-        }
-    }
-
-    let uncapped_cfg = SynthesisConfig {
-        per_source_cap: 1.0,
-        per_model_cap: synthesis_cfg.per_model_cap,
-    };
-    let mut rows_uncapped = all_rows.clone();
-    let _uncapped_stats = synthesize_rows(
-        &mut rows_uncapped,
-        &synthesis_pairs,
-        &records,
-        &uncapped_cfg,
-    );
-
-    let post_synth_coverage = compute_coverage(&rows_for_synthesis, &records);
-    let uncapped_coverage = compute_coverage(&rows_uncapped, &records);
-
-    let mut gaps: BTreeMap<String, GapEntry> = BTreeMap::new();
-    for record in &records {
-        let canonical_id = &record.canonical_id;
-        let mut missing_at_list: Vec<MissingAt> = Vec::new();
-
-        for source_id in all_rows.keys() {
-            let has_coverage = post_synth_coverage
-                .get(canonical_id)
-                .is_some_and(|sources| sources.contains(source_id));
-            if has_coverage {
-                continue;
-            }
-
-            let would_have_uncapped = uncapped_coverage
-                .get(canonical_id)
-                .is_some_and(|sources| sources.contains(source_id));
-            let cap_blocked = would_have_uncapped && !has_coverage;
-
-            let candidates = find_sibling_candidates(
-                canonical_id,
-                &record.vendor,
-                source_id,
-                &matched_by_source,
-                &records,
-            );
-
-            missing_at_list.push(MissingAt {
-                source: source_id.clone(),
-                cap_blocked,
-                candidates,
-            });
-        }
-
-        missing_at_list.sort_by(|a, b| a.source.cmp(&b.source));
-
-        if !missing_at_list.is_empty() {
-            gaps.insert(
-                canonical_id.clone(),
-                GapEntry {
-                    display_name: record.display_name.clone(),
-                    missing_at: missing_at_list,
-                },
-            );
         }
     }
 
@@ -289,12 +175,6 @@ pub async fn cmd_triage(
     }
 
     let total_unmatched_groups: usize = source_reports.values().map(|s| s.unmatched_groups).sum();
-    let total_synthesis_gaps = gaps.len();
-    let total_cap_blocked: usize = gaps
-        .values()
-        .flat_map(|g| &g.missing_at)
-        .filter(|m| m.cap_blocked)
-        .count();
 
     let generated_at = match provenance_times.values().max() {
         Some(latest) => latest
@@ -309,11 +189,8 @@ pub async fn cmd_triage(
         provenance,
         summary: Summary {
             total_unmatched_groups,
-            total_synthesis_gaps,
-            total_cap_blocked,
         },
         sources: source_reports,
-        gaps,
     };
 
     fs::create_dir_all(out_dir)?;
@@ -350,155 +227,12 @@ fn extract_sample_fields(fields: &BTreeMap<String, serde_json::Value>) -> Vec<Sa
         .collect()
 }
 
-fn compute_coverage(
-    rows_by_source: &BTreeMap<String, Vec<RawRow>>,
-    records: &[ModelRecord],
-) -> BTreeMap<String, BTreeSet<String>> {
-    let index = AliasIndex::build(records);
-    let mut coverage: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
-
-    for (source_id, rows) in rows_by_source {
-        for row in rows {
-            if let Some(idx) = index.match_record(&row.model_name, row.vendor_hint.as_deref()) {
-                let canonical_id = &records[idx].canonical_id;
-                coverage
-                    .entry(canonical_id.clone())
-                    .or_default()
-                    .insert(source_id.clone());
-            }
-        }
-    }
-
-    coverage
-}
-
-fn find_sibling_candidates(
-    target_canonical_id: &str,
-    target_vendor: &ipbr_core::Vendor,
-    source_id: &str,
-    matched_by_source: &BTreeMap<String, Vec<(RawRow, usize)>>,
-    records: &[ModelRecord],
-) -> Vec<Candidate> {
-    let Some(source_matched) = matched_by_source.get(source_id) else {
-        return Vec::new();
-    };
-
-    let target_vendor_str = target_vendor.as_str().to_lowercase();
-    let target_vendor_prefix = target_canonical_id
-        .split('/')
-        .next()
-        .unwrap_or("")
-        .to_lowercase();
-    let target_name_norm = normalize_name(
-        target_canonical_id
-            .split('/')
-            .nth(1)
-            .unwrap_or(target_canonical_id),
-    );
-
-    let mut candidates: Vec<(f64, String, bool)> = Vec::new();
-
-    for (row, record_idx) in source_matched.iter() {
-        let sibling_record = &records[*record_idx];
-        let sibling_canonical_id = &sibling_record.canonical_id;
-
-        if sibling_canonical_id == target_canonical_id {
-            continue;
-        }
-
-        let sibling_vendor_str = sibling_record.vendor.as_str().to_lowercase();
-        let sibling_vendor_prefix = sibling_canonical_id
-            .split('/')
-            .next()
-            .unwrap_or("")
-            .to_lowercase();
-
-        let row_vendor_hint = row
-            .vendor_hint
-            .as_deref()
-            .map(|h| h.to_lowercase())
-            .unwrap_or_default();
-
-        let vendor_match = if !row_vendor_hint.is_empty() {
-            let row_vendor_norm = normalize_vendor_hint(&row_vendor_hint);
-            row_vendor_norm == normalize_vendor_hint(&target_vendor_str)
-        } else {
-            sibling_vendor_str == target_vendor_str || sibling_vendor_prefix == target_vendor_prefix
-        };
-
-        if !vendor_match {
-            continue;
-        }
-
-        let sibling_name_norm = normalize_name(
-            sibling_canonical_id
-                .split('/')
-                .nth(1)
-                .unwrap_or(sibling_canonical_id),
-        );
-
-        let overlap = token_overlap(&target_name_norm, &sibling_name_norm);
-        if overlap >= 0.6 {
-            candidates.push((overlap, sibling_canonical_id.clone(), true));
-        }
-    }
-
-    candidates.sort_by(|a, b| {
-        b.0.partial_cmp(&a.0)
-            .unwrap_or(std::cmp::Ordering::Equal)
-            .then_with(|| a.1.cmp(&b.1))
-    });
-
-    candidates
-        .into_iter()
-        .take(3)
-        .map(|(overlap, canonical_id, present)| Candidate {
-            canonical_id,
-            overlap: (overlap * 100.0).round() / 100.0,
-            present_at_source: present,
-        })
-        .collect()
-}
-
-fn token_overlap(a: &str, b: &str) -> f64 {
-    let tokens_a: BTreeSet<&str> = a.split_whitespace().collect();
-    let tokens_b: BTreeSet<&str> = b.split_whitespace().collect();
-
-    if tokens_a.is_empty() && tokens_b.is_empty() {
-        return 1.0;
-    }
-    if tokens_a.is_empty() || tokens_b.is_empty() {
-        return 0.0;
-    }
-
-    let intersection = tokens_a.intersection(&tokens_b).count();
-    let union = tokens_a.union(&tokens_b).count();
-
-    intersection as f64 / union as f64
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::time::Duration;
 
     use ipbr_sources::{SweRebenchSource, cache_html_path, cache_json_path};
-
-    #[test]
-    fn token_overlap_identical() {
-        assert!((token_overlap("gpt 5.5", "gpt 5.5") - 1.0).abs() < 0.001);
-    }
-
-    #[test]
-    fn token_overlap_partial() {
-        let overlap = token_overlap("gpt 5.5 turbo", "gpt 5.5");
-        assert!((0.6..1.0).contains(&overlap));
-    }
-
-    #[test]
-    fn token_overlap_disjoint() {
-        assert!(token_overlap("abc", "xyz") < 0.1);
-    }
 
     #[test]
     fn normalize_vendor_hint_lowercases_and_normalizes() {

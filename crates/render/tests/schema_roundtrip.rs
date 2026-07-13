@@ -5,8 +5,7 @@
 use std::collections::BTreeMap;
 
 use ipbr_core::{
-    Coefficients, ModelRecord, SourceSummary, SynthesisCategory, SynthesisProvenance,
-    ThinkingEffort, Vendor, compute_scores_with,
+    Coefficients, ModelRecord, SourceSummary, ThinkingEffort, Vendor, compute_scores_with,
 };
 use ipbr_render::{Scoreboard, toml_output::write_scoreboard};
 use serde::Deserialize;
@@ -70,8 +69,6 @@ struct Scores21 {
 struct MetricEvidence {
     class: String,
     source: Option<String>,
-    donor: Option<String>,
-    synthesis_category: Option<String>,
     citation: Option<String>,
 }
 
@@ -87,7 +84,6 @@ struct EvidenceTables {
 struct Coverage {
     direct: f64,
     reported: f64,
-    synthesized: f64,
     missing: f64,
     effective: f64,
     family_count: usize,
@@ -113,7 +109,6 @@ struct Coverage {
 struct Missing21 {
     metrics: Vec<String>,
     groups_shrunk: Vec<String>,
-    synthesis_dominant: bool,
 }
 
 #[test]
@@ -156,14 +151,6 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
     anthropic
         .metric_sources
         .insert("TerminalBench".to_string(), "terminal_bench".to_string());
-    anthropic.synthesized.insert(
-        "TerminalBench".to_string(),
-        SynthesisProvenance {
-            source_id: "terminal_bench".to_string(),
-            from: "anthropic/claude-sonnet-5".to_string(),
-            category: SynthesisCategory::SameSeriesForward,
-        },
-    );
     anthropic
         .raw_metrics
         .insert("TerminalBenchUncertainty".to_string(), 1.25);
@@ -187,12 +174,6 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
 
     let mut models = vec![openai, anthropic];
     compute_scores_with(&mut models, &coefficients);
-    models
-        .iter_mut()
-        .find(|model| model.canonical_id == "anthropic/claude-opus-4.7")
-        .unwrap()
-        .missing
-        .synthesis_dominant = true;
 
     let scoreboard = Scoreboard {
         models,
@@ -253,16 +234,9 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
         Some("Anthropic system card, table 8")
     );
 
-    let synthesized = &anthropic.metric_evidence["TerminalBench"];
-    assert_eq!(synthesized.class, "synthesized");
-    assert_eq!(
-        synthesized.donor.as_deref(),
-        Some("anthropic/claude-sonnet-5")
-    );
-    assert_eq!(
-        synthesized.synthesis_category.as_deref(),
-        Some("same_series_forward")
-    );
+    let terminal = &anthropic.metric_evidence["TerminalBench"];
+    assert_eq!(terminal.class, "direct");
+    assert_eq!(terminal.source.as_deref(), Some("terminal_bench"));
 
     let uncertainty = &anthropic.metric_evidence["TerminalBenchUncertainty"];
     assert_eq!(uncertainty.class, "direct");
@@ -294,7 +268,6 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
         anthropic.scores.balanced_status.as_str(),
         "ranked" | "provisional"
     ));
-    assert!(anthropic.missing.synthesis_dominant);
     assert!(
         anthropic
             .missing

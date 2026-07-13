@@ -118,8 +118,6 @@ fn parse_response(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                 .and_then(Value::as_str)
                 .map(ToOwned::to_owned),
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
 
@@ -183,9 +181,8 @@ published date/version metadata, or left unmatched when that context is not
 available.
 
 Preserve published uncertainty as auxiliary numeric fields (`*Uncertainty`,
-`*SEM`, or `*CILow`/`*CIHigh`). Auxiliary uncertainty is unscored and must be
-listed in `NON_SYNTHESIZED_METRICS`; it belongs to the measured observation,
-not a sibling model.
+`*SEM`, or `*CILow`/`*CIHigh`). Auxiliary uncertainty is unscored; it belongs
+to the measured observation.
 
 ### 4. Write a Contract Test
 
@@ -343,11 +340,11 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    ```
 
 4. Confirm the new metric has an intentional score and eligibility path.
-   Missing weight is tracked separately from capability, every actual
-   same-product observation counts as direct (including cited manual overrides),
-   and sibling fills are prior-only. A metric with no final role path is a
-   diagnostic unless it is explicitly declared as coverage-only historical
-   support. Run eligibility tests with at least one established model and one
+   Missing weight is tracked separately from capability, and every actual
+   same-product observation counts as direct (including cited manual overrides).
+   A metric with no final role path is a diagnostic unless it is explicitly
+   declared as coverage-only historical support. Run eligibility tests with at
+   least one established model and one
    genuinely under-covered model; a new narrow source should not flip either
    status merely because its row is absent.
 

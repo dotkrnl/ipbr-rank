@@ -1,7 +1,6 @@
 use crate::coefficients::{Coefficients, EvidenceConfig, MetricEligibility, MetricTransform};
 use crate::model::{
     EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, MissingInfo, ModelRecord,
-    SynthesisCategory,
 };
 use crate::normalize::{anchored_logistic_norm, as_score_0_100, robust_norm, tail_penalty_norm};
 use std::collections::{BTreeMap, BTreeSet};
@@ -38,7 +37,6 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
         record.scores = Default::default();
         record.missing.metrics.clear();
         record.missing.groups_shrunk.clear();
-        record.missing.synthesis_dominant = false;
         record.evidence = EvidenceSummary::default();
     }
 
@@ -53,17 +51,6 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
         &metric_signals,
         &group_signals,
     );
-
-    // Replace the old raw-cell heuristic with actual weighted role paths.
-    if let Some(synthesis) = &coef.synthesis {
-        for record in records.iter_mut() {
-            record.missing.synthesis_dominant = record
-                .evidence
-                .roles
-                .values()
-                .any(|coverage| coverage.synthesized > synthesis.per_model_cap + EPS);
-        }
-    }
 }
 
 /// Balanced eligibility avoids an all-four-role veto: at least three roles
@@ -196,22 +183,11 @@ fn normalize_population(
     let prior = evidence_cfg.prior();
     let mut signals = vec![BTreeMap::new(); records.len()];
     for (metric_key, def) in &coef.metrics {
-        let all_pop: Vec<f64> = records
+        let pop: Vec<f64> = records
             .iter()
             .filter_map(|r| r.raw_metrics.get(metric_key).copied())
             .filter(|v| v.is_finite())
             .collect();
-        let direct_pop: Vec<f64> = records
-            .iter()
-            .filter(|r| !r.synthesized.contains_key(metric_key))
-            .filter_map(|r| r.raw_metrics.get(metric_key).copied())
-            .filter(|v| v.is_finite())
-            .collect();
-        let pop = if direct_pop.len() >= 2 {
-            &direct_pop
-        } else {
-            &all_pop
-        };
         for (idx, r) in records.iter_mut().enumerate() {
             let raw = match r.raw_metrics.get(metric_key) {
                 Some(v) if v.is_finite() => *v,
@@ -224,48 +200,24 @@ fn normalize_population(
                 _ => match def.transform {
                     MetricTransform::AsScore => as_score_0_100(raw),
                     MetricTransform::Percentile => {
-                        robust_norm(raw, pop, def.higher_better, def.log_scale)
+                        robust_norm(raw, &pop, def.higher_better, def.log_scale)
                     }
                     MetricTransform::TailPenalty => {
-                        tail_penalty_norm(raw, pop, def.higher_better, def.log_scale)
+                        tail_penalty_norm(raw, &pop, def.higher_better, def.log_scale)
                     }
                 },
             };
             if let Some(v) = normed {
                 let family = def.family.clone().unwrap_or_else(|| metric_key.clone());
-                let (reliability, mut coverage) =
-                    if let Some(provenance) = r.synthesized.get(metric_key) {
-                        let reliability = match provenance.category {
-                            SynthesisCategory::Conservative => {
-                                evidence_cfg.conservative_synthesis_reliability
-                            }
-                            SynthesisCategory::SameSeriesForward => {
-                                evidence_cfg.same_series_synthesis_reliability
-                            }
-                            SynthesisCategory::StrongerSuccessor => {
-                                evidence_cfg.stronger_successor_synthesis_reliability
-                            }
-                        };
-                        (
-                            evidence_cfg.reliability(reliability),
-                            EvidenceCoverage {
-                                synthesized: 1.0,
-                                ..Default::default()
-                            },
-                        )
-                    } else {
-                        let mut direct_families = BTreeSet::new();
-                        direct_families.insert(family);
-                        (
-                            evidence_cfg.reliability(evidence_cfg.direct_reliability),
-                            EvidenceCoverage {
-                                direct: 1.0,
-                                direct_families,
-                                family_count: 1,
-                                ..Default::default()
-                            },
-                        )
-                    };
+                let mut direct_families = BTreeSet::new();
+                direct_families.insert(family);
+                let reliability = evidence_cfg.reliability(evidence_cfg.direct_reliability);
+                let mut coverage = EvidenceCoverage {
+                    direct: 1.0,
+                    direct_families,
+                    family_count: 1,
+                    ..Default::default()
+                };
                 coverage.effective = reliability;
                 let final_value = prior + reliability * (v - prior);
                 r.metrics.insert(metric_key.clone(), final_value);
@@ -609,7 +561,6 @@ fn aggregate_signals(
             }
             evidence.direct += weight * signal.evidence.direct;
             evidence.reported += weight * signal.evidence.reported;
-            evidence.synthesized += weight * signal.evidence.synthesized;
             evidence.missing += weight * signal.evidence.missing;
             evidence.effective += weight * signal.evidence.effective;
             evidence
@@ -625,7 +576,6 @@ fn aggregate_signals(
 
     evidence.direct /= total;
     evidence.reported /= total;
-    evidence.synthesized /= total;
     evidence.missing /= total;
     evidence.effective /= total;
     evidence.family_count = evidence.direct_families.len();
@@ -655,7 +605,6 @@ fn aggregate_evidence(
         if let Some(evidence) = evidence_by_key.get(key) {
             result.direct += weight * evidence.direct;
             result.reported += weight * evidence.reported;
-            result.synthesized += weight * evidence.synthesized;
             result.missing += weight * evidence.missing;
             result.effective += weight * evidence.effective;
             result
@@ -667,7 +616,6 @@ fn aggregate_evidence(
     }
     result.direct /= total;
     result.reported /= total;
-    result.synthesized /= total;
     result.missing /= total;
     result.effective /= total;
     result.family_count = result.direct_families.len();
@@ -811,7 +759,7 @@ fn cap_family_weights(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{ModelRecord, RoleScores, Vendor};
+    use crate::model::{ModelRecord, Vendor};
 
     fn make_record(id: &str, vendor: Vendor, raw: &[(&str, f64)]) -> ModelRecord {
         let mut r = ModelRecord::new(id.to_string(), id.to_string(), vendor);
@@ -1045,131 +993,6 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_metric_values_are_pulled_toward_50() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-        let coef = Coefficients::load_embedded().unwrap();
-        // Three records: low, high (direct), high (synthesized). The two
-        // high records share a raw value but the synthesized one is
-        // prior-only in the primary score.
-        let mut records = vec![
-            make_record(
-                "l/low",
-                Vendor::Other("l".into()),
-                &[("TerminalBench", 0.0)],
-            ),
-            make_record(
-                "d/direct",
-                Vendor::Other("d".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-            make_record(
-                "s/synth",
-                Vendor::Other("s".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-        ];
-        records[2].synthesized.insert(
-            "TerminalBench".to_string(),
-            SynthesisProvenance {
-                source_id: "terminal_bench".to_string(),
-                from: "d/direct".to_string(),
-                category: SynthesisCategory::Conservative,
-            },
-        );
-        compute_scores_with(&mut records, &coef);
-
-        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
-        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
-        // Direct value should percentile-normalize to ~100 (top of pop).
-        assert!(direct > 95.0, "direct={direct}");
-        // Sibling synthesis has zero primary reliability.
-        assert!(
-            (synth - 50.0).abs() < 1e-9,
-            "synthesized TerminalBench should pull toward 50, got {synth} (direct={direct})"
-        );
-    }
-
-    #[test]
-    fn same_series_forward_synthesized_metric_values_use_configured_reliability() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "l/low",
-                Vendor::Other("l".into()),
-                &[("TerminalBench", 0.0)],
-            ),
-            make_record(
-                "d/direct",
-                Vendor::Other("d".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-            make_record(
-                "s/synth",
-                Vendor::Other("s".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-        ];
-        records[2].synthesized.insert(
-            "TerminalBench".to_string(),
-            SynthesisProvenance {
-                source_id: "terminal_bench".to_string(),
-                from: "d/direct".to_string(),
-                category: SynthesisCategory::SameSeriesForward,
-            },
-        );
-        compute_scores_with(&mut records, &coef);
-
-        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
-        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
-        assert!(direct > 95.0, "direct={direct}");
-        assert!(
-            (synth - 50.0).abs() < 1e-9,
-            "same-series forward synthesis should be prior-only, got synth={synth}, direct={direct}"
-        );
-    }
-
-    #[test]
-    fn stronger_successor_synthesized_metric_values_use_configured_reliability() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-        let coef = Coefficients::load_embedded().unwrap();
-        let mut records = vec![
-            make_record(
-                "l/low",
-                Vendor::Other("l".into()),
-                &[("TerminalBench", 0.0)],
-            ),
-            make_record(
-                "d/direct",
-                Vendor::Other("d".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-            make_record(
-                "s/synth",
-                Vendor::Other("s".into()),
-                &[("TerminalBench", 100.0)],
-            ),
-        ];
-        records[2].synthesized.insert(
-            "TerminalBench".to_string(),
-            SynthesisProvenance {
-                source_id: "terminal_bench".to_string(),
-                from: "d/direct".to_string(),
-                category: SynthesisCategory::StrongerSuccessor,
-            },
-        );
-        compute_scores_with(&mut records, &coef);
-
-        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
-        let synth = records[2].metrics.get("TerminalBench").copied().unwrap();
-        assert!(direct > 95.0, "direct={direct}");
-        assert!(
-            (synth - 50.0).abs() < 1e-9,
-            "stronger-successor synthesis should be prior-only, got synth={synth}, direct={direct}"
-        );
-    }
-
-    #[test]
     fn curated_override_metric_values_use_direct_reliability() {
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
@@ -1201,47 +1024,6 @@ mod tests {
         assert!(
             (curated - direct).abs() < 1e-9,
             "curated same-product observations should use full direct reliability, got curated={curated}, direct={direct}"
-        );
-    }
-
-    #[test]
-    fn synthesized_metrics_do_not_set_normalization_baseline() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-        let mut coef = Coefficients::load_embedded().unwrap();
-        coef.metrics.get_mut("TerminalBench").unwrap().anchor_low = None;
-        coef.metrics.get_mut("TerminalBench").unwrap().anchor_high = None;
-        let mut records = vec![
-            make_record(
-                "l/low",
-                Vendor::Other("l".into()),
-                &[("TerminalBench", 0.0)],
-            ),
-            make_record(
-                "d/direct",
-                Vendor::Other("d".into()),
-                &[("TerminalBench", 50.0)],
-            ),
-            make_record(
-                "s/synth",
-                Vendor::Other("s".into()),
-                &[("TerminalBench", 1000.0)],
-            ),
-        ];
-        records[2].synthesized.insert(
-            "TerminalBench".to_string(),
-            SynthesisProvenance {
-                source_id: "terminal_bench".to_string(),
-                from: "d/direct".to_string(),
-                category: SynthesisCategory::Conservative,
-            },
-        );
-
-        compute_scores_with(&mut records, &coef);
-
-        let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
-        assert!(
-            direct > 95.0,
-            "synthesized outlier should not stretch direct normalization baseline, got {direct}"
         );
     }
 
@@ -1513,109 +1295,5 @@ mod tests {
             records[1].metrics["TerminalBench21Composite"],
             records[1].metrics["AATerminalBench21"]
         );
-    }
-
-    #[test]
-    fn sibling_value_changes_cannot_change_primary_role_scores() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-
-        fn scored(raw: f64) -> RoleScores {
-            let mut coef = Coefficients::load_embedded().unwrap();
-            coef.group_weights.insert(
-                "BUILD".to_string(),
-                [("SWEBenchPro".to_string(), 1.0)].into_iter().collect(),
-            );
-            coef.final_score_weights.insert(
-                "B_raw".to_string(),
-                [("BUILD".to_string(), 1.0)].into_iter().collect(),
-            );
-            let mut target = make_record(
-                "target",
-                Vendor::Other("target".into()),
-                &[("SWEBenchPro", raw)],
-            );
-            target.synthesized.insert(
-                "SWEBenchPro".into(),
-                SynthesisProvenance {
-                    source_id: "swebench_pro".into(),
-                    from: "donor".into(),
-                    category: SynthesisCategory::StrongerSuccessor,
-                },
-            );
-            let mut records = vec![
-                make_record("low", Vendor::Other("low".into()), &[("SWEBenchPro", 0.0)]),
-                make_record(
-                    "high",
-                    Vendor::Other("high".into()),
-                    &[("SWEBenchPro", 100.0)],
-                ),
-                target,
-            ];
-            compute_scores_with(&mut records, &coef);
-            records.pop().unwrap().scores
-        }
-
-        let low = scored(1.0);
-        let high = scored(99.0);
-        assert!((low.b_raw - high.b_raw).abs() < 1e-12);
-        assert!((low.b_raw - 50.0).abs() < 1e-12);
-    }
-
-    #[test]
-    fn synthesis_dominance_uses_weighted_scored_leaves_not_raw_metadata() {
-        use crate::model::{SynthesisCategory, SynthesisProvenance};
-
-        let mut coef = Coefficients::load_embedded().unwrap();
-        coef.synthesis = Some(crate::coefficients::SynthesisConfig {
-            per_source_cap: 1.0,
-            per_model_cap: 0.50,
-        });
-        coef.group_weights.insert(
-            "BUILD".to_string(),
-            [("TerminalBench21".to_string(), 1.0)].into_iter().collect(),
-        );
-        coef.final_score_weights.insert(
-            "B_raw".to_string(),
-            [("BUILD".to_string(), 1.0)].into_iter().collect(),
-        );
-
-        let mut synthesized = make_record(
-            "synth",
-            Vendor::Other("s".into()),
-            &[("TerminalBench21", 80.0)],
-        );
-        synthesized.synthesized.insert(
-            "TerminalBench21".into(),
-            SynthesisProvenance {
-                source_id: "terminal_bench".into(),
-                from: "donor".into(),
-                category: SynthesisCategory::Conservative,
-            },
-        );
-        for idx in 0..100 {
-            synthesized
-                .raw_metrics
-                .insert(format!("UnscoredMetadata{idx}"), idx as f64);
-        }
-        let mut records = vec![synthesized];
-        compute_scores_with(&mut records, &coef);
-        assert!(records[0].missing.synthesis_dominant);
-
-        let mut direct = make_record(
-            "direct",
-            Vendor::Other("d".into()),
-            &[("TerminalBench", 80.0), ("UnscoredSynthetic", 99.0)],
-        );
-        direct.synthesized.insert(
-            "UnscoredSynthetic".into(),
-            SynthesisProvenance {
-                source_id: "metadata".into(),
-                from: "donor".into(),
-                category: SynthesisCategory::Conservative,
-            },
-        );
-        let mut records = vec![direct];
-        compute_scores_with(&mut records, &coef);
-        assert!(!records[0].missing.synthesis_dominant);
     }
 }

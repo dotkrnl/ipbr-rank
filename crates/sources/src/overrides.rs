@@ -6,8 +6,8 @@
 //! by hand from vendor system cards, launch posts, benchmark operators, or
 //! other authoritative sources, and load them through this source so they flow
 //! through the same ingest path as everything else. These are direct
-//! observations, including when the model vendor published them; only sibling
-//! synthesis or future rank-derived estimates are non-direct.
+//! observations, including when the model vendor published them; only future
+//! rank-derived estimates would be non-direct.
 //!
 //! Provenance is preserved: every override row carries `source_id =
 //! "overrides"`, so its origin is visible in the scoreboard's source summary
@@ -151,8 +151,6 @@ fn parse_rows(toml_text: &str) -> Result<Vec<RawRow>, SourceError> {
             model_name: entry.canonical_id.clone(),
             vendor_hint: None,
             fields,
-            synthesized_from: None,
-            synthesis_category: None,
         });
     }
     Ok(rows)

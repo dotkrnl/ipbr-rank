@@ -48,7 +48,7 @@ done <<< "$source_ids"
 while IFS= read -r section; do
     [ -z "$section" ] && continue
     case "$section" in
-        "Removed sources"|"Synthesis") continue ;;
+        "Removed sources"|"Evidence precedence") continue ;;
     esac
     if ! echo "$source_ids" | grep -qx "$section"; then
         echo "WARNING: docs/sources.md has ## $section but no matching SOURCE_ID in sources crate" >&2
