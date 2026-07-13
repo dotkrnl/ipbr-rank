@@ -113,7 +113,6 @@ async fn cmd_triage(cli: &Cli, secrets: &SecretStore, min_count: usize) -> anyho
         .as_deref()
         .context("triage requires --cache DIR")?;
     let records = load_aliases(cli)?;
-    let _coefficients = load_coefficients(cli)?;
 
     let http = ReqwestHttp::default();
     let sources = registry();
@@ -169,7 +168,6 @@ fn resolve_secret(env_key: &str, file: Option<&Path>) -> anyhow::Result<Option<S
         .filter(|value| !value.is_empty()))
 }
 
-#[allow(dead_code)]
 fn secret_env_name(secret: SecretRef) -> &'static str {
     match secret {
         SecretRef::AaApiKey => "AA_API_KEY",
@@ -241,8 +239,9 @@ fn resolve_generated_at(cli: &Cli) -> anyhow::Result<String> {
 async fn cmd_fetch(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
     let cache_dir = cli.cache.as_deref().context("fetch requires --cache DIR")?;
     if cli.offline {
-        // REVIEWER: spec is ambiguous on `fetch --offline`; treating it as an error avoids a
-        // surprising "success" that cannot actually download anything without network access.
+        // `fetch` only warms the cache from the network; treating --offline as an
+        // error avoids a "success" that could not have downloaded anything. Use
+        // `score`/`all` with --offline to run from the cache.
         anyhow::bail!("fetch does not support --offline (use score/all with --offline)");
     }
 
