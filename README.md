@@ -65,7 +65,7 @@ intervention.
 - **I** (Idea): Creativity, general intelligence, open-ended generation
 - **P** (Planning): Structured reasoning, function calling, multi-step task decomposition
 - **B** (Building): Implementation, SWE-style work, terminal tasks, and code-quality benchmarks
-- **R** (Reviewing proxy): Review-adjacent search/document preference plus Planning and Building capability
+- **R** (Reviewing proxy): Direct code-review evidence where available, plus review-adjacent search/document preference and Planning and Building capability
 
 Each role has one 0–100 evidence-adjusted benchmark score.
 
@@ -140,7 +140,11 @@ observations made after a documented redirect belong to the served successor.
 - **I_raw** = 0.65×CRE + 0.35×GEN
 - **P_raw** = 0.65×PLAN + 0.35×GEN
 - **B_raw** = 0.95×BUILD + 0.05×PLAN
-- **R** = 0.30×LM_ARENA_REVIEW_PROXY + 0.35×BUILD + 0.35×PLAN
+- **R** = 0.20×CODE_REVIEW_DIRECT + 0.20×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.30×PLAN
+
+When a model has no direct code-review observation, the
+`CODE_REVIEW_DIRECT` weight redistributes across its remaining observed
+evidence, so unmeasured models are not penalized.
 
 The displayed **Balanced capability** rank is the unweighted mean of the four
 role proxies. Methodology v3 separates score contribution from ranking
