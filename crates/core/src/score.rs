@@ -48,7 +48,7 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     }
 
     let mut metric_signals = normalize_population(records, coef, &evidence_cfg);
-    compute_composite_metrics(records, coef, &evidence_cfg, &mut metric_signals);
+    compute_composite_metrics(records, coef, &mut metric_signals);
     let group_signals =
         aggregate_groups(records, coef, &aggregation, &evidence_cfg, &metric_signals);
     compute_role_scores(
@@ -107,10 +107,8 @@ pub fn balanced_is_provisional_with(model: &ModelRecord, config: &EvidenceConfig
 fn compute_composite_metrics(
     records: &mut [ModelRecord],
     coef: &Coefficients,
-    evidence_cfg: &EvidenceConfig,
     metric_signals: &mut [BTreeMap<String, Signal>],
 ) {
-    let prior = evidence_cfg.prior();
     for (r, signals) in records.iter_mut().zip(metric_signals.iter_mut()) {
         for (name, weights) in &coef.composite_metrics {
             let prefix = format!("{name}/");
@@ -124,13 +122,7 @@ fn compute_composite_metrics(
             let evaluated = if coef.precedence_composites.contains(name) {
                 precedence_signal(signals, &score_weights, Some(&mut r.missing), &prefix)
             } else {
-                aggregate_signals(
-                    signals,
-                    &score_weights,
-                    Some(&mut r.missing),
-                    &prefix,
-                    prior,
-                )
+                aggregate_signals(signals, &score_weights, Some(&mut r.missing), &prefix)
             };
             // Crucial distinction: a fully absent composite stays absent.
             // Partial composites contain explicit prior replacements and
@@ -265,7 +257,6 @@ fn aggregate_groups(
                 &score_weights,
                 Some(&mut r.missing),
                 &prefix,
-                prior,
             );
             r.groups.insert(
                 group_key.clone(),
@@ -344,14 +335,13 @@ fn compute_role_scores(
             let mut family_signals = BTreeMap::new();
             let mut family_evidence = BTreeMap::new();
             for (family, leaf_weights) in &family_leaves {
-                let evaluated =
-                    aggregate_signals(&metric_signals[idx], leaf_weights, None, "", prior);
+                let evaluated = aggregate_signals(&metric_signals[idx], leaf_weights, None, "");
                 family_evidence.insert(family.clone(), evaluated.evidence.clone());
                 if let Some(signal) = evaluated.signal {
                     family_signals.insert(family.clone(), signal);
                 }
             }
-            let evaluated = aggregate_signals(&family_signals, &capped_weights, None, "", prior);
+            let evaluated = aggregate_signals(&family_signals, &capped_weights, None, "");
             let value = evaluated
                 .signal
                 .as_ref()
@@ -476,7 +466,7 @@ fn core_role_coverage(
         .map(|(family, leaves)| {
             (
                 family.clone(),
-                aggregate_signals(metric_signals, leaves, None, "", 50.0).evidence,
+                aggregate_signals(metric_signals, leaves, None, "").evidence,
             )
         })
         .collect();
@@ -540,7 +530,6 @@ fn aggregate_signals(
     weights: &BTreeMap<String, f64>,
     mut missing_info: Option<&mut MissingInfo>,
     prefix: &str,
-    _prior: f64,
 ) -> AggregateEvaluation {
     let total = positive_weight_sum(weights);
     if total <= EPS {

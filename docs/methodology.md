@@ -7,8 +7,11 @@ them.
 
 The scores are benchmark-based capability proxies, not guarantees about a
 particular provider endpoint, agent, or deployment. In particular, Reviewing
-is still a review proxy: EQ-Bench Judgemark measures judge discrimination, but
-the portfolio does not yet contain a broad, direct code-review benchmark.
+is still largely a proxy: it now leads with a direct code-review signal
+(Factory's mean F1 over 50 real PRs) where one exists, but that cohort is
+narrow and supplemental, so most of the Review weight still comes from
+implementation, planning, and a search/document preference proxy. EQ-Bench
+Judgemark measures judge discrimination and remains diagnostic-only.
 
 ## 1. Ranked entity and configuration policy
 
@@ -255,6 +258,7 @@ The active capability groups are:
 | `GEN` | General/reasoning breadth, factual calibration, and research reasoning |
 | `PLAN` | Multi-step reasoning, enterprise workflows, tool use, escalation, and long-context planning |
 | `BUILD` | Long-horizon software implementation, terminal work, tool orchestration, and live coding |
+| `CODE_REVIEW_DIRECT` | Direct code-review evidence: Factory mean F1 over 50 real PRs |
 | `REVIEW_DIRECT` | diagnostic-only EQ-Bench Judgemark judge discrimination |
 | `LM_ARENA_REVIEW_PROXY` | Search/document preference proxy |
 
@@ -265,8 +269,13 @@ role paths are:
 Idea     = 0.65 CRE + 0.35 GEN
 Planning = 0.65 PLAN + 0.35 GEN
 Building = 0.95 BUILD + 0.05 PLAN
-Review   = 0.30 LM_ARENA_REVIEW_PROXY + 0.35 BUILD + 0.35 PLAN
+Review   = 0.20 CODE_REVIEW_DIRECT + 0.20 LM_ARENA_REVIEW_PROXY + 0.30 BUILD + 0.30 PLAN
 ```
+
+Where a model has no Factory code-review observation, the
+`CODE_REVIEW_DIRECT` weight redistributes across the remaining observed
+evidence, so unmeasured models are ranked on the other three inputs rather
+than penalized for a missing benchmark.
 
 These expressions define the nominal graph. The final calculation is made
 from flattened leaves after the family cap, so the published result cannot be

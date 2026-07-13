@@ -4,7 +4,15 @@ use std::collections::{BTreeMap, BTreeSet};
 const VENDOR_COLON_PREFIXES: &[&str] =
     &["openai:", "anthropic:", "google:", "moonshotai:", "z.ai:"];
 
-const ORG_ALIASES: &[(&str, &str)] = &[("moonshot ai", "moonshot"), ("z ai", "zai")];
+const ORG_ALIASES: &[(&str, &str)] = &[
+    ("moonshot ai", "moonshot"),
+    // OpenRouter/canonical IDs use the attached form `moonshotai/...`, which
+    // has no separator to split, so without this the org never normalizes to
+    // the `moonshot` vendor enum and Moonshot models lose the fuzzy-match
+    // vendor bonus.
+    ("moonshotai", "moonshot"),
+    ("z ai", "zai"),
+];
 
 pub fn normalize_vendor_hint(s: &str) -> String {
     normalize_name(s)
@@ -488,6 +496,10 @@ mod tests {
     #[test]
     fn normalize_org_aliases() {
         assert_eq!(normalize_name("Moonshot AI Kimi"), "moonshot kimi");
+        // The attached OpenRouter/canonical org spelling normalizes to the
+        // same `moonshot` vendor token as the spaced form.
+        assert_eq!(normalize_name("moonshotai/kimi-k2.7"), "moonshot kimi k2.7");
+        assert!(vendor_matches(&Vendor::Moonshot, "moonshotai"));
     }
 
     #[test]
