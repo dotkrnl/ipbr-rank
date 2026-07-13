@@ -203,6 +203,16 @@ class = "direct"
 source = "eqbench_judgemark"
 ```
 
+A native benchmark may also attach a citation when the winning observation has
+configuration provenance worth retaining, such as a best-agent submission:
+
+```toml
+[models.metric_evidence.TerminalBench21]
+class = "direct"
+source = "terminal_bench_2_1"
+citation = "TerminalBench21 upstream winning submission: model label=...; agent=..."
+```
+
 Manually curated same-product observation:
 
 ```toml
@@ -229,7 +239,8 @@ only for compatibility with older schema-2.1 snapshots; current output does
 not emit that evidence class. A vendor-published measurement is not classified
 as `reported` merely because it was curated manually. Vendor-automatic routing
 and fallback remain part of the same ranked product and retain a citation on
-the affected direct metrics. Valid synthesis
+the affected direct metrics. Native sources may likewise retain the winning
+agent/harness label as a citation. Valid synthesis
 categories are `conservative`, `same_series_forward`, and
 `stronger_successor`.
 

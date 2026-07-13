@@ -88,7 +88,7 @@ sources = ["terminal_bench_2_1", "hil_bench"]
 
 [[pair]]
 target = "google/gemini-3.1-pro-preview"
-from = "google/gemini-3-pro"
+from = "google/gemini-3-pro-preview"
 category = "same_series_forward"
 
 [[pair]]
@@ -167,7 +167,7 @@ category = "conservative"
 # 3-flash (same tier, full coverage) is the closest defensible donor.
 [[pair]]
 target = "google/gemini-2.5-flash"
-from = "google/gemini-3-flash"
+from = "google/gemini-3-flash-preview"
 category = "conservative"
 
 # Gemini 2.5-pro has no SWE Atlas coverage and is sparse on several
@@ -176,7 +176,7 @@ category = "conservative"
 # swebench_pro while leaving direct 2.5-pro values untouched.
 [[pair]]
 target = "google/gemini-2.5-pro"
-from = "google/gemini-3-pro"
+from = "google/gemini-3-pro-preview"
 category = "conservative"
 
 # ------------------------------------------------------------------
@@ -218,11 +218,11 @@ target = "openai/gpt-5.4-mini"
 from = "openai/gpt-5.4"
 category = "conservative"
 
-# Grok-code-fast-1 lacks arc_agi; grok-4-latest has it. Same vendor, small
+# Grok-code-fast-1 lacks arc_agi; the frozen Grok 4 0709 build has it. Same vendor, small
 # single-metric gap-fill.
 [[pair]]
 target = "xai/grok-code-fast-1"
-from = "xai/grok-4-latest"
+from = "xai/grok-4-0709"
 category = "conservative"
 
 # Kimi K2-0905 (Sept 2025) lacks SWE-Bench Pro; Moonshot only began reporting
@@ -355,7 +355,7 @@ sources = ["arc_agi", "sonar", "swerebench"]
 # predecessor.
 [[pair]]
 target = "google/gemini-3.5-flash"
-from = "google/gemini-3-flash"
+from = "google/gemini-3-flash-preview"
 category = "same_series_forward"
 
 # Gemini 3.1 Flash-Lite is an efficiency-tier model with direct OR/LMArena/
@@ -405,7 +405,7 @@ category = "same_series_forward"
 # public leaderboard gaps that have not yet added 4.3.
 [[pair]]
 target = "xai/grok-4.3"
-from = "xai/grok-4-latest"
+from = "xai/grok-4-0709"
 category = "same_series_forward"
 
 # Grok 4.20 has direct ARC/LMArena/Terminal/OpenRouter rows. xAI's docs expose

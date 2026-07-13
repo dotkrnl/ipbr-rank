@@ -15,8 +15,6 @@ const KNOWN_SUFFIXES: &[&str] = &[
     "reasoning",
     "thinking",
     "adaptive",
-    "preview",
-    "latest",
     "default",
     "medium",
     "high",
@@ -28,7 +26,7 @@ const KNOWN_SUFFIXES: &[&str] = &[
 
 const DISTINCT_VARIANT_TOKENS: &[&str] = &[
     "beta", "chat", "codex", "fast", "flash", "image", "instant", "lite", "mini", "minimal",
-    "nano", "preview", "pro", "turbo", "vision",
+    "nano", "latest", "preview", "pro", "turbo", "vision",
 ];
 
 fn html_unescape(s: &str) -> String {
@@ -495,8 +493,6 @@ mod tests {
         let recs = vec![rec("openai/gpt-5.5", Vendor::Openai, &["gpt-5.5"])];
         let idx = AliasIndex::build(&recs);
         for suffix in [
-            "latest",
-            "preview",
             "thinking",
             "non-reasoning",
             "reasoning",
@@ -522,6 +518,42 @@ mod tests {
                 "space suffix {suffix} should strip to the canonical alias"
             );
         }
+    }
+
+    #[test]
+    fn lifecycle_suffixes_require_explicit_aliases() {
+        let recs = vec![
+            rec("openai/gpt-5.5", Vendor::Openai, &["gpt-5.5"]),
+            rec(
+                "google/gemini-3-flash-preview",
+                Vendor::Google,
+                &["gemini-3-flash-preview"],
+            ),
+            rec(
+                "anthropic/claude-fable-5",
+                Vendor::Anthropic,
+                &["claude-fable-5", "claude-fable-latest"],
+            ),
+        ];
+        let idx = AliasIndex::build(&recs);
+
+        // A lifecycle label can denote a different build or a moving route.
+        // It must never be collapsed to an otherwise similar stable name.
+        assert_eq!(idx.lookup_exact("gpt-5.5-preview", Some("openai")), None);
+        assert_eq!(idx.match_record("gpt-5.5-preview", Some("openai")), None);
+        assert_eq!(idx.lookup_exact("gpt-5.5-latest", Some("openai")), None);
+        assert_eq!(idx.match_record("gpt-5.5-latest", Some("openai")), None);
+
+        // Source-audited lifecycle spellings remain available as explicit
+        // aliases on the intended canonical record.
+        assert_eq!(
+            idx.lookup_exact("gemini-3-flash-preview", Some("google")),
+            Some(1)
+        );
+        assert_eq!(
+            idx.lookup_exact("claude-fable-latest", Some("anthropic")),
+            Some(2)
+        );
     }
 
     #[test]
@@ -637,7 +669,10 @@ mod tests {
             .collect();
 
         let allowed_distinct_variant_drops = BTreeSet::from([
-            ("openrouter".to_string(), "google/gemini-3-pro".to_string()),
+            (
+                "openrouter".to_string(),
+                "google/gemini-3-pro-preview".to_string(),
+            ),
             // The explicit 0905 alias makes the legacy substring matcher
             // mistake unversioned `Kimi K2 Instruct` for the September
             // snapshot. The guarded matcher correctly keeps that older,

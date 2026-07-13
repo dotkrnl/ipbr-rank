@@ -6,6 +6,11 @@
 # different decimal separators ("4.5" vs "4-5"), AA's reasoning/effort
 # suffixes, and common shorthand ("opus 4.7"). Add every observed form so
 # the alias matcher hits exact lookup instead of falling back to fuzzy.
+#
+# Lifecycle labels are identity-bearing. `preview` and `latest` are not
+# stripped globally: preview builds and moving aliases must be mapped here
+# only after their product identity (and, for routes, effective date) has been
+# verified from the publishing source.
 
 # GPT-5.6 family — released 2026-07-09. Sol is the flagship/API `gpt-5.6`
 # route, Terra the balanced tier, and Luna the fast/cost-efficient tier.
@@ -274,6 +279,8 @@ aliases = [
     "gemini-3.1-pro", "gemini-3.1-pro-preview",
     "gemini-3-1-pro", "gemini-3-1-pro-preview",
     "google/gemini-3.1-pro-preview",
+    # Sonar places the effort token before the lifecycle token.
+    "Gemini 3.1 Pro High Preview", "gemini-3.1-pro-high-preview",
     # LMArena search endpoint spelling.
     "gemini-3.1-pro-grounding",
 ]
@@ -298,23 +305,32 @@ aliases = [
     "google/gemini-3.5-flash",
 ]
 
-[models."google/gemini-3-pro"]
+# Gemini 3 Pro shipped only as Preview and was shut down on 2026-03-09.
+# Google's API now redirects the same endpoint slug to Gemini 3.1 Pro Preview;
+# benchmark rows published for the original 2025-11-18 build remain attached
+# to this archived identity. Post-shutdown routed observations must be emitted
+# as Gemini 3.1 Pro by their source parser rather than added as aliases here.
+# Source: https://ai.google.dev/gemini-api/docs/deprecations
+[models."google/gemini-3-pro-preview"]
 vendor = "google"
 aliases = [
     "gemini pro 3", "gemini 3 pro",
     "gemini-3-pro", "gemini-3-pro-preview",
     "gemini-3-pro-low", "gemini-3-pro-high", "gemini-3-pro-medium",
-    "google/gemini-3-pro",
+    "google/gemini-3-pro", "google/gemini-3-pro-preview",
     # LMArena search endpoint spelling.
     "gemini-3-pro-grounding",
 ]
 
-[models."google/gemini-3-flash"]
+# Gemini 3 Flash remains a Preview product; Google has not published a stable
+# `gemini-3-flash` endpoint. Upstreams sometimes omit the lifecycle word, so
+# those audited shorthand labels stay explicit aliases of this Preview build.
+[models."google/gemini-3-flash-preview"]
 vendor = "google"
 aliases = [
     "gemini flash 3", "gemini 3 flash",
     "gemini-3-flash", "gemini-3-flash-preview", "gemini-3-flash-reasoning",
-    "google/gemini-3-flash",
+    "google/gemini-3-flash", "google/gemini-3-flash-preview",
     # LMArena endpoint/effort spellings.
     "gemini-3-flash-grounding", "gemini-3-flash (thinking-minimal)",
 ]
@@ -350,12 +366,15 @@ aliases = [
     "kimi-k2p7", "kimi-k2p7-code",
 ]
 
+# `kimi-latest` was a moving Kimi Assistant route and was retired by Moonshot
+# on 2026-01-28; it was not a permanent K2.6 model ID. Keep it unmatched
+# unless a source supplies enough dated route provenance to resolve the build.
+# Source: https://platform.kimi.com/docs/models
 [models."moonshotai/kimi-k2.6"]
 vendor = "moonshot"
 aliases = [
     "kimi 2.6", "kimi k2.6",
     "kimi-k2.6", "kimi-k2-6",
-    "kimi-latest",
     "moonshot/kimi-k2.6", "moonshotai/kimi-k2.6",
     # Scale leaderboards spell decimals as `p` (no `.` allowed in slugs).
     # `kimi-k2p5` is reserved for K2.5 below — do NOT alias it here.
@@ -438,16 +457,16 @@ aliases = [
     "gpt-5.2-search", "gpt-5.2-search-non-reasoning",
 ]
 
-# DeepSeek V4-Flash. The upstream DeepSeek API exposes both `deepseek-chat`
-# (non-thinking) and `deepseek-reasoner` (thinking on) endpoints. We alias
-# only `deepseek-chat` here so the ranked V4-Flash row reflects the default
-# non-thinking endpoint consistently. The reasoner row is left unmatched on
-# purpose — it's a separate effort tier outside the medium/thinking/adaptive
-# policy.
+# DeepSeek V4-Flash. The upstream DeepSeek API exposes `deepseek-chat`
+# (thinking off) and `deepseek-reasoner` (thinking on) as effort modes of the
+# same served V4-Flash product. Both are eligible under the max-effort policy;
+# explicit aliases keep the relationship source-auditable instead of relying
+# on fuzzy matching.
 [models."deepseek/deepseek-v4-flash"]
 vendor = "deepseek"
 aliases = [
     "deepseek-chat", "deepseek chat", "deepseek/deepseek-chat",
+    "deepseek-reasoner", "deepseek reasoner", "deepseek/deepseek-reasoner",
     "deepseek-v4-flash", "deepseek v4 flash", "deepseek/deepseek-v4-flash",
 ]
 
@@ -477,11 +496,19 @@ aliases = [
     "deepseek-ai/deepseek-v4-pro",
 ]
 
-[models."xai/grok-4-latest"]
+# Frozen 2025-07-09 Grok 4 build. xAI retired `grok-4-0709` on 2026-05-15
+# and now redirects live requests for that slug to Grok 4.3. Published
+# benchmark rows labelled Grok 4 / 0709 remain historical observations of the
+# frozen build; a post-retirement routed observation belongs to Grok 4.3 and
+# must be resolved by a dated/source-aware parser. The ambiguous moving
+# `grok-4-latest` spelling is intentionally not a static alias.
+# Source: https://docs.x.ai/developers/migration/may-15-retirement
+[models."xai/grok-4-0709"]
 vendor = "xai"
 aliases = [
-    "grok-4-latest", "grok 4 latest", "grok-4", "grok 4",
+    "grok-4", "grok 4",
     "x-ai/grok-4", "xai/grok-4", "grok-4-0709", "grok-4-search",
+    "x-ai/grok-4-0709", "xai/grok-4-0709",
 ]
 
 [models."xai/grok-4.3"]

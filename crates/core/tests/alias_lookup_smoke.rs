@@ -91,7 +91,7 @@ fn lookup_refreshed_source_spellings() {
         (
             "gemini-3-flash (thinking-minimal)",
             Some("google"),
-            "google/gemini-3-flash",
+            "google/gemini-3-flash-preview",
         ),
         ("gpt-5.5-search", Some("openai"), "openai/gpt-5.5"),
         (
@@ -102,7 +102,12 @@ fn lookup_refreshed_source_spellings() {
         (
             "gemini-3-pro-grounding",
             Some("google"),
-            "google/gemini-3-pro",
+            "google/gemini-3-pro-preview",
+        ),
+        (
+            "Gemini 3.1 Pro High Preview",
+            Some("google"),
+            "google/gemini-3.1-pro-preview",
         ),
     ];
     for &(input, vendor, expected) in cases {
@@ -360,4 +365,30 @@ fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
             "input={input:?} vendor={vendor:?} should not match by fuzzy fallback"
         );
     }
+}
+
+#[test]
+fn lifecycle_aliases_preserve_frozen_and_moving_identities() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let matched = |input: &str, vendor: Option<&str>| {
+        idx.match_record(input, vendor)
+            .map(|i| records[i].canonical_id.as_str())
+    };
+
+    assert_eq!(
+        matched("gemini-3-pro-preview", Some("google")),
+        Some("google/gemini-3-pro-preview")
+    );
+    assert_eq!(
+        matched("gemini-3-flash-preview", Some("google")),
+        Some("google/gemini-3-flash-preview")
+    );
+    assert_eq!(matched("grok-4-0709", Some("xai")), Some("xai/grok-4-0709"));
+    assert_eq!(matched("grok-4-latest", Some("xai")), None);
+    assert_eq!(matched("kimi-latest", Some("moonshot")), None);
+    assert_eq!(
+        matched("deepseek-reasoner", Some("deepseek")),
+        Some("deepseek/deepseek-v4-flash")
+    );
 }

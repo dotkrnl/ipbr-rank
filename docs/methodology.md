@@ -37,6 +37,14 @@ The per-model `thinking_effort` field serializes this envelope as
 `best_available`; it is not a promise that every metric used one common
 setting.
 
+Canonical identity includes lifecycle. `preview` denotes a particular preview
+product/build and `latest` can denote a moving route, so neither word is
+removed by generic alias normalization. A lifecycle spelling is accepted only
+when it is an explicit, source-audited alias. When a retired endpoint starts
+redirecting to a successor, historical benchmark observations remain on the
+frozen build while post-redirect observations belong to the served successor
+and must carry dated routing provenance.
+
 ## 2. Pipeline overview
 
 1. Fetch each verified source and match source names to canonical model IDs.
@@ -221,6 +229,10 @@ Important v3 corrections:
   fallback-labelled observations therefore use the primary metric keys, count
   as direct evidence, and retain a routing citation. Separately named
   multi-agent or premium endpoints remain distinct products.
+- Benchmark sources that select the best agent/harness submission retain the
+  winning upstream submission label as a per-metric citation. This does not
+  create a separate ranked model; it makes the capability-envelope choice
+  auditable.
 - BFCL, GSO, and Judgemark remain available as diagnostics but have no path to
   a role score. HiL-Bench contributes only a small Plan signal.
 - DeepSWE and SWE Atlas remain scored Build evidence, but are supplemental for

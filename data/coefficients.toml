@@ -94,7 +94,7 @@ vendor = "anthropic"
 [[effort_policy.exceptions]]
 effort = "high"
 source = "artificial_analysis"
-canonical_id = "google/gemini-3-pro"
+canonical_id = "google/gemini-3-pro-preview"
 
 [[effort_policy.exceptions]]
 effort = "high"

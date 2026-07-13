@@ -153,7 +153,16 @@ text. `eqbench.rs` is the reference implementation.
 Before returning rows, canonicalize aliases and keep one best model-level row.
 The project policy prefers max, then xhigh, high, thinking/adaptive, medium, then
 default effort. If the source publishes agent/harness submissions rather than
-effort labels, document the best-row rule in `docs/sources.md`.
+effort labels, document the best-row rule in `docs/sources.md` and attach the
+winning submission label to `<Metric>__evidence_note`. Core ingestion removes
+that reserved field from numeric/effort processing and emits it as the direct
+metric's citation.
+
+Do not assume `preview` or `latest` is a harmless suffix. Preview builds and
+moving aliases require an explicit entry in `data/required_aliases.toml`; a
+route that changed over time must be resolved in the source parser using its
+published date/version metadata, or left unmatched when that context is not
+available.
 
 Preserve published uncertainty as auxiliary numeric fields (`*Uncertainty`,
 `*SEM`, or `*CILow`/`*CIHigh`). Auxiliary uncertainty is unscored and must be

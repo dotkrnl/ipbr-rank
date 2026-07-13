@@ -124,33 +124,40 @@ fn extract_board(
 
     let alias_records = crate::embedded_alias_records();
     let alias_index = AliasIndex::build(&alias_records);
-    let mut best_by_model: BTreeMap<String, (f64, String)> = BTreeMap::new();
+    let mut best_by_model: BTreeMap<String, (f64, String, String)> = BTreeMap::new();
     for entry in results {
-        let model_name = match entry.get("name").and_then(Value::as_str) {
-            Some(value) if !value.trim().is_empty() => extract_model(value),
+        let upstream_label = match entry.get("name").and_then(Value::as_str) {
+            Some(value) if !value.trim().is_empty() => value.trim(),
             _ => continue,
         };
+        let model_name = extract_model(upstream_label);
         let resolved = match entry.get("resolved").and_then(number_like) {
             Some(value) if value.is_finite() => value,
             _ => continue,
         };
+        let evidence_note = submission_note(entry, upstream_label);
 
         let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_name, None);
         match best_by_model.get_mut(&key) {
-            Some((best_resolved, best_name)) if resolved > *best_resolved => {
+            Some((best_resolved, best_name, best_note)) if resolved > *best_resolved => {
                 *best_resolved = resolved;
                 *best_name = model_name.to_string();
+                *best_note = evidence_note;
             }
             Some(_) => {}
             None => {
-                best_by_model.insert(key, (resolved, model_name.to_string()));
+                best_by_model.insert(key, (resolved, model_name.to_string(), evidence_note));
             }
         }
     }
 
-    for (_key, (resolved, model_name)) in best_by_model {
+    for (_key, (resolved, model_name, evidence_note)) in best_by_model {
         let mut fields = BTreeMap::new();
         fields.insert(metric.to_string(), Value::from(resolved));
+        fields.insert(
+            format!("{metric}__evidence_note"),
+            Value::from(evidence_note),
+        );
         rows.push(RawRow {
             source_id: SOURCE_ID.to_string(),
             model_name,
@@ -161,6 +168,26 @@ fn extract_board(
         });
     }
     Ok(())
+}
+
+fn submission_note(entry: &Value, upstream_label: &str) -> String {
+    let metadata: Vec<&str> = entry
+        .get("tags")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .collect();
+    if metadata.is_empty() {
+        format!("SWE-bench upstream winning submission: {upstream_label}")
+    } else {
+        format!(
+            "SWE-bench upstream winning submission: {upstream_label}; metadata: {}",
+            metadata.join("; ")
+        )
+    }
 }
 
 /// Strips a trailing parenthesized YYYY-MM-DD date, then takes the rightmost
@@ -342,6 +369,13 @@ mod tests {
         assert_eq!(
             rows[0].fields.get("SWEBenchVerified").and_then(number_like),
             Some(75.2)
+        );
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("SWEBenchVerified__evidence_note")
+                .and_then(Value::as_str),
+            Some("SWE-bench upstream winning submission: agent-b + Gemini 2.5 Pro")
         );
     }
 }

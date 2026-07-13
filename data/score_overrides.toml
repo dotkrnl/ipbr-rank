@@ -187,7 +187,7 @@ note = "Alibaba Qwen3.6-Plus blog, Terminal-Bench 2.0 (Harbor/Terminus-2 harness
 canonical_id = "qwen/qwen3.6-max-preview"
 metric = "TerminalBench"
 value = 65.4
-note = "Alibaba Qwen3.6-Max-Preview blog reports Terminal-Bench 2.0 +3.8 over Qwen3.6-Plus; Qwen3.6-Plus official row is 61.6, https://www.alibabacloud.com/blog/qwen3-6-max-preview-smarter-sharper-still-evolving_603055 and https://qwen.ai/blog?id=qwen3.6, accessed 2026-06-12"
+note = "DERIVED_FROM_VENDOR_DELTA (not a directly published absolute score): Alibaba reports Qwen3.6-Max-Preview as +3.8 over Qwen3.6-Plus on Terminal-Bench 2.0; 65.4 = the separately published Qwen3.6-Plus score 61.6 + 3.8. Sources: https://www.alibabacloud.com/blog/qwen3-6-max-preview-smarter-sharper-still-evolving_603055 and https://qwen.ai/blog?id=qwen3.6, accessed 2026-06-12"
 
 [[entries]]
 canonical_id = "qwen/qwen3.5-397b-a17b"
@@ -340,7 +340,7 @@ value = 1314
 note = "GDPval-AA Elo, 2026-04-27"
 
 [[entries]]
-canonical_id = "google/gemini-3-flash"
+canonical_id = "google/gemini-3-flash-preview"
 metric = "GDPval"
 value = 1208
 note = "GDPval-AA Elo (Reasoning), 2026-04-27"
@@ -352,7 +352,7 @@ value = 1656
 note = "Google Gemini 3.5 announcement, GDPval-AA Elo, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
 
 [[entries]]
-canonical_id = "google/gemini-3-pro"
+canonical_id = "google/gemini-3-pro-preview"
 metric = "GDPval"
 value = 1189
 note = "GDPval-AA Elo (high), 2026-04-27"
@@ -370,7 +370,7 @@ value = 864
 note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Kimi K2 0905), 2026-04-27"
 
 [[entries]]
-canonical_id = "xai/grok-4-latest"
+canonical_id = "xai/grok-4-0709"
 metric = "GDPval"
 value = 983
 note = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok 4 standard), 2026-04-27"

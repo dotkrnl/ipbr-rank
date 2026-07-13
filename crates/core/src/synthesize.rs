@@ -703,7 +703,11 @@ mod tests {
                 "gemini-3.1-pro-preview",
                 &["gemini-3.1-pro-preview"],
             ),
-            record("google/gemini-3-pro", "gemini-3-pro", &["gemini-3-pro"]),
+            record(
+                "google/gemini-3-pro-preview",
+                "gemini-3-pro-preview",
+                &["gemini-3-pro", "gemini-3-pro-preview"],
+            ),
         ];
         let mut rows = rows_by_source(vec![
             raw("lmarena", "gpt-5.4", None, &[("score", json!(88.0))]),
@@ -716,7 +720,7 @@ mod tests {
                 SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
                 SynthesisPair::same_series_forward(
                     "google/gemini-3.1-pro-preview",
-                    "google/gemini-3-pro",
+                    "google/gemini-3-pro-preview",
                 ),
             ],
             &records,
@@ -744,7 +748,11 @@ mod tests {
                 "gemini-3.1-pro-preview",
                 &["gemini-3.1-pro-preview"],
             ),
-            record("google/gemini-3-pro", "gemini-3-pro", &["gemini-3-pro"]),
+            record(
+                "google/gemini-3-pro-preview",
+                "gemini-3-pro-preview",
+                &["gemini-3-pro", "gemini-3-pro-preview"],
+            ),
             record("anthropic/claude-opus-4.7", "opus-4.7", &["opus-4.7"]),
         ];
         let mut rows = rows_by_source(vec![
@@ -758,7 +766,7 @@ mod tests {
                 SynthesisPair::same_series_forward("openai/gpt-5.5", "openai/gpt-5.4"),
                 SynthesisPair::same_series_forward(
                     "google/gemini-3.1-pro-preview",
-                    "google/gemini-3-pro",
+                    "google/gemini-3-pro-preview",
                 ),
                 SynthesisPair::same_series_forward(
                     "anthropic/claude-opus-4.7",

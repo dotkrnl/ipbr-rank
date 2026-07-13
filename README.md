@@ -130,6 +130,11 @@ back to 50. Final role paths are flattened to unique leaves, and no source
 family may carry more than 30% of a role when enough independent families
 exist.
 
+Lifecycle labels are part of model identity: `preview` builds and moving
+`latest` routes are matched only through explicit, source-audited aliases.
+Historical observations remain attached to the build that was actually tested;
+observations made after a documented redirect belong to the served successor.
+
 ### Final scores
 
 - **I_raw** = 0.65×CRE + 0.35×GEN

@@ -190,6 +190,7 @@ cohort is not part of methodology-v3 scoring or eligibility.
 - **Cache TTL**: 7 d
 - **Metrics**: `SWEBenchVerified` (Verified leaderboard), `SWEBenchMultilingual` (multilingual leaderboard, 9 languages incl. C/C++/Go/Java/JS/PHP/Ruby/Rust). Single fetch covers both — no extra HTTP cost.
 - **Ranking use**: Multilingual remains a scored component of `SWEComposite`; Verified is retired from the current score but retained as direct historical Build/Review support.
+- **Submission provenance**: When several agent/harness submissions resolve to one canonical model, the highest resolved row wins and its full upstream label and published tag metadata are retained as that metric's citation.
 - **Fixture**: `data/fixtures/swebench_leaderboards.json`
 
 ## terminal_bench
@@ -198,7 +199,7 @@ cohort is not part of methodology-v3 scoring or eligibility.
 - **API**: Terminal-Bench 2.0 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `TerminalBench`; `TerminalBenchUncertainty` preserves the published ± value as an unscored auxiliary field.
+- **Metric**: `TerminalBench`; `TerminalBenchUncertainty` preserves the published ± value as an unscored auxiliary field. The winning row's agent, model label, date, and organization fields are retained as the metric citation.
 - **Ranking use**: Retired from the current score in favor of Terminal-Bench 2.1, but retained as direct historical Plan/Build/Review support.
 - **Fixture**: `data/fixtures/terminal_bench.html`
 
@@ -208,7 +209,7 @@ cohort is not part of methodology-v3 scoring or eligibility.
 - **API**: Terminal-Bench 2.1 HTML leaderboard page
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. `TerminalBench21Uncertainty` preserves the published ± value. The source canonicalizes duplicate agent rows to the best row per model. Scoring consumes the primary metric through `TerminalBench21Composite` together with AA's `AATerminalBench21`; uncertainty is unscored.
+- **Metric**: `TerminalBench21` — newer, narrower Terminal-Bench track with current frontier agent/model combinations. `TerminalBench21Uncertainty` preserves the published ± value. The source canonicalizes duplicate agent rows to the best row per model and retains that row's agent/model/date/organization fields as the metric citation. Scoring consumes the primary metric through `TerminalBench21Composite` together with AA's `AATerminalBench21`; uncertainty is unscored.
 - **Fixture**: `data/fixtures/terminal_bench_2_1.html`
 
 ## livecodebench

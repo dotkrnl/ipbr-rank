@@ -172,6 +172,10 @@ fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, 
 
         let mut fields = BTreeMap::new();
         fields.insert(metric.to_string(), serde_json::Value::from(score));
+        fields.insert(
+            format!("{metric}__evidence_note"),
+            serde_json::Value::from(submission_note(&cells, metric)),
+        );
         if let Some(uncertainty) = uncertainty {
             // Auxiliary, unscored uncertainty in percentage points. Keeping
             // the key metric-specific prevents 2.0 and 2.1 observations from
@@ -202,6 +206,25 @@ fn parse_rows(html: &str, metric: &str, source_id: &str) -> Result<Vec<RawRow>, 
         }
     }
     Ok(best_by_model.into_values().map(|(_, row)| row).collect())
+}
+
+fn submission_note(cells: &[String], metric: &str) -> String {
+    let mut details = vec![format!("model label={}", cells[3].trim())];
+    for (label, index) in [
+        ("agent", 2usize),
+        ("date", 4usize),
+        ("agent org", 5usize),
+        ("model org", 6usize),
+    ] {
+        let value = cells.get(index).map_or("", |cell| cell.trim());
+        if !value.is_empty() {
+            details.push(format!("{label}={value}"));
+        }
+    }
+    format!(
+        "{metric} upstream winning submission: {}",
+        details.join("; ")
+    )
 }
 
 fn parse_accuracy(s: &str) -> Option<(f64, Option<f64>)> {
@@ -299,6 +322,15 @@ mod tests {
                 .get("TerminalBenchUncertainty")
                 .and_then(serde_json::Value::as_f64),
             Some(2.0)
+        );
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("TerminalBench__evidence_note")
+                .and_then(serde_json::Value::as_str),
+            Some(
+                "TerminalBench upstream winning submission: model label=GPT-5.3-Codex; agent=agent-a"
+            )
         );
     }
 }
