@@ -2,13 +2,15 @@ use std::fmt::Write;
 
 use crate::Scoreboard;
 
-use super::radar::{RadarSlice, RadarVariant, render_radar};
+use super::radar::{RadarScale, RadarScales, RadarSlice, RadarVariant, render_radar};
 use super::{html_escape, layout};
 
 pub fn render_index(scoreboard: &Scoreboard) -> String {
     let mut body = String::new();
 
-    body.push_str(&render_hero(scoreboard));
+    let radar_scales = top10_axis_scales(scoreboard);
+
+    body.push_str(&render_hero(scoreboard, radar_scales));
 
     body.push_str(SCORING_PANEL);
 
@@ -16,7 +18,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
         r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#,
     );
 
-    body.push_str(&render_leaderboard(scoreboard));
+    body.push_str(&render_leaderboard(scoreboard, radar_scales));
 
     write!(
         body,
@@ -29,7 +31,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
     layout("ipbr · live llm coding scoreboard", scoreboard, &body)
 }
 
-fn render_hero(scoreboard: &Scoreboard) -> String {
+fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
     let top3: Vec<&ipbr_core::ModelRecord> =
         dense_ranked_models(scoreboard.models.iter().collect(), composite)
             .into_iter()
@@ -51,7 +53,7 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
         })
         .rev() // draw rank-3 first so rank-1 sits on top
         .collect();
-    let radar_svg = render_radar(&radar_slices, RadarVariant::Hero);
+    let radar_svg = render_radar(&radar_slices, RadarVariant::Hero, radar_scales);
 
     let mut legend = String::from(r#"<ul class="hero-radar-legend">"#);
     for (idx, model) in top3.iter().enumerate() {
@@ -68,7 +70,7 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
     let leaders = render_leaders(scoreboard);
 
     format!(
-        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models</p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
+        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="hero-stat"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span></span><span class="hero-stat">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time></span><span class="hero-stat">{sources} sources</span><span class="hero-stat">{models} models</span></p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
         generated_at = html_escape(&scoreboard.generated_at),
         sources = scoreboard.source_summary.len(),
         models = scoreboard.models.len(),
@@ -114,6 +116,43 @@ fn render_leaders(scoreboard: &Scoreboard) -> String {
 fn composite(model: &ipbr_core::ModelRecord) -> f64 {
     let s = &model.scores;
     (s.i_raw + s.p_raw + s.b_raw + s.r) / 4.0
+}
+
+const RADAR_REFERENCE_COHORT: usize = 10;
+
+/// Fixes each axis's [min, max] to the spread of the top-10 balanced-score
+/// models, so every radar on the page (hero and per-row) shares one
+/// reference frame instead of each self-normalizing to its own shape.
+fn top10_axis_scales(scoreboard: &Scoreboard) -> RadarScales {
+    let top10: Vec<&ipbr_core::ModelRecord> =
+        dense_ranked_models(scoreboard.models.iter().collect(), composite)
+            .into_iter()
+            .take(RADAR_REFERENCE_COHORT)
+            .map(|(_, model)| model)
+            .collect();
+
+    let axis_range = |get: fn(&ipbr_core::RoleScores) -> f64| -> (f64, f64) {
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+        for model in &top10 {
+            let value = get(&model.scores);
+            min = min.min(value);
+            max = max.max(value);
+        }
+        (min, max)
+    };
+
+    let (idea_min, idea_max) = axis_range(|s| s.i_raw);
+    let (plan_min, plan_max) = axis_range(|s| s.p_raw);
+    let (build_min, build_max) = axis_range(|s| s.b_raw);
+    let (review_min, review_max) = axis_range(|s| s.r);
+
+    RadarScales {
+        idea: RadarScale::from_range(idea_min, idea_max),
+        plan: RadarScale::from_range(plan_min, plan_max),
+        build: RadarScale::from_range(build_min, build_max),
+        review: RadarScale::from_range(review_min, review_max),
+    }
 }
 
 const DISPLAY_TIE_EPSILON: f64 = 0.05;
@@ -239,7 +278,7 @@ fn render_delta(current: f64, prev: Option<f64>) -> String {
     )
 }
 
-fn render_leaderboard(scoreboard: &Scoreboard) -> String {
+fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
     // Default order: build score. Individual role columns remain
     // independently sortable.
@@ -258,7 +297,7 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
     }
 
     let mut html = String::from(
-        r##"<section id="leaderboard"><div class="toolbar"><input data-filter-input="#leaderboard-table" type="search" placeholder="filter by model or vendor" aria-label="filter leaderboard by model or vendor"><div class="vendor-chips" role="group" aria-label="filter leaderboard by vendor">"##,
+        r##"<section id="leaderboard"><div class="toolbar"><div class="search-box"><svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.75" cy="6.75" r="4.75"></circle><line x1="10.4" y1="10.4" x2="14.5" y2="14.5"></line></svg><input data-filter-input="#leaderboard-table" type="search" placeholder="filter" aria-label="filter leaderboard by model or vendor"></div><div class="vendor-chips" role="group" aria-label="filter leaderboard by vendor">"##,
     );
     html.push_str(
         r#"<button type="button" data-vendor="" class="active" aria-pressed="true" aria-label="show all vendors">all</button>"#,
@@ -294,14 +333,18 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
     html.push_str(r#"<th scope="col" aria-label="details"></th></tr></thead><tbody>"#);
 
     for model in &models {
-        html.push_str(&render_row(scoreboard, model));
+        html.push_str(&render_row(scoreboard, model, radar_scales));
     }
 
     html.push_str(r#"</tbody></table></div></section>"#);
     html
 }
 
-fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
+fn render_row(
+    scoreboard: &Scoreboard,
+    model: &ipbr_core::ModelRecord,
+    radar_scales: RadarScales,
+) -> String {
     let mut html = String::new();
     let s = &model.scores;
     let id = html_escape(&model.canonical_id);
@@ -361,6 +404,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
             provisional: balanced_is_provisional(model),
         }],
         RadarVariant::Mini,
+        radar_scales,
     );
 
     write!(

@@ -29,11 +29,16 @@ pub enum RadarVariant {
 
 /// Inline SVG for a 4-axis radar chart (Idea/Plan/Build/Review).
 ///
-/// Each render scales its observed score range to radius 50 so differences
-/// among the displayed models remain visible. Tick rings divide that scaled
-/// range into quarters. Hero variant places axis labels at radius 60; mini
-/// variant omits them.
-pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String {
+/// `scales` fixes each axis's [min, max] mapping to radius 50 — the same
+/// reference frame for every radar on the page (hero and per-row) so shapes
+/// are comparable to one another, not just internally self-consistent. Tick
+/// rings divide the scaled range into quarters. Hero variant places axis
+/// labels at radius 60; mini variant omits them.
+pub fn render_radar(
+    slices: &[RadarSlice<'_>],
+    variant: RadarVariant,
+    scales: RadarScales,
+) -> String {
     let (class, view_box) = match variant {
         RadarVariant::Hero => ("radar radar-hero", "-62 -62 124 124"),
         RadarVariant::Mini => ("radar radar-mini", "-56 -56 112 112"),
@@ -60,14 +65,10 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
         .unwrap();
     }
 
-    // Per-render range scale. Mapping the displayed [min - 10, max] range to
-    // the full radius keeps nearby frontier-model scores distinguishable.
-    let scale = compute_scale(slices);
-
     // Polygons, one per slice. Drawn in supplied order so callers control
     // z-stacking (e.g. rank-1 last so it sits on top).
     for slice in slices {
-        let points = polygon_points(slice, scale);
+        let points = polygon_points(slice, scales);
         let title = slice
             .label
             .map(|label| format!("<title>{}</title>", html_escape(label)))
@@ -106,49 +107,57 @@ pub fn render_radar(slices: &[RadarSlice<'_>], variant: RadarVariant) -> String 
 
 const RADAR_RADIUS: f64 = 50.0;
 
-/// Minimum span between baseline and ceiling. Without this, a slice whose
-/// scores are identical would yield a zero-width range and a degenerate
-/// polygon at the centre.
+/// Minimum span between an axis's min and max. Without this, an axis whose
+/// reference cohort ties on that metric would yield a zero-width range and a
+/// divide-by-zero.
 const RADAR_MIN_RANGE: f64 = 10.0;
 
+/// One axis's [min, max] mapping: min plots at the centre, max at the outer
+/// ring. Scores outside the range clamp to the nearer end.
 #[derive(Clone, Copy, Debug)]
-struct RadarScale {
-    baseline: f64,
-    ceiling: f64,
+pub struct RadarScale {
+    min: f64,
+    max: f64,
 }
 
-fn compute_scale(slices: &[RadarSlice<'_>]) -> RadarScale {
-    let mut min_score = f64::INFINITY;
-    let mut max_score = f64::NEG_INFINITY;
-    for slice in slices {
-        for value in [slice.idea, slice.plan, slice.build, slice.review] {
-            min_score = min_score.min(value);
-            max_score = max_score.max(value);
+impl RadarScale {
+    /// Build a scale from an observed (min, max) pair, e.g. the low/high of a
+    /// reference cohort on one axis. Falls back to a neutral 60-100 range if
+    /// the inputs aren't finite (empty cohort).
+    pub fn from_range(min: f64, max: f64) -> Self {
+        if !min.is_finite() || !max.is_finite() {
+            return RadarScale {
+                min: 60.0,
+                max: 100.0,
+            };
+        }
+        RadarScale {
+            min,
+            max: max.max(min + RADAR_MIN_RANGE),
         }
     }
-    if !min_score.is_finite() || !max_score.is_finite() {
-        return RadarScale {
-            baseline: 60.0,
-            ceiling: 100.0,
-        };
-    }
-    let baseline = (min_score - 10.0).clamp(0.0, 90.0);
-    let ceiling = max_score.max(baseline + RADAR_MIN_RANGE).min(100.0);
-    RadarScale { baseline, ceiling }
 }
 
-fn polygon_points(slice: &RadarSlice<'_>, scale: RadarScale) -> String {
-    let range = (scale.ceiling - scale.baseline).max(RADAR_MIN_RANGE);
-    let r = |score: f64| {
-        let clamped = score.clamp(scale.baseline, scale.ceiling);
-        ((clamped - scale.baseline) / range) * RADAR_RADIUS
+/// The four axes' scales, fixed once per page render (typically from a
+/// reference cohort) and shared by every radar drawn on that page.
+#[derive(Clone, Copy, Debug)]
+pub struct RadarScales {
+    pub idea: RadarScale,
+    pub plan: RadarScale,
+    pub build: RadarScale,
+    pub review: RadarScale,
+}
+
+fn polygon_points(slice: &RadarSlice<'_>, scales: RadarScales) -> String {
+    let r = |score: f64, scale: RadarScale| {
+        let range = (scale.max - scale.min).max(RADAR_MIN_RANGE);
+        let clamped = score.clamp(scale.min, scale.max);
+        ((clamped - scale.min) / range) * RADAR_RADIUS
     };
-    let (idea, plan, build, review) = (
-        r(slice.idea),
-        r(slice.plan),
-        r(slice.build),
-        r(slice.review),
-    );
+    let idea = r(slice.idea, scales.idea);
+    let plan = r(slice.plan, scales.plan);
+    let build = r(slice.build, scales.build);
+    let review = r(slice.review, scales.review);
     // Order: top (idea), right (plan), bottom (build), left (review).
     format!(
         "0,{ti:.1} {pr:.1},0 0,{bb:.1} {rl:.1},0",
@@ -175,15 +184,87 @@ mod tests {
         }
     }
 
+    fn uniform_scales(scale: RadarScale) -> RadarScales {
+        RadarScales {
+            idea: scale,
+            plan: scale,
+            build: scale,
+            review: scale,
+        }
+    }
+
     #[test]
-    fn range_scales_each_render() {
-        let svg = render_radar(&[slice(false)], RadarVariant::Mini);
-        assert!(svg.contains(r#"points="0,-38.5 42.3,0 0,46.2 -50.0,0""#));
+    fn from_range_maps_min_to_zero_and_max_to_full_radius() {
+        let scales = uniform_scales(RadarScale::from_range(70.0, 90.0));
+        let svg = render_radar(&[slice(false)], RadarVariant::Mini, scales);
+        // (80-70)/20*50=25, (81-70)/20*50=27.5, (82-70)/20*50=30, (83-70)/20*50=32.5
+        assert!(svg.contains(r#"points="0,-25.0 27.5,0 0,30.0 -32.5,0""#));
+    }
+
+    #[test]
+    fn from_range_floors_a_degenerate_span() {
+        let s = RadarScale::from_range(50.0, 52.0);
+        assert_eq!(s.max - s.min, RADAR_MIN_RANGE);
+    }
+
+    #[test]
+    fn from_range_falls_back_when_bounds_are_not_finite() {
+        let s = RadarScale::from_range(f64::NAN, 10.0);
+        assert_eq!((s.min, s.max), (60.0, 100.0));
+    }
+
+    #[test]
+    fn each_axis_maps_independently_against_its_own_scale() {
+        let scales = RadarScales {
+            idea: RadarScale::from_range(0.0, 100.0),
+            plan: RadarScale::from_range(50.0, 100.0),
+            build: RadarScale::from_range(80.0, 100.0),
+            review: RadarScale::from_range(90.0, 100.0),
+        };
+        let mid = RadarSlice {
+            idea: 50.0,
+            plan: 75.0,
+            build: 90.0,
+            review: 95.0,
+            class: "solo",
+            label: None,
+            provisional: false,
+        };
+        let svg = render_radar(&[mid], RadarVariant::Mini, scales);
+        // Each score sits at the midpoint of its own axis's range, despite
+        // the four ranges having wildly different widths (100/50/20/10) —
+        // every axis should still plot at exactly half the radius.
+        assert!(svg.contains(r#"points="0,-25.0 25.0,0 0,25.0 -25.0,0""#));
+    }
+
+    #[test]
+    fn scores_outside_the_reference_range_clamp_to_centre_or_ring() {
+        let scales = uniform_scales(RadarScale::from_range(40.0, 60.0));
+        let below = RadarSlice {
+            idea: 10.0,
+            plan: 10.0,
+            build: 10.0,
+            review: 10.0,
+            class: "solo",
+            label: None,
+            provisional: false,
+        };
+        let above = RadarSlice {
+            idea: 200.0,
+            plan: 200.0,
+            build: 200.0,
+            review: 200.0,
+            ..below
+        };
+        let svg = render_radar(&[below, above], RadarVariant::Mini, scales);
+        assert!(svg.contains(r#"points="0,-0.0 0.0,0 0,0.0 -0.0,0""#));
+        assert!(svg.contains(r#"points="0,-50.0 50.0,0 0,50.0 -50.0,0""#));
     }
 
     #[test]
     fn provisional_slices_use_a_dedicated_class() {
-        let svg = render_radar(&[slice(true)], RadarVariant::Mini);
+        let scales = uniform_scales(RadarScale::from_range(70.0, 90.0));
+        let svg = render_radar(&[slice(true)], RadarVariant::Mini, scales);
         assert!(svg.contains(r#"class="radar-poly solo provisional""#));
     }
 }

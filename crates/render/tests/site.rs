@@ -245,8 +245,8 @@ fn style_css_contains_d2_theme_tokens() {
 
     let css = read(find_style_css(&site_dir));
     assert!(
-        css.contains("#0f1419"),
-        "expected D2 background token #0f1419 in CSS"
+        css.contains("#0a1519"),
+        "expected D2 background token #0a1519 in CSS"
     );
     assert!(
         css.contains("ui-monospace"),
@@ -619,7 +619,14 @@ fn provisional_models_remain_in_hero_rankings_with_marked_scores() {
 
 #[test]
 fn expansion_includes_mini_radar() {
-    let scoreboard = sample_scoreboard();
+    let mut scoreboard = sample_scoreboard();
+    // All three fixture models tie at 80/81/82/83 by default. Give Claude a
+    // standout Build score so its axis has real spread across the top-10
+    // reference cohort (here, all 3 models) while Idea/Plan/Review stay
+    // tied — a direct check that each axis scales independently against the
+    // shared cohort range rather than each row's own four scores.
+    scoreboard.models[0].scores.b_raw = 90.0;
+
     let tmp = tempdir().expect("tempdir should be created");
     let site_dir = tmp.path().join("site");
 
@@ -631,9 +638,13 @@ fn expansion_includes_mini_radar() {
         mini_count, 3,
         "expected one mini radar per model row, got {mini_count}"
     );
+    // Claude now sorts first (highest Build). Its own Build (90) sits 40% of
+    // the way through the cohort's floored (82, 92) range; Idea/Plan/Review
+    // are tied across the whole cohort, so those axes floor to a neutral
+    // window whose min equals every model's own score — 0% on each.
     assert!(
-        index.contains(r#"points="0,-38.5 42.3,0 0,46.2 -50.0,0""#),
-        "80/81/82/83 fixture scores must use the restored range-scaled radar"
+        index.contains(r#"points="0,-0.0 0.0,0 0,40.0 -0.0,0""#),
+        "Build axis must scale independently against the top-10 cohort range"
     );
 }
 
