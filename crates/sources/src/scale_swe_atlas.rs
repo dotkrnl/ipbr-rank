@@ -188,6 +188,7 @@ fn clean_swe_atlas_model_name(model_name: &str) -> String {
         " (Codex CLI)",
         " (Codex)",
         " (Claude Code)",
+        " (Gemini CLI)",
         " (Mini-SWE-Agent)",
         " (Mini-SWE)",
         " (OpenHands)",
@@ -215,6 +216,10 @@ mod tests {
         assert_eq!(
             clean_swe_atlas_model_name("Opus-4.7 (Claude Code)"),
             "Opus-4.7"
+        );
+        assert_eq!(
+            clean_swe_atlas_model_name("Gemini-3.1-Pro (Gemini CLI)"),
+            "Gemini-3.1-Pro"
         );
     }
 

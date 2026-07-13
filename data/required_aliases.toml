@@ -117,6 +117,8 @@ aliases = [
     "openai/gpt-5.2-codex", "openai:gpt-5.2-codex",
     "GPT-5.2-Codex", "GPT-5-2 Codex", "GPT 5.2 Codex",
     "GPT-5.2 Codex High", "GPT-5.2 Codex Medium",
+    # Sonar uses product-family-first ordering.
+    "GPT Codex 5.2 High",
     "gpt-5.2-codex-high", "gpt-5.2-codex-medium",
     "gpt-5-2-codex-high", "gpt-5-2-codex-medium",
 ]
@@ -365,7 +367,7 @@ vendor = "zai"
 aliases = [
     "glm 5.1", "glm-5.1", "glm-5-1",
     "glm-5-1-non-reasoning",
-    "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1",
+    "z.ai glm 5.1", "z-ai/glm-5.1", "zai/glm-5.1", "zai-org/GLM-5.1",
     # Scale leaderboards: `p` instead of `.`
     "glm-5p1",
 ]
@@ -376,7 +378,7 @@ aliases = [
     "glm 5.2", "glm-5.2", "glm-5-2",
     "glm-5-2-non-reasoning", "glm-5-2-thinking",
     "glm-5.2 (max)", "glm-5.2 max", "glm 5.2 max",
-    "z.ai glm 5.2", "z-ai/glm-5.2", "zai/glm-5.2",
+    "z.ai glm 5.2", "z-ai/glm-5.2", "zai/glm-5.2", "zai-org/GLM-5.2",
     "z-ai/glm-5.2-20260616",
     "glm-5.2[1m]", "glm-5-2-1m",
     # Scale leaderboards: `p` instead of `.`
@@ -398,6 +400,16 @@ aliases = [
     "claude-4.5-opus-high-reasoning", "claude-4-5-opus-high-reasoning",
     "claude-4.5-opus-medium-20251101", "claude-4-5-opus-medium-20251101",
     "claude-opus-4-5-thinking", "claude-opus-4-5-non-reasoning",
+    # ARC Prize publishes one row per thinking-token budget.
+    "Opus 4.5 (Thinking, None)", "Opus 4.5 (Thinking, 1K)",
+    "Opus 4.5 (Thinking, 8K)", "Opus 4.5 (Thinking, 16K)",
+    "Opus 4.5 (Thinking, 32K)", "Opus 4.5 (Thinking, 64K)",
+    "claude-opus-4-5-20251101-thinking-none",
+    "claude-opus-4-5-20251101-thinking-1k",
+    "claude-opus-4-5-20251101-thinking-8k",
+    "claude-opus-4-5-20251101-thinking-16k",
+    "claude-opus-4-5-20251101-thinking-32k",
+    "claude-opus-4-5-20251101-thinking-64k",
     # LMArena search endpoint spelling.
     "claude-opus-4-5-search",
 ]
@@ -407,7 +419,11 @@ vendor = "anthropic"
 aliases = [
     "claude-sonnet-4-6", "claude sonnet 4.6", "sonnet 4.6",
     "claude-sonnet-4.6", "anthropic/claude-sonnet-4.6",
-    "claude-sonnet-4-6-thinking", "claude-sonnet-4-6-non-reasoning",
+    "claude-sonnet-4-6-thinking", "claude-sonnet-4-6-adaptive",
+    "claude-sonnet-4-6-non-reasoning",
+    "Claude Sonnet 4.6 (Adaptive Reasoning, Max Effort)",
+    "Claude Sonnet 4.6 (Non-reasoning, High Effort)",
+    "Claude Sonnet 4.6 (Non-reasoning, Low Effort)",
     # LMArena search endpoint spelling.
     "claude-sonnet-4-6-search",
 ]
@@ -439,6 +455,7 @@ aliases = [
 vendor = "deepseek"
 aliases = [
     "deepseek-v3.2", "deepseek v3.2", "deepseek-v3-2",
+    "deepseek-v3p2",
     "DeepSeek V3.2", "DeepSeek-V3.2", "deepseek/deepseek-v3.2",
     "deepseek-ai/DeepSeek-V3.2",
     "deepseek-v3-2-0925",
@@ -507,7 +524,9 @@ aliases = [
 vendor = "zai"
 aliases = [
     "glm-4.6", "glm 4.6", "glm-4-6",
-    "z-ai/glm-4.6", "zai/glm-4.6", "glm-4p6",
+    "z-ai/glm-4.6", "zai/glm-4.6", "zai-org/GLM-4.6", "glm-4p6",
+    "glm-4-6-reasoning", "GLM-4.6 (Reasoning)",
+    "GLM-4.6 (Non-reasoning)",
     # SWE-bench temperature-tagged row.
     "glm-4.6-t-1", "GLM-4.6 (T=1)",
 ]
@@ -516,7 +535,7 @@ aliases = [
 vendor = "zai"
 aliases = [
     "glm-4.7", "glm 4.7", "glm-4-7",
-    "z-ai/glm-4.7", "zai/glm-4.7", "glm-4p7",
+    "z-ai/glm-4.7", "zai/glm-4.7", "zai-org/GLM-4.7", "glm-4p7",
 ]
 
 [models."moonshotai/kimi-k2-0905"]
@@ -524,6 +543,8 @@ vendor = "moonshot"
 aliases = [
     "kimi-k2-0905-preview", "kimi k2 0905", "kimi-k2-0905",
     "moonshotai/kimi-k2-0905", "moonshot/kimi-k2-0905",
+    "Kimi K2 Instruct 0905", "Kimi-K2-Instruct-0905",
+    "moonshotai/Kimi-K2-Instruct-0905",
     # Turbo is the same model parameters, just a faster API endpoint
     "kimi-k2-turbo-preview", "kimi k2 turbo", "kimi-k2-turbo",
 ]
@@ -547,7 +568,7 @@ vendor = "zai"
 aliases = [
     "glm-5", "glm 5",
     "glm-5-non-reasoning", "glm-5-thinking",
-    "z.ai glm 5", "z-ai/glm-5", "zai/glm-5",
+    "z.ai glm 5", "z-ai/glm-5", "zai/glm-5", "zai-org/GLM-5",
     # AA dated snapshot
     "glm-5-20260211",
 ]
@@ -556,8 +577,8 @@ aliases = [
 # and Non-reasoning variants (`kimi-k2-5` / `kimi-k2-5-non-reasoning`).
 # Scale Labs uses the no-decimal form `kimi-k2p5`, which the K2.6 entry
 # above explicitly excludes. lmarena tracks `-instant` and `-thinking`
-# endpoint variants; both alias to the same canonical id since per the
-# variant-coverage policy we only score medium/thinking/adaptive.
+# endpoint variants. Both alias to the same canonical id; effort detection
+# excludes the instant row as low effort and prefers the thinking row.
 [models."moonshotai/kimi-k2.5"]
 vendor = "moonshot"
 aliases = [

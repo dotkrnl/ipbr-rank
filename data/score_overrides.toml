@@ -870,16 +870,6 @@ value = 72.9
 note = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B BFCL-V4 row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
 # ---------------------------------------------------------------------
-# ARC-AGI-2 — vendor-reported semi-private scores not yet in arcprize.org.
-# ---------------------------------------------------------------------
-
-[[entries]]
-canonical_id = "anthropic/claude-opus-4.5"
-metric = "ARC_AGI_2"
-value = 37.6
-note = "Anthropic Claude Opus 4.6 System Card comparison table, ARC-AGI-2 for Claude Opus 4.5, https://anthropic.com/claude-opus-4-6-system-card, accessed 2026-05-22"
-
-# ---------------------------------------------------------------------
 # MMLU-Pro — vendor-reported figures missing from Artificial Analysis.
 # ---------------------------------------------------------------------
 

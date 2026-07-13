@@ -331,6 +331,8 @@ impl EffortPreference {
             "default",
             "medium",
             "non reasoning",
+            "minimal",
+            "instant",
             "low",
             "high",
             "thinking",
@@ -346,7 +348,11 @@ impl EffortPreference {
             Self::Default
         } else if contains("non reasoning") {
             Self::NonReasoning
-        } else if contains("low") {
+        } else if contains("minimal") || contains("instant") || contains("low") {
+            // `thinking-minimal` and same-product `-instant` endpoints are
+            // explicitly below the default reasoning tier. Keep them out of
+            // max-effort scoring even though their labels also contain a
+            // generic `thinking` marker (or no other effort marker at all).
             Self::Low
         } else if contains("max") {
             Self::Max
@@ -354,10 +360,12 @@ impl EffortPreference {
             Self::XHigh
         } else if contains("high") {
             Self::High
+        } else if contains("medium") {
+            // Explicit tiers take precedence over generic reasoning-mode
+            // words, e.g. "Adaptive Reasoning, Medium Effort".
+            Self::Medium
         } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
             Self::Thinking
-        } else if contains("medium") {
-            Self::Medium
         } else {
             Self::Other
         }
@@ -888,6 +896,52 @@ mod tests {
                 "max effort must win independently of row order"
             );
         }
+    }
+
+    #[test]
+    fn effort_classifier_keeps_minimal_and_instant_out_of_max_effort_scoring() {
+        for label in ["gemini-3-flash (thinking-minimal)", "kimi-k2.5-instant"] {
+            let preference = EffortPreference::from_text(label);
+            assert_eq!(preference, EffortPreference::Low, "label={label:?}");
+            assert!(!preference.is_scoring_allowed(), "label={label:?}");
+        }
+    }
+
+    #[test]
+    fn thinking_minimal_cannot_override_an_eligible_default_row() {
+        let mut record = ModelRecord::new(
+            "google/gemini-3-flash".to_string(),
+            "gemini-3-flash".to_string(),
+            Vendor::Google,
+        );
+        record.aliases.insert("gemini-3-flash".to_string());
+        record
+            .aliases
+            .insert("gemini-3-flash-thinking-minimal".to_string());
+        let mut records = vec![record];
+
+        let stats = ingest_rows(
+            &mut records,
+            vec![
+                raw(
+                    "lmarena",
+                    "gemini-3-flash-thinking-minimal",
+                    &[("LMArenaText", json!(80.0))],
+                ),
+                raw("lmarena", "gemini-3-flash", &[("LMArenaText", json!(90.0))]),
+            ],
+        );
+
+        assert_eq!(stats.matched, 2);
+        assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&90.0));
+    }
+
+    #[test]
+    fn effort_classifier_prefers_explicit_medium_over_generic_reasoning_words() {
+        assert_eq!(
+            EffortPreference::from_text("Claude Sonnet 5 (Adaptive Reasoning, Medium Effort)"),
+            EffortPreference::Medium
+        );
     }
 
     #[test]

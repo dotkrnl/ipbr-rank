@@ -118,6 +118,43 @@ fn lookup_refreshed_source_spellings() {
 }
 
 #[test]
+fn lookup_audited_source_spellings_at_exact_tier() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        ("zai-org/GLM-4.6", None, "z-ai/glm-4.6"),
+        ("zai-org/GLM-4.7", None, "z-ai/glm-4.7"),
+        ("zai-org/GLM-5", None, "z-ai/glm-5"),
+        ("zai-org/GLM-5.1", None, "z-ai/glm-5.1"),
+        ("zai-org/GLM-5.2", None, "z-ai/glm-5.2"),
+        ("deepseek-v3p2", None, "deepseek/deepseek-v3.2"),
+        ("GPT Codex 5.2 High", None, "openai/gpt-5.2-codex"),
+        (
+            "Claude Sonnet 4.6 (Adaptive Reasoning, Max Effort)",
+            None,
+            "anthropic/claude-sonnet-4.6",
+        ),
+        ("glm-4-6-reasoning", Some("zai"), "z-ai/glm-4.6"),
+        (
+            "Opus 4.5 (Thinking, 64K)",
+            None,
+            "anthropic/claude-opus-4.5",
+        ),
+        ("Kimi K2 Instruct 0905", None, "moonshotai/kimi-k2-0905"),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .lookup_exact(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn lookup_2026_05_22_models() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
@@ -310,6 +347,7 @@ fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
         ("gpt-5.5-instant", Some("openai")),
         ("minimax-m2", Some("minimax")),
         ("glm-4.6v", Some("zai")),
+        ("Kimi K2 Instruct", Some("moonshot")),
     ];
     for &(input, vendor) in cases {
         let matched = idx

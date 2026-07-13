@@ -636,8 +636,17 @@ mod tests {
             })
             .collect();
 
-        let allowed_distinct_variant_drops =
-            BTreeSet::from([("openrouter".to_string(), "google/gemini-3-pro".to_string())]);
+        let allowed_distinct_variant_drops = BTreeSet::from([
+            ("openrouter".to_string(), "google/gemini-3-pro".to_string()),
+            // The explicit 0905 alias makes the legacy substring matcher
+            // mistake unversioned `Kimi K2 Instruct` for the September
+            // snapshot. The guarded matcher correctly keeps that older,
+            // distinct submission out of K2 0905.
+            (
+                "swebench".to_string(),
+                "moonshotai/kimi-k2-0905".to_string(),
+            ),
+        ]);
         let dropped: Vec<_> = legacy
             .difference(&current)
             .filter(|pair| !allowed_distinct_variant_drops.contains(*pair))

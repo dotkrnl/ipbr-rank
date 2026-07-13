@@ -433,6 +433,8 @@ impl AaVariantPreference {
             "default",
             "medium",
             "non reasoning",
+            "minimal",
+            "instant",
             "low",
             "high",
             "thinking",
@@ -448,7 +450,7 @@ impl AaVariantPreference {
             Self::Default
         } else if contains("non reasoning") {
             Self::NonReasoning
-        } else if contains("low") {
+        } else if contains("minimal") || contains("instant") || contains("low") {
             Self::Low
         } else if contains("max") {
             Self::Max
@@ -456,10 +458,10 @@ impl AaVariantPreference {
             Self::XHigh
         } else if contains("high") {
             Self::High
-        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
-            Self::Thinking
         } else if contains("medium") {
             Self::Medium
+        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
+            Self::Thinking
         } else {
             Self::Other
         }
@@ -763,5 +765,37 @@ mod tests {
         assert_eq!(rows.len(), 2);
         assert!(rows.iter().any(|row| row.model_name.ends_with("-max")));
         assert!(rows.iter().any(|row| row.model_name.ends_with("-xhigh")));
+    }
+
+    #[test]
+    fn keeps_explicit_medium_separate_from_generic_adaptive_reasoning() {
+        let payload = json!({
+            "data": [
+                {
+                    "slug": "claude-sonnet-5",
+                    "name": "Claude Sonnet 5 (Adaptive Reasoning)",
+                    "model_creator": {"slug": "anthropic"},
+                    "evaluations": {"intelligence_index": 50.0}
+                },
+                {
+                    "slug": "claude-sonnet-5",
+                    "name": "Claude Sonnet 5 (Adaptive Reasoning, Medium Effort)",
+                    "model_creator": {"slug": "anthropic"},
+                    "evaluations": {"intelligence_index": 40.0}
+                }
+            ]
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+
+        assert_eq!(rows.len(), 2);
+        assert_eq!(
+            AaVariantPreference::from_text("Gemini 3 Flash (Thinking-Minimal)"),
+            AaVariantPreference::Low
+        );
+        assert_eq!(
+            AaVariantPreference::from_text("Kimi K2.5 Instant"),
+            AaVariantPreference::Low
+        );
     }
 }
