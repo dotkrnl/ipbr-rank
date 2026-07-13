@@ -97,7 +97,6 @@ impl SecretStore {
 pub enum VerificationStatus {
     Verified,
     Experimental,
-    Disabled,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -4,9 +4,10 @@ This document describes the verification protocol and implementation checklist f
 
 Most registered sources are `Verified`. A small number of newly introduced,
 diagnostic-only sources may remain `Experimental` while their methodology or
-coverage matures; `Disabled` sources are not registered. Verification status
-describes source/parser confidence, not whether a metric affects ranking — see
-`crates/sources/src/registry.rs` and `docs/sources.md`.
+coverage matures; a source that is not ready is simply left out of the
+registry. Verification status describes source/parser confidence, not whether a
+metric affects ranking — see `crates/sources/src/registry.rs` and
+`docs/sources.md`.
 Refer to existing source modules (`sonar.rs`, `swerebench.rs`,
 `artificial_analysis.rs`, `terminal_bench.rs`) for current patterns.
 
