@@ -203,9 +203,7 @@ fn normalize_population(
             .collect();
         let direct_pop: Vec<f64> = records
             .iter()
-            .filter(|r| {
-                !r.synthesized.contains_key(metric_key) && !r.override_reported.contains(metric_key)
-            })
+            .filter(|r| !r.synthesized.contains_key(metric_key))
             .filter_map(|r| r.raw_metrics.get(metric_key).copied())
             .filter(|v| v.is_finite())
             .collect();
@@ -252,14 +250,6 @@ fn normalize_population(
                             evidence_cfg.reliability(reliability),
                             EvidenceCoverage {
                                 synthesized: 1.0,
-                                ..Default::default()
-                            },
-                        )
-                    } else if r.override_reported.contains(metric_key) {
-                        (
-                            evidence_cfg.reliability(evidence_cfg.reported_reliability),
-                            EvidenceCoverage {
-                                reported: 1.0,
                                 ..Default::default()
                             },
                         )
@@ -1134,7 +1124,7 @@ mod tests {
     }
 
     #[test]
-    fn override_reported_metric_values_use_configured_reliability() {
+    fn curated_override_metric_values_use_direct_reliability() {
         let coef = Coefficients::load_embedded().unwrap();
         let mut records = vec![
             make_record(
@@ -1154,18 +1144,17 @@ mod tests {
             ),
         ];
         records[2]
-            .override_reported
+            .curated_overrides
             .insert("TerminalBench".to_string());
 
         compute_scores_with(&mut records, &coef);
 
         let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
-        let reported = records[2].metrics.get("TerminalBench").copied().unwrap();
+        let curated = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(direct > 95.0, "direct={direct}");
-        let expected = 50.0 + 0.60 * (direct - 50.0);
         assert!(
-            (reported - expected).abs() < 1e-9,
-            "override-reported score should use 0.60 reliability, got reported={reported}, direct={direct}"
+            (curated - direct).abs() < 1e-9,
+            "curated same-model observations should use full direct reliability, got curated={curated}, direct={direct}"
         );
     }
 
@@ -1211,7 +1200,7 @@ mod tests {
     }
 
     #[test]
-    fn override_reported_metrics_do_not_set_normalization_baseline_when_direct_population_exists() {
+    fn curated_override_metrics_set_the_direct_normalization_baseline() {
         let mut coef = Coefficients::load_embedded().unwrap();
         coef.metrics.get_mut("TerminalBench").unwrap().anchor_low = None;
         coef.metrics.get_mut("TerminalBench").unwrap().anchor_high = None;
@@ -1233,16 +1222,18 @@ mod tests {
             ),
         ];
         records[2]
-            .override_reported
+            .curated_overrides
             .insert("TerminalBench".to_string());
 
         compute_scores_with(&mut records, &coef);
 
         let direct = records[1].metrics.get("TerminalBench").copied().unwrap();
+        let curated = records[2].metrics.get("TerminalBench").copied().unwrap();
         assert!(
-            direct > 95.0,
-            "override outlier should not stretch direct normalization baseline, got {direct}"
+            direct < 75.0,
+            "curated direct observation should participate in the direct baseline, got {direct}"
         );
+        assert!(curated > direct, "curated={curated}, direct={direct}");
     }
 
     #[test]
@@ -1393,15 +1384,18 @@ mod tests {
                 &[("TerminalBench21", 100.0), ("SWEBenchPro", 100.0)],
             ),
         ];
-        records[1].override_reported.insert("SWEBenchPro".into());
+        records[1].curated_overrides.insert("SWEBenchPro".into());
         compute_scores_with(&mut records, &coef);
 
         let evidence = &records[1].evidence.roles["B_raw"];
-        assert!((evidence.direct - 0.5).abs() < 1e-9, "{evidence:?}");
-        assert!((evidence.reported - 0.5).abs() < 1e-9, "{evidence:?}");
-        assert!((evidence.effective - 0.8).abs() < 1e-9, "{evidence:?}");
-        assert_eq!(evidence.direct_families, ["terminal".to_string()].into());
-        assert_eq!(evidence.family_count, 1);
+        assert!((evidence.direct - 1.0).abs() < 1e-9, "{evidence:?}");
+        assert!(evidence.reported.abs() < 1e-9, "{evidence:?}");
+        assert!((evidence.effective - 1.0).abs() < 1e-9, "{evidence:?}");
+        assert_eq!(
+            evidence.direct_families,
+            ["swe".to_string(), "terminal".to_string()].into()
+        );
+        assert_eq!(evidence.family_count, 2);
         assert!(evidence.provisional);
     }
 

@@ -195,8 +195,8 @@ sources = ["aa_automation_bench", "aa_enterprise_ops_gym", "aa_gdpval_v2", "aa_o
 [models.scores]
 i_raw = 96.320574
 p_raw = 95.000000
-b_raw = 87.980223
-r = 89.876926
+b_raw = 97.378078
+r = 96.725805
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -204,7 +204,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 85.832394
+BUILD = 98.088282
 CRE = 96.320574
 GEN = 50.000000
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -244,7 +244,7 @@ EnterpriseOpsGymAAHybridFallback = 50.000000
 FactoryCodeReviewF1 = 50.000000
 FactoryCodeReviewPrecision = 50.000000
 FactoryCodeReviewRecall = 50.000000
-GDPval = 77.001838
+GDPval = 95.003063
 GDPvalAA2 = 50.000000
 GDPvalAA2HybridFallback = 50.000000
 GPQA = 50.000000
@@ -258,15 +258,15 @@ LMArenaSearch = 50.000000
 LMArenaText = 50.000000
 LongContextRecall = 50.000000
 MCPAtlas = 95.000000
-OSWorldVerified = 77.894386
+OSWorldVerified = 96.490644
 OutputSpeed = 50.000000
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 79.939384
-SWEBenchVerified = 79.975895
-SWEComposite = 79.939384
+SWEBenchPro = 99.898973
+SWEBenchVerified = 99.959825
+SWEComposite = 99.898973
 SWERebench = 50.000000
 SciCode = 50.000000
 SonarBugDensity = 50.000000
@@ -279,7 +279,7 @@ TerminalBench = 50.000000
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 50.000000
-Toolathlon = 78.528799
+Toolathlon = 97.547998
 
 [models.raw_metrics]
 AAOmniscienceAccuracy = 55.200000
@@ -499,7 +499,7 @@ donor = "anthropic/claude-opus-4.8"
 synthesis_category = "stronger_successor"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.11.4, GDPval-AA v2 Elo comparison row for Fable 5, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
@@ -586,7 +586,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Fable 5 & Mythos 5 System Card Table 8.1.A, OSWorld-Verified, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
 
@@ -621,12 +621,12 @@ donor = "anthropic/claude-opus-4.8"
 synthesis_category = "stronger_successor"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Fable 5 & Mythos 5 System Card Section 8.2, Fable 5 SWE-bench Pro, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Fable 5 & Mythos 5 System Card Section 8.2, Fable 5 SWE-bench Verified, https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf, accessed 2026-07-02"
 
@@ -697,18 +697,18 @@ donor = "anthropic/claude-opus-4.8"
 synthesis_category = "stronger_successor"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.11.5, Toolathlon Pass@1 comparison row for Fable 5, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.evidence.groups."BUILD"]
-direct = 0.220000
-reported = 0.157500
+direct = 0.377500
+reported = 0.000000
 synthesized = 0.272500
 missing = 0.350000
-effective = 0.314500
-family_count = 2
-direct_families = ["deepswe", "scale"]
+effective = 0.377500
+family_count = 3
+direct_families = ["deepswe", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.500000
@@ -783,18 +783,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.234906
-reported = 0.135000
+direct = 0.369906
+reported = 0.000000
 synthesized = 0.614363
 missing = 0.015730
-effective = 0.315906
-family_count = 2
-direct_families = ["deepswe", "scale"]
+effective = 0.369906
+family_count = 3
+direct_families = ["deepswe", "scale", "swe"]
 core_direct = 0.000000
 core_family_count = 0
 core_direct_families = []
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -831,18 +831,18 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.189583
-reported = 0.057422
+direct = 0.247005
+reported = 0.000000
 synthesized = 0.643620
 missing = 0.109375
-effective = 0.224036
-family_count = 2
-direct_families = ["deepswe", "scale"]
+effective = 0.247005
+family_count = 3
+direct_families = ["deepswe", "scale", "swe"]
 core_direct = 0.000000
 core_family_count = 0
 core_direct_families = []
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -915,7 +915,7 @@ LongContextComposite = 85.144310
 LongContextRecall = 85.144310
 MCPAtlas = 0.136217
 MMLUPro = 1.551355
-OSWorldVerified = 20.391438
+OSWorldVerified = 0.652397
 OutputSpeed = 86.787047
 SWEBenchMultilingual = 18.836793
 SWEBenchPro = 50.905023
@@ -1098,7 +1098,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Haiku 4.5 launch benchmark table and methodology footnote, OSWorld-Verified, https://www.anthropic.com/news/claude-haiku-4-5, accessed 2026-07-02"
 
@@ -1323,20 +1323,20 @@ aliases = ["Claude 4.5 Opus", "Claude 4.5 Opus (high reasoning)", "Claude 4.5 Op
 sources = ["artificial_analysis", "bfcl", "eqbench_creative_writing", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 52.900842
-p_raw = 62.063841
+i_raw = 52.240789
+p_raw = 61.755933
 b_raw = 68.446751
 r = 60.316099
 i_status = "ranked"
-p_status = "provisional"
+p_status = "ranked"
 b_status = "ranked"
 r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
 BUILD = 72.756086
-CRE = 49.852589
-GEN = 57.324699
+CRE = 49.192535
+GEN = 56.664645
 LM_ARENA_REVIEW_PROXY = 46.452726
 OPS_long = 62.404098
 OPS_precision = 63.043025
@@ -1350,7 +1350,7 @@ AALiveCodeBench = 89.639561
 AAReasoningComposite = 60.273951
 AGCBench = 50.000000
 AIME25 = 89.230672
-ARC_AGI_2 = 46.699731
+ARC_AGI_2 = 44.499552
 ArtificialAnalysisCoding = 70.945946
 ArtificialAnalysisIntelligence = 70.837344
 ArtificialAnalysisMath = 85.842697
@@ -1476,7 +1476,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."ARC_AGI_2"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.6 System Card comparison table, ARC-AGI-2 for Claude Opus 4.5, https://anthropic.com/claude-opus-4-6-system-card, accessed 2026-05-22"
 
@@ -1708,22 +1708,22 @@ family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
-reported = 0.300000
+direct = 1.000000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.000000
-effective = 0.880000
-family_count = 2
-direct_families = ["eqbench", "lmarena"]
+effective = 1.000000
+family_count = 3
+direct_families = ["arc_agi", "eqbench", "lmarena"]
 
 [models.evidence.groups."GEN"]
-direct = 0.525000
-reported = 0.300000
+direct = 0.825000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.175000
-effective = 0.705000
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.825000
+family_count = 3
+direct_families = ["arc_agi", "artificial_analysis", "lmarena"]
 
 [models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
 direct = 1.000000
@@ -1796,36 +1796,36 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
-reported = 0.300000
+direct = 0.934667
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.065333
-effective = 0.814667
-family_count = 3
-direct_families = ["artificial_analysis", "eqbench", "lmarena"]
-core_direct = 0.634667
-core_family_count = 3
-core_direct_families = ["artificial_analysis", "eqbench", "lmarena"]
+effective = 0.934667
+family_count = 4
+direct_families = ["arc_agi", "artificial_analysis", "eqbench", "lmarena"]
+core_direct = 0.934667
+core_family_count = 4
+core_direct_families = ["arc_agi", "artificial_analysis", "eqbench", "lmarena"]
 historical_family_count = 1
 historical_direct_families = ["artificial_analysis"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."P_raw"]
-direct = 0.438083
-reported = 0.106676
+direct = 0.544760
+reported = 0.000000
 synthesized = 0.033019
 missing = 0.422221
-effective = 0.502089
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "scale"]
-core_direct = 0.331782
-core_family_count = 2
-core_direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.544760
+family_count = 4
+direct_families = ["arc_agi", "artificial_analysis", "lmarena", "scale"]
+core_direct = 0.517154
+core_family_count = 3
+core_direct_families = ["arc_agi", "artificial_analysis", "lmarena"]
 historical_family_count = 2
 historical_direct_families = ["artificial_analysis", "terminal_bench"]
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."R"]
 direct = 0.679167
@@ -1845,7 +1845,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "GEN", "PLAN", "REVIEW_DIRECT"]
+groups_shrunk = ["BUILD", "PLAN", "REVIEW_DIRECT"]
 synthesis_dominant = false
 
 [[models]]
@@ -1886,16 +1886,16 @@ ARC_AGI_2 = 90.791930
 ArtificialAnalysisCoding = 71.959459
 ArtificialAnalysisIntelligence = 83.156882
 BlendedCost = 15.296417
-BrowseComp = 75.720212
+BrowseComp = 92.867020
 ContextWindow = 96.823741
 CopilotArenaOrLMArenaCode = 93.136011
 EQBenchCreativeWriting = 77.551893
 EQBenchJudgemark = 96.158328
-GDPval = 72.106301
+GDPval = 86.843835
 GPQA = 85.205670
 GSO = 87.928036
 HLE = 83.534322
-HLETools = 73.978140
+HLETools = 89.963566
 HiLBench = 87.077832
 IFBench = 15.705912
 LMArenaDocument = 97.051479
@@ -1905,7 +1905,7 @@ LiveCodingComposite = 85.944329
 LongContextComposite = 86.470337
 LongContextRecall = 86.470337
 MCPAtlas = 81.838257
-OSWorldVerified = 54.808832
+OSWorldVerified = 58.014720
 OutputSpeed = 57.751913
 SWEAtlasComposite = 54.869355
 SWEAtlasQnA = 60.676777
@@ -1994,7 +1994,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, BrowseComp, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2023,7 +2023,7 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
 
@@ -2040,7 +2040,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2073,7 +2073,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, Claude Opus 4.6 comparison row, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2314,8 +2314,8 @@ sources = ["agc_bench", "arc_agi", "artificial_analysis", "context_arena", "eqbe
 [models.scores]
 i_raw = 94.403608
 p_raw = 81.951398
-b_raw = 72.832423
-r = 79.403982
+b_raw = 76.336298
+r = 80.924453
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
@@ -2323,7 +2323,7 @@ r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 72.263495
+BUILD = 76.306405
 CRE = 95.154313
 GEN = 93.163649
 LM_ARENA_REVIEW_PROXY = 93.432871
@@ -2342,7 +2342,7 @@ ARC_AGI_3 = 0.000000
 ArtificialAnalysisCoding = 86.824324
 ArtificialAnalysisIntelligence = 100.000000
 BlendedCost = 15.296417
-BrowseComp = 71.887494
+BrowseComp = 86.479157
 ContextArenaMRCR128k = 7.485718
 ContextArenaMRCR1M = 0.000000
 ContextWindow = 96.823741
@@ -2353,11 +2353,11 @@ FactoryCodeReviewF1 = 64.696734
 FactoryCodeReviewF1Stdev = 40.236686
 FactoryCodeReviewPrecision = 93.692308
 FactoryCodeReviewRecall = 72.715573
-GDPval = 76.400126
+GDPval = 94.000210
 GPQA = 91.906103
 GSO = 93.680411
 HLE = 89.222416
-HLETools = 75.917923
+HLETools = 93.196539
 HiLBench = 94.141957
 IFBench = 31.769644
 LMArenaDocument = 93.306150
@@ -2367,14 +2367,14 @@ LiveCodingComposite = 92.888032
 LongContextComposite = 54.080873
 LongContextRecall = 85.144310
 MCPAtlas = 88.232316
-OSWorldVerified = 70.021546
+OSWorldVerified = 83.369243
 OutputSpeed = 56.317782
 SWEAtlasComposite = 92.633996
 SWEAtlasRefactoring = 92.633996
-SWEBenchMultilingual = 79.972274
-SWEBenchPro = 79.148134
-SWEBenchVerified = 79.803046
-SWEComposite = 59.923592
+SWEBenchMultilingual = 99.953790
+SWEBenchPro = 98.580223
+SWEBenchVerified = 99.671744
+SWEComposite = 70.666183
 SWERebench = 36.243787
 SciCode = 91.071320
 SonarBugDensity = 35.033259
@@ -2467,7 +2467,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, BrowseComp, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2520,7 +2520,7 @@ class = "direct"
 source = "factory_code_review"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Adaptive Reasoning, Max Effort), 2026-04-27"
 
@@ -2537,7 +2537,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, Humanity's Last Exam with tools, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2570,7 +2570,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 official release table, OSWorld-Verified, https://www.anthropic.com/news/claude-opus-4-7?pubDate=20260416, accessed 2026-06-11"
 
@@ -2583,17 +2583,17 @@ class = "direct"
 source = "sweatlas_refactoring"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 System Card Table 8.1.A, adaptive thinking max effort, 5-trial average, 2026-04-16"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic-reported, Claude Opus 4.7 (Adaptive Reasoning, Max Effort), 2026-04-16"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 launch announcement, 2026-04-16"
 
@@ -2654,11 +2654,11 @@ class = "direct"
 source = "terminal_bench"
 
 [models.evidence.groups."BUILD"]
-direct = 0.677500
-reported = 0.192500
+direct = 0.870000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.130000
-effective = 0.793000
+effective = 0.870000
 family_count = 6
 direct_families = ["artificial_analysis", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
 
@@ -2735,18 +2735,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.684513
-reported = 0.165000
+direct = 0.849513
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.150487
-effective = 0.783513
+effective = 0.849513
 family_count = 6
 direct_families = ["artificial_analysis", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.970022
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -2783,24 +2783,24 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.736589
-reported = 0.070182
+direct = 0.806771
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.193229
-effective = 0.778698
+effective = 0.806771
 family_count = 6
 direct_families = ["artificial_analysis", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.786342
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "SWEAtlasQnA", "SWEAtlasTestWriting", "Tau3Banking"]
-groups_shrunk = ["BUILD", "PLAN"]
+groups_shrunk = ["PLAN"]
 synthesis_dominant = false
 
 [[models]]
@@ -2814,8 +2814,8 @@ sources = ["aa_critpt", "aa_gdpval_v2", "aa_omniscience", "arc_agi", "artificial
 [models.scores]
 i_raw = 87.213046
 p_raw = 89.129271
-b_raw = 86.176008
-r = 83.009265
+b_raw = 92.145869
+r = 85.630791
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
@@ -2823,7 +2823,7 @@ r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 85.771871
+BUILD = 92.700190
 CRE = 85.820511
 GEN = 89.641850
 LM_ARENA_REVIEW_PROXY = 73.105075
@@ -2861,7 +2861,7 @@ FactoryCodeReviewF1 = 100.000000
 FactoryCodeReviewF1Stdev = 63.905325
 FactoryCodeReviewPrecision = 100.000000
 FactoryCodeReviewRecall = 100.000000
-GDPval = 78.458070
+GDPval = 97.430117
 GDPvalAA2 = 97.212942
 GDPvalAA2CIHigh = 100.000000
 GDPvalAA2CILow = 100.000000
@@ -2871,8 +2871,8 @@ HLE = 95.865937
 HLETools = 50.000000
 HiLBench = 80.018016
 IFBench = 45.882142
-KimiClaw247Bench = 66.308725
-KimiCodeBenchV2 = 74.961408
+KimiClaw247Bench = 77.181208
+KimiCodeBenchV2 = 91.602346
 LMArenaDocument = 73.105075
 LMArenaSearch = 50.000000
 LMArenaText = 81.001541
@@ -2880,19 +2880,19 @@ LiveCodingComposite = 90.492768
 LongContextComposite = 80.529015
 LongContextRecall = 70.564940
 MCPAtlas = 93.708055
-MCPMarkVerified = 30.320405
-MLSBenchLite = 80.000000
+MCPMarkVerified = 17.200675
+MLSBenchLite = 100.000000
 OSWorldVerified = 50.000000
 OutputSpeed = 73.251251
-ProgramBench = 65.929204
+ProgramBench = 76.548673
 SWEAtlasComposite = 89.104489
 SWEAtlasQnA = 93.390134
 SWEAtlasRefactoring = 90.159917
 SWEAtlasTestWriting = 83.411606
-SWEBenchMultilingual = 79.997094
-SWEBenchPro = 79.625170
-SWEBenchVerified = 79.851656
-SWEComposite = 79.692793
+SWEBenchMultilingual = 99.995157
+SWEBenchPro = 99.375284
+SWEBenchVerified = 99.752760
+SWEComposite = 99.487988
 SWERebench = 50.000000
 SciCode = 87.980730
 SonarBugDensity = 50.000000
@@ -3088,7 +3088,7 @@ class = "direct"
 source = "factory_code_review"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.13.6, GDPval-AA Elo, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
@@ -3133,12 +3133,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."KimiClaw247Bench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."KimiCodeBenchV2"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -3165,12 +3165,12 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."MCPMarkVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MLSBenchLite"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -3185,7 +3185,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."ProgramBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -3202,17 +3202,17 @@ class = "direct"
 source = "sweatlas_test_writing"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.8 System Card Table 8.1.A / Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-opus-4-8-system-card, accessed 2026-06-08"
 
@@ -3277,13 +3277,13 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.650000
-reported = 0.192500
+direct = 0.842500
+reported = 0.000000
 synthesized = 0.157500
 missing = 0.000000
-effective = 0.765500
-family_count = 6
-direct_families = ["artificial_analysis", "context_arena", "deepswe", "lmarena", "scale", "terminal_bench"]
+effective = 0.842500
+family_count = 7
+direct_families = ["artificial_analysis", "context_arena", "deepswe", "lmarena", "scale", "swe", "terminal_bench"]
 
 [models.evidence.groups."CRE"]
 direct = 1.000000
@@ -3358,18 +3358,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.684270
-reported = 0.165000
+direct = 0.849270
+reported = 0.000000
 synthesized = 0.135000
 missing = 0.015730
-effective = 0.783270
-family_count = 7
-direct_families = ["artificial_analysis", "context_arena", "deepswe", "gdpval", "lmarena", "scale", "terminal_bench"]
+effective = 0.849270
+family_count = 8
+direct_families = ["artificial_analysis", "context_arena", "deepswe", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.680892
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "gdpval", "lmarena", "terminal_bench"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "standard"
 provisional = false
 
@@ -3406,24 +3406,24 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.625826
-reported = 0.070182
+direct = 0.696008
+reported = 0.000000
 synthesized = 0.194617
 missing = 0.109375
-effective = 0.667935
-family_count = 7
-direct_families = ["artificial_analysis", "context_arena", "deepswe", "gdpval", "lmarena", "scale", "terminal_bench"]
+effective = 0.696008
+family_count = 8
+direct_families = ["artificial_analysis", "context_arena", "deepswe", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.741897
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "gdpval", "lmarena", "terminal_bench"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "standard"
 provisional = false
 
 [models.missing]
 metrics = ["AutomationBenchAA", "EnterpriseOpsGymAA", "Tau3Banking"]
-groups_shrunk = ["BUILD", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["LM_ARENA_REVIEW_PROXY", "PLAN"]
 synthesis_dominant = false
 
 [[models]]
@@ -4371,8 +4371,8 @@ sources = ["agc_bench", "arc_agi", "artificial_analysis", "eqbench_creative_writ
 [models.scores]
 i_raw = 76.959935
 p_raw = 67.733385
-b_raw = 62.409753
-r = 69.465395
+b_raw = 63.735969
+r = 70.032985
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
@@ -4380,7 +4380,7 @@ r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 64.046025
+BUILD = 65.523669
 CRE = 79.103689
 GEN = 73.518438
 LM_ARENA_REVIEW_PROXY = 85.786287
@@ -4434,10 +4434,10 @@ SWEAtlasComposite = 40.481211
 SWEAtlasQnA = 53.333205
 SWEAtlasRefactoring = 45.144616
 SWEAtlasTestWriting = 21.411344
-SWEBenchMultilingual = 79.605652
+SWEBenchMultilingual = 99.342754
 SWEBenchPro = 50.000000
-SWEBenchVerified = 78.139266
-SWEComposite = 75.622707
+SWEBenchVerified = 96.898777
+SWEComposite = 79.211271
 SWERebench = 74.737608
 SciCode = 44.220019
 SonarBugDensity = 57.206208
@@ -4694,7 +4694,7 @@ class = "direct"
 source = "sweatlas_test_writing"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 4.6 System Card Section 2.2, adaptive thinking max effort, 10-trial average, 2026-02-17"
 
@@ -4705,7 +4705,7 @@ donor = "anthropic/claude-sonnet-4.5"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 4.6 System Card Table 2.2.A, adaptive thinking max effort, 10-trial average, https://anthropic.com/claude-sonnet-4-6-system-card, accessed 2026-05-22"
 
@@ -4758,11 +4758,11 @@ class = "direct"
 source = "terminal_bench"
 
 [models.evidence.groups."BUILD"]
-direct = 0.637500
-reported = 0.035000
+direct = 0.672500
+reported = 0.000000
 synthesized = 0.157500
 missing = 0.170000
-effective = 0.658500
+effective = 0.672500
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -4839,18 +4839,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.633652
-reported = 0.030000
+direct = 0.663652
+reported = 0.000000
 synthesized = 0.135000
 missing = 0.201348
-effective = 0.651652
+effective = 0.663652
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -4887,18 +4887,18 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.645443
-reported = 0.012760
+direct = 0.658203
+reported = 0.000000
 synthesized = 0.057422
 missing = 0.284375
-effective = 0.653099
+effective = 0.658203
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.585375
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -4917,9 +4917,9 @@ sources = ["deep_swe_v1_1", "eqbench_creative_writing", "eqbench_judgemark", "ov
 
 [models.scores]
 i_raw = 69.021897
-p_raw = 73.685417
-b_raw = 77.680777
-r = 77.169189
+p_raw = 89.475695
+b_raw = 93.450643
+r = 93.240405
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -4927,21 +4927,21 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 77.865944
+BUILD = 93.993347
 CRE = 69.021897
 GEN = 50.000000
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 50.000000
 OPS_precision = 50.000000
 OPS_review = 50.000000
-PLAN = 73.685417
+PLAN = 89.475695
 REVIEW_DIRECT = 73.319330
 
 [models.metrics]
 AGCBench = 50.000000
 ARC_AGI_2 = 50.000000
 BlendedCost = 50.000000
-BrowseComp = 76.319450
+BrowseComp = 93.865750
 ContextWindow = 50.000000
 CopilotArenaOrLMArenaCode = 50.000000
 DeepSWE = 76.248857
@@ -4953,29 +4953,29 @@ EQBenchJudgemark = 73.319330
 FactoryCodeReviewF1 = 50.000000
 FactoryCodeReviewPrecision = 50.000000
 FactoryCodeReviewRecall = 50.000000
-GDPval = 72.061977
-HLETools = 78.127163
+GDPval = 86.769962
+HLETools = 96.878605
 LMArenaDocument = 50.000000
 LMArenaSearch = 50.000000
 LMArenaText = 50.000000
 MCPAtlas = 50.000000
-OSWorldVerified = 74.964050
+OSWorldVerified = 91.606751
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
-SWEBenchMultilingual = 79.901127
-SWEBenchPro = 78.976862
-SWEBenchVerified = 79.611631
-SWEComposite = 79.144910
+SWEBenchMultilingual = 99.835211
+SWEBenchPro = 98.294771
+SWEBenchVerified = 99.352719
+SWEComposite = 98.574851
 SWERebench = 50.000000
 SonarBugDensity = 50.000000
 SonarFunctionalSkill = 50.000000
 SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TerminalBench = 50.000000
-TerminalBench21 = 73.685417
-TerminalBench21Composite = 73.685417
-Toolathlon = 73.177763
+TerminalBench21 = 89.475695
+TerminalBench21Composite = 89.475695
+Toolathlon = 88.629606
 
 [models.raw_metrics]
 AGCBench = 0.480180
@@ -5036,7 +5036,7 @@ donor = "anthropic/claude-sonnet-4.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.9.2, BrowseComp single-agent score, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
@@ -5103,12 +5103,12 @@ donor = "anthropic/claude-sonnet-4.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.11.4, GDPval-AA v2 Elo, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Table 8.1.A and Section 8.9.1, Humanity's Last Exam with tools, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
@@ -5137,7 +5137,7 @@ donor = "anthropic/claude-sonnet-4.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.10.2, OSWorld-Verified first-attempt success averaged over five runs, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
@@ -5160,17 +5160,17 @@ donor = "anthropic/claude-sonnet-4.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.2, adaptive thinking max effort, 5-trial average, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
@@ -5211,23 +5211,23 @@ donor = "anthropic/claude-sonnet-4.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."TerminalBench21"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.3, Terminal-Bench 2.1 mean reward over 445 trials, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Sonnet 5 System Card Section 8.11.5, Toolathlon Pass@1, https://www.anthropic.com/claude-sonnet-5-system-card, accessed 2026-07-02"
 
 [models.evidence.groups."BUILD"]
-direct = 0.070000
-reported = 0.272500
+direct = 0.342500
+reported = 0.000000
 synthesized = 0.307500
 missing = 0.350000
-effective = 0.233500
-family_count = 1
-direct_families = ["deepswe"]
+effective = 0.342500
+family_count = 3
+direct_families = ["deepswe", "swe", "terminal_bench"]
 
 [models.evidence.groups."CRE"]
 direct = 0.500000
@@ -5284,13 +5284,13 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."PLAN"]
-direct = 0.000000
-reported = 0.100000
+direct = 0.100000
+reported = 0.000000
 synthesized = 0.300000
 missing = 0.600000
-effective = 0.060000
-family_count = 0
-direct_families = []
+effective = 0.100000
+family_count = 1
+direct_families = ["terminal_bench"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 1.000000
@@ -5302,18 +5302,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.069738
-reported = 0.249944
+direct = 0.319682
+reported = 0.000000
 synthesized = 0.479494
 missing = 0.200824
-effective = 0.219704
-family_count = 1
-direct_families = ["deepswe"]
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
-historical_family_count = 0
-historical_direct_families = []
+effective = 0.319682
+family_count = 3
+direct_families = ["deepswe", "swe", "terminal_bench"]
+core_direct = 0.176087
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -5334,34 +5334,34 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."P_raw"]
-direct = 0.000000
-reported = 0.066038
+direct = 0.066038
+reported = 0.000000
 synthesized = 0.429245
 missing = 0.504717
-effective = 0.039623
-family_count = 0
-direct_families = []
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
+effective = 0.066038
+family_count = 1
+direct_families = ["terminal_bench"]
+core_direct = 0.114754
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.025521
-reported = 0.135807
+direct = 0.161328
+reported = 0.000000
 synthesized = 0.557943
 missing = 0.280729
-effective = 0.107005
-family_count = 1
-direct_families = ["deepswe"]
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
-historical_family_count = 0
-historical_direct_families = []
+effective = 0.161328
+family_count = 3
+direct_families = ["deepswe", "swe", "terminal_bench"]
+core_direct = 0.139130
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 1
+historical_direct_families = ["swe"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -5856,9 +5856,9 @@ sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark
 
 [models.scores]
 i_raw = 33.593036
-p_raw = 45.917556
-b_raw = 52.219569
-r = 46.583311
+p_raw = 43.942456
+b_raw = 56.591307
+r = 48.108669
 i_status = "ranked"
 p_status = "provisional"
 b_status = "provisional"
@@ -5866,14 +5866,14 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 52.815535
+BUILD = 59.003861
 CRE = 21.317952
 GEN = 53.426701
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 89.225239
 OPS_precision = 92.920195
 OPS_review = 92.760754
-PLAN = 39.156711
+PLAN = 35.421901
 REVIEW_DIRECT = 5.806579
 
 [models.metrics]
@@ -5882,34 +5882,34 @@ AAReasoningComposite = 77.114087
 ArtificialAnalysisCoding = 40.202703
 ArtificialAnalysisIntelligence = 58.517806
 BlendedCost = 100.000000
-BrowseComp = 25.407958
+BrowseComp = 9.013263
 ContextWindow = 97.815659
 EQBenchCreativeWriting = 17.000696
 EQBenchJudgemark = 5.806579
 GPQA = 84.229419
 HLE = 69.998755
-HLETools = 28.921856
+HLETools = 14.869760
 HiLBench = 50.000000
 IFBench = 93.403838
 LMArenaText = 32.111093
 LiveCodingComposite = 29.679721
 LongContextComposite = 34.276783
 LongContextRecall = 34.276783
-MCPAtlas = 41.596676
-MMLUPro = 66.937342
+MCPAtlas = 35.994460
+MMLUPro = 78.228903
 OutputSpeed = 83.272979
-SWEBenchMultilingual = 70.895177
-SWEBenchPro = 74.069652
-SWEBenchVerified = 77.552485
-SWEComposite = 73.492475
+SWEBenchMultilingual = 84.825294
+SWEBenchPro = 90.116087
+SWEBenchVerified = 95.920808
+SWEComposite = 89.154125
 SciCode = 29.679721
 TTFT = 99.091181
 Tau2Bench = 92.706036
-TerminalBench = 56.461642
+TerminalBench = 60.769403
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 28.659145
-Toolathlon = 45.160935
+Toolathlon = 41.934892
 
 [models.raw_metrics]
 ArtificialAnalysisCoding = 38.700000
@@ -5955,7 +5955,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Flash Think High mode, BrowseComp, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
@@ -5988,7 +5988,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Flash Think High mode, HLE with tools, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
@@ -6011,12 +6011,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, MCP-Atlas Think High mode, https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash, accessed 2026-05-22"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, MMLU-Pro Think High mode, https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash, accessed 2026-05-22"
 
@@ -6025,17 +6025,17 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, Think High mode, 2026-04-24"
 
@@ -6052,7 +6052,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Flash Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
 
@@ -6067,18 +6067,18 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Flash Think High mode, Toolathlon, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.150000
-reported = 0.342500
+direct = 0.492500
+reported = 0.000000
 synthesized = 0.080000
 missing = 0.427500
-effective = 0.355500
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.492500
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.700000
@@ -6135,13 +6135,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.150000
 missing = 0.460000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 1.000000
@@ -6153,18 +6153,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.154157
-reported = 0.330169
+direct = 0.484326
+reported = 0.000000
 synthesized = 0.087566
 missing = 0.428109
-effective = 0.352258
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.484326
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 core_direct = 0.280892
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -6179,40 +6179,40 @@ direct_families = ["artificial_analysis", "eqbench", "lmarena"]
 core_direct = 0.634667
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "eqbench", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."P_raw"]
-direct = 0.239970
-reported = 0.198113
+direct = 0.438083
+reported = 0.000000
 synthesized = 0.099057
 missing = 0.462860
-effective = 0.358838
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.438083
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "scale"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.087500
-reported = 0.234245
+direct = 0.321745
+reported = 0.000000
 synthesized = 0.083854
 missing = 0.594401
-effective = 0.228047
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.321745
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 core_direct = 0.163636
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -6231,24 +6231,24 @@ sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark
 
 [models.scores]
 i_raw = 48.782719
-p_raw = 67.409746
-b_raw = 69.875689
-r = 69.387714
+p_raw = 70.470495
+b_raw = 79.214028
+r = 74.514268
 i_status = "ranked"
 p_status = "provisional"
-b_status = "provisional"
-r_status = "provisional"
-balanced_status = "provisional"
+b_status = "ranked"
+r_status = "ranked"
+balanced_status = "ranked"
 
 [models.groups]
-BUILD = 71.222554
+BUILD = 81.139385
 CRE = 32.475557
 GEN = 73.752595
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 82.090209
 OPS_precision = 88.250503
 OPS_review = 88.208266
-PLAN = 62.278595
+PLAN = 68.066311
 REVIEW_DIRECT = 16.303272
 
 [models.metrics]
@@ -6257,32 +6257,32 @@ AAReasoningComposite = 81.288762
 ArtificialAnalysisCoding = 69.932432
 ArtificialAnalysisIntelligence = 77.767084
 BlendedCost = 89.682556
-BrowseComp = 73.055344
+BrowseComp = 88.425573
 ContextWindow = 97.815659
 CopilotArenaOrLMArenaCode = 73.326773
 EQBenchCreativeWriting = 19.019537
 EQBenchJudgemark = 16.303272
 GPQA = 80.986301
 HLE = 81.591222
-HLETools = 43.906260
+HLETools = 39.843766
 IFBench = 90.008326
 LMArenaText = 66.115607
 LiveCodingComposite = 71.104639
 LongContextComposite = 60.791063
 LongContextRecall = 60.791063
-MCPAtlas = 63.022360
-MMLUPro = 70.288783
+MCPAtlas = 71.703934
+MMLUPro = 83.814639
 OutputSpeed = 71.914371
-SWEBenchMultilingual = 78.896199
-SWEBenchPro = 75.716365
-SWEBenchVerified = 78.033987
-SWEComposite = 76.294516
+SWEBenchMultilingual = 98.160332
+SWEBenchPro = 92.860608
+SWEBenchVerified = 96.723312
+SWEComposite = 93.824194
 SciCode = 69.623216
 TTFT = 98.153549
 Tau2Bench = 93.702982
-TerminalBench = 65.563075
+TerminalBench = 75.938458
 TerminalBenchHard = 71.340791
-Toolathlon = 62.484213
+Toolathlon = 70.807022
 
 [models.raw_metrics]
 ArtificialAnalysisCoding = 47.500000
@@ -6327,7 +6327,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Pro Think High mode, BrowseComp, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
@@ -6364,7 +6364,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Pro Think High mode, HLE with tools, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
@@ -6381,12 +6381,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, MCP-Atlas Think High mode, https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro, accessed 2026-05-22"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, MMLU-Pro Think High mode, https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro, accessed 2026-05-22"
 
@@ -6395,17 +6395,17 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, Think High mode, 2026-04-24"
 
@@ -6422,7 +6422,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4-Pro Hugging Face model card, Think High mode (Terminal-Bench 2.0), 2026-04-24"
 
@@ -6431,18 +6431,18 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "DeepSeek V4 official release table, V4 Pro Think High mode, Toolathlon, https://api-docs.deepseek.com/news/news260424, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.342500
+direct = 0.572500
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.427500
-effective = 0.435500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.572500
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.700000
@@ -6499,13 +6499,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.610000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 1.000000
@@ -6517,20 +6517,20 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.330169
+direct = 0.564026
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.435974
-effective = 0.431959
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.564026
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."I_raw"]
 direct = 0.634667
@@ -6543,42 +6543,42 @@ direct_families = ["artificial_analysis", "eqbench", "lmarena"]
 core_direct = 0.634667
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "eqbench", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."P_raw"]
-direct = 0.239970
-reported = 0.198113
+direct = 0.438083
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.561917
-effective = 0.358838
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.438083
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "scale"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.113110
-reported = 0.234245
+direct = 0.347355
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.652645
-effective = 0.253657
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.347355
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
@@ -7642,7 +7642,7 @@ BlendedCost = 83.304660
 ContextWindow = 97.815659
 CopilotArenaOrLMArenaCode = 39.128403
 EQBenchJudgemark = 14.838655
-GDPval = 39.068181
+GDPval = 31.780301
 GPQA = 86.131437
 GSO = 9.357525
 HLE = 78.351451
@@ -7769,7 +7769,7 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Reasoning), 2026-04-27"
 
@@ -8090,7 +8090,7 @@ BFCLWebSearch = 84.046693
 BlendedCost = 71.143658
 CopilotArenaOrLMArenaCode = 63.830264
 EQBenchCreativeWriting = 12.330276
-GDPval = 37.510652
+GDPval = 29.184420
 GPQA = 90.055257
 GSO = 29.922615
 HLE = 84.662966
@@ -8235,7 +8235,7 @@ class = "direct"
 source = "eqbench_creative_writing"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (high), 2026-04-27"
 
@@ -9025,14 +9025,14 @@ BFCLNonLiveAST = 50.000000
 BFCLRelevanceDetection = 50.000000
 BFCLWebSearch = 50.000000
 BlendedCost = 71.143658
-BrowseComp = 76.934886
+BrowseComp = 94.891477
 ContextArenaMRCR128k = 88.474430
 ContextArenaMRCR1M = 75.029727
 ContextWindow = 97.819248
 CopilotArenaOrLMArenaCode = 67.660292
 EQBenchCreativeWriting = 10.607414
 EQBenchJudgemark = 86.753473
-GDPval = 48.798453
+GDPval = 47.997421
 GPQA = 96.916866
 GSO = 42.955625
 HLE = 95.142414
@@ -9051,7 +9051,7 @@ SWEAtlasQnA = 8.340972
 SWEAtlasTestWriting = 15.369287
 SWEBenchMultilingual = 50.000000
 SWEBenchPro = 76.156222
-SWEBenchVerified = 78.588819
+SWEBenchVerified = 97.648032
 SWEComposite = 75.107540
 SWERebench = 74.058859
 SciCode = 97.773347
@@ -9066,7 +9066,7 @@ TerminalBench = 95.000000
 TerminalBench21 = 36.812911
 TerminalBench21Composite = 36.812911
 TerminalBenchHard = 90.157456
-Toolathlon = 61.932877
+Toolathlon = 69.888128
 
 [models.raw_metrics]
 ARC_AGI_2 = 77.080000
@@ -9193,7 +9193,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Google DeepMind Gemini 3.1 Pro model card, BrowseComp, https://deepmind.google/models/model-cards/gemini-3-1-pro/, accessed 2026-06-11"
 
@@ -9230,7 +9230,7 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, 2026-04-27"
 
@@ -9297,7 +9297,7 @@ class = "direct"
 source = "swebench_pro"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Google DeepMind Gemini 3.1 Pro model card, 2026-02-19"
 
@@ -9358,7 +9358,7 @@ class = "direct"
 source = "terminal_bench"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, Gemini 3.1 Pro comparison row, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -9454,8 +9454,8 @@ direct_families = ["artificial_analysis", "context_arena", "lmarena", "scale", "
 core_direct = 0.970022
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -9502,8 +9502,8 @@ direct_families = ["artificial_analysis", "context_arena", "lmarena", "scale", "
 core_direct = 0.786342
 core_family_count = 5
 core_direct_families = ["artificial_analysis", "context_arena", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -9523,16 +9523,16 @@ sources = ["aa_enterprise_ops_gym", "arc_agi", "artificial_analysis", "hil_bench
 [models.scores]
 i_raw = 92.621808
 p_raw = 89.117822
-b_raw = 85.105782
-r = 85.653892
+b_raw = 91.510695
+r = 88.293475
 i_status = "ranked"
 p_status = "ranked"
-b_status = "provisional"
-r_status = "provisional"
-balanced_status = "provisional"
+b_status = "ranked"
+r_status = "ranked"
+balanced_status = "ranked"
 
 [models.groups]
-BUILD = 83.075515
+BUILD = 91.215485
 CRE = 92.739795
 GEN = 92.521932
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -9557,7 +9557,7 @@ CopilotArenaOrLMArenaCode = 86.832768
 EQBenchJudgemark = 50.000000
 EnterpriseOpsGymAA = 97.874958
 EnterpriseWorkflowComposite = 97.874958
-GDPval = 73.603625
+GDPval = 89.339375
 GPQA = 93.885200
 GSO = 50.000000
 HLE = 91.293926
@@ -9576,9 +9576,9 @@ SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 76.164191
+SWEBenchPro = 93.606985
 SWEBenchVerified = 50.000000
-SWEComposite = 76.164191
+SWEComposite = 93.606985
 SWERebench = 50.000000
 SciCode = 86.505193
 SonarBugDensity = 50.000000
@@ -9688,7 +9688,7 @@ class = "direct"
 source = "aa_enterprise_ops_gym"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Google Gemini 3.5 announcement, GDPval-AA Elo, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
 
@@ -9773,7 +9773,7 @@ donor = "google/gemini-3-flash"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Google Gemini 3.5 announcement, https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/, 2026-05-19"
 
@@ -9842,13 +9842,13 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.380000
-reported = 0.157500
+direct = 0.537500
+reported = 0.000000
 synthesized = 0.272500
 missing = 0.190000
-effective = 0.474500
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "scale"]
+effective = 0.537500
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.500000
@@ -9923,20 +9923,20 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.405056
-reported = 0.135000
+direct = 0.540056
+reported = 0.000000
 synthesized = 0.349569
 missing = 0.110375
-effective = 0.486056
-family_count = 4
-direct_families = ["artificial_analysis", "enterprise_workflow", "lmarena", "scale"]
+effective = 0.540056
+family_count = 5
+direct_families = ["artificial_analysis", "enterprise_workflow", "lmarena", "scale", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
 historical_family_count = 0
 historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "breadth"
+provisional = false
 
 [models.evidence.roles."I_raw"]
 direct = 0.634667
@@ -9971,20 +9971,20 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.319099
-reported = 0.057422
+direct = 0.376521
+reported = 0.000000
 synthesized = 0.446656
 missing = 0.176823
-effective = 0.353552
-family_count = 4
-direct_families = ["artificial_analysis", "enterprise_workflow", "lmarena", "scale"]
+effective = 0.376521
+family_count = 5
+direct_families = ["artificial_analysis", "enterprise_workflow", "lmarena", "scale", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
 historical_family_count = 0
 historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "GDPvalAA2", "Tau3Banking"]
@@ -10288,16 +10288,16 @@ sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "hil_be
 [models.scores]
 i_raw = 7.283052
 p_raw = 20.447194
-b_raw = 39.920537
-r = 35.222312
+b_raw = 42.841129
+r = 36.472260
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
-r_status = "provisional"
+r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 51.463258
+BUILD = 55.414625
 CRE = 4.209366
 GEN = 12.560925
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -10339,9 +10339,9 @@ SWEAtlasQnA = 5.445571
 SWEAtlasRefactoring = 9.031577
 SWEAtlasTestWriting = 1.661834
 SWEBenchMultilingual = 65.064166
-SWEBenchPro = 76.342446
+SWEBenchPro = 93.904077
 SWEBenchVerified = 91.386236
-SWEComposite = 78.979299
+SWEComposite = 86.882032
 SWERebench = 84.708403
 SciCode = 16.442548
 SonarBugDensity = 57.206208
@@ -10519,7 +10519,7 @@ class = "direct"
 source = "swebench"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M2.5 Hugging Face model card evaluation table, https://huggingface.co/MiniMaxAI/MiniMax-M2.5, 2026-Q1"
 
@@ -10582,11 +10582,11 @@ donor = "moonshotai/kimi-k2.5"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.522500
-reported = 0.157500
+direct = 0.680000
+reported = 0.000000
 synthesized = 0.150000
 missing = 0.170000
-effective = 0.617000
+effective = 0.680000
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -10663,11 +10663,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.501105
-reported = 0.135000
+direct = 0.636105
+reported = 0.000000
 synthesized = 0.165169
 missing = 0.198727
-effective = 0.582105
+effective = 0.636105
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
@@ -10675,7 +10675,7 @@ core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
-qualification_path = "core_standard"
+qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
@@ -10711,11 +10711,11 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.237980
-reported = 0.057422
+direct = 0.295401
+reported = 0.000000
 synthesized = 0.301258
 missing = 0.403341
-effective = 0.272433
+effective = 0.295401
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.332567
@@ -10723,8 +10723,8 @@ core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaSearch", "Tau3Banking", "TerminalBench21Composite"]
@@ -10742,8 +10742,8 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar",
 [models.scores]
 i_raw = 28.689096
 p_raw = 52.198493
-b_raw = 45.673110
-r = 47.765661
+b_raw = 51.194604
+r = 49.939770
 i_status = "provisional"
 p_status = "provisional"
 b_status = "ranked"
@@ -10751,7 +10751,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 46.085643
+BUILD = 51.929856
 CRE = 13.482983
 GEN = 36.757646
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -10773,7 +10773,7 @@ ContextWindow = 10.856755
 CopilotArenaOrLMArenaCode = 42.717504
 EQBenchCreativeWriting = 50.000000
 EQBenchJudgemark = 50.000000
-GDPval = 64.873208
+GDPval = 74.788680
 GPQA = 71.527411
 HLE = 54.284758
 HLETools = 50.000000
@@ -10791,10 +10791,10 @@ OutputSpeed = 72.129598
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
-SWEBenchMultilingual = 79.720758
-SWEBenchPro = 76.790891
+SWEBenchMultilingual = 99.534597
+SWEBenchPro = 94.651485
 SWEBenchVerified = 50.000000
-SWEComposite = 42.533728
+SWEComposite = 52.552379
 SWERebench = 0.012781
 SciCode = 45.862387
 SonarBugDensity = 70.509978
@@ -10895,7 +10895,7 @@ donor = "minimax/minimax-m2.5"
 synthesis_category = "conservative"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M2.7 Hugging Face model card, GDPval-AA Elo, https://huggingface.co/MiniMaxAI/MiniMax-M2.7, accessed 2026-05-22"
 
@@ -10978,12 +10978,12 @@ donor = "minimax/minimax-m2.5"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M2.7 launch announcement (SWE Multilingual), https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M2.7 launch announcement, https://www.minimax.io/news/minimax-m27-en, 2026-03-18"
 
@@ -11044,11 +11044,11 @@ donor = "minimax/minimax-m2.5"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.387500
-reported = 0.192500
+direct = 0.580000
+reported = 0.000000
 synthesized = 0.150000
 missing = 0.270000
-effective = 0.503000
+effective = 0.580000
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 
@@ -11125,11 +11125,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.368858
-reported = 0.165000
+direct = 0.533858
+reported = 0.000000
 synthesized = 0.267416
 missing = 0.198727
-effective = 0.467858
+effective = 0.533858
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.746109
@@ -11173,11 +11173,11 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.170532
-reported = 0.070182
+direct = 0.240714
+reported = 0.000000
 synthesized = 0.355945
 missing = 0.403341
-effective = 0.212641
+effective = 0.240714
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.332567
@@ -11203,24 +11203,24 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 72.078228
-p_raw = 71.878778
-b_raw = 64.290654
-r = 52.420795
+p_raw = 73.331263
+b_raw = 71.739637
+r = 56.231755
 i_status = "provisional"
 p_status = "provisional"
-b_status = "provisional"
-r_status = "provisional"
+b_status = "ranked"
+r_status = "ranked"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 66.287344
+BUILD = 74.315933
 CRE = 64.334202
 GEN = 76.187303
 LM_ARENA_REVIEW_PROXY = 22.004255
 OPS_long = 56.001485
 OPS_precision = 70.329190
 OPS_review = 71.065753
-PLAN = 65.417599
+PLAN = 67.514180
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -11246,7 +11246,7 @@ LMArenaText = 64.334202
 LiveCodingComposite = 56.364512
 LongContextComposite = 95.000000
 LongContextRecall = 95.000000
-MCPAtlas = 63.022360
+MCPAtlas = 71.703934
 MMLUPro = 50.000000
 OSWorldVerified = 50.000000
 OutputSpeed = 31.393000
@@ -11254,9 +11254,9 @@ SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 77.953891
-SWEBenchVerified = 78.549115
-SWEComposite = 77.953891
+SWEBenchPro = 96.589819
+SWEBenchVerified = 97.581859
+SWEComposite = 96.589819
 SWERebench = 50.000000
 SciCode = 33.254155
 SonarBugDensity = 50.000000
@@ -11266,8 +11266,8 @@ SonarVulnerabilityDensity = 50.000000
 TTFT = 91.923152
 Tau2Bench = 84.743615
 TerminalBench = 50.000000
-TerminalBench21 = 28.229712
-TerminalBench21Composite = 28.229712
+TerminalBench21 = 13.716187
+TerminalBench21Composite = 13.716187
 TerminalBenchHard = 56.477602
 Toolathlon = 50.000000
 
@@ -11400,7 +11400,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M3 launch report, MCP Atlas, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
 
@@ -11445,12 +11445,12 @@ donor = "minimax/minimax-m2.7"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M3 launch report, SWE-Bench Pro, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M3 model page benchmark card, https://www.minimax.io/models/text/m3, accessed 2026-06-10"
 
@@ -11503,7 +11503,7 @@ donor = "minimax/minimax-m2.7"
 synthesis_category = "conservative"
 
 [models.metric_evidence."TerminalBench21"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "MiniMax M3 launch report, Terminal-Bench 2.1, https://www.minimax.io/blog/minimax-m3, accessed 2026-06-10"
 
@@ -11518,13 +11518,13 @@ donor = "minimax/minimax-m2.7"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.387500
+direct = 0.617500
+reported = 0.000000
 synthesized = 0.192500
 missing = 0.190000
-effective = 0.462500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.617500
+family_count = 5
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -11581,13 +11581,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.400000
+direct = 0.490000
+reported = 0.000000
 synthesized = 0.050000
 missing = 0.460000
-effective = 0.330000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.490000
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "terminal_bench"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -11599,20 +11599,20 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.385112
+direct = 0.618970
+reported = 0.000000
 synthesized = 0.267247
 missing = 0.113783
-effective = 0.464925
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
-core_direct = 0.446109
-core_family_count = 2
-core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+effective = 0.618970
+family_count = 5
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
+core_direct = 0.622196
+core_family_count = 3
+core_direct_families = ["artificial_analysis", "lmarena", "terminal_bench"]
+historical_family_count = 1
+historical_direct_families = ["swe"]
+qualification_path = "standard"
+provisional = false
 
 [models.evidence.roles."I_raw"]
 direct = 0.334667
@@ -11631,36 +11631,36 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."P_raw"]
-direct = 0.239970
-reported = 0.264151
+direct = 0.504121
+reported = 0.000000
 synthesized = 0.139695
 missing = 0.356184
-effective = 0.398461
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
-core_direct = 0.331782
-core_family_count = 2
-core_direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.504121
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "terminal_bench"]
+core_direct = 0.446536
+core_family_count = 3
+core_direct_families = ["artificial_analysis", "lmarena", "terminal_bench"]
 historical_family_count = 1
 historical_direct_families = ["artificial_analysis"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.250305
-reported = 0.287109
+direct = 0.537414
+reported = 0.000000
 synthesized = 0.124870
 missing = 0.337716
-effective = 0.422571
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
-core_direct = 0.463636
-core_family_count = 2
-core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+effective = 0.537414
+family_count = 5
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
+core_direct = 0.602767
+core_family_count = 3
+core_direct_families = ["artificial_analysis", "lmarena", "terminal_bench"]
+historical_family_count = 1
+historical_direct_families = ["swe"]
+qualification_path = "breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaSearch", "Tau3Banking"]
@@ -11678,8 +11678,8 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 3.928215
 p_raw = 2.988560
-b_raw = 13.197280
-r = 9.441563
+b_raw = 0.321010
+r = 0.606080
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -11687,7 +11687,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 11.973595
+BUILD = 0.340209
 CRE = 4.206682
 GEN = 3.780457
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -11711,7 +11711,7 @@ ContextWindow = 59.038448
 CopilotArenaOrLMArenaCode = 50.000000
 EQBenchCreativeWriting = 50.000000
 EQBenchJudgemark = 50.000000
-GDPval = 22.892488
+GDPval = 4.820813
 GPQA = 4.252745
 HLE = 2.904977
 HLETools = 50.000000
@@ -11726,15 +11726,15 @@ MCPAtlas = 50.000000
 MMLUPro = 25.535926
 OSWorldVerified = 50.000000
 OutputSpeed = 0.000000
-SWEBenchMultilingual = 20.085579
+SWEBenchMultilingual = 0.142632
 SWEBenchPro = 50.000000
-SWEBenchVerified = 57.145666
-SWEComposite = 20.085579
+SWEBenchVerified = 61.909443
+SWEComposite = 0.142632
 SWERebench = 50.000000
 SciCode = 0.378205
 TTFT = 96.080050
 Tau2Bench = 40.746342
-TerminalBench = 37.995670
+TerminalBench = 29.992784
 TerminalBenchHard = 4.758168
 Toolathlon = 50.000000
 
@@ -11827,7 +11827,7 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Kimi K2 0905), 2026-04-27"
 
@@ -11890,7 +11890,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, mean over 5 runs (55.9 +/- 0.72), 2025-09"
 
@@ -11901,7 +11901,7 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, mean over 5 runs (69.2 +/- 0.63), 2025-09"
 
@@ -11924,7 +11924,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi-K2-Instruct-0905 Hugging Face model card, 'Terminal-Bench (Terminus-2)' = Terminal-Bench 2.0, mean over 5 runs (44.5 +/- 2.03), 2025-09"
 
@@ -11939,13 +11939,13 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.150000
-reported = 0.035000
+direct = 0.185000
+reported = 0.000000
 synthesized = 0.545000
 missing = 0.270000
-effective = 0.171000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.185000
+family_count = 2
+direct_families = ["artificial_analysis", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -12020,18 +12020,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.154157
-reported = 0.030000
+direct = 0.184157
+reported = 0.000000
 synthesized = 0.517491
 missing = 0.298352
-effective = 0.172157
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.184157
+family_count = 2
+direct_families = ["artificial_analysis", "swe"]
 core_direct = 0.280892
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -12062,24 +12062,24 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.087500
-reported = 0.012760
+direct = 0.100260
+reported = 0.000000
 synthesized = 0.459940
 missing = 0.439799
-effective = 0.095156
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.100260
+family_count = 2
+direct_families = ["artificial_analysis", "swe"]
 core_direct = 0.163636
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -12099,8 +12099,8 @@ sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "lmaren
 [models.scores]
 i_raw = 34.895674
 p_raw = 41.734963
-b_raw = 53.137640
-r = 37.250519
+b_raw = 55.627544
+r = 38.316142
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
@@ -12108,7 +12108,7 @@ r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 55.229009
+BUILD = 58.003212
 CRE = 26.284662
 GEN = 47.831879
 LM_ARENA_REVIEW_PROXY = 13.805771
@@ -12125,7 +12125,7 @@ ARC_AGI_2 = 9.124563
 ArtificialAnalysisCoding = 43.243243
 ArtificialAnalysisIntelligence = 59.672762
 BlendedCost = 86.573883
-BrowseComp = 65.514717
+BrowseComp = 75.857862
 ContextWindow = 59.038448
 CopilotArenaOrLMArenaCode = 60.371127
 EQBenchCreativeWriting = 21.495034
@@ -12133,7 +12133,7 @@ EQBenchJudgemark = 50.000000
 GDPval = 50.000000
 GPQA = 75.207387
 HLE = 59.660173
-HLETools = 66.680661
+HLETools = 77.801101
 HiLBench = 50.000000
 IFBench = 76.094599
 LMArenaDocument = 13.805771
@@ -12142,7 +12142,7 @@ LiveCodingComposite = 61.462889
 LongContextComposite = 52.789138
 LongContextRecall = 52.789138
 MCPAtlas = 22.447711
-MMLUPro = 70.288783
+MMLUPro = 83.814639
 OSWorldVerified = 50.000000
 OutputSpeed = 31.703562
 SWEAtlasComposite = 8.991561
@@ -12150,9 +12150,9 @@ SWEAtlasQnA = 7.914067
 SWEAtlasRefactoring = 11.190215
 SWEAtlasTestWriting = 7.137515
 SWEBenchMultilingual = 51.084471
-SWEBenchPro = 72.457829
+SWEBenchPro = 87.429714
 SWEBenchVerified = 71.920080
-SWEComposite = 79.275173
+SWEComposite = 86.012521
 SWERebench = 92.357117
 SciCode = 62.190730
 SonarBugDensity = 48.337029
@@ -12226,7 +12226,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.5 official release table, BrowseComp, https://www.kimi.com/blog/kimi-k2-5, accessed 2026-06-11"
 
@@ -12263,7 +12263,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.5 official release table, HLE with tools, https://www.kimi.com/blog/kimi-k2-5, accessed 2026-06-11"
 
@@ -12294,7 +12294,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.5 Hugging Face model card, MMLU-Pro, https://huggingface.co/moonshotai/Kimi-K2.5, accessed 2026-05-22"
 
@@ -12325,7 +12325,7 @@ class = "direct"
 source = "swebench"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.5 Hugging Face model card evaluation table, https://huggingface.co/moonshotai/Kimi-K2.5, 2026-Q1"
 
@@ -12388,11 +12388,11 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.672500
-reported = 0.157500
+direct = 0.830000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.170000
-effective = 0.767000
+effective = 0.830000
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -12469,11 +12469,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.663652
-reported = 0.135000
+direct = 0.798652
+reported = 0.000000
 synthesized = 0.002622
 missing = 0.198727
-effective = 0.744652
+effective = 0.798652
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
@@ -12495,8 +12495,8 @@ direct_families = ["arc_agi", "artificial_analysis", "eqbench", "lmarena"]
 core_direct = 0.934667
 core_family_count = 4
 core_direct_families = ["arc_agi", "artificial_analysis", "eqbench", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "standard"
 provisional = false
 
@@ -12517,11 +12517,11 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.521008
-reported = 0.057422
+direct = 0.578430
+reported = 0.000000
 synthesized = 0.018229
 missing = 0.403341
-effective = 0.555461
+effective = 0.578430
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.585375
@@ -12534,7 +12534,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaSearch", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
+groups_shrunk = ["LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 synthesis_dominant = false
 
 [[models]]
@@ -12547,24 +12547,24 @@ sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark
 
 [models.scores]
 i_raw = 66.391684
-p_raw = 68.722725
-b_raw = 66.929833
-r = 57.818523
+p_raw = 68.321907
+b_raw = 70.316670
+r = 59.128422
 i_status = "ranked"
 p_status = "provisional"
 b_status = "ranked"
-r_status = "provisional"
-balanced_status = "provisional"
+r_status = "ranked"
+balanced_status = "ranked"
 
 [models.groups]
-BUILD = 70.043219
+BUILD = 74.597755
 CRE = 57.631041
 GEN = 79.857817
 LM_ARENA_REVIEW_PROXY = 39.516736
 OPS_long = 70.700504
 OPS_precision = 78.185283
 OPS_review = 73.231860
-PLAN = 56.987993
+PLAN = 56.192172
 REVIEW_DIRECT = 37.608483
 
 [models.metrics]
@@ -12573,41 +12573,41 @@ AAReasoningComposite = 86.307405
 ArtificialAnalysisCoding = 68.581081
 ArtificialAnalysisIntelligence = 87.006737
 BlendedCost = 81.624428
-BrowseComp = 77.117463
+BrowseComp = 95.195771
 ContextWindow = 59.038448
 CopilotArenaOrLMArenaCode = 89.012221
 EQBenchCreativeWriting = 50.691342
 EQBenchJudgemark = 37.608483
-GDPval = 64.356697
+GDPval = 73.927828
 GPQA = 91.023587
 HLE = 81.591222
-HLETools = 75.033520
+HLETools = 91.722533
 HiLBench = 35.300552
 IFBench = 89.273607
-KimiClaw247Bench = 20.000000
-KimiCodeBenchV2 = 20.000000
+KimiClaw247Bench = 0.000000
+KimiCodeBenchV2 = 0.000000
 LMArenaDocument = 39.516736
 LMArenaText = 74.980290
 LiveCodingComposite = 88.393326
 LongContextComposite = 82.172232
 LongContextRecall = 82.172232
-MCPAtlas = 48.010447
-MCPMarkVerified = 20.000000
-MLSBenchLite = 20.000000
-OSWorldVerified = 56.218099
+MCPAtlas = 46.684078
+MCPMarkVerified = 0.000000
+MLSBenchLite = 0.000000
+OSWorldVerified = 60.363498
 OutputSpeed = 63.864730
-ProgramBench = 20.000000
-SWEBenchMultilingual = 79.751140
-SWEBenchPro = 77.815848
-SWEBenchVerified = 78.423358
-SWEComposite = 67.267344
+ProgramBench = 0.000000
+SWEBenchMultilingual = 99.585233
+SWEBenchPro = 96.359746
+SWEBenchVerified = 97.372263
+SWEComposite = 77.595508
 SWERebench = 53.944663
 SciCode = 87.980730
 TTFT = 98.665828
 Tau2Bench = 93.466358
-TerminalBench = 69.147753
+TerminalBench = 81.912921
 TerminalBenchHard = 62.741393
-Toolathlon = 65.086303
+Toolathlon = 75.143839
 
 [models.raw_metrics]
 ArtificialAnalysisCoding = 47.100000
@@ -12662,7 +12662,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 official release table, BrowseComp, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
 
@@ -12691,7 +12691,7 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, 2026-04-27"
 
@@ -12704,7 +12704,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 official release table, HLE with tools, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
 
@@ -12717,12 +12717,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."KimiClaw247Bench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."KimiCodeBenchV2"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -12739,22 +12739,22 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi K2.6 comparison row, MCP Atlas, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MCPMarkVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MLSBenchLite"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 official release table, OSWorld-Verified, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
 
@@ -12763,22 +12763,22 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."ProgramBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 tech blog, kimi.com/blog/kimi-k2-6, 2026-04-20"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 tech blog, kimi.com/blog/kimi-k2-6, 2026-04-20"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
 
@@ -12803,7 +12803,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 tech blog, 2026-04-20"
 
@@ -12812,18 +12812,18 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.6 official release table, Toolathlon, https://www.kimi.com/blog/kimi-k2-6, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.387500
-reported = 0.342500
+direct = 0.730000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.270000
-effective = 0.593000
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "swe"]
+effective = 0.730000
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.700000
@@ -12880,11 +12880,11 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.140000
-reported = 0.300000
+direct = 0.440000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.560000
-effective = 0.320000
+effective = 0.440000
 family_count = 2
 direct_families = ["artificial_analysis", "scale"]
 
@@ -12898,19 +12898,19 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.371479
-reported = 0.330169
+direct = 0.701648
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.298352
-effective = 0.569581
+effective = 0.701648
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "core_standard"
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
@@ -12930,36 +12930,36 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."P_raw"]
-direct = 0.272989
-reported = 0.198113
+direct = 0.471102
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.528898
-effective = 0.391857
+effective = 0.471102
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "scale"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.325956
-reported = 0.234245
+direct = 0.560201
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.439799
-effective = 0.466503
+effective = 0.560201
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.585375
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
@@ -12976,9 +12976,9 @@ sources = ["deep_swe_v1_1", "overrides"]
 
 [models.scores]
 i_raw = 50.000000
-p_raw = 67.433740
-b_raw = 56.790564
-r = 62.057808
+p_raw = 79.056233
+b_raw = 66.009027
+r = 72.466011
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -12986,14 +12986,14 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 51.061582
+BUILD = 58.986010
 CRE = 50.000000
 GEN = 50.000000
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 50.000000
 OPS_precision = 50.000000
 OPS_review = 50.000000
-PLAN = 67.433740
+PLAN = 79.056233
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -13015,17 +13015,17 @@ HLE = 50.000000
 HLETools = 50.000000
 HiLBench = 50.000000
 IFBench = 50.000000
-KimiClaw247Bench = 42.818792
-KimiCodeBenchV2 = 54.955233
+KimiClaw247Bench = 38.031320
+KimiCodeBenchV2 = 58.258722
 LMArenaDocument = 50.000000
 LMArenaText = 50.000000
 LongContextRecall = 50.000000
-MCPAtlas = 67.433740
-MCPMarkVerified = 46.172007
-MLSBenchLite = 51.167697
+MCPAtlas = 79.056233
+MCPMarkVerified = 43.620011
+MLSBenchLite = 51.946162
 OSWorldVerified = 50.000000
 OutputSpeed = 50.000000
-ProgramBench = 34.070796
+ProgramBench = 23.451327
 SWEBenchMultilingual = 50.000000
 SWEBenchPro = 50.000000
 SWEBenchVerified = 50.000000
@@ -13179,12 +13179,12 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."KimiClaw247Bench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."KimiCodeBenchV2"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -13207,17 +13207,17 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Atlas, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MCPMarkVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MLSBenchLite"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -13234,7 +13234,7 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."ProgramBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -13299,13 +13299,13 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "same_series_forward"
 
 [models.evidence.groups."BUILD"]
-direct = 0.070000
-reported = 0.150000
+direct = 0.220000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.780000
-effective = 0.160000
-family_count = 1
-direct_families = ["deepswe"]
+effective = 0.220000
+family_count = 2
+direct_families = ["deepswe", "scale"]
 
 [models.evidence.groups."CRE"]
 direct = 0.000000
@@ -13362,13 +13362,13 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."PLAN"]
-direct = 0.000000
-reported = 0.300000
+direct = 0.300000
+reported = 0.000000
 synthesized = 0.050000
 missing = 0.650000
-effective = 0.180000
-family_count = 0
-direct_families = []
+effective = 0.300000
+family_count = 1
+direct_families = ["scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -13380,13 +13380,13 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.069738
-reported = 0.165169
+direct = 0.234906
+reported = 0.000000
 synthesized = 0.536479
 missing = 0.228614
-effective = 0.168839
-family_count = 1
-direct_families = ["deepswe"]
+effective = 0.234906
+family_count = 2
+direct_families = ["deepswe", "scale"]
 core_direct = 0.000000
 core_family_count = 0
 core_direct_families = []
@@ -13412,13 +13412,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."P_raw"]
-direct = 0.000000
-reported = 0.198113
+direct = 0.198113
+reported = 0.000000
 synthesized = 0.272989
 missing = 0.528898
-effective = 0.118868
-family_count = 0
-direct_families = []
+effective = 0.198113
+family_count = 1
+direct_families = ["scale"]
 core_direct = 0.000000
 core_family_count = 0
 core_direct_families = []
@@ -13428,13 +13428,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.025521
-reported = 0.164062
+direct = 0.189583
+reported = 0.000000
 synthesized = 0.396138
 missing = 0.414278
-effective = 0.123958
-family_count = 1
-direct_families = ["deepswe"]
+effective = 0.189583
+family_count = 2
+direct_families = ["deepswe", "scale"]
 core_direct = 0.000000
 core_family_count = 0
 core_direct_families = []
@@ -13509,7 +13509,7 @@ EQBenchJudgemark = 50.000000
 FactoryCodeReviewF1 = 50.000000
 FactoryCodeReviewPrecision = 50.000000
 FactoryCodeReviewRecall = 50.000000
-GDPval = 62.740235
+GDPval = 71.233726
 GPQA = 88.234377
 GSO = 60.479687
 HLE = 80.289158
@@ -13734,7 +13734,7 @@ donor = "openai/gpt-5.4"
 synthesis_category = "conservative"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (xhigh), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
 
@@ -14369,8 +14369,8 @@ sources = ["artificial_analysis", "hil_bench", "lmarena", "openrouter", "overrid
 [models.scores]
 i_raw = 90.527378
 p_raw = 53.682295
-b_raw = 72.366851
-r = 55.214729
+b_raw = 75.702345
+r = 56.642246
 i_status = "provisional"
 p_status = "provisional"
 b_status = "ranked"
@@ -14378,7 +14378,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 75.125279
+BUILD = 79.637981
 CRE = 50.000000
 GEN = 90.527378
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -14407,7 +14407,7 @@ EQBenchJudgemark = 50.000000
 FactoryCodeReviewF1 = 50.000000
 FactoryCodeReviewPrecision = 50.000000
 FactoryCodeReviewRecall = 50.000000
-GDPval = 64.056471
+GDPval = 73.427452
 GPQA = 92.182245
 GSO = 50.000000
 HLE = 89.699945
@@ -14426,8 +14426,8 @@ SWEAtlasComposite = 66.863727
 SWEAtlasQnA = 58.265270
 SWEAtlasRefactoring = 81.759470
 SWEAtlasTestWriting = 55.601194
-SWEBenchPro = 77.076214
-SWEComposite = 80.372134
+SWEBenchPro = 95.127023
+SWEComposite = 89.397539
 SWERebench = 83.668054
 SciCode = 86.887820
 SonarBugDensity = 61.640798
@@ -14579,7 +14579,7 @@ donor = "openai/gpt-5.4"
 synthesis_category = "conservative"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (xhigh), 2026-04-27"
 
@@ -14656,7 +14656,7 @@ class = "direct"
 source = "sweatlas_test_writing"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI-reported on GPT-5.3-Codex launch, openai.com/index/introducing-gpt-5-3-codex (xHigh effort), 2026-02-05"
 
@@ -14721,11 +14721,11 @@ donor = "openai/gpt-5.4"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.487500
-reported = 0.157500
+direct = 0.645000
+reported = 0.000000
 synthesized = 0.250000
 missing = 0.105000
-effective = 0.582000
+effective = 0.645000
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -14802,11 +14802,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.471105
-reported = 0.135000
+direct = 0.606105
+reported = 0.000000
 synthesized = 0.273184
 missing = 0.120712
-effective = 0.552105
+effective = 0.606105
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
@@ -14814,7 +14814,7 @@ core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
 historical_family_count = 1
 historical_direct_families = ["terminal_bench"]
-qualification_path = "core_standard"
+qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
@@ -14850,11 +14850,11 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.225219
-reported = 0.057422
+direct = 0.282641
+reported = 0.000000
 synthesized = 0.533244
 missing = 0.184115
-effective = 0.259672
+effective = 0.282641
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.332567
@@ -14909,7 +14909,7 @@ ARC_AGI_3 = 2.150538
 ArtificialAnalysisCoding = 100.000000
 ArtificialAnalysisIntelligence = 98.171319
 BlendedCost = 62.404288
-BrowseComp = 75.032017
+BrowseComp = 91.720028
 ContextArenaMRCR128k = 91.303560
 ContextArenaMRCR1M = 70.075307
 ContextWindow = 97.844039
@@ -14920,7 +14920,7 @@ FactoryCodeReviewF1 = 0.000000
 FactoryCodeReviewF1Stdev = 100.000000
 FactoryCodeReviewPrecision = 74.461538
 FactoryCodeReviewRecall = 0.000000
-GDPval = 74.237453
+GDPval = 90.395755
 GPQA = 93.437584
 GSO = 72.964387
 HLE = 92.066212
@@ -14933,7 +14933,7 @@ LiveCodingComposite = 85.866127
 LongContextComposite = 93.521424
 LongContextRecall = 95.000000
 MCPAtlas = 53.315922
-OSWorldVerified = 62.441671
+OSWorldVerified = 70.736119
 OutputSpeed = 82.341928
 SWEAtlasComposite = 82.849557
 SWEAtlasQnA = 81.846148
@@ -14951,7 +14951,7 @@ SonarVulnerabilityDensity = 100.000000
 TTFT = 0.000000
 Tau2Bench = 81.429013
 TerminalBenchHard = 94.615356
-Toolathlon = 73.567237
+Toolathlon = 89.278729
 
 [models.raw_metrics]
 AGCBench = 0.736766
@@ -15027,7 +15027,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -15080,7 +15080,7 @@ class = "direct"
 source = "factory_code_review"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Anthropic Claude Opus 4.7 launch GDPval-AA comparison chart for GPT-5.4 xhigh, https://www.anthropic.com/news/claude-opus-4-7, accessed 2026-07-02"
 
@@ -15125,7 +15125,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, OSWorld-Verified, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -15190,7 +15190,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, GPT-5.4 comparison row, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -15355,16 +15355,16 @@ sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "eqbenc
 [models.scores]
 i_raw = 29.509399
 p_raw = 34.036138
-b_raw = 48.472030
-r = 44.611606
+b_raw = 54.807981
+r = 47.323252
 i_status = "ranked"
-p_status = "provisional"
+p_status = "ranked"
 b_status = "provisional"
 r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 57.440052
+BUILD = 65.440699
 CRE = 28.404570
 GEN = 31.954889
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -15397,7 +15397,7 @@ GDPval = 50.000000
 GPQA = 72.289187
 GSO = 50.000000
 HLE = 47.964292
-HLETools = 32.047616
+HLETools = 20.079360
 HiLBench = 50.000000
 IFBench = 84.113590
 LMArenaDocument = 50.000000
@@ -15407,13 +15407,13 @@ LiveCodingComposite = 59.016592
 LongContextComposite = 80.519854
 LongContextRecall = 80.519854
 MCPAtlas = 5.000000
-OSWorldVerified = 52.655428
+OSWorldVerified = 54.425713
 OutputSpeed = 94.305734
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
-SWEBenchPro = 75.716365
-SWEComposite = 75.716365
+SWEBenchPro = 92.860608
+SWEComposite = 92.860608
 SWERebench = 50.000000
 SciCode = 68.917018
 SonarBugDensity = 70.509978
@@ -15423,11 +15423,11 @@ SonarIssueDensity = 24.886537
 SonarVulnerabilityDensity = 90.140845
 TTFT = 80.967256
 Tau2Bench = 72.426396
-TerminalBench = 61.382807
+TerminalBench = 68.971345
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 87.591187
-Toolathlon = 43.253209
+Toolathlon = 38.755348
 
 [models.raw_metrics]
 AGCBench = 0.736766
@@ -15588,7 +15588,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.4 mini and nano launch evaluations, HLE with tools, https://openai.com/index/introducing-gpt-5-4-mini-and-nano/, accessed 2026-06-12"
 
@@ -15627,7 +15627,7 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.4 mini and nano launch evaluations, OSWorld-Verified, https://openai.com/index/introducing-gpt-5-4-mini-and-nano/, accessed 2026-06-12"
 
@@ -15654,7 +15654,7 @@ donor = "openai/gpt-5.4"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.4 mini and nano launch evaluations, SWE-Bench Pro public, https://openai.com/index/introducing-gpt-5-4-mini-and-nano/, accessed 2026-06-12"
 
@@ -15693,7 +15693,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.4 mini and nano launch evaluations, Terminal-Bench 2.0, https://openai.com/index/introducing-gpt-5-4-mini-and-nano/, accessed 2026-06-12"
 
@@ -15708,18 +15708,18 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.4 mini and nano launch evaluations, Toolathlon, https://openai.com/index/introducing-gpt-5-4-mini-and-nano/, accessed 2026-06-12"
 
 [models.evidence.groups."BUILD"]
-direct = 0.380000
-reported = 0.157500
+direct = 0.537500
+reported = 0.000000
 synthesized = 0.257500
 missing = 0.205000
-effective = 0.474500
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "scale"]
+effective = 0.537500
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 1.000000
@@ -15794,18 +15794,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.399026
-reported = 0.135000
+direct = 0.534026
+reported = 0.000000
 synthesized = 0.345262
 missing = 0.120712
-effective = 0.480026
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "scale"]
+effective = 0.534026
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -15836,24 +15836,24 @@ direct_families = ["arc_agi", "artificial_analysis", "lmarena", "scale"]
 core_direct = 0.517154
 core_family_count = 3
 core_direct_families = ["arc_agi", "artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.277172
-reported = 0.057422
+direct = 0.334594
+reported = 0.000000
 synthesized = 0.481291
 missing = 0.184115
-effective = 0.311625
-family_count = 3
-direct_families = ["artificial_analysis", "lmarena", "scale"]
+effective = 0.334594
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -15873,8 +15873,8 @@ sources = ["aa_automation_bench", "aa_enterprise_ops_gym", "aa_gdpval_v2", "aa_o
 [models.scores]
 i_raw = 90.697862
 p_raw = 90.591175
-b_raw = 87.936081
-r = 89.582239
+b_raw = 90.717666
+r = 90.765379
 i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
@@ -15882,7 +15882,7 @@ r_status = "ranked"
 balanced_status = "ranked"
 
 [models.groups]
-BUILD = 87.862329
+BUILD = 91.107511
 CRE = 89.499056
 GEN = 92.694486
 LM_ARENA_REVIEW_PROXY = 91.880772
@@ -15905,7 +15905,7 @@ ArtificialAnalysisCoding = 100.000000
 ArtificialAnalysisIntelligence = 100.000000
 AutomationBenchAA = 95.993834
 BlendedCost = 5.652945
-BrowseComp = 76.148424
+BrowseComp = 93.580707
 ContextArenaMRCR128k = 96.863721
 ContextArenaMRCR1M = 100.000000
 ContextWindow = 97.844039
@@ -15922,7 +15922,7 @@ FactoryCodeReviewF1 = 2.488336
 FactoryCodeReviewF1Stdev = 78.698225
 FactoryCodeReviewPrecision = 0.000000
 FactoryCodeReviewRecall = 35.392535
-GDPval = 76.964878
+GDPval = 94.941463
 GDPvalAA2 = 94.245051
 GDPvalAA2CIHigh = 0.000000
 GDPvalAA2CILow = 0.000000
@@ -15931,8 +15931,8 @@ GSO = 87.928036
 HLE = 94.820566
 HiLBench = 95.887328
 IFBench = 89.055121
-KimiClaw247Bench = 80.000000
-KimiCodeBenchV2 = 80.000000
+KimiClaw247Bench = 100.000000
+KimiCodeBenchV2 = 100.000000
 LMArenaDocument = 89.765862
 LMArenaSearch = 93.995683
 LMArenaText = 86.454388
@@ -15940,18 +15940,18 @@ LiveCodingComposite = 91.090517
 LongContextComposite = 96.041211
 LongContextRecall = 95.492871
 MCPAtlas = 76.374962
-MCPMarkVerified = 80.000000
-MLSBenchLite = 52.913787
-OSWorldVerified = 71.358279
+MCPMarkVerified = 100.000000
+MLSBenchLite = 54.856311
+OSWorldVerified = 85.597132
 OutputSpeed = 71.340353
-ProgramBench = 80.000000
+ProgramBench = 100.000000
 SWEAtlasComposite = 83.582241
 SWEAtlasQnA = 89.732699
 SWEAtlasRefactoring = 87.009443
 SWEAtlasTestWriting = 72.862181
-SWEBenchPro = 77.815848
-SWEBenchVerified = 79.855803
-SWEComposite = 88.094320
+SWEBenchPro = 96.359746
+SWEBenchVerified = 99.759672
+SWEComposite = 97.366269
 SWERebench = 98.372792
 SciCode = 94.548401
 SonarBugDensity = 100.000000
@@ -15965,7 +15965,7 @@ TerminalBench = 96.839829
 TerminalBench21 = 95.116823
 TerminalBench21Composite = 95.116823
 TerminalBenchHard = 96.730869
-Toolathlon = 74.727213
+Toolathlon = 91.212021
 
 [models.raw_metrics]
 AAOmniscienceAccuracy = 56.900000
@@ -16079,7 +16079,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, BrowseComp, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -16152,7 +16152,7 @@ class = "direct"
 source = "factory_code_review"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, artificialanalysis.ai (xhigh effort), 2026-04-27"
 
@@ -16189,12 +16189,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."KimiClaw247Bench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Kimi Claw 24/7 Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."KimiCodeBenchV2"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -16219,17 +16219,17 @@ class = "direct"
 source = "mcp_atlas"
 
 [models.metric_evidence."MCPMarkVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, MCP Mark Verified, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."MLSBenchLite"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, MLS Bench Lite, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
 [models.metric_evidence."OSWorldVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, OSWorld-Verified, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
@@ -16238,7 +16238,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."ProgramBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Program Bench, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
 
@@ -16255,12 +16255,12 @@ class = "direct"
 source = "sweatlas_test_writing"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI-reported on SWE-Bench Pro (xHigh), 2026-04-23"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch, 2026-04-23"
 
@@ -16321,16 +16321,16 @@ class = "direct"
 source = "terminal_bench"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.5 launch evaluations, Toolathlon, https://openai.com/index/introducing-gpt-5-5/, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.807500
-reported = 0.157500
+direct = 0.965000
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.035000
-effective = 0.902000
+effective = 0.965000
 family_count = 7
 direct_families = ["artificial_analysis", "context_arena", "deepswe", "lmarena", "scale", "swe", "terminal_bench"]
 
@@ -16407,18 +16407,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.824513
-reported = 0.135000
+direct = 0.959513
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.040487
-effective = 0.905513
+effective = 0.959513
 family_count = 9
 direct_families = ["artificial_analysis", "context_arena", "deepswe", "enterprise_workflow", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.980892
 core_family_count = 6
 core_direct_families = ["artificial_analysis", "context_arena", "gdpval", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -16455,18 +16455,18 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.856901
-reported = 0.057422
+direct = 0.914323
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.085677
-effective = 0.891354
+effective = 0.914323
 family_count = 9
 direct_families = ["artificial_analysis", "context_arena", "deepswe", "enterprise_workflow", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.863636
 core_family_count = 6
 core_direct_families = ["artificial_analysis", "context_arena", "gdpval", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -16486,8 +16486,8 @@ sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark
 [models.scores]
 i_raw = 37.551370
 p_raw = 58.168416
-b_raw = 60.298002
-r = 49.462057
+b_raw = 61.374531
+r = 49.885944
 i_status = "ranked"
 p_status = "provisional"
 b_status = "ranked"
@@ -16495,7 +16495,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 62.878546
+BUILD = 64.017996
 CRE = 23.155610
 GEN = 59.314240
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -16511,8 +16511,8 @@ AAReasoningComposite = 67.320013
 ARC_AGI_2 = 50.000000
 ArtificialAnalysisCoding = 48.986486
 ArtificialAnalysisIntelligence = 52.743022
-BFCL = 73.376443
-BFCLComposite = 73.376443
+BFCL = 88.960739
+BFCLComposite = 88.960739
 BlendedCost = 85.484240
 ContextWindow = 59.038448
 CopilotArenaOrLMArenaCode = 42.034347
@@ -16520,7 +16520,7 @@ EQBenchCreativeWriting = 9.707540
 EQBenchJudgemark = 30.105447
 GPQA = 83.721970
 HLE = 50.918055
-HLETools = 59.804951
+HLETools = 66.341585
 HiLBench = 50.000000
 IFBench = 92.973333
 LMArenaText = 56.775787
@@ -16528,12 +16528,12 @@ LiveCodingComposite = 25.145828
 LongContextComposite = 55.493575
 LongContextRecall = 55.493575
 MCPAtlas = 50.000000
-MMLUPro = 72.910238
+MMLUPro = 88.183730
 OutputSpeed = 70.452815
-SWEBenchMultilingual = 66.115074
+SWEBenchMultilingual = 76.858457
 SWEBenchPro = 50.000000
-SWEBenchVerified = 75.582447
-SWEComposite = 85.495095
+SWEBenchVerified = 92.637411
+SWEComposite = 87.448437
 SWERebench = 89.801766
 SciCode = 13.886815
 SonarBugDensity = 77.161863
@@ -16543,7 +16543,7 @@ SonarIssueDensity = 22.261606
 SonarVulnerabilityDensity = 23.239437
 TTFT = 93.722149
 Tau2Bench = 93.221485
-TerminalBench = 50.031866
+TerminalBench = 50.053110
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 49.999961
@@ -16601,7 +16601,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BFCL"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B BFCL-V4 row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16642,7 +16642,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B HLE with tools row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16671,7 +16671,7 @@ donor = "qwen/qwen3.6-plus"
 synthesis_category = "conservative"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B MMLU-Pro row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16680,7 +16680,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B SWE-bench Multilingual row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16691,7 +16691,7 @@ donor = "qwen/qwen3.6-plus"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B coding-agent row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16732,7 +16732,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B Terminal Bench 2 row, https://www.alibabacloud.com/blog/602894, accessed 2026-06-12"
 
@@ -16747,11 +16747,11 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.387500
-reported = 0.035000
+direct = 0.422500
+reported = 0.000000
 synthesized = 0.387500
 missing = 0.190000
-effective = 0.408500
+effective = 0.422500
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 
@@ -16828,18 +16828,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.368858
-reported = 0.030000
+direct = 0.398858
+reported = 0.000000
 synthesized = 0.387734
 missing = 0.213408
-effective = 0.386858
+effective = 0.398858
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.746109
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "core_standard"
 provisional = false
 
@@ -16854,8 +16854,8 @@ direct_families = ["artificial_analysis", "eqbench", "lmarena"]
 core_direct = 0.634667
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "eqbench", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "standard"
 provisional = false
 
@@ -16870,24 +16870,24 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.170532
-reported = 0.012760
+direct = 0.183292
+reported = 0.000000
 synthesized = 0.305339
 missing = 0.511369
-effective = 0.178188
+effective = 0.183292
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.332567
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -16961,7 +16961,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 93.112719
 Tau2Bench = 93.466358
-TerminalBench = 67.865787
+TerminalBench = 79.776311
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 62.741393
@@ -17162,7 +17162,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Max-Preview blog reports Terminal-Bench 2.0 +3.8 over Qwen3.6-Plus; Qwen3.6-Plus official row is 61.6, https://www.alibabacloud.com/blog/qwen3-6-max-preview-smarter-sharper-still-evolving_603055 and https://qwen.ai/blog?id=qwen3.6, accessed 2026-06-12"
 
@@ -17268,8 +17268,8 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -17300,8 +17300,8 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -17316,8 +17316,8 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -17336,24 +17336,24 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 53.363246
-p_raw = 63.375836
-b_raw = 61.628024
-r = 65.849656
+p_raw = 66.372938
+b_raw = 71.075940
+r = 70.999609
 i_status = "provisional"
 p_status = "provisional"
-b_status = "provisional"
-r_status = "provisional"
+b_status = "ranked"
+r_status = "ranked"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 63.371971
+BUILD = 73.466161
 CRE = 52.466190
 GEN = 53.839235
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 80.543697
 OPS_precision = 86.312653
 OPS_review = 86.520618
-PLAN = 69.225119
+PLAN = 74.892480
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -17373,12 +17373,12 @@ LMArenaText = 52.466190
 LiveCodingComposite = 35.322017
 LongContextComposite = 82.172232
 LongContextRecall = 82.172232
-MCPAtlas = 62.751563
-MMLUPro = 74.895877
+MCPAtlas = 71.252604
+MMLUPro = 91.493128
 OutputSpeed = 70.735173
-SWEBenchPro = 76.980654
-SWEBenchVerified = 77.682519
-SWEComposite = 76.980654
+SWEBenchPro = 94.967757
+SWEBenchVerified = 96.137531
+SWEComposite = 94.967757
 SWERebench = 50.000000
 SciCode = 9.483138
 SonarBugDensity = 50.000000
@@ -17387,7 +17387,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 95.160027
 Tau2Bench = 94.770479
-TerminalBench = 63.492015
+TerminalBench = 72.486692
 TerminalBench21 = 50.000000
 TerminalBench21Composite = 50.000000
 TerminalBenchHard = 62.741393
@@ -17475,12 +17475,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Plus blog (Public Set, gemini-2.5-pro judger), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Plus blog, MMLU-Pro, https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
@@ -17489,12 +17489,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Plus blog, https://qwen.ai/blog?id=qwen3.6 (figure also reproduced in apidog.com coverage), 2026-03-31"
 
@@ -17541,7 +17541,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Qwen3.6-Plus blog, Terminal-Bench 2.0 (Harbor/Terminus-2 harness, 5-run avg), https://qwen.ai/blog?id=qwen3.6, 2026-03-31"
 
@@ -17556,13 +17556,13 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.307500
+direct = 0.537500
+reported = 0.000000
 synthesized = 0.237500
 missing = 0.225000
-effective = 0.414500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.537500
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -17619,13 +17619,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.150000
 missing = 0.460000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -17637,20 +17637,20 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.300169
+direct = 0.534026
+reported = 0.000000
 synthesized = 0.222566
 missing = 0.243408
-effective = 0.413959
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.534026
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."I_raw"]
 direct = 0.334667
@@ -17663,42 +17663,42 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.334667
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
-
-[models.evidence.roles."P_raw"]
-direct = 0.239970
-reported = 0.198113
-synthesized = 0.205733
-missing = 0.356184
-effective = 0.358838
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
-core_direct = 0.331782
-core_family_count = 2
-core_direct_families = ["artificial_analysis", "lmarena"]
 historical_family_count = 1
 historical_direct_families = ["artificial_analysis"]
 qualification_path = "unqualified"
 provisional = true
 
+[models.evidence.roles."P_raw"]
+direct = 0.438083
+reported = 0.000000
+synthesized = 0.205733
+missing = 0.356184
+effective = 0.438083
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "scale"]
+core_direct = 0.331782
+core_family_count = 2
+core_direct_families = ["artificial_analysis", "lmarena"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
+qualification_path = "unqualified"
+provisional = true
+
 [models.evidence.roles."R"]
-direct = 0.113110
-reported = 0.221484
+direct = 0.334594
+reported = 0.000000
 synthesized = 0.141276
 missing = 0.524130
-effective = 0.246000
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.334594
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "Tau3Banking"]
@@ -17715,24 +17715,24 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 89.511367
-p_raw = 79.560406
-b_raw = 73.768367
-r = 79.163646
+p_raw = 83.859453
+b_raw = 84.855074
+r = 85.495611
 i_status = "provisional"
 p_status = "provisional"
-b_status = "provisional"
-r_status = "provisional"
+b_status = "ranked"
+r_status = "ranked"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 75.183121
+BUILD = 86.549089
 CRE = 89.732550
 GEN = 89.394005
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 93.620087
 OPS_precision = 94.423216
 OPS_review = 94.601487
-PLAN = 71.778550
+PLAN = 79.907822
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -17741,8 +17741,8 @@ AAReasoningComposite = 90.316133
 ARC_AGI_2 = 50.000000
 ArtificialAnalysisCoding = 78.716216
 ArtificialAnalysisIntelligence = 97.401347
-BFCL = 76.265891
-BFCLComposite = 76.265891
+BFCL = 93.776485
+BFCLComposite = 93.776485
 BlendedCost = 78.823540
 ContextWindow = 96.823741
 CopilotArenaOrLMArenaCode = 92.359087
@@ -17754,13 +17754,13 @@ LMArenaText = 89.732550
 LiveCodingComposite = 73.314651
 LongContextComposite = 78.753923
 LongContextRecall = 78.753923
-MCPAtlas = 68.290863
+MCPAtlas = 80.484772
 MMLUPro = 50.000000
 OutputSpeed = 92.086205
-SWEBenchMultilingual = 79.901127
-SWEBenchPro = 78.426395
-SWEBenchVerified = 78.508323
-SWEComposite = 78.694528
+SWEBenchMultilingual = 99.835211
+SWEBenchPro = 97.377325
+SWEBenchVerified = 97.513871
+SWEComposite = 97.824214
 SWERebench = 50.000000
 SciCode = 60.618360
 SonarBugDensity = 50.000000
@@ -17769,7 +17769,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 95.397571
 Tau2Bench = 92.434974
-TerminalBench = 71.699420
+TerminalBench = 86.165700
 TerminalBenchHard = 84.471058
 
 [models.raw_metrics]
@@ -17818,7 +17818,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BFCL"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, BFCL-V4, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
@@ -17861,7 +17861,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
@@ -17876,17 +17876,17 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
@@ -17933,7 +17933,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7 blog, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154, 2026-05-21"
 
@@ -17942,13 +17942,13 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.342500
+direct = 0.572500
+reported = 0.000000
 synthesized = 0.157500
 missing = 0.270000
-effective = 0.435500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.572500
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -18005,13 +18005,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.050000
 missing = 0.560000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -18023,20 +18023,20 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.330169
+direct = 0.564026
+reported = 0.000000
 synthesized = 0.137622
 missing = 0.298352
-effective = 0.431959
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.564026
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."I_raw"]
 direct = 0.334667
@@ -18055,36 +18055,36 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."P_raw"]
-direct = 0.239970
-reported = 0.198113
+direct = 0.438083
+reported = 0.000000
 synthesized = 0.139695
 missing = 0.422221
-effective = 0.358838
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.438083
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "scale"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.113110
-reported = 0.234245
+direct = 0.347355
+reported = 0.000000
 synthesized = 0.075651
 missing = 0.576994
-effective = 0.253657
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.347355
+family_count = 4
+direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
@@ -18101,9 +18101,9 @@ sources = ["artificial_analysis", "openrouter", "overrides"]
 
 [models.scores]
 i_raw = 78.601289
-p_raw = 62.721945
-b_raw = 62.340447
-r = 58.887354
+p_raw = 65.682060
+b_raw = 72.426186
+r = 66.493879
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -18111,14 +18111,14 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 60.760575
+BUILD = 70.776665
 CRE = 50.000000
 GEN = 78.601289
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 80.843778
 OPS_precision = 86.964116
 OPS_review = 86.978953
-PLAN = 56.824967
+PLAN = 61.359782
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -18127,8 +18127,8 @@ AAReasoningComposite = 80.702994
 ARC_AGI_2 = 50.000000
 ArtificialAnalysisCoding = 66.554054
 ArtificialAnalysisIntelligence = 84.696824
-BFCL = 73.376443
-BFCLComposite = 73.376443
+BFCL = 88.960739
+BFCLComposite = 88.960739
 BlendedCost = 88.966446
 ContextWindow = 96.823741
 CopilotArenaOrLMArenaCode = 50.000000
@@ -18140,13 +18140,13 @@ LMArenaText = 50.000000
 LiveCodingComposite = 33.994585
 LongContextComposite = 50.068231
 LongContextRecall = 50.068231
-MCPAtlas = 60.203335
-MMLUPro = 74.895877
+MCPAtlas = 67.005558
+MMLUPro = 91.493128
 OutputSpeed = 70.669891
-SWEBenchMultilingual = 79.582331
-SWEBenchPro = 77.430474
-SWEBenchVerified = 76.876127
-SWEComposite = 77.821720
+SWEBenchMultilingual = 99.303885
+SWEBenchPro = 95.717456
+SWEBenchVerified = 94.793544
+SWEComposite = 96.369534
 SWERebench = 50.000000
 SciCode = 33.994585
 SonarBugDensity = 50.000000
@@ -18155,7 +18155,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 96.705041
 Tau2Bench = 90.606163
-TerminalBench = 72.144833
+TerminalBench = 86.908056
 TerminalBenchHard = 73.928940
 
 [models.raw_metrics]
@@ -18204,7 +18204,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."BFCL"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, BFCL-V4, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
@@ -18251,12 +18251,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MCP-Atlas, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, MMLU-Pro, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
@@ -18265,17 +18265,17 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, SWE-Multilingual, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, SWE-Pro, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
@@ -18322,7 +18322,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Alibaba Cloud Qwen3.7-Plus blog benchmark table, Terminal Bench 2.0-Terminus, https://www.alibabacloud.com/blog/qwen3-7-plus-multimodal-agent-intelligence_603206, accessed 2026-06-10"
 
@@ -18331,13 +18331,13 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.evidence.groups."BUILD"]
-direct = 0.150000
-reported = 0.342500
+direct = 0.492500
+reported = 0.000000
 synthesized = 0.237500
 missing = 0.270000
-effective = 0.355500
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.492500
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.000000
@@ -18394,13 +18394,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.050000
 missing = 0.560000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -18412,18 +18412,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.154157
-reported = 0.330169
+direct = 0.484326
+reported = 0.000000
 synthesized = 0.217322
 missing = 0.298352
-effective = 0.352258
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.484326
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 core_direct = 0.280892
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -18438,40 +18438,40 @@ direct_families = ["artificial_analysis"]
 core_direct = 0.065333
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
-qualification_path = "unqualified"
-provisional = true
-
-[models.evidence.roles."P_raw"]
-direct = 0.115514
-reported = 0.198113
-synthesized = 0.264151
-missing = 0.422221
-effective = 0.234382
-family_count = 1
-direct_families = ["artificial_analysis"]
-core_direct = 0.115514
-core_family_count = 1
-core_direct_families = ["artificial_analysis"]
 historical_family_count = 1
 historical_direct_families = ["artificial_analysis"]
 qualification_path = "unqualified"
 provisional = true
 
+[models.evidence.roles."P_raw"]
+direct = 0.313628
+reported = 0.000000
+synthesized = 0.264151
+missing = 0.422221
+effective = 0.313628
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
+core_direct = 0.115514
+core_family_count = 1
+core_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
+qualification_path = "unqualified"
+provisional = true
+
 [models.evidence.roles."R"]
-direct = 0.087500
-reported = 0.234245
+direct = 0.321745
+reported = 0.000000
 synthesized = 0.101261
 missing = 0.576994
-effective = 0.228047
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.321745
+family_count = 3
+direct_families = ["artificial_analysis", "scale", "swe"]
 core_direct = 0.163636
 core_family_count = 1
 core_direct_families = ["artificial_analysis"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -18529,7 +18529,7 @@ BFCLNonLiveAST = 7.068063
 BFCLRelevanceDetection = 71.428571
 BFCLWebSearch = 60.700389
 BlendedCost = 7.492907
-GDPval = 25.903505
+GDPval = 9.839176
 GPQA = 73.774440
 HLE = 36.879576
 IFBench = 16.940984
@@ -18639,7 +18639,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok 4 standard), 2026-04-27"
 
@@ -19328,7 +19328,7 @@ BlendedCost = 80.422921
 ContextWindow = 96.823741
 CopilotArenaOrLMArenaCode = 31.859012
 EQBenchJudgemark = 20.377089
-GDPval = 65.235153
+GDPval = 75.391922
 GPQA = 87.428497
 HLE = 79.198348
 IFBench = 95.261805
@@ -19488,7 +19488,7 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Artificial Analysis Grok 4.3 analysis, https://artificialanalysis.ai/articles/xai-launches-grok-4-3-with-improved-agentic-performance-and-lower-pricing, 2026-04-30"
 
@@ -19753,7 +19753,7 @@ BFCLRelevanceDetection = 50.000000
 BFCLWebSearch = 50.000000
 BlendedCost = 50.000000
 CopilotArenaOrLMArenaCode = 0.491461
-GDPval = 21.524103
+GDPval = 2.540172
 GPQA = 0.973095
 HLE = 3.534421
 IFBench = 2.566948
@@ -19763,7 +19763,7 @@ LiveCodingComposite = 1.576607
 LongContextComposite = 0.429978
 LongContextRecall = 0.429978
 MMLUPro = 8.109243
-SWEBenchVerified = 63.152048
+SWEBenchVerified = 71.920080
 SWEComposite = 7.456045
 SWERebench = 7.456045
 SciCode = 2.300037
@@ -19890,7 +19890,7 @@ class = "direct"
 source = "lmarena"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo, artificialanalysis.ai/evaluations/gdpval-aa (Grok Code Fast 1), 2026-04-27"
 
@@ -19927,7 +19927,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "xAI launch announcement, x.ai/news/grok-code-fast-1: 'grok-code-fast-1 scored 70.8% using our own internal harness', 2025-08-28"
 
@@ -20051,8 +20051,8 @@ direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.746109
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "core_standard"
 provisional = false
 
@@ -20099,8 +20099,8 @@ direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.332567
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -20120,8 +20120,8 @@ sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 [models.scores]
 i_raw = 39.043366
 p_raw = 37.775970
-b_raw = 58.053840
-r = 55.562494
+b_raw = 67.874334
+r = 59.429351
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -20129,7 +20129,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 59.545313
+BUILD = 69.939793
 CRE = 36.364270
 GEN = 40.464926
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -20163,16 +20163,16 @@ LiveCodingComposite = 36.394275
 LongContextComposite = 31.866011
 LongContextRecall = 31.866011
 MCPAtlas = 50.000000
-MMLUPro = 20.004602
+MMLUPro = 0.007671
 OSWorldVerified = 50.000000
 OutputSpeed = 78.842520
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 76.728663
+SWEBenchPro = 94.547772
 SWEBenchVerified = 50.000000
-SWEComposite = 76.728663
+SWEComposite = 94.547772
 SWERebench = 50.000000
 SciCode = 18.850125
 SonarBugDensity = 50.000000
@@ -20181,7 +20181,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 91.899178
 Tau2Bench = 87.557018
-TerminalBench = 68.271884
+TerminalBench = 80.453141
 TerminalBenchHard = 53.252487
 Toolathlon = 50.000000
 
@@ -20321,7 +20321,7 @@ donor = "xiaomi/mimo-v2.5-pro"
 synthesis_category = "conservative"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5-Pro Hugging Face model card comparison table, MMLU-Pro for MiMo-V2.5, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, accessed 2026-05-22"
 
@@ -20360,7 +20360,7 @@ donor = "xiaomi/mimo-v2.5-pro"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5 Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5, 2026-04-22"
 
@@ -20413,7 +20413,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5 Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5, 2026-04-22"
 
@@ -20428,13 +20428,13 @@ donor = "xiaomi/mimo-v2.5-pro"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.157500
+direct = 0.387500
+reported = 0.000000
 synthesized = 0.342500
 missing = 0.270000
-effective = 0.324500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.387500
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -20509,18 +20509,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.135000
+direct = 0.368858
+reported = 0.000000
 synthesized = 0.432416
 missing = 0.198727
-effective = 0.314858
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.368858
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -20535,8 +20535,8 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.334667
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -20551,24 +20551,24 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.113110
-reported = 0.057422
+direct = 0.170532
+reported = 0.000000
 synthesized = 0.426127
 missing = 0.403341
-effective = 0.147563
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.170532
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -20588,8 +20588,8 @@ sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "openrouter", 
 [models.scores]
 i_raw = 77.894073
 p_raw = 82.138048
-b_raw = 76.600823
-r = 77.559390
+b_raw = 86.616093
+r = 81.502941
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -20597,7 +20597,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 77.101530
+BUILD = 87.702170
 CRE = 80.699376
 GEN = 76.405545
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -20631,16 +20631,16 @@ LiveCodingComposite = 72.637353
 LongContextComposite = 93.857435
 LongContextRecall = 93.857435
 MCPAtlas = 50.000000
-MMLUPro = 20.018838
+MMLUPro = 0.031397
 OSWorldVerified = 50.000000
 OutputSpeed = 43.717613
 SWEAtlasQnA = 50.000000
 SWEAtlasRefactoring = 50.000000
 SWEAtlasTestWriting = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 77.258787
-SWEBenchVerified = 77.745024
-SWEComposite = 77.258787
+SWEBenchPro = 95.431312
+SWEBenchVerified = 96.241707
+SWEComposite = 95.431312
 SWERebench = 50.000000
 SciCode = 71.008008
 SonarBugDensity = 50.000000
@@ -20649,7 +20649,7 @@ SonarIssueDensity = 50.000000
 SonarVulnerabilityDensity = 50.000000
 TTFT = 92.374442
 Tau2Bench = 91.864936
-TerminalBench = 70.661607
+TerminalBench = 84.436012
 TerminalBenchHard = 59.648813
 Toolathlon = 50.000000
 
@@ -20797,7 +20797,7 @@ donor = "moonshotai/kimi-k2.5"
 synthesis_category = "conservative"
 
 [models.metric_evidence."MMLUPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, MMLU-Pro, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, accessed 2026-05-22"
 
@@ -20836,12 +20836,12 @@ donor = "moonshotai/kimi-k2.5"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
 
@@ -20888,7 +20888,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Xiaomi MiMo-V2.5-Pro Hugging Face model card, https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro, 2026-04-22"
 
@@ -20903,13 +20903,13 @@ donor = "moonshotai/kimi-k2.5"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.230000
-reported = 0.157500
+direct = 0.387500
+reported = 0.000000
 synthesized = 0.342500
 missing = 0.270000
-effective = 0.324500
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.387500
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 
 [models.evidence.groups."CRE"]
 direct = 0.200000
@@ -20984,18 +20984,18 @@ family_count = 1
 direct_families = ["eqbench"]
 
 [models.evidence.roles."B_raw"]
-direct = 0.233858
-reported = 0.135000
+direct = 0.368858
+reported = 0.000000
 synthesized = 0.432416
 missing = 0.198727
-effective = 0.314858
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.368858
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.446109
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -21010,8 +21010,8 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.334667
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["artificial_analysis"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -21026,24 +21026,24 @@ direct_families = ["artificial_analysis", "lmarena"]
 core_direct = 0.331782
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.113110
-reported = 0.057422
+direct = 0.170532
+reported = 0.000000
 synthesized = 0.426127
 missing = 0.403341
-effective = 0.147563
-family_count = 2
-direct_families = ["artificial_analysis", "lmarena"]
+effective = 0.170532
+family_count = 3
+direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.210827
 core_family_count = 2
 core_direct_families = ["artificial_analysis", "lmarena"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
@@ -21063,8 +21063,8 @@ sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "overrides", 
 [models.scores]
 i_raw = 41.289868
 p_raw = 20.801943
-b_raw = 10.892964
-r = 16.358293
+b_raw = 9.791655
+r = 15.924648
 i_status = "provisional"
 p_status = "provisional"
 b_status = "ranked"
@@ -21072,7 +21072,7 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 10.787256
+BUILD = 9.621578
 CRE = 57.353125
 GEN = 32.766508
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -21100,13 +21100,13 @@ BFCLNonLiveAST = 70.026178
 BFCLRelevanceDetection = 47.619048
 BFCLWebSearch = 74.319066
 BlendedCost = 86.774238
-BrowseComp = 21.492157
+BrowseComp = 2.486928
 ContextWindow = 8.895149
 CopilotArenaOrLMArenaCode = 25.495203
-GDPval = 27.725009
+GDPval = 12.875016
 GPQA = 6.761734
 HLE = 8.888970
-HLETools = 20.517813
+HLETools = 0.863021
 IFBench = 3.566644
 LMArenaText = 57.353125
 LiveCodingComposite = 12.992342
@@ -21115,10 +21115,10 @@ LongContextRecall = 2.977839
 MCPAtlas = 50.000000
 MMLUPro = 36.628982
 OutputSpeed = 66.185169
-SWEBenchMultilingual = 20.025423
+SWEBenchMultilingual = 0.042371
 SWEBenchPro = 0.667939
 SWEBenchVerified = 55.019528
-SWEComposite = 10.642837
+SWEComposite = 8.644532
 SWERebench = 18.532717
 SciCode = 4.657101
 SonarBugDensity = 50.000000
@@ -21233,7 +21233,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-4.6 official model card, BrowseComp, https://docs.z.ai/guides/llm/glm-4.6, accessed 2026-06-11"
 
@@ -21246,7 +21246,7 @@ class = "direct"
 source = "lmarena"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Reasoning), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
 
@@ -21259,7 +21259,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-4.6 official model card, HLE with tools, https://docs.z.ai/guides/llm/glm-4.6, accessed 2026-06-11"
 
@@ -21290,7 +21290,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Reported in Z.ai GLM-4.7 model card comparison table (huggingface.co/zai-org/GLM-4.7), which lists GLM-4.6 baseline at 53.8, 2025-12-23"
 
@@ -21365,11 +21365,11 @@ donor = "z-ai/glm-4.7"
 synthesis_category = "conservative"
 
 [models.evidence.groups."BUILD"]
-direct = 0.545000
-reported = 0.035000
+direct = 0.580000
+reported = 0.000000
 synthesized = 0.150000
 missing = 0.270000
-effective = 0.566000
+effective = 0.580000
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 
@@ -21446,11 +21446,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.503858
-reported = 0.030000
+direct = 0.533858
+reported = 0.000000
 synthesized = 0.165169
 missing = 0.300974
-effective = 0.521858
+effective = 0.533858
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.746109
@@ -21494,11 +21494,11 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.227954
-reported = 0.012760
+direct = 0.240714
+reported = 0.000000
 synthesized = 0.164062
 missing = 0.595224
-effective = 0.235610
+effective = 0.240714
 family_count = 3
 direct_families = ["artificial_analysis", "lmarena", "swe"]
 core_direct = 0.332567
@@ -21525,16 +21525,16 @@ sources = ["artificial_analysis", "lmarena", "mcp_atlas", "openrouter", "overrid
 [models.scores]
 i_raw = 49.845456
 p_raw = 32.524626
-b_raw = 31.346492
-r = 39.896807
+b_raw = 31.143978
+r = 39.810135
 i_status = "provisional"
 p_status = "provisional"
 b_status = "ranked"
-r_status = "provisional"
+r_status = "ranked"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 36.205225
+BUILD = 35.949503
 CRE = 51.030186
 GEN = 49.216823
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -21553,13 +21553,13 @@ ArtificialAnalysisCoding = 32.094595
 ArtificialAnalysisIntelligence = 41.578441
 ArtificialAnalysisMath = 94.157303
 BlendedCost = 87.008962
-BrowseComp = 24.328192
+BrowseComp = 7.213653
 ContextWindow = 8.895149
 CopilotArenaOrLMArenaCode = 64.449178
-GDPval = 37.271663
+GDPval = 28.786105
 GPQA = 58.793726
 HLE = 41.708327
-HLETools = 36.283916
+HLETools = 27.139861
 IFBench = 68.426082
 LMArenaText = 51.030186
 LiveCodingComposite = 44.429461
@@ -21568,9 +21568,9 @@ LongContextRecall = 41.967020
 MCPAtlas = 6.695092
 MMLUPro = 70.295412
 OutputSpeed = 77.972924
-SWEBenchMultilingual = 45.479202
-SWEBenchVerified = 71.439446
-SWEComposite = 43.329747
+SWEBenchMultilingual = 42.465336
+SWEBenchVerified = 85.732410
+SWEComposite = 42.781772
 SWERebench = 42.852091
 SciCode = 31.082982
 SonarBugDensity = 37.250554
@@ -21582,7 +21582,7 @@ TTFT = 100.000000
 Tau2Bench = 93.466358
 TerminalBench = 11.642882
 TerminalBenchHard = 17.315622
-Toolathlon = 20.560028
+Toolathlon = 0.933380
 
 [models.raw_metrics]
 AALiveCodeBench = 89.400000
@@ -21645,7 +21645,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -21658,7 +21658,7 @@ class = "direct"
 source = "lmarena"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Reasoning), artificialanalysis.ai/evaluations/gdpval-aa, 2026-04-27"
 
@@ -21671,7 +21671,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -21700,12 +21700,12 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."SWEBenchMultilingual"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
 
 [models.metric_evidence."SWEBenchVerified"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-4.7 launch announcement, z.ai/blog/glm-4.7 and Hugging Face model card zai-org/GLM-4.7, 2025-12-23"
 
@@ -21758,16 +21758,16 @@ class = "direct"
 source = "terminal_bench"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.537500
-reported = 0.035000
+direct = 0.572500
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.427500
-effective = 0.558500
+effective = 0.572500
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -21844,18 +21844,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.534026
-reported = 0.030000
+direct = 0.564026
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.435974
-effective = 0.552026
+effective = 0.564026
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "core_standard"
 provisional = false
 
@@ -21892,20 +21892,20 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.334594
-reported = 0.012760
+direct = 0.347355
+reported = 0.000000
 synthesized = 0.000000
 missing = 0.652645
-effective = 0.342250
+effective = 0.347355
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.332567
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
-historical_family_count = 1
-historical_direct_families = ["terminal_bench"]
-qualification_path = "unqualified"
-provisional = true
+historical_family_count = 2
+historical_direct_families = ["swe", "terminal_bench"]
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchPro", "Tau3Banking", "TerminalBench21Composite"]
@@ -21922,24 +21922,24 @@ sources = ["arc_agi", "artificial_analysis", "lmarena", "openrouter", "overrides
 
 [models.scores]
 i_raw = 34.978201
-p_raw = 39.788370
-b_raw = 59.532756
-r = 55.871942
+p_raw = 38.340065
+b_raw = 58.551272
+r = 54.812315
 i_status = "ranked"
-p_status = "provisional"
+p_status = "ranked"
 b_status = "ranked"
-r_status = "provisional"
-balanced_status = "provisional"
+r_status = "ranked"
+balanced_status = "ranked"
 
 [models.groups]
-BUILD = 61.742583
+BUILD = 60.899680
 CRE = 29.071627
 GEN = 38.879663
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 70.749446
 OPS_precision = 74.373378
 OPS_review = 63.019915
-PLAN = 40.814052
+PLAN = 37.629752
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -21949,7 +21949,7 @@ ARC_AGI_2 = 5.424861
 ArtificialAnalysisCoding = 58.783784
 ArtificialAnalysisIntelligence = 71.222329
 BlendedCost = 84.974502
-BrowseComp = 36.866855
+BrowseComp = 28.111426
 ContextWindow = 8.895149
 CopilotArenaOrLMArenaCode = 62.205275
 EQBenchCreativeWriting = 50.000000
@@ -21957,7 +21957,7 @@ EQBenchJudgemark = 50.000000
 GDPval = 50.000000
 GPQA = 24.687285
 HLE = 50.496000
-HLETools = 67.297895
+HLETools = 78.829825
 HiLBench = 50.000000
 IFBench = 81.882412
 LMArenaDocument = 50.000000
@@ -21965,7 +21965,7 @@ LMArenaText = 64.541775
 LiveCodingComposite = 48.511094
 LongContextComposite = 36.771506
 LongContextRecall = 36.771506
-MCPAtlas = 42.835325
+MCPAtlas = 38.058874
 OSWorldVerified = 50.000000
 OutputSpeed = 77.538102
 SWEAtlasComposite = 16.887781
@@ -21987,7 +21987,7 @@ TTFT = 99.722856
 Tau2Bench = 95.147674
 TerminalBench = 49.787560
 TerminalBenchHard = 59.648813
-Toolathlon = 30.618978
+Toolathlon = 17.698297
 
 [models.raw_metrics]
 ARC_AGI_2 = 4.860000
@@ -22048,7 +22048,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -22087,7 +22087,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -22116,7 +22116,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."MCPAtlas"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5 Hugging Face model card, MCP-Atlas Public Set, https://huggingface.co/zai-org/GLM-5"
 
@@ -22205,16 +22205,16 @@ class = "direct"
 source = "terminal_bench"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.522500
-reported = 0.150000
+direct = 0.672500
+reported = 0.000000
 synthesized = 0.157500
 missing = 0.170000
-effective = 0.612500
+effective = 0.672500
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 
@@ -22273,13 +22273,13 @@ family_count = 1
 direct_families = ["operations"]
 
 [models.evidence.groups."PLAN"]
-direct = 0.090000
-reported = 0.300000
+direct = 0.390000
+reported = 0.000000
 synthesized = 0.050000
 missing = 0.560000
-effective = 0.270000
-family_count = 1
-direct_families = ["artificial_analysis"]
+effective = 0.390000
+family_count = 2
+direct_families = ["artificial_analysis", "scale"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -22291,11 +22291,11 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.498483
-reported = 0.165169
+direct = 0.663652
+reported = 0.000000
 synthesized = 0.137622
 missing = 0.198727
-effective = 0.597584
+effective = 0.663652
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.746109
@@ -22303,7 +22303,7 @@ core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
-qualification_path = "core_standard"
+qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
@@ -22323,27 +22323,27 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."P_raw"]
-direct = 0.346647
-reported = 0.198113
+direct = 0.544760
+reported = 0.000000
 synthesized = 0.033019
 missing = 0.422221
-effective = 0.465514
-family_count = 3
-direct_families = ["arc_agi", "artificial_analysis", "lmarena"]
+effective = 0.544760
+family_count = 4
+direct_families = ["arc_agi", "artificial_analysis", "lmarena", "scale"]
 core_direct = 0.517154
 core_family_count = 3
 core_direct_families = ["arc_agi", "artificial_analysis", "lmarena"]
 historical_family_count = 2
 historical_direct_families = ["artificial_analysis", "terminal_bench"]
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.evidence.roles."R"]
-direct = 0.219750
-reported = 0.164062
+direct = 0.383813
+reported = 0.000000
 synthesized = 0.212846
 missing = 0.403341
-effective = 0.318188
+effective = 0.383813
 family_count = 4
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe"]
 core_direct = 0.332567
@@ -22351,8 +22351,8 @@ core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "swe"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
-qualification_path = "unqualified"
-provisional = true
+qualification_path = "historical_breadth"
+provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "GDPvalAA2", "LMArenaSearch", "Tau3Banking", "TerminalBench21Composite"]
@@ -22370,8 +22370,8 @@ sources = ["artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrout
 [models.scores]
 i_raw = 77.808024
 p_raw = 58.291698
-b_raw = 48.910392
-r = 61.536286
+b_raw = 52.004334
+r = 62.888954
 i_status = "provisional"
 p_status = "provisional"
 b_status = "ranked"
@@ -22379,7 +22379,7 @@ r_status = "ranked"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 44.505821
+BUILD = 48.405510
 CRE = 87.347416
 GEN = 72.746306
 LM_ARENA_REVIEW_PROXY = 50.000000
@@ -22395,15 +22395,15 @@ AAReasoningComposite = 60.285084
 ArtificialAnalysisCoding = 56.081081
 ArtificialAnalysisIntelligence = 77.382098
 BlendedCost = 80.751832
-BrowseComp = 50.454292
+BrowseComp = 50.757153
 ContextWindow = 8.895149
 CopilotArenaOrLMArenaCode = 91.715121
 EQBenchCreativeWriting = 50.000000
 EQBenchJudgemark = 50.000000
-GDPval = 67.602484
+GDPval = 79.337473
 GPQA = 66.704745
 HLE = 53.865422
-HLETools = 72.127091
+HLETools = 86.878484
 HiLBench = 73.910654
 IFBench = 89.699086
 LMArenaDocument = 50.000000
@@ -22415,18 +22415,18 @@ MCPAtlas = 77.552289
 OSWorldVerified = 50.000000
 OutputSpeed = 77.274579
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 77.743506
+SWEBenchPro = 96.239177
 SWEBenchVerified = 50.000000
-SWEComposite = 38.878144
+SWEComposite = 48.125979
 SWERebench = 0.012781
 SciCode = 22.661214
 TTFT = 99.908485
 Tau2Bench = 94.770479
-TerminalBench = 65.794693
+TerminalBench = 76.324488
 TerminalBench21 = 2.070673
 TerminalBench21Composite = 2.070673
 TerminalBenchHard = 59.648813
-Toolathlon = 36.827389
+Toolathlon = 28.045648
 
 [models.raw_metrics]
 ArtificialAnalysisCoding = 43.400000
@@ -22476,7 +22476,7 @@ class = "direct"
 source = "openrouter"
 
 [models.metric_evidence."BrowseComp"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, BrowseComp, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -22501,7 +22501,7 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.metric_evidence."GDPval"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "GDPval-AA Elo (Reasoning), 2026-04-27"
 
@@ -22514,7 +22514,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."HLETools"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
@@ -22561,7 +22561,7 @@ donor = "moonshotai/kimi-k2.6"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 launch / Hugging Face model card zai-org/GLM-5.1, 2026-04-08"
 
@@ -22592,7 +22592,7 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."TerminalBench"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 Hugging Face model card, Terminal-Bench 2.0 (Terminus-2), https://huggingface.co/zai-org/GLM-5.1, accessed 2026-05-22"
 
@@ -22609,16 +22609,16 @@ class = "direct"
 source = "artificial_analysis"
 
 [models.metric_evidence."Toolathlon"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.1 official model card, Toolathlon, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
 
 [models.evidence.groups."BUILD"]
-direct = 0.617500
-reported = 0.157500
+direct = 0.775000
+reported = 0.000000
 synthesized = 0.035000
 missing = 0.190000
-effective = 0.712000
+effective = 0.775000
 family_count = 5
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 
@@ -22695,18 +22695,18 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.621592
-reported = 0.135000
+direct = 0.756592
+reported = 0.000000
 synthesized = 0.030000
 missing = 0.213408
-effective = 0.702592
+effective = 0.756592
 family_count = 5
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.922196
 core_family_count = 4
 core_direct_families = ["artificial_analysis", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
@@ -22737,24 +22737,24 @@ direct_families = ["artificial_analysis", "lmarena", "scale", "terminal_bench"]
 core_direct = 0.446536
 core_family_count = 3
 core_direct_families = ["artificial_analysis", "lmarena", "terminal_bench"]
-historical_family_count = 1
-historical_direct_families = ["artificial_analysis"]
+historical_family_count = 2
+historical_direct_families = ["artificial_analysis", "terminal_bench"]
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.418448
-reported = 0.057422
+direct = 0.475870
+reported = 0.000000
 synthesized = 0.149956
 missing = 0.374174
-effective = 0.452901
+effective = 0.475870
 family_count = 5
 direct_families = ["artificial_analysis", "lmarena", "scale", "swe", "terminal_bench"]
 core_direct = 0.471697
 core_family_count = 4
 core_direct_families = ["artificial_analysis", "lmarena", "swe", "terminal_bench"]
-historical_family_count = 0
-historical_direct_families = []
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
 qualification_path = "breadth"
 provisional = false
 
@@ -22773,9 +22773,9 @@ sources = ["overrides"]
 
 [models.scores]
 i_raw = 50.000000
-p_raw = 74.562788
-b_raw = 77.843071
-r = 77.342371
+p_raw = 90.937980
+b_raw = 96.405119
+r = 95.570618
 i_status = "provisional"
 p_status = "provisional"
 b_status = "provisional"
@@ -22783,14 +22783,14 @@ r_status = "provisional"
 balanced_status = "provisional"
 
 [models.groups]
-BUILD = 77.988786
+BUILD = 96.647976
 CRE = 50.000000
 GEN = 50.000000
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 50.000000
 OPS_precision = 50.000000
 OPS_review = 50.000000
-PLAN = 74.562788
+PLAN = 90.937980
 REVIEW_DIRECT = 50.000000
 
 [models.metrics]
@@ -22815,16 +22815,16 @@ MCPAtlas = 50.000000
 OSWorldVerified = 50.000000
 OutputSpeed = 50.000000
 SWEBenchMultilingual = 50.000000
-SWEBenchPro = 78.771871
+SWEBenchPro = 97.953118
 SWEBenchVerified = 50.000000
-SWEComposite = 78.771871
+SWEComposite = 97.953118
 SWERebench = 50.000000
 SciCode = 50.000000
 TTFT = 50.000000
 Tau2Bench = 50.000000
 TerminalBench = 50.000000
-TerminalBench21 = 74.562788
-TerminalBench21Composite = 74.562788
+TerminalBench21 = 90.937980
+TerminalBench21Composite = 90.937980
 TerminalBenchHard = 50.000000
 Toolathlon = 50.000000
 
@@ -22988,7 +22988,7 @@ donor = "z-ai/glm-5.1"
 synthesis_category = "conservative"
 
 [models.metric_evidence."SWEBenchPro"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.2 official model card, SWE-bench Pro, https://docs.z.ai/guides/llm/glm-5.2, accessed 2026-06-17"
 
@@ -23029,7 +23029,7 @@ donor = "z-ai/glm-5.1"
 synthesis_category = "same_series_forward"
 
 [models.metric_evidence."TerminalBench21"]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Z.ai GLM-5.2 official model card, Terminal-Bench 2.1, https://docs.z.ai/guides/llm/glm-5.2, accessed 2026-06-17"
 
@@ -23046,13 +23046,13 @@ donor = "z-ai/glm-5.1"
 synthesis_category = "same_series_forward"
 
 [models.evidence.groups."BUILD"]
-direct = 0.000000
-reported = 0.237500
+direct = 0.237500
+reported = 0.000000
 synthesized = 0.342500
 missing = 0.420000
-effective = 0.142500
-family_count = 0
-direct_families = []
+effective = 0.237500
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
 
 [models.evidence.groups."CRE"]
 direct = 0.000000
@@ -23109,13 +23109,13 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."PLAN"]
-direct = 0.000000
-reported = 0.100000
+direct = 0.100000
+reported = 0.000000
 synthesized = 0.350000
 missing = 0.550000
-effective = 0.060000
-family_count = 0
-direct_families = []
+effective = 0.100000
+family_count = 1
+direct_families = ["terminal_bench"]
 
 [models.evidence.groups."REVIEW_DIRECT"]
 direct = 0.000000
@@ -23127,16 +23127,16 @@ family_count = 0
 direct_families = []
 
 [models.evidence.roles."B_raw"]
-direct = 0.000000
-reported = 0.219944
+direct = 0.219944
+reported = 0.000000
 synthesized = 0.566648
 missing = 0.213408
-effective = 0.131966
-family_count = 0
-direct_families = []
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
+effective = 0.219944
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.176087
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "unqualified"
@@ -23159,32 +23159,32 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."P_raw"]
-direct = 0.000000
-reported = 0.066038
+direct = 0.066038
+reported = 0.000000
 synthesized = 0.471102
 missing = 0.462860
-effective = 0.039623
-family_count = 0
-direct_families = []
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
+effective = 0.066038
+family_count = 1
+direct_families = ["terminal_bench"]
+core_direct = 0.114754
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."R"]
-direct = 0.000000
-reported = 0.123047
+direct = 0.123047
+reported = 0.000000
 synthesized = 0.502779
 missing = 0.374174
-effective = 0.073828
-family_count = 0
-direct_families = []
-core_direct = 0.000000
-core_family_count = 0
-core_direct_families = []
+effective = 0.123047
+family_count = 2
+direct_families = ["swe", "terminal_bench"]
+core_direct = 0.139130
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "unqualified"

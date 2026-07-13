@@ -86,7 +86,7 @@ fn writes_valid_nested_scoreboard_toml() {
     );
     assert_eq!(
         anthropic["metric_evidence"]["SWEBenchVerified"]["class"].as_str(),
-        Some("reported")
+        Some("direct")
     );
     assert_eq!(
         anthropic["metric_evidence"]["SWEBenchVerified"]["citation"].as_str(),
@@ -282,7 +282,7 @@ fn sample_scoreboard() -> Scoreboard {
         .raw_metrics
         .insert("SWEBenchVerified".to_string(), 80.0);
     model_a
-        .override_reported
+        .curated_overrides
         .insert("SWEBenchVerified".to_string());
     model_a
         .metric_sources

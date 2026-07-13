@@ -141,7 +141,7 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
         .raw_metrics
         .insert("SWEBenchVerified".to_string(), 80.0);
     anthropic
-        .override_reported
+        .curated_overrides
         .insert("SWEBenchVerified".to_string());
     anthropic
         .metric_sources
@@ -245,11 +245,11 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
     assert_eq!(direct.class, "direct");
     assert_eq!(direct.source.as_deref(), Some("lmarena"));
 
-    let reported = &anthropic.metric_evidence["SWEBenchVerified"];
-    assert_eq!(reported.class, "reported");
-    assert_eq!(reported.source.as_deref(), Some("overrides"));
+    let curated = &anthropic.metric_evidence["SWEBenchVerified"];
+    assert_eq!(curated.class, "direct");
+    assert_eq!(curated.source.as_deref(), Some("overrides"));
     assert_eq!(
-        reported.citation.as_deref(),
+        curated.citation.as_deref(),
         Some("Anthropic system card, table 8")
     );
 

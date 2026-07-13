@@ -98,7 +98,7 @@ reported in the output):
 - MCP-Atlas (Scale) — supplemental Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
 - HiL-Bench (Scale) — human-in-the-loop escalation accuracy; a small Plan-only signal
 - ARC-AGI v2 — active novel pattern-induction benchmark; ARC-AGI-3 is ingested separately as a floor-compressed diagnostic
-- Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metrics for models neutral public leaderboards have not yet rated. Historical GDPval reports remain diagnostic now that GDPval-AA v2 has a direct source.
+- Manual overrides (`data/score_overrides.toml`) — cited, hand-curated same-model benchmark observations for gaps that native public feeds have not yet filled. Vendor and system-card observations count as direct coverage; a native public row still replaces a duplicate override. Historical GDPval overrides remain diagnostic now that GDPval-AA v2 has a native source.
 
 ## Math Summary
 
@@ -118,16 +118,15 @@ cohort.
 
 Evidence is reliability-weighted toward the neutral prior of 50:
 
-- direct public observation: **1.00**
-- cited reported override: **0.60**
+- actual same-model observation, whether fetched or manually curated: **1.00**
 - sibling synthesis (all categories): **0.00 / prior-only**
 
-Capability is averaged over available direct and discounted same-model
-reported evidence; missing and sibling-only leaves do not depress the point
-estimate. Their nominal weight remains visible as confidence/coverage, and a
-fully unsupported role falls back to 50. Final role paths are flattened to
-unique leaves, and no source family may carry more than 30% of a role when
-enough independent families exist.
+Capability is averaged over available direct same-model observations; missing
+and sibling-only leaves do not depress the point estimate. Their nominal weight
+remains visible as confidence/coverage, and a fully unsupported role falls
+back to 50. Final role paths are flattened to unique leaves, and no source
+family may carry more than 30% of a role when enough independent families
+exist.
 
 ### Final scores
 
@@ -198,11 +197,11 @@ class = "direct"
 source = "eqbench_judgemark"
 
 [models.evidence.roles.R]
-direct = 0.55
-reported = 0.10
+direct = 0.65
+reported = 0.00
 synthesized = 0.05
 missing = 0.30
-effective = 0.61
+effective = 0.65
 family_count = 2
 direct_families = ["lmarena", "scale"]
 core_direct = 0.42

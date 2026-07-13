@@ -56,16 +56,19 @@ setting.
 Evidence precedence is order-independent:
 
 ```text
-direct public source > cited reported override > sibling synthesis
+native public observation > manual same-model observation > sibling synthesis
 ```
 
-A direct leaderboard observation always replaces a manual override for the
-same model and metric. An override can replace a synthesized fill, but cannot
-replace a direct observation. Synthesis is fill-only.
+A native leaderboard observation always replaces a manual override for the
+same model and metric. This is a source-precedence rule, not an evidence-class
+difference: a cited override is still an actual same-model observation and
+counts as direct coverage, including when the model vendor published it. An
+override replaces a synthesized fill. Synthesis is fill-only.
 
 Schema 2.1 records the winning source and evidence class for every scored raw
-metric. Reported values retain their citation. Synthesized values retain the
-donor and synthesis category. See `docs/output-schema.md`.
+metric. Manual observations retain their citation and `source = "overrides"`;
+synthesized values retain the donor and synthesis category. See
+`docs/output-schema.md`.
 
 ## 4. Fixed-anchor normalization
 
@@ -73,10 +76,9 @@ donor and synthesis category. See `docs/output-schema.md`.
 
 Every active scored leaf has `anchor_low` and `anchor_high` in the versioned
 coefficient set. Anchor set `2026-07-12.v2` freezes the direct-evidence p5/p95
-raw values from the refreshed 2026-07-12 snapshot. Metrics available only as
-cited reports use the same quantiles over reported evidence. Adding or
-removing unrelated models from the current cohort therefore does not move
-another model's normalized score.
+raw values from the refreshed 2026-07-12 snapshot. Manually curated same-model
+observations are direct evidence too. Adding or removing unrelated models from
+the current cohort therefore does not move another model's normalized score.
 
 Changing an anchor is a methodology change and must be reviewed together with
 the coefficient diff. The effective anchors are echoed to
@@ -123,8 +125,7 @@ Default v3 reliabilities are:
 
 | Evidence class | Reliability |
 |---|---:|
-| Direct public observation | 1.00 |
-| Cited reported override | 0.60 |
+| Actual same-model observation, native or manually curated | 1.00 |
 | Sibling synthesis, any category | 0.00 |
 
 Sibling fills remain published for provenance and sensitivity analysis, but
@@ -133,8 +134,8 @@ therefore cannot change a model's official point score.
 
 ### 5.1 Missing weight and confidence
 
-The capability point estimate is conditional on available direct or cited
-same-model evidence. For observed weights `w_i`:
+The capability point estimate is conditional on available direct same-model
+evidence. For observed weights `w_i`:
 
 ```text
 capability = Σ observed w_i S_i / Σ observed w_i
@@ -207,8 +208,8 @@ Important v3 corrections:
 - AA v4.1 retired tau2 and Terminal-Bench Hard in favor of tau3-Banking and
   Terminal-Bench 2.1, and removed saturated IFBench. The retired fields remain
   readable diagnostics but have no primary path.
-- GDPval-AA v2 now uses a neutral direct source; the older reported GDPval
-  overrides remain diagnostic and are not stacked with it.
+- GDPval-AA v2 now uses a neutral native source; the older manually curated
+  GDPval observations remain diagnostic and are not stacked with it.
 - AIME 2025, MMLU-Pro, Terminal-Bench 2.0, and SWE-bench Verified have no
   current score path but may provide direct historical support. AA
   LiveCodeBench, BrowseComp, HLE-with-tools, Toolathlon, and OSWorld remain
@@ -293,11 +294,11 @@ The role is `ranked` when any of these auditable paths holds:
   current families, direct historical support from at least two relevant
   families, and at least five current-plus-historical families in union.
 
-Otherwise it is `provisional`. Cited same-model reports help produce a
-discounted estimate. Sibling fills are prior-only; neither reports nor fills
-count as direct families or can qualify a role by themselves. Historical
-support must also be direct; its score is never blended into the capability
-point estimate.
+Otherwise it is `provisional`. Every actual same-model observation counts as
+direct, including a cited manual override from a vendor report or system card.
+Sibling fills and any future rank-derived estimates are non-direct and cannot
+qualify a role by themselves. Historical support must also be a same-model
+observation; its score is never blended into the capability point estimate.
 
 The v3 historical portfolio is deliberately restricted to stable retired
 metrics: AIME 2025 and MMLU-Pro for Idea; tau2, IFBench, and Terminal-Bench 2.0

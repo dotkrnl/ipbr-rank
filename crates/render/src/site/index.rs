@@ -564,19 +564,18 @@ fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static st
             ),
         );
     }
-    if model.override_reported.contains(metric) {
-        return (
-            "reported",
-            "Cited reported observation; full citation is in scoreboard.toml".to_string(),
-        );
-    }
     if model.raw_metrics.contains_key(metric) {
         let source = model
             .metric_sources
             .get(metric)
             .map(String::as_str)
             .unwrap_or("direct source");
-        return ("direct", format!("Direct observation from {source}"));
+        let detail = if model.curated_overrides.contains(metric) {
+            "Curated direct observation; full citation is in scoreboard.toml".to_string()
+        } else {
+            format!("Direct observation from {source}")
+        };
+        return ("direct", detail);
     }
     ("derived", "Composite of normalized inputs".to_string())
 }

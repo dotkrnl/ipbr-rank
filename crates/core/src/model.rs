@@ -201,8 +201,12 @@ pub struct ModelRecord {
     pub scores: RoleScores,
     pub missing: MissingInfo,
     pub synthesized: BTreeMap<MetricKey, SynthesisProvenance>,
-    #[serde(default)]
-    pub override_reported: BTreeSet<MetricKey>,
+    /// Metrics whose winning observation came from the checked-in curated
+    /// override source. These are direct same-model observations, but the
+    /// marker preserves lower precedence than a native public source and
+    /// keeps their citations attached to the winning value.
+    #[serde(default, alias = "override_reported")]
+    pub curated_overrides: BTreeSet<MetricKey>,
     /// Winning source for each raw metric after evidence and effort
     /// precedence have been applied.
     #[serde(default)]
@@ -231,7 +235,7 @@ impl ModelRecord {
             scores: RoleScores::default(),
             missing: MissingInfo::new(),
             synthesized: BTreeMap::new(),
-            override_reported: BTreeSet::new(),
+            curated_overrides: BTreeSet::new(),
             metric_sources: BTreeMap::new(),
             override_notes: BTreeMap::new(),
             evidence: EvidenceSummary::default(),

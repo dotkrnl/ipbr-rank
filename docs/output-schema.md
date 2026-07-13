@@ -190,8 +190,8 @@ Currently preserved auxiliary keys include:
 
 ### Per-metric provenance
 
-Every present public raw metric, including uncertainty auxiliaries, has a
-provenance table.
+Every present raw metric, including manually curated observations and
+uncertainty auxiliaries, has a provenance table.
 
 Direct observation:
 
@@ -201,11 +201,11 @@ class = "direct"
 source = "eqbench_judgemark"
 ```
 
-Reported override:
+Manually curated same-model observation:
 
 ```toml
 [models.metric_evidence.GDPval]
-class = "reported"
+class = "direct"
 source = "overrides"
 citation = "Artificial Analysis GDPval-AA leaderboard, accessed ..."
 ```
@@ -220,15 +220,23 @@ donor = "openai/gpt-5.4"
 synthesis_category = "same_series_forward"
 ```
 
-Valid evidence classes are `direct`, `reported`, and `synthesized`. Valid
-synthesis categories are `conservative`, `same_series_forward`, and
+Actual same-model observations use `direct`, whether their winning source is a
+native public feed or the cited manual `overrides` source. `synthesized` is
+used for sibling substitutions. The `reported` value and coverage field remain
+only for compatibility with older schema-2.1 snapshots; current output does
+not emit that evidence class. A vendor-published measurement is not classified
+as `reported` merely because it was curated manually. Valid synthesis
+categories are `conservative`, `same_series_forward`, and
 `stronger_successor`.
 
 Winning-observation precedence is:
 
 ```text
-direct > reported > synthesized
+native public direct > manual override direct > synthesized
 ```
+
+There are currently no rank-derived estimates. If introduced later, they must
+remain explicitly non-direct and cannot qualify a role.
 
 ### Evidence coverage
 
@@ -236,20 +244,20 @@ Every group and role has an evidence summary:
 
 ```toml
 [models.evidence.groups.BUILD]
-direct = 0.640000
-reported = 0.100000
+direct = 0.740000
+reported = 0.000000
 synthesized = 0.080000
 missing = 0.180000
-effective = 0.700000
+effective = 0.740000
 family_count = 5
 direct_families = ["eqbench", "gso", "scale", "sonar", "swe"]
 
 [models.evidence.roles.B_raw]
-direct = 0.620000
-reported = 0.120000
+direct = 0.740000
+reported = 0.000000
 synthesized = 0.070000
 missing = 0.190000
-effective = 0.692000
+effective = 0.740000
 family_count = 5
 direct_families = ["artificial_analysis", "deepswe", "lmarena", "scale", "swe"]
 core_direct = 0.700000
@@ -262,9 +270,10 @@ provisional = false
 ```
 
 The four nominal shares `direct + reported + synthesized + missing` sum to
-approximately 1. `effective` is the confidence-weighted coverage
-(`direct + 0.60 × reported` in the current methodology); it is not another
-nominal class. `family_count` counts direct families only.
+approximately 1. `reported` is retained only for compatibility; current actual
+same-model observations, including manual overrides, contribute to `direct`.
+`effective` is confidence-weighted coverage rather than another nominal class.
+`family_count` counts direct families only.
 
 Group summaries describe the displayed group graph. Role summaries describe
 the flattened and family-capped role calculation. Methodology-v3 role summaries
@@ -356,9 +365,10 @@ max_family_weight = 0.30
 ```
 
 Consumers must still read the effective file rather than hard-code this
-example. Anchor set `2026-07-12.v2` was derived from the frozen 2026-07-12
-direct-evidence snapshot, with a cited-report fallback for reported-only
-metrics. Active scored leaves use fixed anchors; explicitly unanchored
+example. `reported_reliability` is a reserved compatibility setting for older
+snapshots; it is not applied to actual manual overrides.
+Anchor set `2026-07-12.v2` was derived from the frozen 2026-07-12 evidence
+snapshot. Active scored leaves use fixed anchors; explicitly unanchored
 diagnostic or custom metrics may use their configured fallback transform.
 
 `metrics.*.eligibility` is `core`, `supplemental`, or `historical_support`.

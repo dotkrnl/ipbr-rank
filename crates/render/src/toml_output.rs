@@ -305,8 +305,6 @@ fn render_metric_evidence(out: &mut String, model: &ModelRecord, coefficients: &
                 Some(provenance.from.as_str()),
                 Some(synthesis_category(provenance.category)),
             )
-        } else if model.override_reported.contains(metric) {
-            ("reported", None, None)
         } else {
             ("direct", None, None)
         };

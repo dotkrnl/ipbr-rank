@@ -247,7 +247,7 @@ fn ingest_real_row(
                     }
                     let choice_key = (i, key.clone());
                     let incoming_evidence = if is_override {
-                        EvidencePriority::Reported
+                        EvidencePriority::CuratedDirect
                     } else {
                         EvidencePriority::Direct
                     };
@@ -279,14 +279,14 @@ fn ingest_real_row(
                     record.synthesized.remove(&key);
                     record.metric_sources.insert(key.clone(), source_id.clone());
                     if is_override {
-                        record.override_reported.insert(key.clone());
+                        record.curated_overrides.insert(key.clone());
                         if let Some(note) = evidence_notes.get(&key) {
                             record.override_notes.insert(key, note.clone());
                         } else {
                             record.override_notes.remove(&key);
                         }
                     } else {
-                        record.override_reported.remove(&key);
+                        record.curated_overrides.remove(&key);
                         record.override_notes.remove(&key);
                     }
                 }
@@ -372,7 +372,7 @@ impl EffortPreference {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum EvidencePriority {
     Synthesized,
-    Reported,
+    CuratedDirect,
     Direct,
 }
 
@@ -380,8 +380,8 @@ fn evidence_priority(record: &ModelRecord, metric: &str) -> Option<EvidencePrior
     record.raw_metrics.contains_key(metric).then(|| {
         if record.synthesized.contains_key(metric) {
             EvidencePriority::Synthesized
-        } else if record.override_reported.contains(metric) {
-            EvidencePriority::Reported
+        } else if record.curated_overrides.contains(metric) {
+            EvidencePriority::CuratedDirect
         } else {
             EvidencePriority::Direct
         }
@@ -591,7 +591,7 @@ mod tests {
                 "gpt-5.5",
                 &[("TerminalBench", json!(80.0))],
             );
-            let reported = raw(
+            let curated = raw(
                 "overrides",
                 "gpt-5.5",
                 &[
@@ -603,9 +603,9 @@ mod tests {
                 ],
             );
             let ordered = if direct_first {
-                vec![direct, reported]
+                vec![direct, curated]
             } else {
-                vec![reported, direct]
+                vec![curated, direct]
             };
             // Separate calls exercise precedence across the CLI's per-source
             // ingestion boundary, not only within one input vector.
@@ -620,7 +620,7 @@ mod tests {
                     .map(String::as_str),
                 Some("terminal_bench")
             );
-            assert!(!records[0].override_reported.contains("TerminalBench"));
+            assert!(!records[0].curated_overrides.contains("TerminalBench"));
             assert!(!records[0].override_notes.contains_key("TerminalBench"));
         }
     }
@@ -660,6 +660,7 @@ mod tests {
                 .map(String::as_str),
             Some("overrides")
         );
+        assert!(records[0].curated_overrides.contains("TerminalBench"));
         assert!(
             !records[0]
                 .raw_metrics
@@ -764,7 +765,7 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_rows_never_carry_override_flag() {
+    fn synthesized_rows_never_carry_curated_override_flag() {
         let mut records = vec![{
             let mut r = ModelRecord::new(
                 "openai/gpt-5.5".to_string(),
@@ -786,8 +787,8 @@ mod tests {
             "synthesized flag should be set"
         );
         assert!(
-            !records[0].override_reported.contains("TerminalBench"),
-            "synthesized rows must not be marked override_reported"
+            !records[0].curated_overrides.contains("TerminalBench"),
+            "synthesized rows must not be marked as curated overrides"
         );
     }
 
@@ -1104,7 +1105,7 @@ mod tests {
             assert_eq!(records[0].raw_metrics.get("SWEBenchPro"), Some(&60.6));
             assert_eq!(records[0].raw_metrics.get("LMArenaText"), Some(&91.0));
             assert_eq!(records[0].raw_metrics.get("SWERebench"), Some(&72.0));
-            assert!(records[0].override_reported.contains("SWEBenchPro"));
+            assert!(records[0].curated_overrides.contains("SWEBenchPro"));
             assert!(records[0].synthesized.contains_key("SWERebench"));
         }
     }

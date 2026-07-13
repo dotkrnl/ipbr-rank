@@ -666,7 +666,7 @@ async fn bfcl_fixture_contract() {
 }
 
 #[tokio::test]
-async fn overrides_source_emits_vendor_reported_rows() {
+async fn overrides_source_emits_curated_direct_rows() {
     let source = ipbr_sources::OverridesSource::default();
     let rows = source
         .fetch(
@@ -693,6 +693,10 @@ async fn overrides_source_emits_vendor_reported_rows() {
         opus47_swe.is_some(),
         "claude-opus-4.7 should pick up SWEBenchVerified from overrides"
     );
+    assert!(records.iter().any(|record| {
+        record.canonical_id == "anthropic/claude-opus-4.7"
+            && record.curated_overrides.contains("SWEBenchVerified")
+    }));
 }
 
 #[tokio::test]

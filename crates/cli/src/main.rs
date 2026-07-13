@@ -731,31 +731,86 @@ impl ModelToml {
         record.missing.groups_shrunk = self.missing.groups_shrunk.into_iter().collect();
         record.missing.synthesis_dominant = self.missing.synthesis_dominant;
         for (metric, evidence) in self.metric_evidence {
-            if let Some(source) = evidence.source.clone() {
-                record.metric_sources.insert(metric.clone(), source);
-            }
-            match evidence.class.as_str() {
-                "reported" => {
-                    record.override_reported.insert(metric.clone());
-                    if let Some(citation) = evidence.citation {
-                        record.override_notes.insert(metric, citation);
-                    }
-                }
-                "synthesized" => {
-                    if let Some(donor) = evidence.donor {
-                        record.synthesized.insert(
-                            metric,
-                            ipbr_core::SynthesisProvenance {
-                                source_id: evidence.source.unwrap_or_else(|| "unknown".to_string()),
-                                from: donor,
-                                category: evidence.synthesis_category.unwrap_or_default(),
-                            },
-                        );
-                    }
-                }
-                _ => {}
-            }
+            restore_metric_evidence(&mut record, metric, evidence);
         }
         record
+    }
+}
+
+fn restore_metric_evidence(record: &mut ModelRecord, metric: String, evidence: MetricEvidenceToml) {
+    if let Some(source) = evidence.source.clone() {
+        record.metric_sources.insert(metric.clone(), source);
+    }
+    let is_curated_override = evidence.source.as_deref() == Some("overrides")
+        && matches!(evidence.class.as_str(), "direct" | "reported");
+    if is_curated_override {
+        record.curated_overrides.insert(metric.clone());
+        if let Some(citation) = evidence.citation {
+            record.override_notes.insert(metric.clone(), citation);
+        }
+    }
+    if evidence.class == "synthesized"
+        && let Some(donor) = evidence.donor
+    {
+        record.synthesized.insert(
+            metric,
+            ipbr_core::SynthesisProvenance {
+                source_id: evidence.source.unwrap_or_else(|| "unknown".to_string()),
+                from: donor,
+                category: evidence.synthesis_category.unwrap_or_default(),
+            },
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn evidence(class: &str, donor: Option<&str>) -> MetricEvidenceToml {
+        MetricEvidenceToml {
+            class: class.to_string(),
+            source: Some("overrides".to_string()),
+            donor: donor.map(str::to_string),
+            synthesis_category: None,
+            citation: Some("cited source".to_string()),
+        }
+    }
+
+    #[test]
+    fn scoreboard_rehydrate_preserves_curated_direct_citation_and_legacy_reported_rows() {
+        for class in ["direct", "reported"] {
+            let mut record = ModelRecord::new(
+                "openai/gpt-5.5".into(),
+                "GPT-5.5".into(),
+                ipbr_core::Vendor::Openai,
+            );
+            restore_metric_evidence(&mut record, "TerminalBench".into(), evidence(class, None));
+            assert!(record.curated_overrides.contains("TerminalBench"));
+            assert_eq!(
+                record
+                    .override_notes
+                    .get("TerminalBench")
+                    .map(String::as_str),
+                Some("cited source")
+            );
+        }
+    }
+
+    #[test]
+    fn scoreboard_rehydrate_does_not_mark_synthesized_override_as_curated() {
+        let mut record = ModelRecord::new(
+            "openai/gpt-5.5".into(),
+            "GPT-5.5".into(),
+            ipbr_core::Vendor::Openai,
+        );
+        restore_metric_evidence(
+            &mut record,
+            "TerminalBench".into(),
+            evidence("synthesized", Some("openai/gpt-5.4")),
+        );
+        assert!(!record.curated_overrides.contains("TerminalBench"));
+        assert!(!record.override_notes.contains_key("TerminalBench"));
+        assert!(record.synthesized.contains_key("TerminalBench"));
     }
 }
