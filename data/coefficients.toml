@@ -29,35 +29,36 @@ ARC_AGI_2 = 0.30
 AAGeneralComposite = 0.35
 
 [group_weights.PLAN]
-# PLAN uses current end-to-end agent, tool-use, instruction-following, and
-# context signals. Terminal-Bench 2.0 is superseded by 2.1. Reported-only
-# Toolathlon/OSWorld/HLETools/BrowseComp and the construct-mismatched ARC path
-# remain diagnostic rather than affecting the primary rank.
-TerminalBench21Composite = 0.13
-BFCLComposite = 0.10
-HiLBench = 0.08
-Tau3Banking = 0.14
-LongContextComposite = 0.10
-MCPAtlas = 0.26
-EnterpriseWorkflowComposite = 0.12
-GDPvalAA2 = 0.07
+# PLAN emphasizes current end-to-end agent and tool-use evidence while retaining
+# independent context and enterprise-work signals. HiL-Bench is a small
+# supplemental planning input because knowing when to escalate is useful but
+# specialized. BFCL remains ingested as a diagnostic: its narrow, overlapping
+# cohort no longer affects the primary rank. Terminal-Bench 2.0 is superseded
+# by 2.1; the reported-only Toolathlon/OSWorld/HLETools/BrowseComp and
+# construct-mismatched ARC paths likewise remain diagnostic.
+MCPAtlas = 0.30
+Tau3Banking = 0.20
+LongContextComposite = 0.15
+GDPvalAA2 = 0.10
+EnterpriseWorkflowComposite = 0.10
+TerminalBench21Composite = 0.10
+HiLBench = 0.05
 
 # BUILD is centered on direct software-work evidence. SWEComposite remains the
-# largest input; SWE Atlas, terminal work, BFCL, GSO, live coding, and MCP
-# orchestration cover distinct implementation demands. Sonar remains a
-# diagnostic because its current rows mix explicit effort levels and measure a
-# narrower coding-quality profile than the repository/agent benchmarks.
+# largest input; live coding, MCP orchestration, SWE Atlas, terminal work,
+# DeepSWE, and long-context retrieval cover distinct implementation demands.
+# BFCL, HiL-Bench, GSO, and Sonar remain ingested diagnostics: BFCL overlaps
+# other tool-use signals, HiL-Bench is planning-specific, GSO has unresolved
+# reproducibility concerns, and Sonar measures a narrower coding-quality
+# profile with mixed explicit effort levels.
 [group_weights.BUILD]
-SWEComposite = 0.221
-DeepSWE = 0.120
-SWEAtlasComposite = 0.148
-MCPAtlas = 0.102
+SWEComposite = 0.35
+LiveCodingComposite = 0.20
+MCPAtlas = 0.15
+SWEAtlasComposite = 0.10
 TerminalBench21Composite = 0.080
-BFCLComposite = 0.068
-HiLBench = 0.045
-GSO = 0.103
-LongContextComposite = 0.045
-LiveCodingComposite = 0.068
+DeepSWE = 0.07
+LongContextComposite = 0.05
 
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
@@ -223,15 +224,14 @@ BFCL = 1.0
 # LM_ARENA_REVIEW_PROXY is intentionally named as a proxy, not a judge
 # benchmark. It combines LM Arena search and document preference ratings
 # after each config is normalized on its own raw Elo scale. That is useful
-# review-adjacent evidence, but not direct code-review capability, so the
-# R-axis weights it lightly.
+# review-adjacent evidence, but not direct code-review capability.
 [group_weights.LM_ARENA_REVIEW_PROXY]
 LMArenaSearch = 0.50
 LMArenaDocument = 0.50
 
 [group_weights.REVIEW_DIRECT]
-# Judgemark directly evaluates a model used as a judge and publishes 95% CIs.
-# It is not code-review-specific, so the UI still labels R as a review proxy.
+# Diagnostic-only Judgemark group. Judge discrimination is not code review, so
+# REVIEW_DIRECT is deliberately unreachable from final_score_weights.R.
 EQBenchJudgemark = 1.0
 
 # Reference-only operational views. They are rendered as diagnostics but are
@@ -268,12 +268,12 @@ BUILD = 0.95
 PLAN = 0.05
 
 [final_score_weights.R]
-# Judgemark measures judge discrimination rather than code review and has a
-# narrow direct cohort, so it no longer dominates the Review proxy.
-REVIEW_DIRECT = 0.20
-LM_ARENA_REVIEW_PROXY = 0.20
-BUILD = 0.30
-PLAN = 0.30
+# Until a broad direct code-review source exists, Review combines the
+# search/document preference proxy with implementation and planning evidence.
+# Judgemark remains available as a diagnostic but has no ranking path.
+LM_ARENA_REVIEW_PROXY = 0.30
+BUILD = 0.35
+PLAN = 0.35
 
 [aggregation]
 # Presentation-only threshold for the legacy `groups_shrunk` diagnostic.
@@ -297,6 +297,20 @@ provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
 provisional_breadth_min_families = 5
+# Four independent core families at 50% direct coverage are also sufficient.
+# This path is core-only so sparse supplemental evidence cannot qualify a new
+# model merely by accumulating narrow leaderboards.
+core_corroborated_min_direct = 0.50
+core_corroborated_min_families = 4
+# Historical support is a qualification path, never a scoring input. It needs
+# a meaningful current base plus breadth across independent retired sources.
+historical_min_current_direct = 0.25
+historical_min_current_families = 2
+historical_min_families = 2
+historical_min_total_families = 5
+# Balanced requires three independently ranked roles; the fourth must retain
+# at least this much direct current score-path evidence.
+balanced_min_fourth_direct = 0.20
 max_family_weight = 0.30
 
 [normalization]
@@ -313,6 +327,7 @@ reported_fallback = true
 
 [metrics.LMArenaText]
 family = "lmarena"
+eligibility = "core"
 anchor_low = 1382.87
 anchor_high = 1487.64
 higher_better = true
@@ -331,6 +346,7 @@ transform = "percentile"
 
 [metrics.CopilotArenaOrLMArenaCode]
 family = "lmarena"
+eligibility = "core"
 anchor_low = 1260.30
 anchor_high = 1559.63
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
@@ -341,6 +357,7 @@ transform = "percentile"
 
 [metrics.LMArenaSearch]
 family = "lmarena"
+eligibility = "supplemental"
 anchor_low = 1142.22
 anchor_high = 1242.02
 higher_better = true
@@ -350,6 +367,7 @@ transform = "percentile"
 
 [metrics.LMArenaDocument]
 family = "lmarena"
+eligibility = "core"
 anchor_low = 1412.94
 anchor_high = 1499.34
 higher_better = true
@@ -359,6 +377,7 @@ transform = "percentile"
 
 [metrics.EQBenchCreativeWriting]
 family = "eqbench"
+eligibility = "core"
 anchor_low = 1367.42
 anchor_high = 2185.10
 higher_better = true
@@ -368,6 +387,7 @@ transform = "percentile"
 
 [metrics.EQBenchJudgemark]
 family = "eqbench"
+eligibility = "supplemental"
 anchor_low = 35.3666
 anchor_high = 88.2502
 higher_better = true
@@ -407,6 +427,7 @@ transform = "percentile"
 
 [metrics.GPQA]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 77.15
 anchor_high = 92.765
 higher_better = true
@@ -416,6 +437,7 @@ transform = "percentile"
 
 [metrics.HLE]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 9.645
 anchor_high = 44.52
 higher_better = true
@@ -425,29 +447,33 @@ transform = "percentile"
 
 [metrics.LiveCodeBench]
 family = "livecodebench"
+eligibility = "historical_support"
+eligibility_roles = ["B_raw", "R"]
 # Retained as an ingested metric for backwards-compat with the cached
 # fixture and any consumers reading per-source values, but removed from
 # group_weights.BUILD (see comment there). The upstream JSON has been
-# frozen at mid-2025 frontier for ~12 months; GSO is the active
-# replacement track. `groups = []` keeps it descriptively unscored.
+# frozen at mid-2025 frontier for ~12 months. It now provides coverage-only
+# historical support; `groups = []` keeps it descriptively unscored.
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
-# GSO ("Generalized Software Optimization") replaces LiveCodeBench in the
-# BUILD portfolio. We ingest the `score_hack_control` field — GSO's
+# GSO ("Generalized Software Optimization") is retained as a diagnostic after
+# unresolved reproducibility concerns removed it from BUILD. We ingest the
+# `score_hack_control` field — GSO's
 # contamination-resistant variant, added specifically to penalize
 # deceptive optimizations — rather than raw `score`. Filtered to the
 # `Opt@1` setting; among Opt@1 rows for the same model we keep the one
 # with the highest reasoning_effort (max/xhigh before high before default).
 [metrics.GSO]
 family = "gso"
+eligibility = "supplemental"
 anchor_low = 3.185
 anchor_high = 43.875
 higher_better = true
 log_scale = false
-groups = ["BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.GPQA_HLE_Reasoning]
@@ -466,6 +492,8 @@ transform = "percentile"
 # and "top of Verified" both map to ~100 within their own populations.
 [metrics.SWEBenchVerified]
 family = "swe"
+eligibility = "historical_support"
+eligibility_roles = ["B_raw", "R"]
 anchor_low = 57.1325
 anchor_high = 77.85
 higher_better = true
@@ -475,6 +503,8 @@ transform = "percentile"
 
 [metrics.TerminalBench]
 family = "terminal_bench"
+eligibility = "historical_support"
+eligibility_roles = ["P_raw", "B_raw", "R"]
 anchor_low = 24.76
 anchor_high = 80.20
 higher_better = true
@@ -487,6 +517,7 @@ transform = "percentile"
 # Gemini 3.1 Pro, Claude Opus 4.7, and GLM-5.1.
 [metrics.TerminalBench21]
 family = "terminal_bench"
+eligibility = "core"
 anchor_low = 62.0
 anchor_high = 83.31
 # Input to TerminalBench21Composite.
@@ -497,6 +528,7 @@ transform = "percentile"
 
 [metrics.AATerminalBench21]
 family = "terminal_bench"
+eligibility = "core"
 anchor_low = 34.4944
 anchor_high = 84.4007
 # Input to TerminalBench21Composite; AA's terminalbench_v2_1 field.
@@ -507,6 +539,7 @@ transform = "percentile"
 
 [metrics.TerminalBench21Composite]
 family = "terminal_bench"
+eligibility = "core"
 higher_better = true
 log_scale = false
 groups = ["PLAN", "BUILD"]
@@ -523,12 +556,13 @@ transform = "percentile"
 
 [metrics.BFCL]
 family = "bfcl"
+eligibility = "supplemental"
 anchor_low = 56.018
 anchor_high = 75.778
 # Input to BFCLComposite.
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = []
 transform = "percentile"
 
 [metrics.BFCLNonLiveAST]
@@ -587,15 +621,17 @@ transform = "percentile"
 # blocked SWE tasks.
 [metrics.HiLBench]
 family = "scale"
+eligibility = "supplemental"
 anchor_low = 5.683
 anchor_high = 28.3135
 higher_better = true
 log_scale = false
-groups = ["PLAN", "BUILD"]
+groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.SWEBenchMultilingual]
 family = "swe"
+eligibility = "supplemental"
 anchor_low = 62.135
 anchor_high = 72.315
 higher_better = true
@@ -605,6 +641,7 @@ transform = "percentile"
 
 [metrics.SWERebench]
 family = "swe"
+eligibility = "core"
 anchor_low = 30.7162
 anchor_high = 60.7613
 higher_better = true
@@ -616,6 +653,7 @@ transform = "percentile"
 # saturating near 90), so it differentiates better at the top.
 [metrics.SWEBenchPro]
 family = "swe"
+eligibility = "supplemental"
 anchor_low = 21.832
 anchor_high = 56.64
 higher_better = true
@@ -625,6 +663,7 @@ transform = "percentile"
 
 [metrics.SWEAtlasQnA]
 family = "scale"
+eligibility = "supplemental"
 anchor_low = 9.67
 anchor_high = 50.862
 higher_better = true
@@ -634,6 +673,7 @@ transform = "percentile"
 
 [metrics.SWEAtlasTestWriting]
 family = "scale"
+eligibility = "supplemental"
 anchor_low = 23.9775
 anchor_high = 51.8525
 higher_better = true
@@ -643,6 +683,7 @@ transform = "percentile"
 
 [metrics.SWEAtlasRefactoring]
 family = "scale"
+eligibility = "supplemental"
 anchor_low = 15.712
 anchor_high = 51.046
 higher_better = true
@@ -655,6 +696,7 @@ transform = "percentile"
 # loops are tool-orchestration loops).
 [metrics.MCPAtlas]
 family = "scale"
+eligibility = "supplemental"
 anchor_low = 56.70
 anchor_high = 83.30
 higher_better = true
@@ -705,6 +747,7 @@ transform = "percentile"
 # Orthogonal to GPQA/HLE which test learned knowledge.
 [metrics.ARC_AGI_2]
 family = "arc_agi"
+eligibility = "core"
 anchor_low = 3.792
 anchor_high = 76.8925
 higher_better = true
@@ -717,6 +760,8 @@ transform = "percentile"
 # adding any new HTTP fetches.
 [metrics.Tau2Bench]
 family = "artificial_analysis"
+eligibility = "historical_support"
+eligibility_roles = ["P_raw"]
 anchor_low = 54.3275
 anchor_high = 98.0117
 # Input to TauComposite.
@@ -737,6 +782,7 @@ transform = "percentile"
 
 [metrics.SciCode]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 38.625
 anchor_high = 56.375
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
@@ -747,6 +793,7 @@ transform = "percentile"
 
 [metrics.AALiveCodeBench]
 family = "artificial_analysis"
+eligibility = "supplemental"
 anchor_low = 61.35
 anchor_high = 91.07
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
@@ -757,6 +804,8 @@ transform = "percentile"
 
 [metrics.IFBench]
 family = "artificial_analysis"
+eligibility = "historical_support"
+eligibility_roles = ["P_raw"]
 anchor_low = 45.5238
 anchor_high = 80.9524
 higher_better = true
@@ -774,6 +823,8 @@ transform = "percentile"
 
 [metrics.AIME25]
 family = "artificial_analysis"
+eligibility = "historical_support"
+eligibility_roles = ["I_raw"]
 anchor_low = 53.1333
 anchor_high = 97.60
 higher_better = true
@@ -783,6 +834,8 @@ transform = "percentile"
 
 [metrics.MMLUPro]
 family = "artificial_analysis"
+eligibility = "historical_support"
+eligibility_roles = ["I_raw"]
 anchor_low = 78.31
 anchor_high = 89.59
 higher_better = true
@@ -792,6 +845,7 @@ transform = "percentile"
 
 [metrics.LongContextRecall]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 55.9833
 anchor_high = 74.0
 higher_better = true
@@ -802,6 +856,7 @@ transform = "percentile"
 # Sonar Code Quality leaderboard — functional pass rate.
 [metrics.SonarFunctionalSkill]
 family = "sonar"
+eligibility = "supplemental"
 anchor_low = 73.239
 anchor_high = 83.646
 higher_better = true
@@ -813,6 +868,7 @@ transform = "percentile"
 # inverts via `higher_better = false` before percentile normalization.
 [metrics.SonarIssueDensity]
 family = "sonar"
+eligibility = "supplemental"
 anchor_low = 14.85
 anchor_high = 25.3505
 higher_better = false
@@ -823,6 +879,7 @@ transform = "percentile"
 # Sonar bug density (bugs / kLOC). Lower is better.
 [metrics.SonarBugDensity]
 family = "sonar"
+eligibility = "supplemental"
 higher_better = false
 log_scale = false
 groups = []
@@ -831,6 +888,7 @@ transform = "percentile"
 # Sonar vulnerability density (vulnerabilities / kLOC). Lower is better.
 [metrics.SonarVulnerabilityDensity]
 family = "sonar"
+eligibility = "supplemental"
 higher_better = false
 log_scale = false
 groups = []
@@ -841,6 +899,7 @@ transform = "percentile"
 # another SWE-bench variant.
 [metrics.DeepSWE]
 family = "deepswe"
+eligibility = "supplemental"
 anchor_low = 19.933481
 anchor_high = 68.514553
 higher_better = true
@@ -852,6 +911,7 @@ transform = "percentile"
 # evaluation pages rather than vendor launch-card overrides.
 [metrics.GDPvalAA2]
 family = "gdpval"
+eligibility = "core"
 anchor_low = 782.486
 anchor_high = 1512.132
 higher_better = true
@@ -861,6 +921,7 @@ transform = "percentile"
 
 [metrics.CritPt]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 0.114286
 anchor_high = 20.857143
 higher_better = true
@@ -870,6 +931,7 @@ transform = "percentile"
 
 [metrics.AAOmniscienceAccuracy]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 19.34
 anchor_high = 54.75
 higher_better = true
@@ -879,6 +941,7 @@ transform = "percentile"
 
 [metrics.AAOmniscienceNonHallucination]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 6.715907
 anchor_high = 76.415078
 higher_better = true
@@ -888,6 +951,7 @@ transform = "percentile"
 
 [metrics.EnterpriseOpsGymAA]
 family = "enterprise_workflow"
+eligibility = "supplemental"
 anchor_low = 27.757386
 anchor_high = 47.157565
 higher_better = true
@@ -897,6 +961,7 @@ transform = "percentile"
 
 [metrics.AutomationBenchAA]
 family = "enterprise_workflow"
+eligibility = "supplemental"
 anchor_low = 9.482192
 anchor_high = 42.932138
 higher_better = true
@@ -906,6 +971,7 @@ transform = "percentile"
 
 [metrics.ContextArenaMRCR128k]
 family = "context_arena"
+eligibility = "core"
 anchor_low = 25.953719
 anchor_high = 86.698585
 higher_better = true
@@ -922,6 +988,7 @@ transform = "percentile"
 
 [metrics.Tau3Banking]
 family = "artificial_analysis"
+eligibility = "core"
 anchor_low = 8.659794
 anchor_high = 30.381443
 higher_better = true
@@ -940,6 +1007,7 @@ transform = "percentile"
 
 [metrics.AGCBench]
 family = "agc_bench"
+eligibility = "supplemental"
 higher_better = true
 log_scale = false
 groups = []
@@ -947,6 +1015,7 @@ transform = "percentile"
 
 [metrics.FactoryCodeReviewF1]
 family = "factory_code_review"
+eligibility = "supplemental"
 higher_better = true
 log_scale = false
 groups = []
@@ -954,6 +1023,7 @@ transform = "percentile"
 
 [metrics.FactoryCodeReviewPrecision]
 family = "factory_code_review"
+eligibility = "supplemental"
 higher_better = true
 log_scale = false
 groups = []
@@ -961,6 +1031,7 @@ transform = "percentile"
 
 [metrics.FactoryCodeReviewRecall]
 family = "factory_code_review"
+eligibility = "supplemental"
 higher_better = true
 log_scale = false
 groups = []
@@ -968,6 +1039,7 @@ transform = "percentile"
 
 [metrics.FactoryCodeReviewF1Stdev]
 family = "factory_code_review"
+eligibility = "supplemental"
 higher_better = false
 log_scale = false
 groups = []

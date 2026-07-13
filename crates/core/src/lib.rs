@@ -12,17 +12,20 @@ pub mod synthesize;
 pub use alias::{AliasIndex, normalize_name, normalize_vendor_hint};
 pub use coefficients::{
     AggregationConfig, Coefficients, EffortException, EffortPolicy, EvidenceConfig, MetricDef,
-    MetricTransform, NormalizationConfig, PenaltiesConfig, SynthesisConfig,
+    MetricEligibility, MetricTransform, NormalizationConfig, PenaltiesConfig, SynthesisConfig,
 };
 pub use ingest::{
     IngestStats, ingest_rows, ingest_rows_with_policy, mark_synthesis_dominant,
     mark_synthesis_dominant_with_coefficients, warn_stale_overrides,
 };
 pub use model::{
-    EvidenceCoverage, EvidenceSummary, GroupKey, MetricKey, MissingInfo, ModelRecord, RawRow,
-    RoleScores, SourceId, SynthesisCategory, SynthesisProvenance, ThinkingEffort, Vendor,
+    EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, GroupKey, MetricKey,
+    MissingInfo, ModelRecord, RawRow, RoleScores, SourceId, SynthesisCategory, SynthesisProvenance,
+    ThinkingEffort, Vendor,
 };
-pub use score::{compute_scores, compute_scores_with};
+pub use score::{
+    balanced_is_provisional, balanced_is_provisional_with, compute_scores, compute_scores_with,
+};
 pub use scoreboard::{SCHEMA_VERSION, Scoreboard, SourceSummary};
 pub use synthesize::{
     SynthesisPair, SynthesisStats, load_embedded_pairs, load_pairs_from_str, synthesize_rows,

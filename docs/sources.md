@@ -14,6 +14,14 @@ winning metric keeps its source and evidence class; direct observations take
 precedence over cited reported overrides, which take precedence over sibling
 synthesis.
 
+Methodology v3 also separates score use from eligibility use. `core` metrics
+are broad enough to establish current ranking coverage. `supplemental` metrics
+still affect a role score when observed, but a missing row on their narrow
+leaderboards does not count against eligibility. `historical_support` metrics
+are retired from scoring and can only corroborate that an established model
+has direct role-relevant evidence. Operational and other diagnostic metrics
+affect neither scores nor eligibility.
+
 ## openrouter
 
 - **Status**: Verified
@@ -21,7 +29,7 @@ synthesis.
 - **Secret**: `OPENROUTER_API_KEY` (via `--openrouter-api-key-file` or environment variable)
 - **Cache TTL**: 24 h
 - **Metrics emitted**: pricing, provider routing, advertised context, and supported-parameter fields.
-- **Ranking use**: Diagnostic only. Pricing and context metadata have zero path to a methodology-v2 capability rank.
+- **Ranking use**: Diagnostic only. Pricing and context metadata have zero path to a methodology-v3 capability rank.
 - **Fixture**: `data/fixtures/openrouter_models.json`
 
 ## lmarena
@@ -52,6 +60,7 @@ synthesis.
 - **Cache TTL**: 24 h
 - **Metric**: `EQBenchJudgemark` — judge-discrimination/separability score, scaled from 0–1 to 0–100.
 - **Uncertainty**: `EQBenchJudgemarkCILow` and `EQBenchJudgemarkCIHigh` preserve the prompt-bootstrap 95% interval. They are unscored and never synthesized.
+- **Ranking use**: Diagnostic. Judge discrimination is not direct code review, so methodology v3 removes it from the Review score and eligibility portfolio.
 - **Fixture**: `data/fixtures/eqbench_judgemark_v4.js`
 
 ## artificial_analysis
@@ -61,6 +70,7 @@ synthesis.
 - **Secret**: `AA_API_KEY` (via `--aa-api-key-file` or environment variable)
 - **Cache TTL**: 10 min
 - **Metrics emitted**: current `GPQA`, `HLE`, `Tau3Banking`, `SciCode`, `AATerminalBench21`, and `LongContextRecall`, plus aggregate, legacy, operational, and pricing diagnostics. The upstream `tau_banking` payload key is emitted under the current tau3 semantic name; `Tau2Bench`, `TauBanking`, `IFBench`, and `TerminalBenchHard` remain historical diagnostics.
+- **Eligibility use**: Current general-reasoning, SciCode, tau3, and long-context leaves are core evidence in their respective roles. Stable retired task metrics may be marked `historical_support`; their values never enter methodology-v3 scores.
 - **Duplicate correction**: current AA general/scientific leaves feed `AAGeneralComposite` once. Aggregate Intelligence/Coding indices do not stack with their components.
 - **Multi-row dedup**: AA ships several rows per logical model. The parser preserves distinct effort rows and ingestion selects the strongest eligible effort; equal-effort duplicate rows keep the highest intelligence observation. Speed/TTFT sentinel zeros are skipped.
 - **Product tiers**: reasoning labels such as `xhigh` and `max` are eligible configurations of a canonical model. Separately named products such as `GPT-5.5 Pro` are not silently folded into the base `GPT-5.5` record; they require their own catalog entry before ranking.
@@ -69,16 +79,39 @@ synthesis.
 - **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
-## Artificial Analysis evaluation pages
+The five Artificial Analysis evaluation-page sources below parse official
+server-rendered model objects, need no secret, cache for 24 hours, and rename
+fallback-assisted observations to unranked `*HybridFallback` diagnostics.
+
+## aa_gdpval_v2
 
 - **Status**: Verified
-- **APIs**: server-rendered JSON-LD plus complete model objects on the official GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA evaluation pages
-- **Secret**: None
-- **Cache TTL**: 24 h
-- **Metrics**: `GDPvalAA2`, `CritPt`, `AAOmniscienceAccuracy`, `AAOmniscienceNonHallucination`, `EnterpriseOpsGymAA`, and `AutomationBenchAA`; GDPval confidence bounds and the Omniscience index are retained as diagnostics.
-- **Composites**: EnterpriseOps and AutomationBench form one correlated enterprise-workflow PLAN family. The Omniscience components join HLE, GPQA, and CritPt inside `AAGeneralComposite`; AA-LCR is used only in the dedicated long-context composite.
-- **Fallback guard**: scores labelled with another model as fallback are renamed to `*HybridFallback`, remain visible, and have no ranking path.
-- **Fixtures**: `data/fixtures/aa_*.html`
+- **Metric**: `GDPvalAA2`, a core Plan signal; published confidence bounds are diagnostic.
+- **Fixture**: `data/fixtures/aa_gdpval_v2.html`
+
+## aa_critpt
+
+- **Status**: Verified
+- **Metric**: `CritPt`, a core input to `AAGeneralComposite`.
+- **Fixture**: `data/fixtures/aa_critpt.html`
+
+## aa_omniscience
+
+- **Status**: Verified
+- **Metrics**: `AAOmniscienceAccuracy` and `AAOmniscienceNonHallucination`, core inputs to `AAGeneralComposite`; the upstream combined index is diagnostic.
+- **Fixture**: `data/fixtures/aa_omniscience.html`
+
+## aa_enterprise_ops_gym
+
+- **Status**: Verified
+- **Metric**: `EnterpriseOpsGymAA`, a supplemental input to the correlated enterprise-workflow Plan composite.
+- **Fixture**: `data/fixtures/aa_enterprise_ops_gym.html`
+
+## aa_automation_bench
+
+- **Status**: Verified
+- **Metric**: `AutomationBenchAA`, a supplemental input to the correlated enterprise-workflow Plan composite.
+- **Fixture**: `data/fixtures/aa_automation_bench.html`
 
 ## deep_swe_v1_1
 
@@ -88,6 +121,7 @@ synthesis.
 - **Cache TTL**: 24 h
 - **Metric**: `DeepSWE` pass@1 across 113 original long-horizon repository tasks.
 - **Configuration**: fixed `mini-swe-agent` harness; max, xhigh, high, thinking/adaptive, medium/default, then low effort is preferred. Pass@4, confidence interval, attempts, task count, run count, and configuration provenance stay attached to the selected row.
+- **Ranking use**: Supplemental Build evidence. It affects Build when present, but its narrow cohort cannot make an otherwise established model provisional.
 - **Fixture**: `data/fixtures/deep_swe_v1_1.json`
 
 ## context_arena
@@ -117,7 +151,9 @@ synthesis.
 - **Metrics**: F1, precision, recall, and F1 standard deviation over 50 real PRs with human-curated bugs and repeated runs.
 - **Ranking use**: Diagnostic until broader current max-effort coverage is available. Cost fields are intentionally not ingested.
 
-## aistupidlevel
+## Removed sources
+
+### aistupidlevel
 
 Removed from active scoring on 2026-05-21. We reproduced the benchmark
 locally and found the tasks not representative enough of real model quality
@@ -127,19 +163,19 @@ not registered, the `AI_*` metrics are no longer in `data/coefficients.toml`,
 the `A_*` perspective groups are gone, and the canary-health penalty is no
 longer applied.
 
-## openevals (removed)
+### openevals
 
 Removed because of zero overlap with the flagship model set — none of the 14 required
 canonical IDs appeared in its leaderboard — so it contributed no coverage while adding
 fetch latency.
 
-## bigcodebench, aider_polyglot, metr_horizons (removed)
+### bigcodebench, aider_polyglot, and metr_horizons
 
 These were removed during audit passes. `bigcodebench` (HuggingFace
 dataset) stopped covering 2026-class models; `aider_polyglot` went stale
 on the frontier; `metr_horizons` produced sparse measurements that warped
-scores. BFCL was restored once the V4 CSV exposed current frontier rows
-and agentic tool-use categories.
+scores. BFCL remains ingested for diagnostics, but its sparse overlapping
+cohort is not part of methodology-v3 scoring or eligibility.
 
 ## swebench
 
@@ -148,6 +184,7 @@ and agentic tool-use categories.
 - **Secret**: None
 - **Cache TTL**: 7 d
 - **Metrics**: `SWEBenchVerified` (Verified leaderboard), `SWEBenchMultilingual` (multilingual leaderboard, 9 languages incl. C/C++/Go/Java/JS/PHP/Ruby/Rust). Single fetch covers both — no extra HTTP cost.
+- **Ranking use**: Multilingual remains a scored component of `SWEComposite`; Verified is retired from the current score but retained as direct historical Build/Review support.
 - **Fixture**: `data/fixtures/swebench_leaderboards.json`
 
 ## terminal_bench
@@ -157,6 +194,7 @@ and agentic tool-use categories.
 - **Secret**: None
 - **Cache TTL**: 7 d
 - **Metric**: `TerminalBench`; `TerminalBenchUncertainty` preserves the published ± value as an unscored auxiliary field.
+- **Ranking use**: Retired from the current score in favor of Terminal-Bench 2.1, but retained as direct historical Plan/Build/Review support.
 - **Fixture**: `data/fixtures/terminal_bench.html`
 
 ## terminal_bench_2_1
@@ -170,12 +208,12 @@ and agentic tool-use categories.
 
 ## livecodebench
 
-- **Status**: Verified (retired from BUILD weighting — see GSO below)
+- **Status**: Verified (retired from Build scoring)
 - **API**: LiveCodeBench `performances_generation.json` (fetched from `livecodebench.github.io`)
 - **Secret**: None
 - **Cache TTL**: 2 d
 - **Fixture**: `data/fixtures/livecodebench.json`
-- **Note**: The upstream JSON has been frozen at mid-2025 frontier (latest entries are Claude-Opus-4 / Claude-Sonnet-4 / Gemini-2.5-Pro; no GPT-5/5.x, no Opus 4.5+, no Gemini 3, no Kimi K2.x, no DeepSeek V4) for ~12 months. The metric is still ingested for backwards-compat and historical reference but `groups = []` removes it from any role-score weighting. Successor: `gso`.
+- **Note**: The upstream JSON has been frozen at mid-2025 frontier (latest entries are Claude-Opus-4 / Claude-Sonnet-4 / Gemini-2.5-Pro; no GPT-5/5.x, no Opus 4.5+, no Gemini 3, no Kimi K2.x, no DeepSeek V4) for ~12 months. The metric has no current score weight, but direct rows may provide historical Build/Review support. GSO was evaluated as a successor and is retained only as a diagnostic.
 
 ## gso
 
@@ -185,6 +223,7 @@ and agentic tool-use categories.
 - **Cache TTL**: 2 d
 - **Fixture**: `data/fixtures/gso.json`
 - **Metric**: `GSO` — pass rate over 102 software-optimization tasks. We ingest the contamination-resistant `score_hack_control` field and filter to `setting == "Opt@1"`. Among duplicate Opt@1 rows, max/pro, xhigh, high, thinking/adaptive, medium/default, then low effort is preferred, matching the best-available configuration policy.
+- **Ranking use**: Diagnostic only. A July 2026 cross-machine audit found substantial reference-patch reproducibility problems, so GSO affects neither Build nor eligibility pending a corrected release.
 
 ## swerebench
 
@@ -202,18 +241,29 @@ and agentic tool-use categories.
 - **API**: Scale Labs `labs.scale.com/leaderboard/swe_bench_pro_public` (Next.js page; data is embedded in the streamed React Server Component chunks as `\"model\":\"…\",\"score\":N`).
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `SWEBenchPro` — feeds the `SWEComposite` derived metric alongside `SWERebench`, `SWEBenchVerified`, and `SWEBenchMultilingual`. Frontier models top out near 60-65% (vs Verified saturating near 90), so it differentiates better at the top of the leaderboard. 1,865 multi-file tasks across 41 actively-maintained Python/Go/TypeScript/JavaScript repos; average edit is 107 LOC across 4.1 files.
+- **Metric**: `SWEBenchPro` — feeds the `SWEComposite` derived metric alongside `SWERebench` and `SWEBenchMultilingual`; retired Verified rows do not enter the composite. Frontier models top out near 60-65% (vs Verified saturating near 90), so it differentiates better at the top of the leaderboard. 1,865 multi-file tasks across 41 actively-maintained Python/Go/TypeScript/JavaScript repos; average edit is 107 LOC across 4.1 files.
+- **Ranking use**: Supplemental Build evidence.
 - **Fragility note**: Depends on Scale's RSC embedding. If field names change (`model` → `name`, `score` → `passRate`), the parser will need updating.
 - **Fixture**: `data/fixtures/swebench_pro.html`
 
-## sweatlas
+The three verified SWE Atlas sources need no secret, cache Scale's RSC pages
+for seven days, and feed one supplemental `SWEAtlasComposite` Build input so
+their correlated tracks do not stack as independent weights.
 
-- **Status**: Verified
-- **APIs**: Scale Labs `labs.scale.com/leaderboard/sweatlas-qna`, `/sweatlas-tw`, and `/sweatlas-refactoring` (same RSC pattern as `swebench_pro` / `mcp_atlas`).
-- **Secret**: None
-- **Cache TTL**: 7 d
-- **Metrics**: `SWEAtlasQnA`, `SWEAtlasTestWriting`, `SWEAtlasRefactoring`. These feed the derived `SWEAtlasComposite` BUILD input so the three correlated Scale SWE Atlas tracks do not stack as independent BUILD weights.
-- **Fixtures**: `data/fixtures/sweatlas_qna.html`, `data/fixtures/sweatlas_test_writing.html`, `data/fixtures/sweatlas_refactoring.html`
+## sweatlas_qna
+
+- **Metric**: `SWEAtlasQnA`, codebase question answering.
+- **Fixture**: `data/fixtures/sweatlas_qna.html`
+
+## sweatlas_test_writing
+
+- **Metric**: `SWEAtlasTestWriting`, production-grade test writing.
+- **Fixture**: `data/fixtures/sweatlas_test_writing.html`
+
+## sweatlas_refactoring
+
+- **Metric**: `SWEAtlasRefactoring`, repository refactoring.
+- **Fixture**: `data/fixtures/sweatlas_refactoring.html`
 
 ## mcp_atlas
 
@@ -222,6 +272,7 @@ and agentic tool-use categories.
 - **Secret**: None
 - **Cache TTL**: 7 d
 - **Metric**: `MCPAtlas` — pass rate over 1,000 tasks across 36 real Model Context Protocol servers / 220 tools. Each task asks the agent to identify the right servers, sequence 3-6 tool calls across multiple servers, and produce a correct end-state. Closest public proxy for "real Claude Code / Codex tool-use loops" we can ingest. Feeds both `PLAN` (multi-step tool sequencing) and `BUILD` (real coding agents *are* tool-orchestration loops).
+- **Ranking use**: Supplemental current evidence. It affects Plan and Build scores when present without burdening eligibility when absent.
 - **Coverage**: 19 models, all 14 flagships matched directly (opus-4.7 max=79.1%, gemini-3.1-pro=78.2%, glm-5.1=75.6%, gpt-5.4=70.6%, …, haiku-4.5=40.2%).
 - **Fragility note**: Same as `swebench_pro` — RSC field names.
 - **Fixture**: `data/fixtures/mcp_atlas.html`
@@ -232,7 +283,8 @@ and agentic tool-use categories.
 - **API**: Scale Labs `labs.scale.com/leaderboard/hil` (same RSC pattern as `mcp_atlas`).
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metric**: `HiLBench` — human-in-the-loop escalation accuracy. It measures whether an agent recognizes ambiguous or blocked tasks and asks targeted human questions instead of guessing, so it feeds PLAN with a smaller BUILD contribution.
+- **Metric**: `HiLBench` — human-in-the-loop escalation accuracy. It measures whether an agent recognizes ambiguous or blocked tasks and asks targeted human questions instead of guessing.
+- **Ranking use**: A 5% supplemental Plan signal only; it has no Build path.
 - **Fixture**: `data/fixtures/hil_bench.html`
 
 ## bfcl
@@ -241,7 +293,8 @@ and agentic tool-use categories.
 - **API**: Berkeley Function Calling Leaderboard V4 `data_overall.csv`
 - **Secret**: None
 - **Cache TTL**: 7 d
-- **Metrics**: `BFCL` plus category splits `BFCLNonLiveAST`, `BFCLLive`, `BFCLMultiTurn`, `BFCLWebSearch`, `BFCLMemory`, `BFCLRelevanceDetection`, and `BFCLIrrelevanceDetection`. The splits remain visible, but `BFCLComposite` scores only the upstream overall value so the headline is not stacked with components from which it is derived.
+- **Metrics**: `BFCL` plus category splits `BFCLNonLiveAST`, `BFCLLive`, `BFCLMultiTurn`, `BFCLWebSearch`, `BFCLMemory`, `BFCLRelevanceDetection`, and `BFCLIrrelevanceDetection`. The diagnostic `BFCLComposite` contains only the upstream overall value, so the headline is not stacked with components from which it is derived.
+- **Ranking use**: Diagnostic. Its current cohort is too narrow and overlaps MCP/tau tool-use evidence, so it affects neither scores nor eligibility pending a broader refresh.
 - **Fixture**: `data/fixtures/bfcl.csv`
 
 ## arc_agi
@@ -293,6 +346,6 @@ Synthesis categories control reliability, not a hidden claim that the value was 
 | `same_series_forward` | 0.00 (prior-only) |
 | `stronger_successor` | 0.00 (prior-only) |
 
-For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked.
+For normalized value `N`, the scored observation is `50 + reliability × (N - 50)`. Synthesized evidence does not count toward direct-family coverage and cannot make a provisional role ranked. Historical support likewise requires a direct observation; a reported override or sibling fill cannot establish it.
 
-The configured per-source cap limits emitted synthetic rows. After scoring, `synthesis_dominant` is computed from weighted role paths and becomes true when any role's synthesized share exceeds the configured per-model cap. Schema 2.0 publishes each synthesized metric's source, donor, category, and evidence coverage.
+The configured per-source cap limits emitted synthetic rows. After scoring, `synthesis_dominant` is computed from weighted role paths and becomes true when any role's synthesized share exceeds the configured per-model cap. Schema 2.1 publishes each synthesized metric's source, donor, category, and evidence coverage.

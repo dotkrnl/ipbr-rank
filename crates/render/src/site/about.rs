@@ -7,7 +7,7 @@ use super::{html_escape, layout};
 pub fn render_about(scoreboard: &Scoreboard) -> String {
     let mut body = String::from(r#"<div class="doc">"#);
 
-    body.push_str(r#"<p class="about-tagline"><strong>A capability snapshot with explicit evidence quality.</strong></p>
+    body.push_str(r#"<p class="about-tagline"><strong>Models drift. Evidence accumulates. Ranks update.</strong></p>
 
 <h2>What this is</h2>
 <p>ipbr combines public benchmark observations into four 0-100 role proxies: Idea, Plan, Build, and Review. <strong>Balanced capability</strong> is the unweighted mean of those four scores; it is a summary view, not a fifth measured construct.</p>
@@ -16,18 +16,19 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <h2>The four roles</h2>
 <ul>
 <li><strong>Idea</strong> — open-ended generation and novel problem solving. EQ-Bench Creative Writing v3 supplies a direct creativity signal; LM Arena Text and ARC-AGI add preference and abstraction evidence.</li>
-<li><strong>Plan</strong> — structured reasoning, function calling, tool orchestration, and multi-step execution. Terminal-Bench, BFCL, MCP-Atlas, tau3, long-context, and enterprise-workflow tasks contribute.</li>
-<li><strong>Build</strong> — implementing and repairing software. SWE-bench variants, SWE-rebench, SWE Atlas, GSO, terminal tasks, live coding, and MCP orchestration dominate. Sonar code-quality data remains diagnostic.</li>
-<li><strong>Review proxy</strong> — judge calibration and review-adjacent capability. EQ-Bench Judgemark v4 is direct judge evidence; search/document preference and Plan/Build signals broaden it. It is not claimed to be a direct code-review benchmark.</li>
+<li><strong>Plan</strong> — structured reasoning, tool orchestration, and multi-step execution. MCP-Atlas, tau3, long-context, enterprise-workflow, Terminal-Bench 2.1, GDPval, and a small human-escalation signal contribute.</li>
+<li><strong>Build</strong> — implementing and repairing software. SWE-bench variants, SWE-rebench, live coding, MCP orchestration, SWE Atlas, terminal work, DeepSWE, and long context contribute. GSO, BFCL, and Sonar remain diagnostic.</li>
+<li><strong>Review proxy</strong> — review-adjacent capability derived from search/document preference plus Plan and Build. Judgemark remains a diagnostic because judge discrimination is not direct code review, and no currently broad code-review benchmark is treated as direct evidence.</li>
 </ul>
 
 <h2>How scores are built</h2>
 <ol>
 <li><strong>Select one model record</strong> — observations are combined under the canonical model. Where effort is published, best-available max/high effort is preferred; sources without effort metadata keep their reported configuration.</li>
-<li><strong>Normalize on fixed anchors</strong> — ranked leaves use raw-unit p5/p95 anchors frozen from the 2026-07-12 refreshed cohort. Anchors map near 5 and 95 through an asymptotic logistic curve, so future model additions do not rescale earlier observations and extreme values do not hard-clip.</li>
+<li><strong>Normalize on fixed anchors</strong> — scored leaves use raw-unit p5/p95 anchors frozen from the 2026-07-12 refreshed cohort. Anchors map near 5 and 95 through an asymptotic logistic curve, so future model additions do not rescale earlier observations and extreme values do not hard-clip.</li>
 <li><strong>Apply evidence reliability</strong> — direct observations count at 1.00 reliability and cited same-model reports at 0.60. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
 <li><strong>Separate capability from confidence</strong> — the point estimate averages available same-model evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
-<li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%. A role qualifies through either 60% direct nominal weight across three families or 35% across five; provisional estimates remain visible in the same rank order.</li>
+<li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%.</li>
+<li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Direct retired evidence may support an established model's coverage history but never its current score. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</li>
 </ol>
 
 <h2>What never affects rank</h2>
@@ -58,7 +59,8 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <ul>
 <li><strong>Direct coverage</strong> — the share of a role's nominal path supported by direct benchmark observations.</li>
 <li><strong>Confidence</strong> — evidence coverage after cited reports are discounted; sibling fills contribute no confidence.</li>
-<li><strong>Provisional</strong> — a numeric role score that meets neither the standard direct-coverage gate nor the broader five-family corroboration gate.</li>
+<li><strong>Provisional</strong> — a numeric role score that meets none of the full-current, core-current, or established-history evidence gates. It remains in the same rank order, italicized and starred, with a dotted radar outline.</li>
+<li><strong>Core / supplemental / historical support</strong> — eligibility classes for broad current evidence, narrow scored evidence, and unscored retired direct evidence respectively.</li>
 <li><strong>Composite</strong> — a weighted blend used to collapse overlapping components before role aggregation, such as the SWE, Sonar, or AA reasoning families.</li>
 <li><strong>Fixed anchor</strong> — a versioned raw benchmark value used to keep normalization stable across changing model cohorts.</li>
 </ul>

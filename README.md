@@ -1,12 +1,14 @@
 # ipbr
 
-> **Models drift. Agents battle. Math decides.**
+> **Models drift. Evidence accumulates. Ranks update.**
 > Live LLM coding scoreboard — site at <https://ipbr.pages.dev>.
 
-A Rust workspace that fetches public LLM benchmarks from verified sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a static website. (CLI binary and crate names stay `ipbr-rank`.)
+A Rust workspace that fetches registered public LLM benchmark sources, normalizes them, computes four building-role scores (Idea, Planning, Building, Reviewing), and emits a canonical TOML scoreboard plus a static website. (CLI binary and crate names stay `ipbr-rank`.)
 
-Methodology v2 separates capability from deployment diagnostics, publishes
-evidence quality and provenance, and marks under-supported roles provisional.
+Methodology v3 separates capability from deployment diagnostics, publishes
+evidence quality and provenance, and marks genuinely under-supported roles
+provisional without penalizing established models for gaps on narrow new
+leaderboards.
 See [`docs/methodology.md`](docs/methodology.md) for the scoring contract.
 
 ## Quick Start
@@ -62,7 +64,7 @@ intervention.
 - **I** (Idea): Creativity, general intelligence, open-ended generation
 - **P** (Planning): Structured reasoning, function calling, multi-step task decomposition
 - **B** (Building): Implementation, SWE-style work, terminal tasks, and code-quality benchmarks
-- **R** (Reviewing): Judging code quality, correctness, preference evaluation
+- **R** (Reviewing proxy): Review-adjacent search/document preference plus Planning and Building capability
 
 Each role has one 0–100 evidence-adjusted benchmark score.
 
@@ -70,30 +72,31 @@ Each role has one 0–100 evidence-adjusted benchmark score.
 
 All data comes from public, verifiable sources. See [`docs/sources.md`](docs/sources.md) for the full list.
 
-**Verified sources** (always run):
+**Registered sources** (run by default; experimental and credentialed status is
+reported in the output):
 
 - OpenRouter API — model discovery, pricing, context windows
 - LM Arena — text, code, search, and document preference ratings
 - EQ-Bench Creative Writing v3 — direct creative-writing Elo
-- EQ-Bench Judgemark v4 — judge-discrimination score with a published 95% confidence interval
+- EQ-Bench Judgemark v4 — diagnostic judge-discrimination score with a published 95% confidence interval
 - Artificial Analysis model API — GPQA, HLE, SciCode, AA-LCR, current tau3-Banking, Terminal-Bench 2.1 fallback, and legacy/operational diagnostics. Explicit model+fallback rows are excluded from pure model evidence.
 - Artificial Analysis evaluation pages — direct GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA observations
-- DeepSWE v1.1 — original long-horizon repository work under one fixed mini-swe-agent harness; active BUILD evidence
+- DeepSWE v1.1 — original long-horizon repository work under one fixed mini-swe-agent harness; supplemental Build evidence
 - Context Arena — eight-needle GDM-MRCRv2 AUC through 128k, combined with AA-LCR as one long-context signal
 - AGC-Bench — broad creativity meta-benchmark, currently diagnostic while the new suite matures
 - Factory Code Review — direct precision/recall/F1 on human-curated PR bugs, diagnostic pending broader max-effort frontier coverage
-- SWE-bench JSON — Verified + Multilingual leaderboards (single fetch, both fed into the SWE composite)
-- SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos), also fed into the SWE composite
+- SWE-bench JSON — Multilingual feeds the current SWE composite; retired Verified rows provide historical Build/Review support only
+- SWE-bench Pro (Scale) — harder, multi-file SWE-bench (1.8k tasks across 41 repos); supplemental in the SWE composite
 - SWE Atlas (Scale) — codebase Q&A, test writing, and refactoring leaderboards, collapsed into a SWE Atlas composite
 - SWE-rebench — continuously-refreshed agentic SWE leaderboard, rolling-window resolved rate
 - LiveCodeBench — competitive-programming pass@1 (ingested for back-compat; *retired* from BUILD weighting after the upstream JSON froze at mid-2025 frontier — see `docs/sources.md`)
-- GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; replaces LiveCodeBench in BUILD using the contamination-resistant `score_hack_control` field
-- Terminal-Bench 2.0 — agentic terminal task leaderboard
+- GSO — "Generalized Software Optimization" track from the LiveCodeBench operators; retained as a diagnostic after a cross-machine reliability audit
+- Terminal-Bench 2.0 — retired score input retained as direct historical Plan/Build/Review support
 - Terminal-Bench 2.1 — newer narrow Terminal-Bench track, combined with AA's terminalbench_v2_1 field
-- BFCL V4 — Berkeley function/tool-calling leaderboard; the overall score is used without stacking its derived categories
+- BFCL V4 — Berkeley function/tool-calling leaderboard; diagnostic pending a broader refreshed cohort
 - Sonar Code Quality — diagnostic functional pass rate plus issue, bug, and vulnerability density; excluded from rank while published effort levels are not comparable across models
-- MCP-Atlas (Scale) — real Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
-- HiL-Bench (Scale) — human-in-the-loop escalation accuracy for ambiguous or blocked agent tasks
+- MCP-Atlas (Scale) — supplemental Model Context Protocol tool-orchestration over 36 servers / 220 tools / 1k tasks
+- HiL-Bench (Scale) — human-in-the-loop escalation accuracy; a small Plan-only signal
 - ARC-AGI v2 — active novel pattern-induction benchmark; ARC-AGI-3 is ingested separately as a floor-compressed diagnostic
 - Manual overrides (`data/score_overrides.toml`) — hand-curated vendor-published metrics for models neutral public leaderboards have not yet rated. Historical GDPval reports remain diagnostic now that GDPval-AA v2 has a direct source.
 
@@ -108,7 +111,7 @@ not necessarily one runnable endpoint configuration.
 
 ### Normalization and evidence
 
-Active ranked leaves use fixed, versioned raw anchors with an asymptotic
+Active scored leaves use fixed, versioned raw anchors with an asymptotic
 logistic mapping: the low and high anchors map to approximately 5 and 95.
 Scores therefore do not move merely because an unrelated model joins the
 cohort.
@@ -131,12 +134,16 @@ enough independent families exist.
 - **I_raw** = 0.65×CRE + 0.35×GEN
 - **P_raw** = 0.65×PLAN + 0.35×GEN
 - **B_raw** = 0.95×BUILD + 0.05×PLAN
-- **R** = 0.20×REVIEW_DIRECT + 0.20×LM_ARENA_REVIEW_PROXY + 0.30×BUILD + 0.30×PLAN
+- **R** = 0.30×LM_ARENA_REVIEW_PROXY + 0.35×BUILD + 0.35×PLAN
 
 The displayed **Balanced capability** rank is the unweighted mean of the four
-role proxies. A role is ranked through either the standard evidence path
-(at least 60% direct weight across three families) or the breadth path (at
-least 35% direct weight across five families); otherwise it is provisional.
+role proxies. Methodology v3 separates score contribution from ranking
+eligibility: broad core benchmarks establish current coverage, sparse
+supplemental benchmarks may improve the score without making their absence a
+penalty, and retired-but-valid direct observations may support the coverage
+history without entering the current score. The legacy full-portfolio gate is
+retained as a compatibility path. Balanced is ranked when at least three roles
+are ranked and the fourth has at least 20% current direct coverage.
 
 Pricing, speed, latency, TTFT, and context-window values are diagnostics only.
 They have zero path to any role or Balanced capability rank.
@@ -146,10 +153,10 @@ See [`docs/methodology.md`](docs/methodology.md) for the complete mathematical d
 ## Sample Output (TOML)
 
 ```toml
-schema_version = "2.0.0"
+schema_version = "2.1.0"
 generated_at = "2026-07-12T19:44:00Z"
 generator = "ipbr-rank 0.1.0"
-methodology = "v2"
+methodology = "v3"
 configuration_policy = "best_available_max_effort"
 
 [[models]]
@@ -169,6 +176,7 @@ i_status = "ranked"
 p_status = "ranked"
 b_status = "ranked"
 r_status = "provisional"
+balanced_status = "ranked"
 
 [models.groups]
 CRE = 80.2
@@ -196,7 +204,13 @@ synthesized = 0.05
 missing = 0.30
 effective = 0.61
 family_count = 2
-direct_families = ["eqbench", "lmarena"]
+direct_families = ["lmarena", "scale"]
+core_direct = 0.42
+core_family_count = 2
+core_direct_families = ["lmarena", "swe"]
+historical_family_count = 1
+historical_direct_families = ["terminal_bench"]
+qualification_path = "unqualified"
 provisional = true
 
 [models.missing]

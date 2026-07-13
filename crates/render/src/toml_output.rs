@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use ipbr_core::{Coefficients, EvidenceCoverage, ModelRecord, SCHEMA_VERSION, SynthesisCategory};
+use ipbr_core::{
+    Coefficients, EligibilityQualificationPath, EvidenceCoverage, ModelRecord, SCHEMA_VERSION,
+    SynthesisCategory, balanced_is_provisional,
+};
 
 use crate::Scoreboard;
 
@@ -116,8 +119,16 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
             toml_string(role_status(model, "B_raw"))
         ));
         out.push_str(&format!(
-            "r_status = {}\n\n",
+            "r_status = {}\n",
             toml_string(role_status(model, "R"))
+        ));
+        out.push_str(&format!(
+            "balanced_status = {}\n\n",
+            toml_string(if balanced_is_provisional(model) {
+                "provisional"
+            } else {
+                "ranked"
+            })
         ));
 
         out.push_str("[models.groups]\n");
@@ -348,9 +359,45 @@ fn render_coverage(out: &mut String, coverage: &EvidenceCoverage, include_status
         toml_array(coverage.direct_families.iter().cloned())
     ));
     if include_status {
+        out.push_str(&format!(
+            "core_direct = {}\n",
+            format_float(coverage.core_direct)
+        ));
+        out.push_str(&format!(
+            "core_family_count = {}\n",
+            coverage.core_family_count
+        ));
+        out.push_str(&format!(
+            "core_direct_families = {}\n",
+            toml_array(coverage.core_direct_families.iter().cloned())
+        ));
+        out.push_str(&format!(
+            "historical_family_count = {}\n",
+            coverage.historical_family_count
+        ));
+        out.push_str(&format!(
+            "historical_direct_families = {}\n",
+            toml_array(coverage.historical_direct_families.iter().cloned())
+        ));
+        out.push_str(&format!(
+            "qualification_path = {}\n",
+            toml_string(qualification_path(coverage.qualification_path))
+        ));
         out.push_str(&format!("provisional = {}\n", coverage.provisional));
     }
     out.push('\n');
+}
+
+fn qualification_path(path: EligibilityQualificationPath) -> &'static str {
+    match path {
+        EligibilityQualificationPath::Standard => "standard",
+        EligibilityQualificationPath::Breadth => "breadth",
+        EligibilityQualificationPath::CoreStandard => "core_standard",
+        EligibilityQualificationPath::CoreCorroborated => "core_corroborated",
+        EligibilityQualificationPath::CoreBreadth => "core_breadth",
+        EligibilityQualificationPath::HistoricalBreadth => "historical_breadth",
+        EligibilityQualificationPath::Unqualified => "unqualified",
+    }
 }
 
 fn synthesis_category(category: SynthesisCategory) -> &'static str {

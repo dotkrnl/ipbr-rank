@@ -34,8 +34,13 @@ def score(model: dict, role: str) -> float:
 
 
 def is_provisional(model: dict, role: str) -> bool:
+    scores = model.get("scores", {})
     roles = model.get("evidence", {}).get("roles", {})
     if role == "balanced":
+        if "balanced_status" in scores:
+            return scores["balanced_status"] == "provisional"
+        # Compatibility with methodology-v2 snapshots, which used an
+        # all-four-role veto and did not serialize Balanced status.
         return any(
             bool(roles.get(key, {}).get("provisional", False))
             for key in ("I_raw", "P_raw", "B_raw", "R")
@@ -44,12 +49,8 @@ def is_provisional(model: dict, role: str) -> bool:
     return bool(roles.get(evidence_key, {}).get("provisional", False))
 
 
-def dense_ranks(
-    models: list[dict], role: str, *, eligible_only: bool = False
-) -> tuple[dict[str, int], dict[str, float]]:
+def dense_ranks(models: list[dict], role: str) -> tuple[dict[str, int], dict[str, float]]:
     scores = {model["canonical_id"]: score(model, role) for model in models}
-    if eligible_only:
-        models = [model for model in models if not is_provisional(model, role)]
     ordered = sorted(models, key=lambda model: (-score(model, role), model["canonical_id"]))
     ranks: dict[str, int] = {}
     previous: float | None = None
@@ -74,54 +75,37 @@ def report(before: dict, after: dict, top: int) -> str:
         f"Before: `{before.get('generated_at', 'unknown')}` / `{before.get('methodology', 'unknown')}`  ",
         f"After: `{after.get('generated_at', 'unknown')}` / `{after.get('methodology', 'unknown')}`",
         "",
-        "Dense ties use the displayed 0.1-point precision. Official ranks exclude provisional models; estimate position shows score order across every model.",
+        "Dense ties use the displayed 0.1-point precision. Every model remains in the rank order; provisional status is reported separately.",
     ]
     for role, label in ROLES:
-        before_ranks, before_scores = dense_ranks(
-            list(before_by_id.values()), role, eligible_only=True
-        )
-        after_ranks, after_scores = dense_ranks(
-            list(after_by_id.values()), role, eligible_only=True
-        )
-        before_estimate_positions, _ = dense_ranks(list(before_by_id.values()), role)
-        after_estimate_positions, _ = dense_ranks(list(after_by_id.values()), role)
+        before_ranks, before_scores = dense_ranks(list(before_by_id.values()), role)
+        after_ranks, after_scores = dense_ranks(list(after_by_id.values()), role)
         selected = sorted(
             common,
             key=lambda canonical_id: (
-                min(
-                    before_ranks.get(canonical_id, 10**9),
-                    before_estimate_positions[canonical_id],
-                    after_estimate_positions[canonical_id],
-                ),
-                after_estimate_positions[canonical_id],
+                min(before_ranks[canonical_id], after_ranks[canonical_id]),
+                after_ranks[canonical_id],
                 canonical_id,
             ),
         )
         selected = [
             canonical_id
             for canonical_id in selected
-            if before_ranks.get(canonical_id, 10**9) <= top
-            or before_estimate_positions[canonical_id] <= top
-            or after_estimate_positions[canonical_id] <= top
+            if before_ranks[canonical_id] <= top or after_ranks[canonical_id] <= top
         ]
         lines.extend(
             (
                 "",
                 f"## {label}",
                 "",
-                "| Model | Official before | Official after | Official Δ | Estimate before | Estimate after | Estimate Δ | Score before | Score after | Score Δ | Status before → after |",
-                "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+                "| Model | Rank before | Rank after | Rank Δ | Score before | Score after | Score Δ | Status before → after |",
+                "|---|---:|---:|---:|---:|---:|---:|---|",
             )
         )
         for canonical_id in selected:
-            old_rank = before_ranks.get(canonical_id)
-            new_rank = after_ranks.get(canonical_id)
-            old_label = str(old_rank) if old_rank is not None else "—"
-            new_label = str(new_rank) if new_rank is not None else "—"
-            movement = f"{old_rank - new_rank:+d}" if old_rank and new_rank else "—"
-            old_estimate = before_estimate_positions[canonical_id]
-            new_estimate = after_estimate_positions[canonical_id]
-            estimate_movement = f"{old_estimate - new_estimate:+d}"
+            old_rank = before_ranks[canonical_id]
+            new_rank = after_ranks[canonical_id]
+            movement = f"{old_rank - new_rank:+d}"
             old_status = (
                 "provisional"
                 if is_provisional(before_by_id[canonical_id], role)
@@ -133,8 +117,7 @@ def report(before: dict, after: dict, top: int) -> str:
                 else "ranked"
             )
             lines.append(
-                f"| `{canonical_id}` | {old_label} | {new_label} | {movement} | "
-                f"{old_estimate} | {new_estimate} | {estimate_movement} | "
+                f"| `{canonical_id}` | {old_rank} | {new_rank} | {movement} | "
                 f"{before_scores[canonical_id]:.2f} | {after_scores[canonical_id]:.2f} | "
                 f"{after_scores[canonical_id] - before_scores[canonical_id]:+.2f} | "
                 f"{old_status} → {new_status} |"

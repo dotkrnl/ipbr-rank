@@ -1,8 +1,8 @@
 # Output schema reference
 
-This document describes schema 2.0, the TOML emitted by `ipbr-rank`. Schema
-2.0 adds metric provenance, evidence coverage, provisional role status, raw
-measurement uncertainty, and an explicit best-available configuration policy.
+This document describes schema 2.1, the TOML emitted by `ipbr-rank`. Schema
+2.1 retains the evidence-rich 2.0 shape and adds auditable methodology-v3
+eligibility classes, qualification paths, and Balanced status.
 
 ## Versioning
 
@@ -11,8 +11,8 @@ reject unsupported major versions and ignore unknown fields within a supported
 major version.
 
 ```toml
-schema_version = "2.0.0"
-methodology = "v2"
+schema_version = "2.1.0"
+methodology = "v3"
 configuration_policy = "best_available_max_effort"
 ```
 
@@ -35,10 +35,10 @@ semantics. Either may change independently.
 ### Top-level fields
 
 ```toml
-schema_version = "2.0.0"
+schema_version = "2.1.0"
 generated_at = "2026-07-12T19:44:00Z"
 generator = "ipbr-rank 0.1.0"
-methodology = "v2"
+methodology = "v3"
 configuration_policy = "best_available_max_effort"
 ```
 
@@ -101,18 +101,19 @@ p_raw = 81.100000
 b_raw = 79.600000
 r = 84.000000
 i_status = "ranked"
-p_status = "provisional"
+p_status = "ranked"
 b_status = "ranked"
 r_status = "provisional"
+balanced_status = "ranked"
 ```
 
 `i_raw`, `p_raw`, `b_raw`, and `r` are the Idea, Planning, Building, and
 Review proxy scores.
 
-Each status is `ranked` or `provisional`. A role is ranked with either at least
-60% direct coverage across three independent families or at least 35% direct
-coverage across five independent families. The numeric score remains available
-in either case.
+Each status is `ranked` or `provisional`. Methodology v3 can qualify a role
+through the full current score path, a core-only current path that is not
+diluted by sparse specialist benchmarks, or a current-plus-historical breadth
+path. The numeric score remains available in every case.
 
 Balanced capability is not stored as a fifth score. Consumers can reproduce
 the presentation view with:
@@ -121,7 +122,9 @@ the presentation view with:
 (i_raw + p_raw + b_raw + r) / 4
 ```
 
-Balanced status is provisional if any component role is provisional.
+`balanced_status` is `ranked` when at least three component roles are ranked
+and the remaining role has at least 20% current direct coverage. Otherwise it
+is `provisional`.
 
 ### Groups
 
@@ -135,7 +138,7 @@ OPS_precision = 72.300000
 
 Group values are 0–100 diagnostics computed from their configured inputs.
 Operational `OPS_*` groups can appear here, but pricing, speed, latency, TTFT,
-and context have zero path to any capability rank in methodology v2.
+and context have zero path to any capability rank in methodology v3.
 
 Final roles are flattened to leaf metrics and family-capped. Therefore a role
 score cannot always be reproduced by naively averaging the displayed groups.
@@ -248,7 +251,13 @@ synthesized = 0.070000
 missing = 0.190000
 effective = 0.692000
 family_count = 5
-direct_families = ["gso", "scale", "sonar", "swe", "terminal_bench"]
+direct_families = ["artificial_analysis", "deepswe", "lmarena", "scale", "swe"]
+core_direct = 0.700000
+core_family_count = 4
+core_direct_families = ["artificial_analysis", "lmarena", "swe", "terminal_bench"]
+historical_family_count = 2
+historical_direct_families = ["livecodebench", "swe"]
+qualification_path = "core_standard"
 provisional = false
 ```
 
@@ -258,7 +267,17 @@ approximately 1. `effective` is the confidence-weighted coverage
 nominal class. `family_count` counts direct families only.
 
 Group summaries describe the displayed group graph. Role summaries describe
-the flattened and family-capped role calculation.
+the flattened and family-capped role calculation. Methodology-v3 role summaries
+also expose:
+
+- `core_direct`, `core_direct_families`, and `core_family_count` — coverage
+  after retaining and renormalizing only current `core` leaves;
+- `historical_direct_families` and `historical_family_count` — direct,
+  role-relevant coverage-only families whose scores are not current inputs; and
+- `qualification_path` — one of `standard`, `breadth`, `core_standard`,
+  `core_corroborated`, `core_breadth`, `historical_breadth`, or `unqualified`.
+
+`provisional` is true exactly when `qualification_path = "unqualified"`.
 
 ### Missing-data table
 
@@ -293,7 +312,7 @@ separate `schema_version` field.
 
 ## `coefficients.toml`
 
-This is the effective configuration used for the run. Important schema 2.0
+This is the effective configuration used for the run. Important schema 2.1
 fields include:
 
 ```toml
@@ -307,6 +326,7 @@ reported_fallback = true
 
 [metrics.EQBenchCreativeWriting]
 family = "eqbench"
+eligibility = "core"
 higher_better = true
 log_scale = false
 transform = "percentile"
@@ -325,14 +345,27 @@ provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
 provisional_breadth_min_families = 5
+core_corroborated_min_direct = 0.50
+core_corroborated_min_families = 4
+historical_min_current_direct = 0.25
+historical_min_current_families = 2
+historical_min_families = 2
+historical_min_total_families = 5
+balanced_min_fourth_direct = 0.20
 max_family_weight = 0.30
 ```
 
 Consumers must still read the effective file rather than hard-code this
 example. Anchor set `2026-07-12.v2` was derived from the frozen 2026-07-12
 direct-evidence snapshot, with a cited-report fallback for reported-only
-metrics. Active ranked leaves use fixed anchors; explicitly unanchored
+metrics. Active scored leaves use fixed anchors; explicitly unanchored
 diagnostic or custom metrics may use their configured fallback transform.
+
+`metrics.*.eligibility` is `core`, `supplemental`, or `historical_support`.
+Unannotated metrics default to `supplemental`, preventing a newly ingested
+diagnostic from silently tightening eligibility. A historical-support metric
+also declares `eligibility_roles`, for example `["B_raw", "R"]`, and must have
+no current group/final-score path.
 
 ## Parsing example
 
@@ -350,10 +383,7 @@ if not board["schema_version"].startswith("2."):
 for model in board["models"]:
     scores = model["scores"]
     balanced = sum(scores[key] for key in ("i_raw", "p_raw", "b_raw", "r")) / 4
-    status = "provisional" if any(
-        scores[key] == "provisional"
-        for key in ("i_status", "p_status", "b_status", "r_status")
-    ) else "ranked"
+    status = scores["balanced_status"]
     print(model["canonical_id"], balanced, status)
 ```
 
@@ -380,6 +410,16 @@ arrays are sorted and floats use fixed precision.
 - Map keys are case-sensitive.
 
 ## Changelog
+
+### 2.1.0
+
+- Changed the scoring identifier to methodology v3.
+- Added per-metric eligibility classes and role declarations for historical
+  support.
+- Added core and historical family coverage plus an explicit qualification
+  path to role evidence.
+- Added `balanced_status`; Balanced now requires three ranked roles and 20%
+  current direct evidence in the fourth instead of an all-four-role veto.
 
 ### 2.0.0
 

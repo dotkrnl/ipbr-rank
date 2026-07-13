@@ -31,10 +31,41 @@ pub struct EvidenceCoverage {
     pub direct_families: BTreeSet<String>,
     #[serde(default)]
     pub family_count: usize,
-    /// Role scores that fail both configured direct-coverage/independent-
-    /// family qualification paths remain computable, but are provisional.
+    /// Direct coverage after retaining only role-relevant `core` metrics and
+    /// renormalizing their configured weights. Supplemental and historical
+    /// sources cannot burden this denominator.
+    #[serde(default)]
+    pub core_direct: f64,
+    #[serde(default)]
+    pub core_direct_families: BTreeSet<String>,
+    #[serde(default)]
+    pub core_family_count: usize,
+    /// Direct, role-relevant retired benchmark families. These can establish
+    /// historical breadth but never contribute to current numeric scores.
+    #[serde(default)]
+    pub historical_direct_families: BTreeSet<String>,
+    #[serde(default)]
+    pub historical_family_count: usize,
+    /// The first explicit eligibility path satisfied by this role.
+    #[serde(default)]
+    pub qualification_path: EligibilityQualificationPath,
+    /// Role scores that fail every configured current, core, and historical-
+    /// breadth qualification path remain computable, but are provisional.
     #[serde(default)]
     pub provisional: bool,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EligibilityQualificationPath {
+    Standard,
+    Breadth,
+    CoreStandard,
+    CoreCorroborated,
+    CoreBreadth,
+    HistoricalBreadth,
+    #[default]
+    Unqualified,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]

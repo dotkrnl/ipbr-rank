@@ -1,4 +1,4 @@
-# Ranking methodology v2
+# Ranking methodology v3
 
 This document defines the scoring contract for ipbr's four role proxies:
 Idea, Planning, Building, and Reviewing. The authoritative numeric settings
@@ -63,7 +63,7 @@ A direct leaderboard observation always replaces a manual override for the
 same model and metric. An override can replace a synthesized fill, but cannot
 replace a direct observation. Synthesis is fill-only.
 
-Schema 2.0 records the winning source and evidence class for every scored raw
+Schema 2.1 records the winning source and evidence class for every scored raw
 metric. Reported values retain their citation. Synthesized values retain the
 donor and synthesis category. See `docs/output-schema.md`.
 
@@ -71,7 +71,7 @@ donor and synthesis category. See `docs/output-schema.md`.
 
 ### 4.1 Versioned raw anchors
 
-Every active ranked leaf has `anchor_low` and `anchor_high` in the versioned
+Every active scored leaf has `anchor_low` and `anchor_high` in the versioned
 coefficient set. Anchor set `2026-07-12.v2` freezes the direct-evidence p5/p95
 raw values from the refreshed 2026-07-12 snapshot. Metrics available only as
 cited reports use the same quantiles over reported evidence. Adding or
@@ -84,7 +84,7 @@ the coefficient diff. The effective anchors are echoed to
 
 The implementation retains cohort transforms for explicitly unanchored
 reference or diagnostic metrics and for custom coefficient files. They are
-not the v2 contract for active ranked leaves.
+not the v3 contract for active scored leaves.
 
 ### 4.2 Logistic 5/95 mapping
 
@@ -119,7 +119,7 @@ becomes:
 S = 50 + q (N - 50)
 ```
 
-Default v2 reliabilities are:
+Default v3 reliabilities are:
 
 | Evidence class | Reliability |
 |---|---:|
@@ -146,10 +146,14 @@ aggregate uses 50 only as a compatibility fallback and is provisional.
 
 This prevents benchmark availability from being mistaken for low capability.
 It can make sparse estimates more extreme, which is why ordinal qualification
-requires either concentrated direct coverage (at least 60% across three
-independent families) or broader corroboration (at least 35% across five
-families). A fully absent composite remains absent; a partially observed
-composite uses available evidence and carries recursive coverage separately.
+is evaluated separately from score contribution. Broad core benchmarks form
+the primary eligibility portfolio; narrow supplemental benchmarks may move the
+score when present without making every missing row an eligibility penalty.
+Retired but still valid direct benchmarks can establish that an older model
+has real historical coverage, but their values have zero weight in the current
+score. Section 9 defines the gates precisely. A fully absent composite remains
+absent; a partially observed composite uses available evidence and carries
+recursive coverage separately.
 
 `groups_shrunk` remains a compatibility name for groups with incomplete
 nominal coverage; it does not select a different scoring formula.
@@ -183,9 +187,9 @@ counted repeatedly.
 | `LongContextComposite` | AA-LCR .60, Context Arena MRCRv2 AUC@128k .40 |
 | `EnterpriseWorkflowComposite` | EnterpriseOps-Gym-AA .65, AutomationBench-AA .35 |
 | `TerminalBench21Composite` | official Terminal-Bench 2.1, with AA as fallback |
-| `BFCLComposite` | BFCL overall 1.00 |
+| `BFCLComposite` | diagnostic only: BFCL overall 1.00 |
 
-Important v2 corrections:
+Important v3 corrections:
 
 - LM Arena text Elo is no longer copied into a fictitious creativity metric.
   EQ-Bench Creative Writing v3 supplies direct creativity evidence.
@@ -205,16 +209,20 @@ Important v2 corrections:
   readable diagnostics but have no primary path.
 - GDPval-AA v2 now uses a neutral direct source; the older reported GDPval
   overrides remain diagnostic and are not stacked with it.
-- AIME 2025, MMLU-Pro, AA LiveCodeBench, Terminal-Bench 2.0, SWE-bench
-  Verified, BrowseComp, HLE-with-tools, Toolathlon, and OSWorld remain
-  diagnostics with no primary rank path.
+- AIME 2025, MMLU-Pro, Terminal-Bench 2.0, and SWE-bench Verified have no
+  current score path but may provide direct historical support. AA
+  LiveCodeBench, BrowseComp, HLE-with-tools, Toolathlon, and OSWorld remain
+  diagnostics with no score or eligibility path.
 - DeepSWE v1.1 supplies direct long-horizon BUILD evidence under one fixed
   harness. Its weight replaces Terminal-Bench Hard and part of the correlated
   SWE composite rather than simply increasing the total SWE-family mass.
 - Explicit upstream model+fallback observations are published under
   `*HybridFallback` diagnostic keys. They never count as pure model evidence.
-- Current sparse signals such as BFCL, GSO, HiL-Bench, Judgemark, and SWE
-  Atlas remain active; lack of a row lowers confidence rather than ability.
+- BFCL, GSO, and Judgemark remain available as diagnostics but have no path to
+  a role score. HiL-Bench contributes only a small Plan signal.
+- DeepSWE and SWE Atlas remain scored Build evidence, but are supplemental for
+  eligibility: their narrow cohorts cannot make an otherwise established
+  model provisional.
 - Sonar remains diagnostic because current rows mix explicit Medium and
   Thinking effort levels and its narrow code-quality profile was decisive in
   otherwise close Build rankings.
@@ -231,8 +239,8 @@ The active capability groups are:
 | `CRE` | Direct creative writing, text preference, and novel pattern induction |
 | `GEN` | General/reasoning breadth, factual calibration, and research reasoning |
 | `PLAN` | Multi-step reasoning, enterprise workflows, tool use, escalation, and long-context planning |
-| `BUILD` | Long-horizon software implementation, terminal work, tool orchestration, and code quality |
-| `REVIEW_DIRECT` | EQ-Bench Judgemark judge discrimination |
+| `BUILD` | Long-horizon software implementation, terminal work, tool orchestration, and live coding |
+| `REVIEW_DIRECT` | diagnostic-only EQ-Bench Judgemark judge discrimination |
 | `LM_ARENA_REVIEW_PROXY` | Search/document preference proxy |
 
 The group metric weights are authoritative in `data/coefficients.toml`. Final
@@ -242,8 +250,7 @@ role paths are:
 Idea     = 0.65 CRE + 0.35 GEN
 Planning = 0.65 PLAN + 0.35 GEN
 Building = 0.95 BUILD + 0.05 PLAN
-Review   = 0.20 REVIEW_DIRECT + 0.20 LM_ARENA_REVIEW_PROXY
-         + 0.30 BUILD + 0.30 PLAN
+Review   = 0.30 LM_ARENA_REVIEW_PROXY + 0.35 BUILD + 0.35 PLAN
 ```
 
 These expressions define the nominal graph. The final calculation is made
@@ -259,21 +266,44 @@ Balanced = (Idea + Planning + Building + Review) / 4
 ```
 
 It is an unweighted presentation view, not a separately trained score. It is
-provisional if any of the four role proxies is provisional.
+ranked when at least three component roles are ranked and the remaining role
+has at least 20% current direct coverage. Otherwise it is provisional. The
+four numeric inputs do not change when only the Balanced status changes.
 
 ## 9. Ranked versus provisional
 
-A role remains computable when evidence is sparse. Its status is `ranked` when
-either qualification path holds:
+A role remains computable when evidence is sparse. Each scored metric declares
+one eligibility class:
 
-- standard: at least 60% of its family-capped nominal weight is direct evidence
-  spanning at least three independent families; or
-- breadth: at least 35% is direct evidence spanning at least five independent
-  families.
+- `core` — broad, role-representative current evidence used by the primary
+  eligibility gate;
+- `supplemental` — valuable specialist evidence that affects the score when it
+  exists, but whose absence is not an eligibility penalty; or
+- `historical_support` — retired but still valid direct evidence that affects
+  coverage history only and has no current score path.
+
+The role is `ranked` when any of these auditable paths holds:
+
+- full-current compatibility path: at least 60% direct current weight across
+  three families, or at least 35% across five;
+- core-current path: after renormalizing the role's core leaves, at least 60%
+  direct core weight across three families, at least 50% across four, or at
+  least 35% across five; or
+- established-history path: at least 25% current direct weight across two
+  current families, direct historical support from at least two relevant
+  families, and at least five current-plus-historical families in union.
 
 Otherwise it is `provisional`. Cited same-model reports help produce a
 discounted estimate. Sibling fills are prior-only; neither reports nor fills
-count as direct families or can qualify a role by themselves.
+count as direct families or can qualify a role by themselves. Historical
+support must also be direct; its score is never blended into the capability
+point estimate.
+
+The v3 historical portfolio is deliberately restricted to stable retired
+metrics: AIME 2025 and MMLU-Pro for Idea; tau2, IFBench, and Terminal-Bench 2.0
+for Plan; and SWE-bench Verified, Terminal-Bench 2.0, and LiveCodeBench for
+Build/Review. Current experimental sources, sparse diagnostics, and
+effort-mixed Sonar observations do not establish eligibility.
 
 ## 10. Operational diagnostics
 
@@ -288,7 +318,7 @@ model-capability rank.
 
 ## 11. Uncertainty
 
-Where a source publishes measurement uncertainty, schema 2.0 preserves it in
+Where a source publishes measurement uncertainty, schema 2.1 preserves it in
 native raw fields:
 
 - `TerminalBenchUncertainty`
@@ -299,13 +329,13 @@ native raw fields:
 
 These fields are observation-specific, unscored, and never transferred by
 sibling synthesis. They support auditing and future interval-aware ranking;
-v2 does not claim that all role scores already have statistical confidence
+v3 does not claim that all role scores already have statistical confidence
 intervals.
 
 ## 12. Reproducibility and limitations
 
-- `schema_version = "2.0.0"` identifies the evidence-rich output shape.
-- `methodology = "v2"` identifies this scoring method.
+- `schema_version = "2.1.0"` identifies the evidence-rich output shape.
+- `methodology = "v3"` identifies this scoring and eligibility method.
 - The effective coefficients and anchors are emitted with every run.
 - `--offline`, a fixed fixture cache, and `--now` produce deterministic output.
 - Role labels remain proxies. Weight choices are explicit design judgments,

@@ -1,9 +1,11 @@
-use crate::coefficients::{Coefficients, EvidenceConfig, MetricTransform};
+use crate::coefficients::{Coefficients, EvidenceConfig, MetricEligibility, MetricTransform};
 use crate::model::{
-    EvidenceCoverage, EvidenceSummary, MissingInfo, ModelRecord, SynthesisCategory,
+    EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, MissingInfo, ModelRecord,
+    SynthesisCategory,
 };
 use crate::normalize::{anchored_logistic_norm, as_score_0_100, robust_norm, tail_penalty_norm};
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::OnceLock;
 
 const ROLE_KEYS: &[&str] = &["I_raw", "P_raw", "B_raw", "R"];
 const EPS: f64 = 1e-12;
@@ -64,6 +66,44 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
     }
 }
 
+/// Balanced eligibility avoids an all-four-role veto: at least three roles
+/// must qualify independently, and the remaining role must still have 20%
+/// (configurable) direct current evidence. Numeric Balanced capability remains
+/// the unchanged arithmetic mean of the four role scores.
+pub fn balanced_is_provisional(model: &ModelRecord) -> bool {
+    static CONFIG: OnceLock<EvidenceConfig> = OnceLock::new();
+    let config = CONFIG.get_or_init(|| {
+        Coefficients::load_embedded()
+            .expect("embedded coefficients are valid")
+            .evidence
+            .unwrap_or_default()
+    });
+    balanced_is_provisional_with(model, config)
+}
+
+pub fn balanced_is_provisional_with(model: &ModelRecord, config: &EvidenceConfig) -> bool {
+    let qualifying_roles = ROLE_KEYS
+        .iter()
+        .filter_map(|role| model.evidence.roles.get(*role))
+        .filter(|coverage| !coverage.provisional)
+        .count();
+    if qualifying_roles < 3 {
+        return true;
+    }
+    if qualifying_roles == ROLE_KEYS.len() {
+        return false;
+    }
+
+    let min_direct = config.balanced_min_fourth_direct.clamp(0.0, 1.0);
+    !ROLE_KEYS.iter().all(|role| {
+        model
+            .evidence
+            .roles
+            .get(*role)
+            .is_some_and(|coverage| !coverage.provisional || coverage.direct + EPS >= min_direct)
+    })
+}
+
 /// Compute each composite metric as a missing-safe weighted average of its
 /// input metrics (post-normalization). The result is written into `r.metrics`
 /// under the composite's name so that group aggregation can consume it as if
@@ -80,10 +120,23 @@ fn compute_composite_metrics(
     for (r, signals) in records.iter_mut().zip(metric_signals.iter_mut()) {
         for (name, weights) in &coef.composite_metrics {
             let prefix = format!("{name}/");
+            let score_weights: BTreeMap<String, f64> = weights
+                .iter()
+                .filter(|(metric, _)| {
+                    metric_eligibility(coef, metric) != MetricEligibility::HistoricalSupport
+                })
+                .map(|(metric, weight)| (metric.clone(), *weight))
+                .collect();
             let evaluated = if coef.precedence_composites.contains(name) {
-                precedence_signal(signals, weights, Some(&mut r.missing), &prefix)
+                precedence_signal(signals, &score_weights, Some(&mut r.missing), &prefix)
             } else {
-                aggregate_signals(signals, weights, Some(&mut r.missing), &prefix, prior)
+                aggregate_signals(
+                    signals,
+                    &score_weights,
+                    Some(&mut r.missing),
+                    &prefix,
+                    prior,
+                )
             };
             // Crucial distinction: a fully absent composite stays absent.
             // Partial composites contain explicit prior replacements and
@@ -251,9 +304,16 @@ fn aggregate_groups(
     for (idx, r) in records.iter_mut().enumerate() {
         for (group_key, weights) in &coef.group_weights {
             let prefix = format!("{group_key}/");
+            let score_weights: BTreeMap<String, f64> = weights
+                .iter()
+                .filter(|(metric, _)| {
+                    metric_eligibility(coef, metric) != MetricEligibility::HistoricalSupport
+                })
+                .map(|(metric, weight)| (metric.clone(), *weight))
+                .collect();
             let evaluated = aggregate_signals(
                 &metric_signals[idx],
-                weights,
+                &score_weights,
                 Some(&mut r.missing),
                 &prefix,
                 prior,
@@ -315,17 +375,17 @@ fn compute_role_scores(
 
             let leaves = role_leaf_weights.get(role).cloned().unwrap_or_default();
             let mut family_leaves: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
-            for (metric, weight) in leaves {
+            for (metric, weight) in &leaves {
                 let family = coef
                     .metrics
-                    .get(&metric)
+                    .get(metric)
                     .and_then(|def| def.family.clone())
                     .unwrap_or_else(|| metric.clone());
                 *family_leaves
                     .entry(family)
                     .or_default()
-                    .entry(metric)
-                    .or_default() += weight;
+                    .entry(metric.clone())
+                    .or_default() += *weight;
             }
 
             let family_masses: BTreeMap<String, f64> = family_leaves
@@ -353,7 +413,23 @@ fn compute_role_scores(
             // evidence, while coverage always retains the full nominal path,
             // including prior-only sibling fills and truly missing leaves.
             let mut coverage = aggregate_evidence(&family_evidence, &capped_weights);
-            coverage.provisional = role_is_provisional(&coverage, evidence_cfg);
+            let core = core_role_coverage(
+                coef,
+                &metric_signals[idx],
+                &leaves,
+                evidence_cfg.max_family_weight,
+            );
+            coverage.core_direct = core.direct;
+            coverage.core_direct_families = core.direct_families;
+            coverage.core_family_count = coverage.core_direct_families.len();
+            coverage.historical_direct_families =
+                historical_role_families(coef, &metric_signals[idx], role);
+            coverage.historical_family_count = coverage.historical_direct_families.len();
+            coverage.qualification_path = role_qualification_path(&coverage, evidence_cfg);
+            coverage.provisional = matches!(
+                coverage.qualification_path,
+                EligibilityQualificationPath::Unqualified
+            );
             r.evidence.roles.insert(role.to_string(), coverage);
             role_values.insert(role, value);
         }
@@ -364,14 +440,146 @@ fn compute_role_scores(
     }
 }
 
-fn role_is_provisional(coverage: &EvidenceCoverage, config: &EvidenceConfig) -> bool {
-    let standard_path = coverage.direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
-        && coverage.family_count >= config.provisional_min_families;
-    let breadth_path = coverage.direct + EPS
-        >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
-        && coverage.family_count >= config.provisional_breadth_min_families;
+fn role_qualification_path(
+    coverage: &EvidenceCoverage,
+    config: &EvidenceConfig,
+) -> EligibilityQualificationPath {
+    if coverage.direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
+        && coverage.family_count >= config.provisional_min_families
+    {
+        return EligibilityQualificationPath::Standard;
+    }
+    if coverage.direct + EPS >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
+        && coverage.family_count >= config.provisional_breadth_min_families
+    {
+        return EligibilityQualificationPath::Breadth;
+    }
+    if coverage.core_direct + EPS >= config.provisional_min_direct.clamp(0.0, 1.0)
+        && coverage.core_family_count >= config.provisional_min_families
+    {
+        return EligibilityQualificationPath::CoreStandard;
+    }
+    if coverage.core_direct + EPS >= config.core_corroborated_min_direct.clamp(0.0, 1.0)
+        && coverage.core_family_count >= config.core_corroborated_min_families
+    {
+        return EligibilityQualificationPath::CoreCorroborated;
+    }
+    if coverage.core_direct + EPS >= config.provisional_breadth_min_direct.clamp(0.0, 1.0)
+        && coverage.core_family_count >= config.provisional_breadth_min_families
+    {
+        return EligibilityQualificationPath::CoreBreadth;
+    }
 
-    !(standard_path || breadth_path)
+    let total_families = coverage
+        .direct_families
+        .union(&coverage.historical_direct_families)
+        .count();
+    if coverage.direct + EPS >= config.historical_min_current_direct.clamp(0.0, 1.0)
+        && coverage.family_count >= config.historical_min_current_families
+        && coverage.historical_family_count >= config.historical_min_families
+        && total_families >= config.historical_min_total_families
+    {
+        return EligibilityQualificationPath::HistoricalBreadth;
+    }
+
+    EligibilityQualificationPath::Unqualified
+}
+
+/// Compute direct coverage over current core metrics only. Core weights are
+/// renormalized before the usual family cap, so absent specialist sources do
+/// not dilute eligibility while correlated core leaves remain controlled.
+fn core_role_coverage(
+    coef: &Coefficients,
+    metric_signals: &BTreeMap<String, Signal>,
+    role_leaves: &BTreeMap<String, f64>,
+    max_family_weight: f64,
+) -> EvidenceCoverage {
+    let mut family_leaves: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
+    for (metric, weight) in role_leaves {
+        if metric_eligibility(coef, metric) != MetricEligibility::Core {
+            continue;
+        }
+        let family = coef
+            .metrics
+            .get(metric)
+            .and_then(|def| def.family.clone())
+            .unwrap_or_else(|| metric.clone());
+        family_leaves
+            .entry(family)
+            .or_default()
+            .insert(metric.clone(), *weight);
+    }
+    if family_leaves.is_empty() {
+        return EvidenceCoverage::default();
+    }
+
+    let family_masses: BTreeMap<String, f64> = family_leaves
+        .iter()
+        .map(|(family, leaves)| (family.clone(), positive_weight_sum(leaves)))
+        .collect();
+    let capped_weights = cap_family_weights(&family_masses, max_family_weight);
+    let family_evidence: BTreeMap<String, EvidenceCoverage> = family_leaves
+        .iter()
+        .map(|(family, leaves)| {
+            (
+                family.clone(),
+                aggregate_signals(metric_signals, leaves, None, "", 50.0).evidence,
+            )
+        })
+        .collect();
+    aggregate_evidence(&family_evidence, &capped_weights)
+}
+
+fn metric_eligibility(coef: &Coefficients, metric: &str) -> MetricEligibility {
+    fn visit(
+        coef: &Coefficients,
+        metric: &str,
+        visiting: &mut BTreeSet<String>,
+    ) -> MetricEligibility {
+        if let Some(def) = coef.metrics.get(metric) {
+            return def.eligibility;
+        }
+        let Some(inputs) = coef.composite_metrics.get(metric) else {
+            return MetricEligibility::Supplemental;
+        };
+        if !visiting.insert(metric.to_string()) {
+            return MetricEligibility::Supplemental;
+        }
+        let mut classes = inputs
+            .iter()
+            .filter(|(_, weight)| weight.is_finite() && **weight > 0.0)
+            .map(|(input, _)| visit(coef, input, visiting));
+        let first = classes.next().unwrap_or(MetricEligibility::Supplemental);
+        let result = if classes.all(|class| class == first) {
+            first
+        } else {
+            MetricEligibility::Supplemental
+        };
+        visiting.remove(metric);
+        result
+    }
+
+    visit(coef, metric, &mut BTreeSet::new())
+}
+
+fn historical_role_families(
+    coef: &Coefficients,
+    metric_signals: &BTreeMap<String, Signal>,
+    role: &str,
+) -> BTreeSet<String> {
+    coef.metrics
+        .iter()
+        .filter(|(_, def)| {
+            def.eligibility == MetricEligibility::HistoricalSupport
+                && def.eligibility_roles.contains(role)
+        })
+        .filter_map(|(metric, def)| {
+            metric_signals
+                .get(metric)
+                .filter(|signal| signal.evidence.direct > 1.0 - EPS)
+                .map(|_| def.family.clone().unwrap_or_else(|| metric.clone()))
+        })
+        .collect()
 }
 
 fn aggregate_signals(
@@ -516,6 +724,9 @@ fn expand_metric_leaves(
     leaves: &mut BTreeMap<String, f64>,
     visiting: &mut BTreeSet<String>,
 ) {
+    if metric_eligibility(coef, metric) == MetricEligibility::HistoricalSupport {
+        return;
+    }
     if coef.precedence_composites.contains(metric) {
         *leaves.entry(metric.to_string()).or_default() += weight;
         return;
@@ -624,11 +835,177 @@ mod tests {
             ..Default::default()
         };
 
-        assert!(!role_is_provisional(&coverage(0.60, 3), &config));
-        assert!(!role_is_provisional(&coverage(0.35, 5), &config));
-        assert!(role_is_provisional(&coverage(0.59, 4), &config));
-        assert!(role_is_provisional(&coverage(0.34, 8), &config));
-        assert!(role_is_provisional(&coverage(0.80, 2), &config));
+        assert_eq!(
+            role_qualification_path(&coverage(0.60, 3), &config),
+            EligibilityQualificationPath::Standard
+        );
+        assert_eq!(
+            role_qualification_path(&coverage(0.35, 5), &config),
+            EligibilityQualificationPath::Breadth
+        );
+        assert_eq!(
+            role_qualification_path(&coverage(0.59, 4), &config),
+            EligibilityQualificationPath::Unqualified
+        );
+        assert_eq!(
+            role_qualification_path(&coverage(0.34, 8), &config),
+            EligibilityQualificationPath::Unqualified
+        );
+        assert_eq!(
+            role_qualification_path(&coverage(0.80, 2), &config),
+            EligibilityQualificationPath::Unqualified
+        );
+
+        let mut corroborated = coverage(0.20, 2);
+        corroborated.core_direct = 0.50;
+        corroborated.core_family_count = 4;
+        assert_eq!(
+            role_qualification_path(&corroborated, &config),
+            EligibilityQualificationPath::CoreCorroborated
+        );
+    }
+
+    #[test]
+    fn supplemental_absence_does_not_dilute_core_eligibility() {
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.evidence = Some(EvidenceConfig {
+            max_family_weight: 1.0,
+            ..Default::default()
+        });
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [
+                ("TerminalBench21".to_string(), 0.10),
+                ("SWERebench".to_string(), 0.10),
+                ("SciCode".to_string(), 0.10),
+                ("DeepSWE".to_string(), 0.35),
+                ("MCPAtlas".to_string(), 0.35),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        coef.final_score_weights.insert(
+            "B_raw".to_string(),
+            [("BUILD".to_string(), 1.0)].into_iter().collect(),
+        );
+
+        let mut records = vec![make_record(
+            "core-only",
+            Vendor::Other("x".into()),
+            &[
+                ("TerminalBench21", 70.0),
+                ("SWERebench", 45.0),
+                ("SciCode", 48.0),
+            ],
+        )];
+        compute_scores_with(&mut records, &coef);
+
+        let coverage = &records[0].evidence.roles["B_raw"];
+        assert!((coverage.direct - 0.30).abs() < 1e-9, "{coverage:?}");
+        assert!((coverage.core_direct - 1.0).abs() < 1e-9, "{coverage:?}");
+        assert_eq!(coverage.core_family_count, 3, "{coverage:?}");
+        assert_eq!(
+            coverage.qualification_path,
+            EligibilityQualificationPath::CoreStandard
+        );
+        assert!(!coverage.provisional);
+    }
+
+    #[test]
+    fn historical_support_never_changes_numeric_scores() {
+        let mut coef = Coefficients::load_embedded().unwrap();
+        coef.group_weights.insert(
+            "BUILD".to_string(),
+            [("TerminalBench".to_string(), 1.0)].into_iter().collect(),
+        );
+        coef.final_score_weights.insert(
+            "B_raw".to_string(),
+            [("BUILD".to_string(), 1.0)].into_iter().collect(),
+        );
+        let mut records = vec![
+            make_record("low", Vendor::Other("x".into()), &[("TerminalBench", 20.0)]),
+            make_record(
+                "high",
+                Vendor::Other("y".into()),
+                &[("TerminalBench", 80.0)],
+            ),
+        ];
+        compute_scores_with(&mut records, &coef);
+
+        for record in &records {
+            assert!((record.scores.b_raw - 50.0).abs() < 1e-9);
+            let coverage = &record.evidence.roles["B_raw"];
+            assert_eq!(coverage.direct, 0.0);
+            assert_eq!(coverage.historical_family_count, 1);
+            assert!(
+                coverage
+                    .historical_direct_families
+                    .contains("terminal_bench")
+            );
+        }
+    }
+
+    #[test]
+    fn historical_path_requires_current_and_retired_breadth() {
+        let config = EvidenceConfig::default();
+        let qualifying = EvidenceCoverage {
+            direct: 0.25,
+            direct_families: ["current-a", "current-b", "current-c"]
+                .into_iter()
+                .map(str::to_string)
+                .collect(),
+            family_count: 3,
+            historical_direct_families: ["retired-a", "retired-b"]
+                .into_iter()
+                .map(str::to_string)
+                .collect(),
+            historical_family_count: 2,
+            ..Default::default()
+        };
+        assert_eq!(
+            role_qualification_path(&qualifying, &config),
+            EligibilityQualificationPath::HistoricalBreadth
+        );
+
+        let mut too_little_current = qualifying.clone();
+        too_little_current.direct = 0.249;
+        assert_eq!(
+            role_qualification_path(&too_little_current, &config),
+            EligibilityQualificationPath::Unqualified
+        );
+        let mut too_little_history = qualifying;
+        too_little_history.historical_direct_families.pop_last();
+        too_little_history.historical_family_count = 1;
+        assert_eq!(
+            role_qualification_path(&too_little_history, &config),
+            EligibilityQualificationPath::Unqualified
+        );
+    }
+
+    #[test]
+    fn balanced_requires_three_roles_and_direct_support_in_the_fourth() {
+        let config = EvidenceConfig::default();
+        let mut model = make_record("model", Vendor::Other("x".into()), &[]);
+        for role in ROLE_KEYS {
+            model.evidence.roles.insert(
+                role.to_string(),
+                EvidenceCoverage {
+                    direct: 0.80,
+                    provisional: false,
+                    ..Default::default()
+                },
+            );
+        }
+        model.evidence.roles.get_mut("R").unwrap().provisional = true;
+        model.evidence.roles.get_mut("R").unwrap().direct = 0.20;
+        assert!(!balanced_is_provisional_with(&model, &config));
+
+        model.evidence.roles.get_mut("R").unwrap().direct = 0.199;
+        assert!(balanced_is_provisional_with(&model, &config));
+
+        model.evidence.roles.get_mut("B_raw").unwrap().provisional = true;
+        model.evidence.roles.get_mut("R").unwrap().direct = 0.80;
+        assert!(balanced_is_provisional_with(&model, &config));
     }
 
     #[test]
@@ -991,7 +1368,7 @@ mod tests {
         coef.group_weights.insert(
             "BUILD".to_string(),
             [
-                ("TerminalBench".to_string(), 0.5),
+                ("TerminalBench21".to_string(), 0.5),
                 ("SWEBenchPro".to_string(), 0.5),
             ]
             .into_iter()
@@ -1001,19 +1378,19 @@ mod tests {
             "B_raw".to_string(),
             [("BUILD".to_string(), 1.0)].into_iter().collect(),
         );
-        coef.metrics.get_mut("TerminalBench").unwrap().family = Some("terminal".into());
+        coef.metrics.get_mut("TerminalBench21").unwrap().family = Some("terminal".into());
         coef.metrics.get_mut("SWEBenchPro").unwrap().family = Some("swe".into());
 
         let mut records = vec![
             make_record(
                 "low/x",
                 Vendor::Other("a".into()),
-                &[("TerminalBench", 0.0), ("SWEBenchPro", 0.0)],
+                &[("TerminalBench21", 0.0), ("SWEBenchPro", 0.0)],
             ),
             make_record(
                 "hi/y",
                 Vendor::Other("b".into()),
-                &[("TerminalBench", 100.0), ("SWEBenchPro", 100.0)],
+                &[("TerminalBench21", 100.0), ("SWEBenchPro", 100.0)],
             ),
         ];
         records[1].override_reported.insert("SWEBenchPro".into());
@@ -1155,7 +1532,7 @@ mod tests {
         });
         coef.group_weights.insert(
             "BUILD".to_string(),
-            [("TerminalBench".to_string(), 1.0)].into_iter().collect(),
+            [("TerminalBench21".to_string(), 1.0)].into_iter().collect(),
         );
         coef.final_score_weights.insert(
             "B_raw".to_string(),
@@ -1165,10 +1542,10 @@ mod tests {
         let mut synthesized = make_record(
             "synth",
             Vendor::Other("s".into()),
-            &[("TerminalBench", 80.0)],
+            &[("TerminalBench21", 80.0)],
         );
         synthesized.synthesized.insert(
-            "TerminalBench".into(),
+            "TerminalBench21".into(),
             SynthesisProvenance {
                 source_id: "terminal_bench".into(),
                 from: "donor".into(),

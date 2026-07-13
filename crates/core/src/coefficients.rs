@@ -19,6 +19,20 @@ fn default_transform() -> MetricTransform {
     MetricTransform::AsScore
 }
 
+/// Whether a metric can establish that a role has enough independent evidence
+/// to receive a non-provisional rank. This policy is deliberately separate
+/// from score weight: specialist benchmarks may improve a score without
+/// penalizing models they did not evaluate, while retired benchmarks may
+/// establish historical support without ever changing a current score.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MetricEligibility {
+    Core,
+    #[default]
+    Supplemental,
+    HistoricalSupport,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetricDef {
     pub higher_better: bool,
@@ -39,6 +53,16 @@ pub struct MetricDef {
     /// observations and cap family influence in final role scores.
     #[serde(default)]
     pub family: Option<String>,
+    /// Eligibility behavior for this metric. Unannotated metrics default to
+    /// supplemental so newly ingested diagnostics cannot silently make the
+    /// ranked cohort narrower.
+    #[serde(default)]
+    pub eligibility: MetricEligibility,
+    /// Roles for which a `historical_support` metric establishes direct
+    /// evidence. Current core/supplemental roles are derived from their
+    /// configured score paths instead.
+    #[serde(default)]
+    pub eligibility_roles: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -63,6 +87,20 @@ pub struct EvidenceConfig {
     pub provisional_breadth_min_direct: f64,
     #[serde(default = "default_provisional_breadth_min_families")]
     pub provisional_breadth_min_families: usize,
+    #[serde(default = "default_core_corroborated_min_direct")]
+    pub core_corroborated_min_direct: f64,
+    #[serde(default = "default_core_corroborated_min_families")]
+    pub core_corroborated_min_families: usize,
+    #[serde(default = "default_historical_min_current_direct")]
+    pub historical_min_current_direct: f64,
+    #[serde(default = "default_historical_min_current_families")]
+    pub historical_min_current_families: usize,
+    #[serde(default = "default_historical_min_families")]
+    pub historical_min_families: usize,
+    #[serde(default = "default_historical_min_total_families")]
+    pub historical_min_total_families: usize,
+    #[serde(default = "default_balanced_min_fourth_direct")]
+    pub balanced_min_fourth_direct: f64,
     #[serde(default = "default_max_family_weight")]
     pub max_family_weight: f64,
 }
@@ -121,6 +159,34 @@ fn default_provisional_breadth_min_families() -> usize {
     5
 }
 
+fn default_core_corroborated_min_direct() -> f64 {
+    0.50
+}
+
+fn default_core_corroborated_min_families() -> usize {
+    4
+}
+
+fn default_historical_min_current_direct() -> f64 {
+    0.25
+}
+
+fn default_historical_min_current_families() -> usize {
+    2
+}
+
+fn default_historical_min_families() -> usize {
+    2
+}
+
+fn default_historical_min_total_families() -> usize {
+    5
+}
+
+fn default_balanced_min_fourth_direct() -> f64 {
+    0.20
+}
+
 fn default_max_family_weight() -> f64 {
     1.0
 }
@@ -139,6 +205,13 @@ impl Default for EvidenceConfig {
             provisional_min_families: default_provisional_min_families(),
             provisional_breadth_min_direct: default_provisional_breadth_min_direct(),
             provisional_breadth_min_families: default_provisional_breadth_min_families(),
+            core_corroborated_min_direct: default_core_corroborated_min_direct(),
+            core_corroborated_min_families: default_core_corroborated_min_families(),
+            historical_min_current_direct: default_historical_min_current_direct(),
+            historical_min_current_families: default_historical_min_current_families(),
+            historical_min_families: default_historical_min_families(),
+            historical_min_total_families: default_historical_min_total_families(),
+            balanced_min_fourth_direct: default_balanced_min_fourth_direct(),
             max_family_weight: default_max_family_weight(),
         }
     }
@@ -399,6 +472,8 @@ mod tests {
         let evidence = c.evidence.expect("embedded evidence policy");
         assert_eq!(evidence.provisional_min_direct, 0.60);
         assert_eq!(evidence.provisional_min_families, 3);
+        assert_eq!(evidence.core_corroborated_min_direct, 0.50);
+        assert_eq!(evidence.core_corroborated_min_families, 4);
         assert_eq!(evidence.provisional_breadth_min_direct, 0.35);
         assert_eq!(evidence.provisional_breadth_min_families, 5);
     }
@@ -555,13 +630,53 @@ mod tests {
     }
 
     #[test]
-    fn direct_creative_and_judge_signals_replace_old_duplicates() {
+    fn creative_signal_is_ranked_while_judge_signal_is_diagnostic() {
         let c = Coefficients::load_embedded().unwrap();
         let ranked = ranked_leaves(&c);
         assert!(ranked.contains("EQBenchCreativeWriting"));
-        assert!(ranked.contains("EQBenchJudgemark"));
+        assert!(!ranked.contains("EQBenchJudgemark"));
         assert!(!ranked.contains("LMArenaCreativeOrOpenEnded"));
         assert!(!ranked.contains("ArtificialAnalysisReasoning"));
         assert!(!ranked.contains("GPQA_HLE_Reasoning"));
+    }
+
+    #[test]
+    fn eligibility_classes_are_explicit_and_historical_support_is_retired_only() {
+        let c = Coefficients::load_embedded().unwrap();
+        let historical: BTreeMap<String, BTreeSet<String>> = c
+            .metrics
+            .iter()
+            .filter(|(_, def)| def.eligibility == MetricEligibility::HistoricalSupport)
+            .map(|(metric, def)| (metric.clone(), def.eligibility_roles.clone()))
+            .collect();
+        let expected: BTreeMap<String, BTreeSet<String>> = [
+            ("AIME25", &["I_raw"][..]),
+            ("IFBench", &["P_raw"][..]),
+            ("LiveCodeBench", &["B_raw", "R"][..]),
+            ("MMLUPro", &["I_raw"][..]),
+            ("SWEBenchVerified", &["B_raw", "R"][..]),
+            ("Tau2Bench", &["P_raw"][..]),
+            ("TerminalBench", &["P_raw", "B_raw", "R"][..]),
+        ]
+        .into_iter()
+        .map(|(metric, roles)| {
+            (
+                metric.to_string(),
+                roles.iter().map(|role| role.to_string()).collect(),
+            )
+        })
+        .collect();
+        assert_eq!(historical, expected);
+
+        let ranked = ranked_leaves(&c);
+        assert!(ranked.iter().all(|metric| {
+            c.metrics
+                .get(metric)
+                .is_some_and(|def| def.eligibility != MetricEligibility::HistoricalSupport)
+        }));
+        assert_eq!(
+            c.metrics["TerminalBench21Composite"].eligibility,
+            MetricEligibility::Core
+        );
     }
 }

@@ -2,9 +2,11 @@
 
 This document describes the verification protocol and implementation checklist for adding a new benchmark source to ipbr-rank.
 
-Every source we ship is `Verified`. The `Experimental` and `Disabled`
-variants of `VerificationStatus` exist in the trait but are not used by
-anything currently registered — see `crates/sources/src/registry.rs`.
+Most registered sources are `Verified`. A small number of newly introduced,
+diagnostic-only sources may remain `Experimental` while their methodology or
+coverage matures; `Disabled` sources are not registered. Verification status
+describes source/parser confidence, not whether a metric affects ranking — see
+`crates/sources/src/registry.rs` and `docs/sources.md`.
 Refer to existing source modules (`sonar.rs`, `swerebench.rs`,
 `artificial_analysis.rs`, `terminal_bench.rs`) for current patterns.
 
@@ -269,6 +271,7 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    ```toml
    [metrics.YourNewMetric]
    family = "your_source_family"
+   eligibility = "core"
    higher_better = true
    log_scale = false
    groups = ["BUILD"]  # or whichever groups this metric belongs to
@@ -277,7 +280,7 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    anchor_high = 90.0
    ```
 
-   Active ranked leaves in methodology v2 require fixed raw-unit anchors.
+   Active scored leaves in methodology v3 require fixed raw-unit anchors.
    Derive them from a frozen direct-evidence reference snapshot and review
    them as part of the methodology/coefficient version. The logistic scorer
    maps low/high anchors to approximately 5/95. Do not derive anchors from the
@@ -286,6 +289,19 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    `family` identifies correlated observations for the role-level source-family
    cap. Reuse a family for metrics from the same benchmark suite or aggregate
    source; do not create a new family merely to evade the cap.
+
+   Choose the eligibility class independently from score weight:
+
+   - `core` for broad, role-representative current benchmarks;
+   - `supplemental` for useful but narrow current benchmarks whose missing rows
+     must not make established models provisional; or
+   - `historical_support` for retired direct evidence with no current score
+     path.
+
+   Do not classify a source as core merely to make more models qualify. Record
+   cohort coverage, construct relevance, refresh cadence, and overlap with
+   existing families in `docs/sources.md`. Historical support must identify its
+   role relevance explicitly and must remain unreachable from group weights.
 
 2. Add the metric to the appropriate group weights:
    ```toml
@@ -299,10 +315,14 @@ If your source contributes new metrics not in `data/coefficients.toml`:
    cargo test --package ipbr-rank-core
    ```
 
-4. Confirm the new metric has an intentional evidence path. Missing weight is
+4. Confirm the new metric has an intentional score and eligibility path.
+   Missing weight is
    tracked separately from capability, cited reports are discounted, and
    sibling fills are prior-only. A metric with no final role path is a
-   diagnostic, even if it appears in raw output.
+   diagnostic unless it is explicitly declared as coverage-only historical
+   support. Run eligibility tests with at least one established model and one
+   genuinely under-covered model; a new narrow source should not flip either
+   status merely because its row is absent.
 
 ---
 

@@ -152,9 +152,7 @@ fn role_is_provisional(model: &ipbr_core::ModelRecord, role: &str) -> bool {
 }
 
 fn balanced_is_provisional(model: &ipbr_core::ModelRecord) -> bool {
-    ["I_raw", "P_raw", "B_raw", "R"]
-        .iter()
-        .any(|role| role_is_provisional(model, role))
+    ipbr_core::balanced_is_provisional(model)
 }
 
 fn rank_class(rank: usize) -> &'static str {
@@ -673,13 +671,13 @@ fn render_missing_pills(model: &ipbr_core::ModelRecord) -> String {
 const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <summary>how scoring works</summary>
 <div class="scoring-body">
-<p>Each model gets four capability proxies from public benchmarks. <strong>Idea</strong> includes EQ-Bench Creative Writing, preference, and novel-reasoning evidence. <strong>Plan</strong> measures structured reasoning, tool use, and multi-step execution. <strong>Build</strong> emphasizes software and terminal tasks. <strong>Review</strong> remains a proxy, now anchored by EQ-Bench Judgemark plus planning, building, search, and document evidence; no public code-review benchmark is treated as direct code-review evidence.</p>
+<p>Each model gets four capability proxies from public benchmarks. <strong>Idea</strong> includes EQ-Bench Creative Writing, preference, and novel-reasoning evidence. <strong>Plan</strong> measures structured reasoning, tool use, and multi-step execution. <strong>Build</strong> emphasizes software and terminal tasks. <strong>Review</strong> remains a proxy combining planning, building, search, and document evidence. Judgemark is diagnostic because judge discrimination is not code review, and no currently broad code-review benchmark is treated as direct evidence.</p>
 
 <h3>scoring</h3>
 <p>Ranked metrics use versioned fixed raw-score anchors and an asymptotic 0-100 logistic map. Direct observations count fully and cited same-model reports are discounted. Sibling fills are visible but prior-only, so donor values cannot move primary ranks. Correlated metrics are collapsed by benchmark family, and no family may carry more than 30% of a role.</p>
 
 <h3>missing data</h3>
-<p>Capability is estimated from available same-model evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. A role qualifies through either 60% direct weight across three independent families or 35% across five; other estimates remain in the rank order but are italicized, starred, and shown with dotted radar outlines as provisional.</p>
+<p>Capability is estimated from available same-model evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Eligibility is separate: broad core benchmarks establish current coverage, narrow supplemental benchmarks affect scores without making every missing row a penalty, and direct retired evidence can corroborate coverage history without entering the current score. Estimates that meet none of these gates remain in the same rank order but are italicized, starred, and shown with dotted radar outlines as provisional. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</p>
 
 <h3>configuration and diagnostics</h3>
 <p>There is one record per model. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, Review, or balanced capability.</p>

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-//! Strict round-trip regression for the public scoreboard schema v2.
+//! Strict round-trip regression for the public scoreboard schema v2.1.
 
 use std::collections::BTreeMap;
 
@@ -14,14 +14,14 @@ use tempfile::tempdir;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Schema20 {
+struct Schema21 {
     schema_version: String,
     generated_at: String,
     generator: String,
     methodology: String,
     configuration_policy: String,
     sources: BTreeMap<String, SourceTable>,
-    models: Vec<Model20>,
+    models: Vec<Model21>,
 }
 
 #[derive(Deserialize)]
@@ -35,25 +35,25 @@ struct SourceTable {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Model20 {
+struct Model21 {
     canonical_id: String,
     display_name: String,
     vendor: String,
     thinking_effort: String,
     aliases: Vec<String>,
     sources: Vec<String>,
-    scores: Scores20,
+    scores: Scores21,
     groups: BTreeMap<String, f64>,
     metrics: BTreeMap<String, f64>,
     raw_metrics: BTreeMap<String, f64>,
     metric_evidence: BTreeMap<String, MetricEvidence>,
     evidence: EvidenceTables,
-    missing: Missing20,
+    missing: Missing21,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Scores20 {
+struct Scores21 {
     i_raw: f64,
     p_raw: f64,
     b_raw: f64,
@@ -62,6 +62,7 @@ struct Scores20 {
     p_status: String,
     b_status: String,
     r_status: String,
+    balanced_status: String,
 }
 
 #[derive(Deserialize)]
@@ -92,19 +93,31 @@ struct Coverage {
     family_count: usize,
     direct_families: Vec<String>,
     #[serde(default)]
+    core_direct: Option<f64>,
+    #[serde(default)]
+    core_family_count: Option<usize>,
+    #[serde(default)]
+    core_direct_families: Vec<String>,
+    #[serde(default)]
+    historical_family_count: Option<usize>,
+    #[serde(default)]
+    historical_direct_families: Vec<String>,
+    #[serde(default)]
+    qualification_path: Option<String>,
+    #[serde(default)]
     provisional: Option<bool>,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Missing20 {
+struct Missing21 {
     metrics: Vec<String>,
     groups_shrunk: Vec<String>,
     synthesis_dominant: bool,
 }
 
 #[test]
-fn rendered_scoreboard_round_trips_through_schema_v2() {
+fn rendered_scoreboard_round_trips_through_schema_v2_1() {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
 
     let mut anthropic = ModelRecord::new(
@@ -186,7 +199,7 @@ fn rendered_scoreboard_round_trips_through_schema_v2() {
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v2".to_string(),
+        methodology: "v3".to_string(),
         source_summary: [(
             "lmarena".to_string(),
             SourceSummary {
@@ -206,12 +219,12 @@ fn rendered_scoreboard_round_trips_through_schema_v2() {
     let rendered = std::fs::read_to_string(tmp.path().join("scoreboard.toml"))
         .expect("scoreboard.toml should be written");
 
-    let parsed: Schema20 =
-        toml::from_str(&rendered).expect("rendered TOML must match schema v2 exactly");
-    assert_eq!(parsed.schema_version, "2.0.0");
+    let parsed: Schema21 =
+        toml::from_str(&rendered).expect("rendered TOML must match schema v2.1 exactly");
+    assert_eq!(parsed.schema_version, "2.1.0");
     assert_eq!(parsed.generated_at, "2026-01-01T00:00:00Z");
     assert_eq!(parsed.generator, "ipbr-rank 0.1.0");
-    assert_eq!(parsed.methodology, "v2");
+    assert_eq!(parsed.methodology, "v3");
     assert_eq!(parsed.configuration_policy, "best_available_max_effort");
     assert_eq!(parsed.sources["lmarena"].n_rows_matched, 2);
     assert_eq!(parsed.models.len(), 2);
@@ -257,6 +270,18 @@ fn rendered_scoreboard_round_trips_through_schema_v2() {
 
     assert!(!anthropic.evidence.groups.is_empty());
     assert_eq!(anthropic.evidence.roles.len(), 4);
+    let idea_evidence = &anthropic.evidence.roles["I_raw"];
+    assert!(idea_evidence.core_direct.is_some());
+    assert!(idea_evidence.core_family_count.is_some());
+    assert!(idea_evidence.qualification_path.is_some());
+    assert_eq!(
+        idea_evidence.core_family_count,
+        Some(idea_evidence.core_direct_families.len())
+    );
+    assert_eq!(
+        idea_evidence.historical_family_count,
+        Some(idea_evidence.historical_direct_families.len())
+    );
     assert_eq!(
         anthropic.scores.i_status,
         if anthropic.evidence.roles["I_raw"].provisional == Some(true) {
@@ -265,6 +290,10 @@ fn rendered_scoreboard_round_trips_through_schema_v2() {
             "ranked"
         }
     );
+    assert!(matches!(
+        anthropic.scores.balanced_status.as_str(),
+        "ranked" | "provisional"
+    ));
     assert!(anthropic.missing.synthesis_dominant);
     assert!(
         anthropic

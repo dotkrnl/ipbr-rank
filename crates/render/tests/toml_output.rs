@@ -50,8 +50,8 @@ fn writes_valid_nested_scoreboard_toml() {
     assert!(rendered.contains("[models.missing]"));
 
     let parsed: toml::Value = toml::from_str(&rendered).expect("rendered TOML should parse");
-    assert_eq!(parsed["schema_version"].as_str(), Some("2.0.0"));
-    assert_eq!(parsed["methodology"].as_str(), Some("v2"));
+    assert_eq!(parsed["schema_version"].as_str(), Some("2.1.0"));
+    assert_eq!(parsed["methodology"].as_str(), Some("v3"));
     assert_eq!(
         parsed["configuration_policy"].as_str(),
         Some("best_available_max_effort")
@@ -75,6 +75,10 @@ fn writes_valid_nested_scoreboard_toml() {
         anthropic["scores"]["i_status"].as_str(),
         Some("provisional")
     );
+    assert!(matches!(
+        anthropic["scores"]["balanced_status"].as_str(),
+        Some("ranked" | "provisional")
+    ));
     assert!(anthropic["scores"].get("i_adj").is_none());
     assert_eq!(
         anthropic["raw_metrics"]["SWEBenchVerified"].as_float(),
@@ -98,6 +102,21 @@ fn writes_valid_nested_scoreboard_toml() {
     );
     assert!(anthropic["evidence"]["groups"].as_table().is_some());
     assert!(anthropic["evidence"]["roles"].as_table().is_some());
+    let idea_evidence = &anthropic["evidence"]["roles"]["I_raw"];
+    assert!(idea_evidence["core_direct"].as_float().is_some());
+    assert!(idea_evidence["core_family_count"].as_integer().is_some());
+    assert!(idea_evidence["core_direct_families"].as_array().is_some());
+    assert!(
+        idea_evidence["historical_family_count"]
+            .as_integer()
+            .is_some()
+    );
+    assert!(
+        idea_evidence["historical_direct_families"]
+            .as_array()
+            .is_some()
+    );
+    assert!(idea_evidence["qualification_path"].as_str().is_some());
     assert_eq!(
         anthropic["missing"]["synthesis_dominant"].as_bool(),
         Some(true)
@@ -153,7 +172,7 @@ fn renders_missing_and_coefficients_toml() {
 }
 
 #[test]
-fn missing_output_uses_core_v2_missing_diagnostics() {
+fn missing_output_uses_current_core_missing_diagnostics() {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
     let mut model = ModelRecord::new(
         "test/model".to_string(),
@@ -170,7 +189,7 @@ fn missing_output_uses_core_v2_missing_diagnostics() {
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v2".to_string(),
+        methodology: "v3".to_string(),
         source_summary: BTreeMap::new(),
         prev_scores: None,
     };
@@ -301,7 +320,7 @@ fn sample_scoreboard() -> Scoreboard {
         coefficients,
         generated_at: "2026-01-01T00:00:00Z".to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v2".to_string(),
+        methodology: "v3".to_string(),
         source_summary: BTreeMap::new(),
         prev_scores: None,
     }
@@ -381,7 +400,7 @@ async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
         coefficients,
         generated_at: now.to_string(),
         generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v2".to_string(),
+        methodology: "v3".to_string(),
         source_summary,
         prev_scores: None,
     })

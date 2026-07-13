@@ -576,7 +576,7 @@ async fn build_scoreboard(
             coefficients: coefficients.clone(),
             generated_at: now,
             generator: format!("ipbr-rank {}", env!("CARGO_PKG_VERSION")),
-            methodology: "v2".to_string(),
+            methodology: "v3".to_string(),
             source_summary,
             prev_scores: None,
         },
