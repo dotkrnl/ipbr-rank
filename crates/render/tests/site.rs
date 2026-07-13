@@ -76,7 +76,7 @@ fn native_direct_provenance_note_is_visible_in_metric_tooltip() {
     model
         .metric_sources
         .insert("LMArenaText".into(), "artificial_analysis".into());
-    model.override_notes.insert(
+    model.metric_citations.insert(
         "LMArenaText".into(),
         "served product with automatic fallback".into(),
     );

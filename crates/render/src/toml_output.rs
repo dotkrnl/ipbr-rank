@@ -299,7 +299,7 @@ fn render_metric_evidence(out: &mut String, model: &ModelRecord, coefficients: &
         if let Some(source) = model.metric_sources.get(metric) {
             out.push_str(&format!("source = {}\n", toml_string(source)));
         }
-        if let Some(note) = model.override_notes.get(metric) {
+        if let Some(note) = model.metric_citations.get(metric) {
             out.push_str(&format!("citation = {}\n", toml_string(note)));
         }
         out.push('\n');

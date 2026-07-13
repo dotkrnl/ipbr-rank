@@ -138,7 +138,7 @@ fn rendered_scoreboard_round_trips_through_schema_v2_1() {
     anthropic
         .metric_sources
         .insert("SWEBenchVerified".to_string(), "overrides".to_string());
-    anthropic.override_notes.insert(
+    anthropic.metric_citations.insert(
         "SWEBenchVerified".to_string(),
         "Anthropic system card, table 8".to_string(),
     );

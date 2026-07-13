@@ -269,7 +269,7 @@ fn sample_scoreboard() -> Scoreboard {
     model_a
         .metric_sources
         .insert("SWEBenchVerified".to_string(), "overrides".to_string());
-    model_a.override_notes.insert(
+    model_a.metric_citations.insert(
         "SWEBenchVerified".to_string(),
         "Anthropic system card".to_string(),
     );

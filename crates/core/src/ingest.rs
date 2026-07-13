@@ -208,9 +208,9 @@ fn ingest_real_row(
                         record.curated_overrides.remove(&key);
                     }
                     if let Some(note) = evidence_notes.get(&key) {
-                        record.override_notes.insert(key, note.clone());
+                        record.metric_citations.insert(key, note.clone());
                     } else {
-                        record.override_notes.remove(&key);
+                        record.metric_citations.remove(&key);
                     }
                 }
             }
@@ -505,7 +505,7 @@ mod tests {
                 Some("terminal_bench")
             );
             assert!(!records[0].curated_overrides.contains("TerminalBench"));
-            assert!(!records[0].override_notes.contains_key("TerminalBench"));
+            assert!(!records[0].metric_citations.contains_key("TerminalBench"));
         }
     }
 
@@ -532,7 +532,7 @@ mod tests {
         assert_eq!(records[0].raw_metrics.get("TerminalBench"), Some(&80.0));
         assert_eq!(
             records[0]
-                .override_notes
+                .metric_citations
                 .get("TerminalBench")
                 .map(String::as_str),
             Some("reported at prohibited low effort, xHigh comparison")
@@ -577,7 +577,7 @@ mod tests {
         );
         assert_eq!(records[0].raw_metrics.get("GPQA"), Some(&92.6));
         assert_eq!(
-            records[0].override_notes.get("GPQA").map(String::as_str),
+            records[0].metric_citations.get("GPQA").map(String::as_str),
             Some("served product with automatic fallback")
         );
         assert!(!records[0].curated_overrides.contains("GPQA"));

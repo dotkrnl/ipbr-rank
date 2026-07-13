@@ -158,11 +158,11 @@ pub struct ModelRecord {
     /// precedence have been applied.
     #[serde(default)]
     pub metric_sources: BTreeMap<MetricKey, SourceId>,
-    /// Human-readable citations/notes emitted by the winning observation.
-    /// The legacy field name is retained for snapshot compatibility; native
-    /// sources may also attach provenance such as automatic product routing.
+    /// Human-readable citations/notes emitted by the winning observation for a
+    /// metric, whether a manual override or a native source attaching
+    /// provenance such as automatic product routing. Serialized as `citation`.
     #[serde(default)]
-    pub override_notes: BTreeMap<MetricKey, String>,
+    pub metric_citations: BTreeMap<MetricKey, String>,
     #[serde(default)]
     pub evidence: EvidenceSummary,
 }
@@ -182,7 +182,7 @@ impl ModelRecord {
             missing: MissingInfo::new(),
             curated_overrides: BTreeSet::new(),
             metric_sources: BTreeMap::new(),
-            override_notes: BTreeMap::new(),
+            metric_citations: BTreeMap::new(),
             evidence: EvidenceSummary::default(),
         }
     }

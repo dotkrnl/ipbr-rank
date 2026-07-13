@@ -588,7 +588,7 @@ fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static st
             .unwrap_or("direct source");
         let detail = if model.curated_overrides.contains(metric) {
             "Curated direct observation; full citation is in scoreboard.toml".to_string()
-        } else if let Some(note) = model.override_notes.get(metric) {
+        } else if let Some(note) = model.metric_citations.get(metric) {
             format!("Direct observation from {source}: {note}")
         } else {
             format!("Direct observation from {source}")

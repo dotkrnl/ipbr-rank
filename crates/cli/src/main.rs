@@ -705,7 +705,7 @@ fn restore_metric_evidence(record: &mut ModelRecord, metric: String, evidence: M
     if evidence.class == "direct"
         && let Some(citation) = evidence.citation
     {
-        record.override_notes.insert(metric.clone(), citation);
+        record.metric_citations.insert(metric.clone(), citation);
     }
 }
 
@@ -732,7 +732,7 @@ mod tests {
         assert!(record.curated_overrides.contains("TerminalBench"));
         assert_eq!(
             record
-                .override_notes
+                .metric_citations
                 .get("TerminalBench")
                 .map(String::as_str),
             Some("cited source")
@@ -756,7 +756,7 @@ mod tests {
 
         assert!(!record.curated_overrides.contains("GPQA"));
         assert_eq!(
-            record.override_notes.get("GPQA").map(String::as_str),
+            record.metric_citations.get("GPQA").map(String::as_str),
             Some("served product with automatic fallback")
         );
     }
