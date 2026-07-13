@@ -136,7 +136,7 @@ nav a:hover { color: var(--text-strong); }
   border-top: 1px solid var(--line-soft); padding-top: 8px;
 }
 .hero-radar-legend li {
-  display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 8px;
+  display: grid; grid-template-columns: 9px minmax(0, 1fr); gap: 8px;
   align-items: baseline;
   color: var(--text);
 }
@@ -145,9 +145,6 @@ nav a:hover { color: var(--text-strong); }
 }
 .hero-radar-legend .legend-name {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.hero-radar-legend .legend-score {
-  font-variant-numeric: tabular-nums; color: var(--muted);
 }
 .hero-radar-legend .legend-dot.rank-1 { background: var(--accent); }
 .hero-radar-legend .legend-dot.rank-2 { background: var(--idea); }

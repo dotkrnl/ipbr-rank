@@ -10,7 +10,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
     body.push_str(r#"<p class="about-tagline"><strong>Models drift. Evidence accumulates. Ranks update.</strong></p>
 
 <h2>What this is</h2>
-<p>ipbr combines public benchmark observations into four 0-100 role proxies: Idea, Plan, Build, and Review. <strong>Balanced capability</strong> is the unweighted mean of those four scores; it is a summary view, not a fifth measured construct.</p>
+<p>ipbr combines public benchmark observations into four 0-100 role proxies: Idea, Plan, Build, and Review.</p>
 <p>Inputs, fixed normalization anchors, evidence classes, family caps, and weights are versioned in the repository. Native public observations take precedence over duplicate manually curated observations; both count as direct same-product evidence and take precedence over synthesized sibling fills. Vendor-automatic fallback is part of the served ranked product and retains explicit provenance; separately named multi-agent or premium endpoints remain distinct. No score is manually reranked.</p>
 
 <h2>The four roles</h2>
@@ -28,11 +28,11 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Apply evidence reliability</strong> — every actual same-product observation counts at 1.00 reliability, including cited vendor or system-card observations curated as overrides. Sibling fills remain visible for provenance, but are prior-only (0.00) in the primary score.</li>
 <li><strong>Separate capability from confidence</strong> — the point estimate averages available same-product evidence. Missing and sibling-only leaves do not imply average capability; their nominal weight remains visible in confidence and provisional status.</li>
 <li><strong>Control correlation</strong> — related metrics are combined once, then role scoring caps any benchmark/source family at 30%.</li>
-<li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Total-portfolio qualification still requires at least 35% direct core weight across three core families, so a favorable specialist subset cannot qualify by itself. Direct retired evidence may support an established model's coverage history but never its current score. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</li>
+<li><strong>Qualify independently</strong> — broad core benchmarks establish current coverage; narrow supplemental benchmarks may affect scores without making their missing rows a penalty. Total-portfolio qualification still requires at least 35% direct core weight across three core families, so a favorable specialist subset cannot qualify by itself. Direct retired evidence may support an established model's coverage history but never its current score. The radar outline renders as ranked once three roles are ranked and the fourth carries at least 20% current direct coverage.</li>
 </ol>
 
 <h2>What never affects rank</h2>
-<p>Price, output throughput, time to first token, and advertised context window remain available as reference diagnostics. Their path weight into Idea, Plan, Build, Review, and balanced capability is exactly zero.</p>
+<p>Price, output throughput, time to first token, and advertised context window remain available as reference diagnostics. Their path weight into Idea, Plan, Build, and Review is exactly zero.</p>
 
 <h2>Configuration policy</h2>
 <p>The ranking intentionally compares served products, not every effort or agent-harness permutation. Automatic vendor routing is included; separately named multi-agent or premium endpoints remain distinct. A score can therefore combine the best available public observation from benchmarks that expose different configuration detail. The API labels this policy <code>best_available_max_effort</code>; it should not be read as a controlled same-harness experiment.</p>

@@ -36,7 +36,7 @@ fn provisional_scores_are_italicized_starred_and_explained() {
         r#"<span class="cell-score provisional-score"><em>82.0</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span>"#
     ));
     assert!(index.contains(
-        r#"models · <span class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</span></p></div><div class="hero-body">"#
+        r#"</details><p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#
     ));
     assert!(!index.contains(r#"</table></div><p class="provisional-note">"#));
     assert!(index.contains(r#"<span class="cell-score">81.0</span>"#));
@@ -331,9 +331,10 @@ fn leaderboard_has_row_and_expansion_per_model() {
     assert!(index.contains("class=\"exp-table\""));
     assert!(index.contains("class=\"exp-rank"));
 
-    // Sort buttons emit data-sort attribute on header
-    assert!(index.contains("data-sort=\"balanced\""));
-    assert!(index.contains("data-sort-balanced="));
+    // Sort buttons emit data-sort attribute on header; build is the default sort
+    assert!(index.contains(r#"data-sort="b" aria-sort="descending" data-sort-active="desc""#));
+    assert!(index.contains("data-sort-b="));
+    assert!(!index.contains("balanced"));
     assert!(
         !index.contains(r#"Claude Opus 4.7 <span class="status-badge"#),
         "model rows must not carry ranked/provisional label tags"
@@ -509,7 +510,7 @@ fn scoring_panel_has_role_definitions_and_link() {
     // Link to full methodology page
     assert!(index.contains("href=\"about.html\""));
     assert!(index.contains("missing and sibling-only leaves reduce confidence"));
-    assert!(index.contains("never enter Idea, Plan, Build, Review"));
+    assert!(index.contains("never enter Idea, Plan, Build, or Review"));
     assert!(!index.contains("best-available/max-effort per model"));
     assert!(index.contains("best available max/high-effort"));
 }
@@ -609,9 +610,6 @@ fn provisional_models_remain_in_hero_rankings_with_marked_scores() {
     render_site(&scoreboard, &site_dir).expect("site should render");
     let index = read(site_dir.join("index.html"));
 
-    assert!(index.contains(
-        r#"<span class="legend-score"><span class="provisional-score"><em>85.8</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span></span>"#
-    ));
     assert!(index.contains(
         r#"<span class="score" data-tier="high"><span class="provisional-score"><em>99.0</em><span class="status-marker" title="Provisional: direct-evidence requirements not met" aria-label="provisional">*</span></span></span>"#
     ));

@@ -12,6 +12,10 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
 
     body.push_str(SCORING_PANEL);
 
+    body.push_str(
+        r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#,
+    );
+
     body.push_str(&render_leaderboard(scoreboard));
 
     write!(
@@ -51,10 +55,9 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
 
     let mut legend = String::from(r#"<ul class="hero-radar-legend">"#);
     for (idx, model) in top3.iter().enumerate() {
-        let score = render_leader_score(composite(model), balanced_is_provisional(model));
         write!(
             legend,
-            r#"<li><span class="legend-dot {cls}" aria-hidden="true"></span><span class="legend-name">{name}</span><span class="legend-score">{score}</span></li>"#,
+            r#"<li><span class="legend-dot {cls}" aria-hidden="true"></span><span class="legend-name">{name}</span></li>"#,
             cls = rank_class(idx),
             name = html_escape(&model.display_name),
         )
@@ -65,7 +68,7 @@ fn render_hero(scoreboard: &Scoreboard) -> String {
     let leaders = render_leaders(scoreboard);
 
     format!(
-        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models · <span class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</span></p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
+        r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span> · refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time> · {sources} sources · {models} models</p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
         generated_at = html_escape(&scoreboard.generated_at),
         sources = scoreboard.source_summary.len(),
         models = scoreboard.models.len(),
@@ -238,11 +241,13 @@ fn render_delta(current: f64, prev: Option<f64>) -> String {
 
 fn render_leaderboard(scoreboard: &Scoreboard) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
-    // Default order: the explicitly named, equal-weight balanced capability
-    // view. Individual role columns remain independently sortable.
+    // Default order: build score. Individual role columns remain
+    // independently sortable.
     models.sort_by(|left, right| {
-        composite(right)
-            .partial_cmp(&composite(left))
+        right
+            .scores
+            .b_raw
+            .partial_cmp(&left.scores.b_raw)
             .unwrap_or(std::cmp::Ordering::Equal)
             .then_with(|| left.canonical_id.cmp(&right.canonical_id))
     });
@@ -272,14 +277,9 @@ fn render_leaderboard(scoreboard: &Scoreboard) -> String {
         r#"<th scope="col" data-sort="vendor" aria-sort="none"><button type="button" class="sort" aria-label="sort by vendor descending">vendor</button></th>"#,
     );
 
-    // Score columns — balanced capability is the default sort.
-    for (label, key) in [
-        ("balanced", "balanced"),
-        ("idea", "i"),
-        ("plan", "p"),
-        ("build", "b"),
-    ] {
-        let (active_attr, aria_sort) = if key == "balanced" {
+    // Score columns — build is the default sort.
+    for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
+        let (active_attr, aria_sort) = if key == "b" {
             (r#" data-sort-active="desc""#, "descending")
         } else {
             ("", "none")
@@ -307,8 +307,6 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
     let id = html_escape(&model.canonical_id);
     let vendor = html_escape(model.vendor.as_str());
     let name = html_escape(&model.display_name);
-    let balanced = composite(model);
-    let balanced_provisional = balanced_is_provisional(model);
     let prev = scoreboard
         .prev_scores
         .as_ref()
@@ -316,28 +314,12 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-balanced="{balanced:.4}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name}</td><td>{vendor}</td>"#,
+        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name}</td><td>{vendor}</td>"#,
         name_lc = name.to_lowercase(),
         i = s.i_raw,
         p = s.p_raw,
         b = s.b_raw,
         r = s.r,
-    )
-    .unwrap();
-
-    let balanced_delta =
-        prev.map(|scores| (scores.i_raw + scores.p_raw + scores.b_raw + scores.r) / 4.0);
-    write!(
-        html,
-        r#"<td class="num" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
-        tier = score_tier(balanced),
-        status = if balanced_provisional {
-            "provisional"
-        } else {
-            "ranked"
-        },
-        score = render_score_value(balanced, balanced_provisional),
-        delta = render_delta(balanced, balanced_delta),
     )
     .unwrap();
 
@@ -383,7 +365,7 @@ fn render_row(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String
 
     write!(
         html,
-        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
+        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="7"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
         evidence = render_role_evidence(model),
         groups = render_group_table(scoreboard, model),
         metrics = render_metric_table(scoreboard, model),
@@ -676,10 +658,10 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <p>Ranked metrics use versioned fixed raw-score anchors and an asymptotic 0-100 logistic map. Every actual same-product observation counts fully, including vendor-automatic fallback with an explicit routing citation and cited vendor or system-card observations curated as overrides. Sibling fills are visible but prior-only, so donor values cannot move primary ranks. Correlated metrics are collapsed by benchmark family, and no family may carry more than 30% of a role.</p>
 
 <h3>missing data</h3>
-<p>Capability is estimated from available same-product evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Eligibility is separate: broad core benchmarks establish current coverage, narrow supplemental benchmarks affect scores without making every missing row a penalty, and total-portfolio qualification still needs at least 35% direct core weight across three core families. Direct retired evidence can corroborate coverage history without entering the current score. Estimates that meet none of these gates remain in the same rank order but are italicized, starred, and shown with dotted radar outlines as provisional. Balanced is ranked with three ranked roles plus at least 20% current direct coverage in the fourth.</p>
+<p>Capability is estimated from available same-product evidence; missing and sibling-only leaves reduce confidence rather than the point estimate. Eligibility is separate: broad core benchmarks establish current coverage, narrow supplemental benchmarks affect scores without making every missing row a penalty, and total-portfolio qualification still needs at least 35% direct core weight across three core families. Direct retired evidence can corroborate coverage history without entering the current score. Estimates that meet none of these gates remain in the same rank order but are italicized, starred, and shown with dotted radar outlines as provisional. The radar outline renders as ranked once three roles are ranked and the fourth carries at least 20% current direct coverage.</p>
 
 <h3>configuration and diagnostics</h3>
-<p>There is one record per served product. Vendor-automatic fallback is included, while separately named multi-agent or premium endpoints remain distinct. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, Review, or balanced capability.</p>
+<p>There is one record per served product. Vendor-automatic fallback is included, while separately named multi-agent or premium endpoints remain distinct. Where a benchmark exposes effort, the best available max/high-effort observation is preferred; benchmarks without effort metadata retain their reported configuration. Price, output speed, first-token latency, and advertised context are diagnostics only and never enter Idea, Plan, Build, or Review.</p>
 
 <p><a href="about.html">Full math, role definitions, and source list →</a></p>
 </div>
