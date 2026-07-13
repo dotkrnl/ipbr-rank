@@ -697,12 +697,12 @@ fn restore_metric_evidence(record: &mut ModelRecord, metric: String, evidence: M
     if let Some(source) = evidence.source.clone() {
         record.metric_sources.insert(metric.clone(), source);
     }
-    let is_curated_override = evidence.source.as_deref() == Some("overrides")
-        && matches!(evidence.class.as_str(), "direct" | "reported");
+    let is_curated_override =
+        evidence.source.as_deref() == Some("overrides") && evidence.class == "direct";
     if is_curated_override {
         record.curated_overrides.insert(metric.clone());
     }
-    if matches!(evidence.class.as_str(), "direct" | "reported")
+    if evidence.class == "direct"
         && let Some(citation) = evidence.citation
     {
         record.override_notes.insert(metric.clone(), citation);
@@ -722,23 +722,21 @@ mod tests {
     }
 
     #[test]
-    fn scoreboard_rehydrate_preserves_curated_direct_citation_and_legacy_reported_rows() {
-        for class in ["direct", "reported"] {
-            let mut record = ModelRecord::new(
-                "openai/gpt-5.5".into(),
-                "GPT-5.5".into(),
-                ipbr_core::Vendor::Openai,
-            );
-            restore_metric_evidence(&mut record, "TerminalBench".into(), evidence(class));
-            assert!(record.curated_overrides.contains("TerminalBench"));
-            assert_eq!(
-                record
-                    .override_notes
-                    .get("TerminalBench")
-                    .map(String::as_str),
-                Some("cited source")
-            );
-        }
+    fn scoreboard_rehydrate_preserves_curated_direct_citation() {
+        let mut record = ModelRecord::new(
+            "openai/gpt-5.5".into(),
+            "GPT-5.5".into(),
+            ipbr_core::Vendor::Openai,
+        );
+        restore_metric_evidence(&mut record, "TerminalBench".into(), evidence("direct"));
+        assert!(record.curated_overrides.contains("TerminalBench"));
+        assert_eq!(
+            record
+                .override_notes
+                .get("TerminalBench")
+                .map(String::as_str),
+            Some("cited source")
+        );
     }
 
     #[test]
