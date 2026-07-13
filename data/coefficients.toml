@@ -234,6 +234,15 @@ LMArenaDocument = 0.50
 # REVIEW_DIRECT is deliberately unreachable from final_score_weights.R.
 EQBenchJudgemark = 1.0
 
+# CODE_REVIEW_DIRECT is the first genuinely direct code-review signal in the
+# portfolio: Factory's benchmark scores models on 50 real pull requests with
+# human-curated bug sets and a cross-validated semantic judge. Its cohort is
+# small and fixed at one effort, so the F1 leaf is supplemental for
+# eligibility — it moves the Review score where present without making
+# unmeasured models provisional. It reaches R directly (unlike REVIEW_DIRECT).
+[group_weights.CODE_REVIEW_DIRECT]
+FactoryCodeReviewF1 = 1.0
+
 # Reference-only operational views. They are rendered as diagnostics but are
 # unreachable from every final_score_weights role and from balanced ranking.
 [group_weights.OPS_long]
@@ -268,12 +277,15 @@ BUILD = 0.95
 PLAN = 0.05
 
 [final_score_weights.R]
-# Until a broad direct code-review source exists, Review combines the
-# search/document preference proxy with implementation and planning evidence.
-# Judgemark remains available as a diagnostic but has no ranking path.
-LM_ARENA_REVIEW_PROXY = 0.30
-BUILD = 0.35
-PLAN = 0.35
+# Review now leads with a direct code-review signal where it exists, backed by
+# the search/document preference proxy and implementation/planning evidence.
+# Judgemark remains a diagnostic with no ranking path. Where a model has no
+# Factory code-review observation, the CODE_REVIEW_DIRECT weight redistributes
+# across the remaining observed evidence, so unmeasured models are unaffected.
+CODE_REVIEW_DIRECT = 0.20
+LM_ARENA_REVIEW_PROXY = 0.20
+BUILD = 0.30
+PLAN = 0.30
 
 [aggregation]
 # Presentation-only threshold for the legacy `groups_shrunk` diagnostic.
@@ -413,14 +425,14 @@ transform = "percentile"
 # leaderboard X" maps to ~100 across all benchmarks, regardless of headline
 # difficulty.
 [metrics.ArtificialAnalysisIntelligence]
-family = "artificial_analysis"
+family = "aa_intelligence"
 higher_better = true
 log_scale = false
 groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisCoding]
-family = "artificial_analysis"
+family = "aa_coding"
 # Input to LiveCodingComposite; no longer a direct BUILD weight.
 higher_better = true
 log_scale = false
@@ -428,7 +440,7 @@ groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisReasoning]
-family = "artificial_analysis"
+family = "aa_reasoning"
 # Retained for schema compatibility; replaced by distinct GPQA and HLE inputs.
 higher_better = true
 log_scale = false
@@ -436,7 +448,7 @@ groups = []
 transform = "percentile"
 
 [metrics.GPQA]
-family = "artificial_analysis"
+family = "aa_reasoning"
 eligibility = "core"
 anchor_low = 77.15
 anchor_high = 92.765
@@ -446,7 +458,7 @@ groups = ["GEN"]
 transform = "percentile"
 
 [metrics.HLE]
-family = "artificial_analysis"
+family = "aa_reasoning"
 eligibility = "core"
 anchor_low = 9.645
 anchor_high = 44.52
@@ -487,7 +499,7 @@ groups = []
 transform = "percentile"
 
 [metrics.GPQA_HLE_Reasoning]
-family = "artificial_analysis"
+family = "aa_reasoning"
 # Retained for schema compatibility; no longer emitted or scored.
 higher_better = true
 log_scale = false
@@ -556,7 +568,7 @@ groups = ["PLAN", "BUILD"]
 transform = "as_score"
 
 [metrics.TerminalBenchHard]
-family = "artificial_analysis"
+family = "aa_terminal"
 anchor_low = 23.7879
 anchor_high = 58.0303
 higher_better = true
@@ -769,7 +781,7 @@ transform = "percentile"
 # previously unused. Wiring them up gives PLAN and BUILD more breadth without
 # adding any new HTTP fetches.
 [metrics.Tau2Bench]
-family = "artificial_analysis"
+family = "aa_tooluse"
 eligibility = "historical_support"
 eligibility_roles = ["P_raw"]
 anchor_low = 54.3275
@@ -781,7 +793,7 @@ groups = []
 transform = "percentile"
 
 [metrics.TauBanking]
-family = "artificial_analysis"
+family = "aa_tooluse"
 anchor_low = 8.65979
 anchor_high = 30.3711
 # Input to TauComposite; AA's tau_banking field.
@@ -791,7 +803,7 @@ groups = []
 transform = "percentile"
 
 [metrics.SciCode]
-family = "artificial_analysis"
+family = "aa_coding"
 eligibility = "core"
 anchor_low = 38.625
 anchor_high = 56.375
@@ -802,7 +814,7 @@ groups = ["BUILD"]
 transform = "percentile"
 
 [metrics.AALiveCodeBench]
-family = "artificial_analysis"
+family = "aa_coding"
 eligibility = "supplemental"
 anchor_low = 61.35
 anchor_high = 91.07
@@ -813,7 +825,7 @@ groups = []
 transform = "percentile"
 
 [metrics.IFBench]
-family = "artificial_analysis"
+family = "aa_instruction"
 eligibility = "historical_support"
 eligibility_roles = ["P_raw"]
 anchor_low = 45.5238
@@ -824,7 +836,7 @@ groups = []
 transform = "percentile"
 
 [metrics.ArtificialAnalysisMath]
-family = "artificial_analysis"
+family = "aa_math"
 # Diagnostic aggregate only; AIME and other distinct components are scored.
 higher_better = true
 log_scale = false
@@ -832,7 +844,7 @@ groups = []
 transform = "percentile"
 
 [metrics.AIME25]
-family = "artificial_analysis"
+family = "aa_math"
 eligibility = "historical_support"
 eligibility_roles = ["I_raw"]
 anchor_low = 53.1333
@@ -843,7 +855,7 @@ groups = []
 transform = "percentile"
 
 [metrics.MMLUPro]
-family = "artificial_analysis"
+family = "aa_knowledge"
 eligibility = "historical_support"
 eligibility_roles = ["I_raw"]
 anchor_low = 78.31
@@ -854,7 +866,7 @@ groups = []
 transform = "percentile"
 
 [metrics.LongContextRecall]
-family = "artificial_analysis"
+family = "aa_longcontext"
 eligibility = "core"
 anchor_low = 55.9833
 anchor_high = 74.0
@@ -930,7 +942,7 @@ groups = ["PLAN"]
 transform = "percentile"
 
 [metrics.CritPt]
-family = "artificial_analysis"
+family = "aa_reasoning"
 eligibility = "core"
 anchor_low = 0.114286
 anchor_high = 20.857143
@@ -940,7 +952,7 @@ groups = ["GEN"]
 transform = "percentile"
 
 [metrics.AAOmniscienceAccuracy]
-family = "artificial_analysis"
+family = "aa_knowledge"
 eligibility = "core"
 anchor_low = 19.34
 anchor_high = 54.75
@@ -950,7 +962,7 @@ groups = ["GEN"]
 transform = "percentile"
 
 [metrics.AAOmniscienceNonHallucination]
-family = "artificial_analysis"
+family = "aa_knowledge"
 eligibility = "core"
 anchor_low = 6.715907
 anchor_high = 76.415078
@@ -997,7 +1009,7 @@ groups = []
 transform = "percentile"
 
 [metrics.Tau3Banking]
-family = "artificial_analysis"
+family = "aa_tooluse"
 eligibility = "core"
 anchor_low = 8.659794
 anchor_high = 30.381443
@@ -1023,12 +1035,18 @@ log_scale = false
 groups = []
 transform = "percentile"
 
+# Direct code-review evidence: Factory's mean F1 over 50 real PRs. Anchored on
+# the direct-evidence p5/p95 of the current cohort (13 same-product rows,
+# 45.6-60.5 raw F1). Supplemental so the narrow, fixed-effort cohort moves the
+# Review score without gating eligibility.
 [metrics.FactoryCodeReviewF1]
 family = "factory_code_review"
 eligibility = "supplemental"
+anchor_low = 46.74
+anchor_high = 60.08
 higher_better = true
 log_scale = false
-groups = []
+groups = ["CODE_REVIEW_DIRECT"]
 transform = "percentile"
 
 [metrics.FactoryCodeReviewPrecision]
@@ -1077,7 +1095,7 @@ groups = []
 transform = "percentile"
 
 [metrics.AAOmniscienceIndex]
-family = "artificial_analysis"
+family = "aa_knowledge"
 higher_better = true
 log_scale = false
 groups = []

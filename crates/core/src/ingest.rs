@@ -136,6 +136,46 @@ pub fn warn_stale_overrides(
     stale
 }
 
+/// Report rows that matched a canonical model only through fuzzy substring
+/// matching (i.e. `lookup_exact` missed but `match_record` succeeded). Exact
+/// and suffix-stripped matches are deterministic and trusted; fuzzy matches are
+/// where a silent mis-attribution would hide, so they are logged for manual
+/// audit. Returns `(source, input_name, canonical_id)` per fuzzy match and
+/// writes one line each to stderr.
+pub fn audit_fuzzy_matches(
+    rows_by_source: &BTreeMap<SourceId, Vec<RawRow>>,
+    records: &[ModelRecord],
+) -> Vec<(String, String, String)> {
+    let index = AliasIndex::build(records);
+    let mut audited = Vec::new();
+    let mut seen: BTreeSet<(String, String, String)> = BTreeSet::new();
+    for (source_id, rows) in rows_by_source {
+        for row in rows {
+            if row.synthesized_from.is_some() {
+                continue;
+            }
+            let vendor = row.vendor_hint.as_deref();
+            if index.lookup_exact(&row.model_name, vendor).is_some() {
+                continue;
+            }
+            let Some(idx) = index.match_record(&row.model_name, vendor) else {
+                continue;
+            };
+            let canonical = records[idx].canonical_id.clone();
+            let entry = (source_id.clone(), row.model_name.clone(), canonical.clone());
+            if !seen.insert(entry.clone()) {
+                continue;
+            }
+            eprintln!(
+                "audit: fuzzy alias match {source_id}: {:?} -> {canonical} (no exact/suffix-stripped key); verify in data/required_aliases.toml",
+                row.model_name
+            );
+            audited.push(entry);
+        }
+    }
+    audited
+}
+
 pub fn mark_synthesis_dominant(records: &mut [ModelRecord], per_model_cap: f64) {
     let coefficients = crate::coefficients::Coefficients::load_embedded()
         .expect("embedded coefficients are valid");
@@ -309,11 +349,27 @@ enum EffortPreference {
     NonReasoning = 8,
 }
 
+/// String fields that legitimately encode reasoning effort. Effort detection
+/// reads only these plus the model name — NOT arbitrary string fields.
+/// Scanning every string value let unrelated descriptive text drive effort:
+/// a "low-latency" tagline classified the row as Low and silently dropped it,
+/// and "high-throughput"/"max context" mislabeled default rows as high/max.
+const EFFORT_FIELDS: &[&str] = &[
+    "DisplayName",
+    "display_name",
+    "variant",
+    "Variant",
+    "effort",
+    "Effort",
+    "reasoning_effort",
+    "ReasoningEffort",
+];
+
 impl EffortPreference {
     fn from_row(row: &RawRow) -> Self {
         let mut text = row.model_name.clone();
         for (key, value) in &row.fields {
-            if is_evidence_note_key(key) {
+            if !EFFORT_FIELDS.contains(&key.as_str()) {
                 continue;
             }
             if let Some(s) = value.as_str() {
@@ -760,6 +816,37 @@ mod tests {
     }
 
     #[test]
+    fn audit_fuzzy_matches_reports_only_non_exact_resolutions() {
+        let mut record = ModelRecord::new(
+            "example/mystery-preview".into(),
+            "mystery-preview".into(),
+            Vendor::Other("example".into()),
+        );
+        record.aliases.insert("mystery preview".into());
+        let records = vec![record];
+
+        let mut rows_by_source = BTreeMap::new();
+        rows_by_source.insert(
+            "board".to_string(),
+            vec![
+                // Exact/alias hit — trusted, must not be audited.
+                raw("board", "mystery-preview", &[("LMArenaText", json!(80.0))]),
+                // Only a fuzzy substring match — must be surfaced.
+                raw(
+                    "board",
+                    "acme-mystery-preview",
+                    &[("LMArenaText", json!(81.0))],
+                ),
+            ],
+        );
+
+        let audited = audit_fuzzy_matches(&rows_by_source, &records);
+        assert_eq!(audited.len(), 1, "{audited:?}");
+        assert_eq!(audited[0].1, "acme-mystery-preview");
+        assert_eq!(audited[0].2, "example/mystery-preview");
+    }
+
+    #[test]
     fn unmatched_row_collected_for_review() {
         let mut records: Vec<ModelRecord> = vec![];
         let rows = vec![raw("foo", "totally-unknown-model-zzz", &[])];
@@ -908,6 +995,34 @@ mod tests {
             assert_eq!(preference, EffortPreference::Low, "label={label:?}");
             assert!(!preference.is_scoring_allowed(), "label={label:?}");
         }
+    }
+
+    #[test]
+    fn effort_detection_ignores_non_effort_string_fields() {
+        // A descriptive field ("low-latency ...") must not classify the row as
+        // Low and get it silently dropped from scoring. Only the model name and
+        // the allowlisted effort fields drive effort.
+        let mut record =
+            ModelRecord::new("openai/gpt-5.5".into(), "gpt-5.5".into(), Vendor::Openai);
+        record.aliases.insert("gpt-5.5".into());
+        let mut records = vec![record];
+        let stats = ingest_rows(
+            &mut records,
+            vec![raw(
+                "benchmark",
+                "gpt-5.5",
+                &[
+                    ("tagline", json!("low-latency high-throughput flagship")),
+                    ("TerminalBench", json!(88.0)),
+                ],
+            )],
+        );
+        assert_eq!(stats.matched, 1);
+        assert_eq!(
+            records[0].raw_metrics.get("TerminalBench"),
+            Some(&88.0),
+            "a descriptive 'low-latency' field must not drop the row as Low effort"
+        );
     }
 
     #[test]

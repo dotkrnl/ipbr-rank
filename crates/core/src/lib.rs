@@ -9,14 +9,16 @@ pub mod score;
 pub mod scoreboard;
 pub mod synthesize;
 
-pub use alias::{AliasIndex, normalize_name, normalize_vendor_hint};
+pub use alias::{
+    AliasCollision, AliasIndex, normalize_name, normalize_vendor_hint, warn_alias_collisions,
+};
 pub use coefficients::{
     AggregationConfig, Coefficients, EffortException, EffortPolicy, EvidenceConfig, MetricDef,
     MetricEligibility, MetricTransform, NormalizationConfig, PenaltiesConfig, SynthesisConfig,
 };
 pub use ingest::{
-    IngestStats, ingest_rows, ingest_rows_with_policy, mark_synthesis_dominant,
-    mark_synthesis_dominant_with_coefficients, warn_stale_overrides,
+    IngestStats, audit_fuzzy_matches, ingest_rows, ingest_rows_with_policy,
+    mark_synthesis_dominant, mark_synthesis_dominant_with_coefficients, warn_stale_overrides,
 };
 pub use model::{
     EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, GroupKey, MetricKey,

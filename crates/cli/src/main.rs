@@ -542,6 +542,14 @@ async fn build_scoreboard(
     // ingest precedence and the entry can be retired.
     let _stale_overrides = ipbr_core::warn_stale_overrides(&rows_by_source, &records);
 
+    // Loudly flag alias keys shared by two canonical models: they silently
+    // reroute benchmark rows to the first-registered record.
+    let _collisions = ipbr_core::warn_alias_collisions(&records);
+
+    // Log rows that resolved only through fuzzy substring matching so each can
+    // be audited by hand; exact/suffix-stripped matches are trusted silently.
+    let _fuzzy = ipbr_core::audit_fuzzy_matches(&rows_by_source, &records);
+
     for (source_id, rows) in rows_by_source {
         let row_count = fetched_rows.get(&source_id).copied().unwrap_or(rows.len());
         let status = fetched_statuses

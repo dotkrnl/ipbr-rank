@@ -1,5 +1,5 @@
 use crate::model::{ModelRecord, Vendor};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 const VENDOR_COLON_PREFIXES: &[&str] =
     &["openai:", "anthropic:", "google:", "moonshotai:", "z.ai:"];
@@ -385,6 +385,64 @@ pub fn match_record(
     AliasIndex::build(records).match_record(input, vendor_hint)
 }
 
+/// A normalized or compact alias key claimed by two distinct canonical models.
+/// `AliasIndex` resolves these first-record-wins and silently, so a colliding
+/// alias reroutes another model's benchmark rows with no other signal.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AliasCollision {
+    pub kind: &'static str,
+    pub key: String,
+    pub first: String,
+    pub second: String,
+}
+
+/// Detect alias keys shared across distinct canonical models. Emits a CRITICAL
+/// warning per collision to stderr (no logging dependency in `ipbr-core`) and
+/// returns them so the CLI can fail loudly and tests can assert on the set.
+pub fn warn_alias_collisions(records: &[ModelRecord]) -> Vec<AliasCollision> {
+    let mut normalized: BTreeMap<String, usize> = BTreeMap::new();
+    let mut compact: BTreeMap<String, usize> = BTreeMap::new();
+    let mut collisions = Vec::new();
+    for (idx, record) in records.iter().enumerate() {
+        let keys = std::iter::once(record.canonical_id.as_str())
+            .chain(std::iter::once(record.display_name.as_str()))
+            .chain(record.aliases.iter().map(String::as_str));
+        // Dedupe keys within a record so a model that lists the same alias
+        // twice (e.g. canonical_id == display_name) doesn't self-collide.
+        let mut seen_here: BTreeSet<(&'static str, String)> = BTreeSet::new();
+        for key in keys {
+            for (kind, candidate, seen) in [
+                ("normalized", normalize_name(key), &mut normalized),
+                ("compact", compact_key(key), &mut compact),
+            ] {
+                if candidate.is_empty() || !seen_here.insert((kind, candidate.clone())) {
+                    continue;
+                }
+                match seen.get(&candidate) {
+                    Some(&other) if other != idx => {
+                        let collision = AliasCollision {
+                            kind,
+                            key: candidate.clone(),
+                            first: records[other].canonical_id.clone(),
+                            second: record.canonical_id.clone(),
+                        };
+                        eprintln!(
+                            "CRITICAL: {kind} alias key {:?} is shared by {} and {} — benchmark rows may be attributed to the wrong model; disambiguate in data/required_aliases.toml",
+                            collision.key, collision.first, collision.second
+                        );
+                        collisions.push(collision);
+                    }
+                    Some(_) => {}
+                    None => {
+                        seen.insert(candidate, idx);
+                    }
+                }
+            }
+        }
+    }
+    collisions
+}
+
 fn vendor_matches(vendor: &Vendor, hint: &str) -> bool {
     let hn = normalize_name(hint);
     let vn = normalize_name(vendor.as_str());
@@ -639,6 +697,32 @@ mod tests {
         let recs = vec![rec("openai/gpt-5.5", Vendor::Openai, &["gpt 5.5"])];
         let idx = AliasIndex::build(&recs);
         assert!(idx.match_record("xy", None).is_none());
+    }
+
+    #[test]
+    fn warn_alias_collisions_flags_shared_keys_only() {
+        let clean = vec![
+            rec("openai/gpt-5.5", Vendor::Openai, &["gpt-5.5"]),
+            rec(
+                "anthropic/claude-opus-4.7",
+                Vendor::Anthropic,
+                &["opus-4.7"],
+            ),
+        ];
+        assert!(warn_alias_collisions(&clean).is_empty());
+
+        // Second model aliases a key that normalizes/compacts to the first.
+        let colliding = vec![
+            rec("openai/gpt-5.5", Vendor::Openai, &["gpt-5.5"]),
+            rec("acme/clone", Vendor::Other("acme".into()), &["gpt 5.5"]),
+        ];
+        let collisions = warn_alias_collisions(&colliding);
+        assert!(
+            collisions
+                .iter()
+                .any(|c| c.first == "openai/gpt-5.5" && c.second == "acme/clone"),
+            "{collisions:?}"
+        );
     }
 
     #[test]
