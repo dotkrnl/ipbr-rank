@@ -9,7 +9,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use ipbr_core::{AliasIndex, RawRow, normalize_name};
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name};
 use scraper::{Html, Selector};
 use serde_json::Value;
 
@@ -267,10 +267,205 @@ struct ParsedScore {
 
 #[derive(Debug)]
 struct PendingRow {
+    model_name: String,
     label: String,
     details_url: Option<String>,
+    revision: ModelRevision,
     fields: BTreeMap<String, Value>,
+    field_transports: BTreeMap<String, ObservationTransport>,
     hybrid_fallback: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct PendingKey {
+    model: String,
+    effort: AaEffort,
+}
+
+#[derive(Debug, Clone)]
+struct StableModelIdentity {
+    key: String,
+    output_name: String,
+    catalog_match: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct ModelRevision {
+    explicit_version: u32,
+    release_date: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ObservationTransport {
+    JsonLd,
+    Rsc,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum AaEffort {
+    Max,
+    XHigh,
+    High,
+    Thinking,
+    Medium,
+    Default,
+    Low,
+    NonReasoning,
+}
+
+impl AaEffort {
+    fn from_label(label: &str) -> Self {
+        let normalized = normalize_name(label);
+        let has_token = |needle: &str| normalized.split_whitespace().any(|token| token == needle);
+        if normalized.contains("non reasoning") {
+            Self::NonReasoning
+        } else if has_token("instant") || has_token("minimal") || has_token("low") {
+            Self::Low
+        } else if has_token("max") {
+            Self::Max
+        } else if has_token("xhigh") {
+            Self::XHigh
+        } else if has_token("high") {
+            Self::High
+        } else if has_token("medium") {
+            Self::Medium
+        } else if has_token("thinking") || has_token("reasoning") || has_token("adaptive") {
+            Self::Thinking
+        } else {
+            Self::Default
+        }
+    }
+}
+
+impl PendingRow {
+    fn new(
+        model_name: String,
+        label: &str,
+        details_url: Option<String>,
+        revision: ModelRevision,
+    ) -> Self {
+        Self {
+            model_name,
+            label: label.to_string(),
+            details_url,
+            revision,
+            fields: BTreeMap::new(),
+            field_transports: BTreeMap::new(),
+            hybrid_fallback: is_hybrid_fallback_label(label),
+        }
+    }
+
+    /// Returns whether observations from this revision belong to the selected
+    /// row. A newer revision atomically replaces the older one so component
+    /// metrics cannot be accidentally mixed across releases.
+    fn select_revision(
+        &mut self,
+        model_name: &str,
+        label: &str,
+        details_url: Option<&str>,
+        revision: ModelRevision,
+    ) -> bool {
+        if revision < self.revision {
+            return false;
+        }
+        if revision > self.revision {
+            self.model_name = model_name.to_string();
+            self.label = label.to_string();
+            self.details_url = details_url.map(ToOwned::to_owned);
+            self.revision = revision;
+            self.fields.clear();
+            self.field_transports.clear();
+            self.hybrid_fallback = is_hybrid_fallback_label(label);
+            return true;
+        }
+
+        if self.details_url.is_none() {
+            self.details_url = details_url.map(ToOwned::to_owned);
+        }
+        merge_identity_label(self, label);
+        true
+    }
+
+    fn merge_field(&mut self, key: String, value: Value, transport: ObservationTransport) {
+        if self
+            .field_transports
+            .get(&key)
+            .is_none_or(|existing| transport > *existing)
+        {
+            self.fields.insert(key.clone(), value);
+            self.field_transports.insert(key, transport);
+        }
+    }
+}
+
+fn stable_model_identity(
+    label: &str,
+    details_url: Option<&str>,
+    alias_records: &[ModelRecord],
+    alias_index: &AliasIndex<'_>,
+) -> StableModelIdentity {
+    let slug = details_url.and_then(details_model_slug);
+    let vendor = infer_vendor(label);
+    // The details URL is the stable upstream identity; display labels are
+    // mutable and only serve as a fallback when no model slug is available.
+    let catalog_index = slug
+        .and_then(|slug| alias_index.lookup_exact(slug, vendor))
+        .or_else(|| alias_index.lookup_exact(label, vendor));
+    if let Some(index) = catalog_index {
+        let canonical = alias_records[index].canonical_id.clone();
+        return StableModelIdentity {
+            key: format!("canonical:{canonical}"),
+            output_name: canonical,
+            catalog_match: true,
+        };
+    }
+    if let Some(slug) = slug {
+        return StableModelIdentity {
+            key: format!("slug:{}", normalize_name(slug)),
+            output_name: slug.to_string(),
+            catalog_match: false,
+        };
+    }
+    StableModelIdentity {
+        key: format!("label:{}", normalize_name(label)),
+        output_name: label.to_string(),
+        catalog_match: false,
+    }
+}
+
+fn details_model_slug(url: &str) -> Option<&str> {
+    let slug = url
+        .split_once("/models/")
+        .map(|(_, slug)| slug)
+        .or_else(|| url.strip_prefix("models/"))?
+        .split(['?', '#'])
+        .next()?
+        .trim_matches('/');
+    (!slug.is_empty()).then_some(slug)
+}
+
+fn model_revision(label: &str, item: &Value) -> ModelRevision {
+    let explicit_version = normalize_name(label)
+        .split_whitespace()
+        .filter_map(|token| token.strip_prefix('v'))
+        .filter_map(|version| version.parse::<u32>().ok())
+        .max()
+        .unwrap_or(0);
+    let release_date = item
+        .get("release_date")
+        .or_else(|| item.get("releaseDate"))
+        .and_then(Value::as_str)
+        .map(|date| {
+            date.chars()
+                .filter(char::is_ascii_digit)
+                .collect::<String>()
+        })
+        .and_then(|digits| digits.parse::<u32>().ok())
+        .unwrap_or(0);
+    ModelRevision {
+        explicit_version,
+        release_date,
+    }
 }
 
 fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<RawRow>, SourceError> {
@@ -282,7 +477,9 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
         .iter()
         .map(|metric| (metric.dataset_name, metric))
         .collect();
-    let mut pending: BTreeMap<String, PendingRow> = BTreeMap::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut pending: BTreeMap<PendingKey, PendingRow> = BTreeMap::new();
     let mut matched_datasets = BTreeSet::new();
 
     for script in document.select(&selector) {
@@ -330,26 +527,53 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
                     .get("detailsUrl")
                     .and_then(Value::as_str)
                     .map(ToOwned::to_owned);
-                let identity = details_url
-                    .clone()
-                    .unwrap_or_else(|| format!("label:{}", normalize_name(label)));
-                let row = pending.entry(identity).or_insert_with(|| PendingRow {
-                    label: label.to_string(),
-                    details_url,
-                    fields: BTreeMap::new(),
-                    hybrid_fallback: is_hybrid_fallback_label(label),
+                let identity = stable_model_identity(
+                    label,
+                    details_url.as_deref(),
+                    &alias_records,
+                    &alias_index,
+                );
+                let revision = model_revision(label, item);
+                let key = PendingKey {
+                    model: identity.key,
+                    effort: AaEffort::from_label(label),
+                };
+                let row = pending.entry(key).or_insert_with(|| {
+                    PendingRow::new(
+                        identity.output_name.clone(),
+                        label,
+                        details_url.clone(),
+                        revision,
+                    )
                 });
-                merge_identity_label(row, label);
+                if !row.select_revision(
+                    &identity.output_name,
+                    label,
+                    details_url.as_deref(),
+                    revision,
+                ) {
+                    continue;
+                }
 
                 let metric = spec.metric.to_string();
-                row.fields.insert(metric.clone(), Value::from(mid));
+                row.merge_field(
+                    metric.clone(),
+                    Value::from(mid),
+                    ObservationTransport::JsonLd,
+                );
                 if let Some(lower) = score.lower.and_then(|value| spec.transform.apply(value)) {
-                    row.fields
-                        .insert(format!("{metric}CILow"), Value::from(lower));
+                    row.merge_field(
+                        format!("{metric}CILow"),
+                        Value::from(lower),
+                        ObservationTransport::JsonLd,
+                    );
                 }
                 if let Some(upper) = score.upper.and_then(|value| spec.transform.apply(value)) {
-                    row.fields
-                        .insert(format!("{metric}CIHigh"), Value::from(upper));
+                    row.merge_field(
+                        format!("{metric}CIHigh"),
+                        Value::from(upper),
+                        ObservationTransport::JsonLd,
+                    );
                 }
             }
         }
@@ -375,7 +599,7 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
     // supplementing from them matters when two charts sort differently (for
     // example Omniscience accuracy versus non-hallucination). JSON-LD remains
     // the schema gate and source of the visible raw labels.
-    merge_rsc_rows(html, config, &mut pending)?;
+    merge_rsc_rows(html, config, &alias_records, &alias_index, &mut pending)?;
 
     Ok(pending
         .into_values()
@@ -405,7 +629,7 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
             }
             RawRow {
                 source_id: config.source_id.to_string(),
-                model_name: row.label.clone(),
+                model_name: row.model_name,
                 vendor_hint: infer_vendor(&row.label).map(ToOwned::to_owned),
                 fields: row.fields,
                 synthesized_from: None,
@@ -418,16 +642,15 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
 fn merge_rsc_rows(
     html: &str,
     config: EvaluationConfig,
-    pending: &mut BTreeMap<String, PendingRow>,
+    alias_records: &[ModelRecord],
+    alias_index: &AliasIndex<'_>,
+    pending: &mut BTreeMap<PendingKey, PendingRow>,
 ) -> Result<(), SourceError> {
     const MODEL_OBJECT_ANCHOR: &str = r#"{\"additional_text\":"#;
     let mut cursor = 0usize;
     let mut anchors = 0usize;
     let mut parsed_objects = 0usize;
     let mut useful_observations = 0usize;
-    let alias_records = crate::embedded_alias_records();
-    let alias_index = AliasIndex::build(&alias_records);
-
     while let Some(relative) = html[cursor..].find(MODEL_OBJECT_ANCHOR) {
         let start = cursor + relative;
         anchors += 1;
@@ -449,30 +672,19 @@ fn merge_rsc_rows(
             .get("slug")
             .and_then(Value::as_str)
             .map(|slug| format!("/models/{slug}"));
-        let identity = details_url
-            .clone()
-            .or_else(|| {
-                item.get("id")
-                    .and_then(Value::as_str)
-                    .map(ToOwned::to_owned)
-            })
-            .unwrap_or_else(|| format!("label:{}", normalize_name(label)));
+        let identity =
+            stable_model_identity(label, details_url.as_deref(), alias_records, alias_index);
+        let key = PendingKey {
+            model: identity.key.clone(),
+            effort: AaEffort::from_label(label),
+        };
 
         // RSC includes hundreds of historical and untracked models. Retain
         // every row visible in the official JSON-LD chart plus any additional
         // row that maps to this ranking's current model catalog. This recovers
         // complete component coverage without turning routine scoring into a
         // fuzzy-match pass over the entire AA archive.
-        if !pending.contains_key(&identity)
-            && alias_index
-                .lookup_exact(label, infer_vendor(label))
-                .is_none()
-            && details_url
-                .as_deref()
-                .and_then(|url| url.strip_prefix("/models/"))
-                .and_then(|slug| alias_index.lookup_exact(slug, infer_vendor(label)))
-                .is_none()
-        {
+        if !pending.contains_key(&key) && !identity.catalog_match {
             continue;
         }
 
@@ -495,27 +707,43 @@ fn merge_rsc_rows(
             continue;
         }
 
-        let row = pending.entry(identity).or_insert_with(|| PendingRow {
-            label: label.to_string(),
-            details_url,
-            fields: BTreeMap::new(),
-            hybrid_fallback: is_hybrid_fallback_label(label),
+        let revision = model_revision(label, &item);
+        let row = pending.entry(key).or_insert_with(|| {
+            PendingRow::new(
+                identity.output_name.clone(),
+                label,
+                details_url.clone(),
+                revision,
+            )
         });
-        merge_identity_label(row, label);
+        if !row.select_revision(
+            &identity.output_name,
+            label,
+            details_url.as_deref(),
+            revision,
+        ) {
+            continue;
+        }
         for (spec, mid, lower, upper) in observations {
             let Some(mid) = spec.rsc_transform.apply(mid) else {
                 continue;
             };
             useful_observations += 1;
             let metric = spec.metric.to_string();
-            row.fields.insert(metric.clone(), Value::from(mid));
+            row.merge_field(metric.clone(), Value::from(mid), ObservationTransport::Rsc);
             if let Some(lower) = lower.and_then(|value| spec.rsc_transform.apply(value)) {
-                row.fields
-                    .insert(format!("{metric}CILow"), Value::from(lower));
+                row.merge_field(
+                    format!("{metric}CILow"),
+                    Value::from(lower),
+                    ObservationTransport::Rsc,
+                );
             }
             if let Some(upper) = upper.and_then(|value| spec.rsc_transform.apply(value)) {
-                row.fields
-                    .insert(format!("{metric}CIHigh"), Value::from(upper));
+                row.merge_field(
+                    format!("{metric}CIHigh"),
+                    Value::from(upper),
+                    ObservationTransport::Rsc,
+                );
             }
         }
     }
@@ -715,6 +943,13 @@ mod tests {
         row.fields.get(metric).and_then(number_like)
     }
 
+    fn upstream_label(row: &RawRow) -> &str {
+        row.fields
+            .get("UpstreamModelLabel")
+            .and_then(Value::as_str)
+            .expect("parsed rows retain their upstream display label")
+    }
+
     #[test]
     fn parses_gdpval_interval_and_keeps_routed_product_primary() {
         let rows = parse_evaluation_rows(
@@ -725,7 +960,7 @@ mod tests {
         assert_eq!(rows.len(), 3);
         let gpt = rows
             .iter()
-            .find(|row| row.model_name == "GPT-5.5 (xhigh)")
+            .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
             .expect("GPT row");
         assert_eq!(numeric(gpt, "GDPvalAA2"), Some(1493.72));
         assert_eq!(numeric(gpt, "GDPvalAA2CILow"), Some(1477.17));
@@ -733,7 +968,7 @@ mod tests {
 
         let fable = rows
             .iter()
-            .find(|row| row.model_name.contains("Fable"))
+            .find(|row| upstream_label(row).contains("Fable"))
             .expect("Fable fallback row should remain visible");
         assert_eq!(numeric(fable, "GDPvalAA2"), Some(1759.6));
         assert_eq!(numeric(fable, "GDPvalAA2CILow"), Some(1740.2));
@@ -760,7 +995,7 @@ mod tests {
         .expect("CritPt fixture should parse");
         let row = rows
             .iter()
-            .find(|row| row.model_name == "GPT-5.5 Pro (xhigh)")
+            .find(|row| upstream_label(row) == "GPT-5.5 Pro (xhigh)")
             .expect("GPT-5.5 Pro row");
         assert!((numeric(row, "CritPt").unwrap() - 30.5714285714286).abs() < 1e-10);
     }
@@ -775,7 +1010,7 @@ mod tests {
         assert_eq!(rows.len(), 3);
         let gpt = rows
             .iter()
-            .find(|row| row.model_name == "GPT-5.5 (xhigh)")
+            .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
             .expect("GPT row");
         assert_eq!(numeric(gpt, "AAOmniscienceIndex"), Some(25.25));
         assert!((numeric(gpt, "AAOmniscienceAccuracy").unwrap() - 56.9).abs() < 1e-10);
@@ -783,7 +1018,7 @@ mod tests {
 
         let fable = rows
             .iter()
-            .find(|row| row.model_name.contains("Fable"))
+            .find(|row| upstream_label(row).contains("Fable"))
             .expect("Fable row");
         assert_eq!(numeric(fable, "AAOmniscienceAccuracy"), Some(61.35));
         assert_eq!(
@@ -807,7 +1042,7 @@ mod tests {
         .expect("EnterpriseOps fixture should parse");
         let gpt = enterprise
             .iter()
-            .find(|row| row.model_name == "GPT-5.5 (xhigh)")
+            .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
             .expect("GPT EnterpriseOps row");
         assert!((numeric(gpt, "EnterpriseOpsGymAA").unwrap() - 46.64279319606088).abs() < 1e-10);
 
@@ -818,7 +1053,7 @@ mod tests {
         .expect("AutomationBench fixture should parse");
         let gpt = automation
             .iter()
-            .find(|row| row.model_name == "GPT-5.5 (xhigh)")
+            .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
             .expect("GPT AutomationBench row");
         assert!((numeric(gpt, "AutomationBenchAA").unwrap() - 44.25).abs() < 1e-10);
     }
@@ -854,7 +1089,7 @@ mod tests {
         let rows = parse_evaluation_rows(html, GDPVAL_CONFIG).expect("labels should merge");
         assert_eq!(rows.len(), 2);
         for row in &rows {
-            assert!(row.model_name.contains("fallback"));
+            assert!(upstream_label(row).contains("fallback"));
             assert!(row.fields.contains_key("GDPvalAA2"));
             assert!(row.fields.contains_key("GDPvalAA2CILow"));
             assert!(row.fields.contains_key("GDPvalAA2CIHigh"));
@@ -863,14 +1098,69 @@ mod tests {
         }
         let a = rows
             .iter()
-            .find(|row| row.model_name.contains("Test A"))
+            .find(|row| upstream_label(row).contains("Test A"))
             .expect("test A row");
         let b = rows
             .iter()
-            .find(|row| row.model_name.contains("Test B"))
+            .find(|row| upstream_label(row).contains("Test B"))
             .expect("test B row");
         assert_eq!(numeric(a, "GDPvalAA2"), Some(1200.0));
         assert_eq!(numeric(b, "GDPvalAA2"), Some(1300.0));
+    }
+
+    #[test]
+    fn stable_slug_keeps_efforts_separate_and_selects_latest_revision() {
+        let html = r#"
+        <script type="application/ld+json">{
+          "@type":"Dataset","name":"CritPt: Score","data":[
+            {"label":"Grok 4.20 0309 v2 (Reasoning)","CritPt":0.065714,"detailsUrl":"/models/grok-4-20"},
+            {"label":"Grok 4.20 0309 (Reasoning)","CritPt":0.06,"detailsUrl":"/models/grok-4-20"},
+            {"label":"Grok 4.20 0309 v2 (Non-reasoning)","CritPt":0.03,"detailsUrl":"/models/grok-4-20"},
+            {"label":"Grok 4.20 0309 (Non-reasoning)","CritPt":0.02,"detailsUrl":"/models/grok-4-20"}
+          ]
+        }</script>
+        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 v2 (Reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-04-07\",\"critpt\":0.065714}"])</script>
+        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 (Reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-03-10\",\"critpt\":0.06}"])</script>
+        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 v2 (Non-reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-04-07\",\"critpt\":0.03}"])</script>
+        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 (Non-reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-03-10\",\"critpt\":0.02}"])</script>
+        "#;
+
+        let rows = parse_evaluation_rows(html, CRITPT_CONFIG).expect("Grok rows should parse");
+        assert_eq!(rows.len(), 2, "reasoning efforts remain distinct");
+        assert!(
+            rows.iter().all(|row| row.model_name == "xai/grok-4.20"),
+            "the stable canonical identity should be emitted"
+        );
+        let reasoning = rows
+            .iter()
+            .find(|row| {
+                let label = upstream_label(row);
+                label.contains("Reasoning") && !label.contains("Non-reasoning")
+            })
+            .expect("reasoning row");
+        let non_reasoning = rows
+            .iter()
+            .find(|row| upstream_label(row).contains("Non-reasoning"))
+            .expect("non-reasoning row");
+        assert!(upstream_label(reasoning).contains("v2"));
+        assert!(upstream_label(non_reasoning).contains("v2"));
+        assert!((numeric(reasoning, "CritPt").unwrap() - 6.5714).abs() < 1e-10);
+        assert_eq!(numeric(non_reasoning, "CritPt"), Some(3.0));
+    }
+
+    #[test]
+    fn stable_slug_takes_precedence_over_a_mutable_display_label() {
+        let records = crate::embedded_alias_records();
+        let index = AliasIndex::build(&records);
+        let identity = stable_model_identity(
+            "GPT-5.5 (xhigh)",
+            Some("/models/claude-opus-4-8"),
+            &records,
+            &index,
+        );
+
+        assert_eq!(identity.output_name, "anthropic/claude-opus-4.8");
+        assert!(identity.catalog_match);
     }
 
     #[test]

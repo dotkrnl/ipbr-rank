@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use ipbr_core::{AliasIndex, RawRow};
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name};
 use serde_json::Value;
 
 use crate::{
@@ -76,13 +76,21 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
     let alias_index = AliasIndex::build(&alias_records);
     let mut rows_by_model: BTreeMap<String, RawRow> = BTreeMap::new();
     for item in data {
-        let model_id = item
-            .get("id")
-            .and_then(Value::as_str)
-            .or_else(|| item.get("canonical_slug").and_then(Value::as_str))
-            .or_else(|| item.get("name").and_then(Value::as_str))
-            .ok_or_else(|| SourceError::Parse("OpenRouter row missing id/name".into()))?;
-        let vendor_hint = model_id.split('/').next().filter(|s| !s.is_empty());
+        let public_id = item.get("id").and_then(Value::as_str);
+        let canonical_slug = item.get("canonical_slug").and_then(Value::as_str);
+        let display_name = item.get("name").and_then(Value::as_str);
+        if public_id.is_none() && canonical_slug.is_none() && display_name.is_none() {
+            return Err(SourceError::Parse("OpenRouter row missing id/name".into()));
+        }
+        let Some(identity) = select_openrouter_identity(
+            public_id,
+            canonical_slug,
+            display_name,
+            &alias_records,
+            &alias_index,
+        ) else {
+            continue;
+        };
 
         let mut fields = BTreeMap::new();
         copy_if_present(&mut fields, "ModelId", item.get("id"));
@@ -154,15 +162,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             );
         }
 
-        let key = crate::alias_dedupe_key(&alias_records, &alias_index, model_id, vendor_hint);
-        let output_name = key
-            .strip_prefix("canonical:")
-            .unwrap_or(model_id)
-            .to_string();
-        let row = rows_by_model.entry(key).or_insert_with(|| RawRow {
+        let row = rows_by_model.entry(identity.key).or_insert_with(|| RawRow {
             source_id: SOURCE_ID.to_string(),
-            model_name: output_name,
-            vendor_hint: vendor_hint.map(ToOwned::to_owned),
+            model_name: identity.output_name,
+            vendor_hint: identity.vendor_hint,
             fields: BTreeMap::new(),
             synthesized_from: None,
             synthesis_category: None,
@@ -172,6 +175,143 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         }
     }
     Ok(rows_by_model.into_values().collect())
+}
+
+struct OpenRouterIdentity {
+    key: String,
+    output_name: String,
+    vendor_hint: Option<String>,
+}
+
+fn select_openrouter_identity(
+    public_id: Option<&str>,
+    canonical_slug: Option<&str>,
+    display_name: Option<&str>,
+    alias_records: &[ModelRecord],
+    alias_index: &AliasIndex<'_>,
+) -> Option<OpenRouterIdentity> {
+    let validated_slug =
+        canonical_slug.filter(|slug| public_id.is_none_or(|id| provider_prefixes_match(id, slug)));
+    let preferred = validated_slug.or(public_id).or(display_name)?;
+    let vendor_hint = provider_prefix(preferred)
+        .or_else(|| public_id.and_then(provider_prefix))
+        .map(ToOwned::to_owned);
+
+    if let Some(index) = alias_index.lookup_exact(preferred, vendor_hint.as_deref()) {
+        let canonical = alias_records[index].canonical_id.clone();
+        return Some(OpenRouterIdentity {
+            key: format!("canonical:{canonical}"),
+            output_name: canonical,
+            vendor_hint,
+        });
+    }
+
+    if let Some(index) = alias_index.match_record(preferred, vendor_hint.as_deref()) {
+        let canonical = &alias_records[index].canonical_id;
+        if explicit_versions_compatible(preferred, canonical) {
+            return Some(OpenRouterIdentity {
+                key: format!("canonical:{canonical}"),
+                output_name: canonical.clone(),
+                vendor_hint,
+            });
+        }
+
+        // A rolling public ID can point at an older canonical version on
+        // OpenRouter (for example deepseek/deepseek-chat -> ...-chat-v3).
+        // Prefer a version-bearing display label when it does not resolve back
+        // to the conflicting ranked model; this keeps the historical row
+        // visible for triage without letting core fuzzy matching merge it.
+        if let Some(display_name) = display_name
+            && alias_index
+                .match_record(display_name, vendor_hint.as_deref())
+                .is_none_or(|display_index| display_index != index)
+        {
+            return Some(OpenRouterIdentity {
+                key: format!("raw:{}", normalize_name(preferred)),
+                output_name: display_name.to_string(),
+                vendor_hint,
+            });
+        }
+
+        // If no safe display identity exists, omit the conflicting operational
+        // diagnostic rather than attach it to the wrong ranked product.
+        return None;
+    }
+
+    // Versioned canonical slugs often add a release date that intentionally
+    // fails the generic fuzzy matcher. In that case the public ID may still
+    // identify the ranked family, but only accept it when the explicit model
+    // generation agrees with the canonical slug.
+    if validated_slug.is_some()
+        && let Some(public_id) = public_id
+        && let Some(index) = alias_index
+            .lookup_exact(public_id, vendor_hint.as_deref())
+            .or_else(|| alias_index.match_record(public_id, vendor_hint.as_deref()))
+    {
+        let canonical = &alias_records[index].canonical_id;
+        if explicit_versions_compatible(preferred, canonical) {
+            return Some(OpenRouterIdentity {
+                key: format!("canonical:{canonical}"),
+                output_name: canonical.clone(),
+                vendor_hint,
+            });
+        }
+        if let Some(display_name) = display_name
+            && alias_index
+                .match_record(display_name, vendor_hint.as_deref())
+                .is_none_or(|display_index| display_index != index)
+        {
+            return Some(OpenRouterIdentity {
+                key: format!("raw:{}", normalize_name(preferred)),
+                output_name: display_name.to_string(),
+                vendor_hint,
+            });
+        }
+        return None;
+    }
+
+    Some(OpenRouterIdentity {
+        key: format!("raw:{}", normalize_name(preferred)),
+        output_name: preferred.to_string(),
+        vendor_hint,
+    })
+}
+
+fn provider_prefix(value: &str) -> Option<&str> {
+    value
+        .split_once('/')
+        .map(|(provider, _)| provider)
+        .filter(|provider| !provider.is_empty())
+}
+
+fn provider_prefixes_match(public_id: &str, canonical_slug: &str) -> bool {
+    match (provider_prefix(public_id), provider_prefix(canonical_slug)) {
+        (Some(public), Some(canonical)) => normalize_name(public) == normalize_name(canonical),
+        _ => true,
+    }
+}
+
+fn explicit_versions_compatible(source_identity: &str, canonical_id: &str) -> bool {
+    match (
+        explicit_v_major(source_identity),
+        explicit_v_major(canonical_id),
+    ) {
+        (Some(source), Some(canonical)) => source == canonical,
+        _ => true,
+    }
+}
+
+fn explicit_v_major(value: &str) -> Option<u32> {
+    normalize_name(value)
+        .split_whitespace()
+        .filter_map(|token| token.strip_prefix('v'))
+        .filter_map(|version| {
+            let major: String = version.chars().take_while(char::is_ascii_digit).collect();
+            (!major.is_empty())
+                .then(|| major.parse::<u32>().ok())
+                .flatten()
+        })
+        .next()
 }
 
 fn merge_openrouter_field(fields: &mut BTreeMap<String, Value>, key: String, value: Value) {
@@ -269,16 +409,20 @@ mod tests {
     }
 
     #[test]
-    fn merges_duplicate_canonical_operational_fields_by_direction() {
+    fn canonical_slug_keeps_deepseek_v3_separate_from_v4_flash() {
         let payload = json!({
             "data": [
                 {
                     "id": "deepseek/deepseek-chat",
-                    "context_length": 163840,
+                    "canonical_slug": "deepseek/deepseek-chat-v3",
+                    "name": "DeepSeek: DeepSeek V3",
+                    "context_length": 2000000,
                     "pricing": { "prompt": "0.00000025", "completion": "0.0000011" }
                 },
                 {
                     "id": "deepseek/deepseek-v4-flash",
+                    "canonical_slug": "deepseek/deepseek-v4-flash-20260423",
+                    "name": "DeepSeek: DeepSeek V4 Flash",
                     "context_length": 1048576,
                     "pricing": { "prompt": "0.00000007", "completion": "0.00000035" }
                 }
@@ -286,19 +430,58 @@ mod tests {
         });
 
         let rows = parse_rows(&payload).expect("payload should parse");
-        let row = rows
+        assert_eq!(rows.len(), 2, "V3 and V4 are distinct upstream models");
+        let v4 = rows
             .iter()
             .find(|row| row.model_name == "deepseek/deepseek-v4-flash")
             .expect("canonical row should be present");
         assert_eq!(
-            row.fields.get("ContextWindow").and_then(number_like),
+            v4.fields.get("ContextWindow").and_then(number_like),
             Some(1048576.0)
         );
-        let blended = row
+        let blended = v4
             .fields
             .get("BlendedCost")
             .and_then(number_like)
             .expect("blended cost should be present");
         assert!((blended - 0.14).abs() < 1e-9, "blended={blended}");
+
+        let v3 = rows
+            .iter()
+            .find(|row| {
+                row.fields.get("CanonicalSlug").and_then(Value::as_str)
+                    == Some("deepseek/deepseek-chat-v3")
+            })
+            .expect("historical V3 row should remain visible");
+        assert_eq!(v3.model_name, "DeepSeek: DeepSeek V3");
+
+        let mut records = crate::embedded_alias_records();
+        ipbr_core::ingest_rows(&mut records, rows);
+        let ranked_v4 = records
+            .iter()
+            .find(|record| record.canonical_id == "deepseek/deepseek-v4-flash")
+            .expect("ranked V4 record");
+        assert_eq!(
+            ranked_v4.raw_metrics.get("ContextWindow").copied(),
+            Some(1048576.0),
+            "the larger V3 context must not leak into V4"
+        );
+    }
+
+    #[test]
+    fn rejects_cross_provider_canonical_slug_for_identity() {
+        let payload = json!({
+            "data": [{
+                "id": "openai/gpt-5.5",
+                "canonical_slug": "anthropic/claude-opus-4.8",
+                "name": "OpenAI: GPT-5.5",
+                "context_length": 400000
+            }]
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "openai/gpt-5.5");
+        assert_eq!(rows[0].vendor_hint.as_deref(), Some("openai"));
     }
 }

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use ipbr_core::RawRow;
+use ipbr_core::{AliasIndex, RawRow, normalize_name};
 use serde_json::{Map, Value};
 
 use std::time::Duration;
@@ -20,6 +20,8 @@ const WEB_PAGES: &[(&str, &str)] = &[
     ("webdev", "https://lmarena.ai/leaderboard/code"),
 ];
 const PAGE_DELAY: Duration = Duration::from_secs(5);
+const PAGE_ORIGIN_FIELD: &str = "_ipbr_origin";
+const LIVE_WEB_ORIGIN: &str = "live_web";
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct LmArenaSource;
@@ -254,6 +256,13 @@ fn parse_web_page(config: &str, html: &str) -> Result<Option<Value>, SourceError
     }
     let mut page = Map::new();
     page.insert("rows".to_string(), Value::Array(rows));
+    // The API dataset can lag the live leaderboard. Retain transport
+    // provenance in the cached wrapper so parsing can deterministically give
+    // the current website row precedence even when page order changes.
+    page.insert(
+        PAGE_ORIGIN_FIELD.to_string(),
+        Value::String(LIVE_WEB_ORIGIN.to_string()),
+    );
     Ok(Some(Value::Object(page)))
 }
 
@@ -399,9 +408,12 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
         ));
     };
 
-    let mut rows_by_model: BTreeMap<(String, String), RawRow> = BTreeMap::new();
+    let alias_records = crate::embedded_alias_records();
+    let alias_index = AliasIndex::build(&alias_records);
+    let mut rows_by_model: BTreeMap<(String, LmArenaVariant), AccumulatedRow> = BTreeMap::new();
     for (config, pages) in config_pages {
         for page in pages {
+            let origin = PageOrigin::from_page(&page);
             let rows = page.get("rows").and_then(Value::as_array).ok_or_else(|| {
                 SourceError::Parse(format!("LMArena {config} page missing rows[]"))
             })?;
@@ -430,25 +442,127 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                 let rating = row.get("rating").and_then(number_like).ok_or_else(|| {
                     SourceError::Parse(format!("LMArena {config} row missing numeric rating"))
                 })?;
-                let key = (model_name.to_string(), vendor_hint.to_string());
-                let raw_row = rows_by_model.entry(key).or_insert_with(|| RawRow {
-                    source_id: SOURCE_ID.to_string(),
-                    model_name: model_name.to_string(),
-                    vendor_hint: (!vendor_hint.is_empty()).then(|| vendor_hint.to_string()),
-                    fields: BTreeMap::new(),
-                    synthesized_from: None,
-                    synthesis_category: None,
+                let identity = crate::alias_dedupe_key(
+                    &alias_records,
+                    &alias_index,
+                    model_name,
+                    (!vendor_hint.is_empty()).then_some(vendor_hint),
+                );
+                let key = (identity, LmArenaVariant::from_label(model_name));
+                let accumulated = rows_by_model.entry(key).or_insert_with(|| AccumulatedRow {
+                    row: RawRow {
+                        source_id: SOURCE_ID.to_string(),
+                        model_name: model_name.to_string(),
+                        vendor_hint: (!vendor_hint.is_empty()).then(|| vendor_hint.to_string()),
+                        fields: BTreeMap::new(),
+                        synthesized_from: None,
+                        synthesis_category: None,
+                    },
+                    field_origins: BTreeMap::new(),
+                    label_origin: origin,
                 });
-                map_rating(config, rating, &mut raw_row.fields);
-                copy_numeric(&mut raw_row.fields, "Rank", row.get("rank"));
-                copy_numeric(&mut raw_row.fields, "VoteCount", row.get("vote_count"));
-                copy_numeric(&mut raw_row.fields, "RatingLower", row.get("rating_lower"));
-                copy_numeric(&mut raw_row.fields, "RatingUpper", row.get("rating_upper"));
+                accumulated.prefer_label(model_name, vendor_hint, origin);
+
+                let mut fields = BTreeMap::new();
+                map_rating(config, rating, &mut fields);
+                copy_numeric(&mut fields, "Rank", row.get("rank"));
+                copy_numeric(&mut fields, "VoteCount", row.get("vote_count"));
+                copy_numeric(&mut fields, "RatingLower", row.get("rating_lower"));
+                copy_numeric(&mut fields, "RatingUpper", row.get("rating_upper"));
+                accumulated.merge_fields(fields, origin);
             }
         }
     }
 
-    Ok(rows_by_model.into_values().collect())
+    Ok(rows_by_model
+        .into_values()
+        .map(|accumulated| accumulated.row)
+        .collect())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum PageOrigin {
+    Dataset,
+    LiveWeb,
+}
+
+impl PageOrigin {
+    fn from_page(page: &Value) -> Self {
+        if page.get(PAGE_ORIGIN_FIELD).and_then(Value::as_str) == Some(LIVE_WEB_ORIGIN) {
+            Self::LiveWeb
+        } else {
+            Self::Dataset
+        }
+    }
+}
+
+/// Keep effort/configuration variants separate while collapsing spelling and
+/// organization-casing differences to one model identity. The ranking layer
+/// still needs distinct rows so it can apply its configured effort policy per
+/// metric.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum LmArenaVariant {
+    Max,
+    XHigh,
+    High,
+    Thinking,
+    Medium,
+    Default,
+    Low,
+    NonReasoning,
+}
+
+impl LmArenaVariant {
+    fn from_label(label: &str) -> Self {
+        let normalized = normalize_name(label);
+        let contains = |phrase: &str| normalized.split_whitespace().any(|token| token == phrase);
+        if normalized.contains("non reasoning") {
+            Self::NonReasoning
+        } else if contains("instant") || contains("minimal") || contains("low") {
+            Self::Low
+        } else if contains("max") {
+            Self::Max
+        } else if contains("xhigh") {
+            Self::XHigh
+        } else if contains("high") {
+            Self::High
+        } else if contains("medium") {
+            Self::Medium
+        } else if contains("thinking") || contains("reasoning") || contains("adaptive") {
+            Self::Thinking
+        } else {
+            Self::Default
+        }
+    }
+}
+
+struct AccumulatedRow {
+    row: RawRow,
+    field_origins: BTreeMap<String, PageOrigin>,
+    label_origin: PageOrigin,
+}
+
+impl AccumulatedRow {
+    fn prefer_label(&mut self, model_name: &str, vendor_hint: &str, origin: PageOrigin) {
+        if origin > self.label_origin {
+            self.row.model_name = model_name.to_string();
+            self.row.vendor_hint = (!vendor_hint.is_empty()).then(|| vendor_hint.to_string());
+            self.label_origin = origin;
+        }
+    }
+
+    fn merge_fields(&mut self, fields: BTreeMap<String, Value>, origin: PageOrigin) {
+        for (key, value) in fields {
+            if self
+                .field_origins
+                .get(&key)
+                .is_none_or(|existing| origin >= *existing)
+            {
+                self.row.fields.insert(key.clone(), value);
+                self.field_origins.insert(key, origin);
+            }
+        }
+    }
 }
 
 fn is_locked_dataset_error(err: &SourceError) -> bool {
@@ -1018,5 +1132,119 @@ mod tests {
             Some(1641.0)
         );
         assert_eq!(row.vendor_hint.as_deref(), Some("Z.ai"));
+        assert_eq!(
+            page.get(PAGE_ORIGIN_FIELD).and_then(Value::as_str),
+            Some(LIVE_WEB_ORIGIN)
+        );
+    }
+
+    #[test]
+    fn dedupes_vendor_case_by_normalized_model_identity() {
+        let payload = json!({
+            "configs": {
+                "text": [{
+                    "rows": [{"row": {
+                        "model_name": "case-model",
+                        "organization": "Anthropic",
+                        "rating": 1400.0,
+                        "category": "overall"
+                    }}]
+                }],
+                "webdev": [{
+                    "rows": [{"row": {
+                        "model_name": "Case Model",
+                        "organization": "anthropic",
+                        "rating": 1410.0,
+                        "category": "overall"
+                    }}]
+                }]
+            }
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1, "vendor casing must not create a second row");
+        assert_eq!(
+            rows[0].fields.get("LMArenaText").and_then(number_like),
+            Some(1400.0)
+        );
+        assert_eq!(
+            rows[0]
+                .fields
+                .get("CopilotArenaOrLMArenaCode")
+                .and_then(number_like),
+            Some(1410.0)
+        );
+    }
+
+    #[test]
+    fn live_web_row_wins_even_when_dataset_page_comes_later() {
+        let payload = json!({
+            "configs": {
+                "text": [{
+                    PAGE_ORIGIN_FIELD: LIVE_WEB_ORIGIN,
+                    "rows": [{"row": {
+                        "model_name": "Live Model",
+                        "organization": "OpenAI",
+                        "rating": 1508.62,
+                        "rank": 3,
+                        "vote_count": 5000,
+                        "category": "overall"
+                    }}]
+                }, {
+                    "rows": [{"row": {
+                        "model_name": "live-model",
+                        "organization": "openai",
+                        "rating": 1495.08,
+                        "rank": 7,
+                        "vote_count": 4000,
+                        "category": "overall"
+                    }}]
+                }]
+            }
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(row.model_name, "Live Model");
+        assert_eq!(row.vendor_hint.as_deref(), Some("OpenAI"));
+        assert_eq!(
+            row.fields.get("LMArenaText").and_then(number_like),
+            Some(1508.62)
+        );
+        assert_eq!(row.fields.get("Rank").and_then(number_like), Some(3.0));
+        assert_eq!(
+            row.fields.get("VoteCount").and_then(number_like),
+            Some(5000.0)
+        );
+    }
+
+    #[test]
+    fn instant_and_default_rows_remain_distinct_before_effort_filtering() {
+        let payload = json!({
+            "configs": {
+                "text": [{
+                    "rows": [
+                        {"row": {
+                            "model_name": "kimi-k2.5",
+                            "organization": "Moonshot AI",
+                            "rating": 1400.0,
+                            "category": "overall"
+                        }},
+                        {"row": {
+                            "model_name": "kimi-k2.5-instant",
+                            "organization": "moonshot ai",
+                            "rating": 1300.0,
+                            "category": "overall"
+                        }}
+                    ]
+                }]
+            }
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 2, "instant is a distinct low-effort row");
+        assert!(rows.iter().any(|row| row.model_name == "kimi-k2.5"));
+        assert!(rows.iter().any(|row| row.model_name == "kimi-k2.5-instant"));
     }
 }
