@@ -193,7 +193,7 @@ aliases = ["Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
 sources = ["aa_automation_bench", "aa_enterprise_ops_gym", "aa_gdpval_v2", "aa_omniscience", "artificial_analysis", "deep_swe_v1_1", "eqbench_creative_writing", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 96.664649
+i_raw = 96.683764
 p_raw = 95.250855
 b_raw = 96.980484
 r = 96.090392
@@ -456,10 +456,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.400000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["eqbench"]
 
@@ -526,7 +526,7 @@ missing = 0.465449
 effective = 0.534551
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "deepswe", "enterprise_workflow", "gdpval", "scale", "swe"]
-core_direct = 0.312023
+core_direct = 0.333542
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "gdpval"]
 historical_family_count = 1
@@ -535,13 +535,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.408889
+direct = 0.410459
 reported = 0.000000
-missing = 0.591111
-effective = 0.408889
+missing = 0.589541
+effective = 0.410459
 family_count = 3
 direct_families = ["aa_knowledge", "aa_reasoning", "eqbench"]
-core_direct = 0.408889
+core_direct = 0.410459
 core_family_count = 3
 core_direct_families = ["aa_knowledge", "aa_reasoning", "eqbench"]
 historical_family_count = 0
@@ -556,7 +556,7 @@ missing = 0.514417
 effective = 0.485583
 family_count = 6
 direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "enterprise_workflow", "gdpval", "scale"]
-core_direct = 0.318846
+core_direct = 0.337447
 core_family_count = 4
 core_direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "gdpval"]
 historical_family_count = 2
@@ -571,7 +571,7 @@ missing = 0.664750
 effective = 0.335250
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "deepswe", "enterprise_workflow", "gdpval", "scale", "swe"]
-core_direct = 0.248564
+core_direct = 0.271225
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "gdpval"]
 historical_family_count = 1
@@ -580,7 +580,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["ARC_AGI_2", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "FactoryCodeReviewF1", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["ARC_AGI_2", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "FactoryCodeReviewF1", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -592,7 +592,7 @@ aliases = ["Claude 4.5 Haiku", "Claude 4.5 Haiku (Non-reasoning)", "Claude 4.5 H
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "terminal_bench"]
 
 [models.scores]
-i_raw = 6.101771
+i_raw = 6.725584
 p_raw = 11.453469
 b_raw = 25.116043
 r = 17.926981
@@ -605,7 +605,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 31.582401
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 6.294807
+CRE = 8.177685
 GEN = 5.553678
 LM_ARENA_REVIEW_PROXY = 6.651051
 OPS_long = 72.058736
@@ -638,6 +638,7 @@ CopilotArenaOrLMArenaCode = 15.584513
 GPQA = 0.123324
 HLE = 5.044299
 IFBench = 18.421468
+LMArenaCreative = 10.693420
 LMArenaDocument = 6.651051
 LMArenaText = 8.099224
 LiveCodingComposite = 18.165501
@@ -683,6 +684,7 @@ CopilotArenaOrLMArenaCode = 1324.089554
 GPQA = 67.200000
 HLE = 9.700000
 IFBench = 54.285714
+LMArenaCreative = 1368.527927
 LMArenaDocument = 1417.383615
 LMArenaText = 1392.041307
 LongContextRecall = 70.333333
@@ -783,6 +785,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -885,10 +891,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.600000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.400000
+effective = 0.600000
 family_count = 2
 direct_families = ["arc_agi", "lmarena"]
 
@@ -955,7 +961,7 @@ missing = 0.435974
 effective = 0.564026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -964,13 +970,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.635830
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.364170
+effective = 0.635830
 family_count = 3
 direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.635830
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
@@ -985,7 +991,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -1000,7 +1006,7 @@ missing = 0.611250
 effective = 0.388750
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.475457
+core_direct = 0.491453
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -1021,7 +1027,7 @@ aliases = ["Claude 4.5 Opus", "Claude 4.5 Opus (high reasoning)", "Claude 4.5 Op
 sources = ["arc_agi", "artificial_analysis", "bfcl", "eqbench_creative_writing", "gso", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 51.971810
+i_raw = 54.268133
 p_raw = 57.336814
 b_raw = 68.393515
 r = 58.960849
@@ -1034,7 +1040,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 72.756086
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 49.216414
+CRE = 56.088522
 GEN = 56.688524
 LM_ARENA_REVIEW_PROXY = 46.452726
 OPS_long = 62.314471
@@ -1069,6 +1075,7 @@ GPQA = 65.009010
 GSO = 53.503839
 HLE = 55.538893
 IFBench = 29.370608
+LMArenaCreative = 76.596663
 LMArenaDocument = 57.383321
 LMArenaSearch = 35.522132
 LMArenaText = 65.060914
@@ -1117,6 +1124,7 @@ GPQA = 86.600000
 GSO = 24.500000
 HLE = 28.400000
 IFBench = 57.959184
+LMArenaCreative = 1443.415821
 LMArenaDocument = 1460.504955
 LMArenaSearch = 1182.016653
 LMArenaText = 1446.316085
@@ -1227,6 +1235,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -1406,7 +1418,7 @@ missing = 0.300974
 effective = 0.699026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -1415,13 +1427,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -1436,7 +1448,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -1451,7 +1463,7 @@ missing = 0.464000
 effective = 0.536000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -1472,7 +1484,7 @@ aliases = ["Claude Opus 4.6 (120K, High)", "Claude Opus 4.6 (120K, Low)", "Claud
 sources = ["agc_bench", "arc_agi", "artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 87.922127
+i_raw = 88.189879
 p_raw = 87.695230
 b_raw = 79.975401
 r = 86.643686
@@ -1485,7 +1497,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 80.181249
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 85.516633
+CRE = 88.232346
 GEN = 90.800020
 LM_ARENA_REVIEW_PROXY = 97.031377
 OPS_long = 68.171567
@@ -1514,6 +1526,7 @@ HLE = 83.534322
 HLETools = 89.963566
 HiLBench = 87.077832
 IFBench = 15.705912
+LMArenaCreative = 97.703489
 LMArenaDocument = 97.051479
 LMArenaSearch = 97.011275
 LMArenaText = 97.515536
@@ -1563,6 +1576,7 @@ HLE = 36.700000
 HLETools = 53.300000
 HiLBench = 24.330000
 IFBench = 53.129252
+LMArenaCreative = 1501.478330
 LMArenaDocument = 1507.402099
 LMArenaSearch = 1251.095927
 LMArenaText = 1500.547773
@@ -1667,6 +1681,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -1859,7 +1877,7 @@ missing = 0.198727
 effective = 0.801273
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -1868,13 +1886,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -1889,7 +1907,7 @@ missing = 0.425250
 effective = 0.574750
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -1904,7 +1922,7 @@ missing = 0.419000
 effective = 0.581000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -1925,7 +1943,7 @@ aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus
 sources = ["agc_bench", "arc_agi", "artificial_analysis", "context_arena", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 94.598817
+i_raw = 94.486578
 p_raw = 80.749654
 b_raw = 76.181703
 r = 78.720471
@@ -1938,7 +1956,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 76.306405
 CODE_REVIEW_DIRECT = 75.010987
-CRE = 95.154313
+CRE = 94.962583
 GEN = 93.163649
 LM_ARENA_REVIEW_PROXY = 93.432871
 OPS_long = 67.175299
@@ -1974,6 +1992,7 @@ HLE = 89.222416
 HLETools = 93.196539
 HiLBench = 94.141957
 IFBench = 31.769644
+LMArenaCreative = 94.288857
 LMArenaDocument = 93.306150
 LMArenaSearch = 93.559592
 LMArenaText = 94.998524
@@ -2030,6 +2049,7 @@ HLE = 39.600000
 HLETools = 54.700000
 HiLBench = 27.670000
 IFBench = 58.639456
+LMArenaCreative = 1480.049529
 LMArenaDocument = 1494.795547
 LMArenaSearch = 1237.470823
 LMArenaText = 1487.634473
@@ -2162,6 +2182,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -2356,22 +2380,22 @@ missing = 0.150487
 effective = 0.849513
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.969208
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.967085
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -2386,9 +2410,9 @@ missing = 0.321250
 effective = 0.678750
 family_count = 7
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.637809
-core_family_count = 6
-core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena", "terminal_bench"]
+core_direct = 0.616679
+core_family_count = 5
+core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "terminal_bench"]
 historical_family_count = 3
 historical_direct_families = ["aa_instruction", "aa_tooluse", "terminal_bench"]
 qualification_path = "standard"
@@ -2401,9 +2425,9 @@ missing = 0.159000
 effective = 0.841000
 family_count = 8
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "factory_code_review", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.780679
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.760684
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
@@ -2422,7 +2446,7 @@ aliases = ["Opus 4.8 (Claude Code)", "Opus 4.8 (Claude Code) xHigh", "Opus 4.8 C
 sources = ["aa_critpt", "aa_gdpval_v2", "aa_omniscience", "arc_agi", "artificial_analysis", "context_arena", "deep_swe_v1_1", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 87.213046
+i_raw = 87.452992
 p_raw = 89.361960
 b_raw = 92.231902
 r = 88.944262
@@ -2435,7 +2459,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 92.700190
 CODE_REVIEW_DIRECT = 96.889711
-CRE = 85.820511
+CRE = 85.425225
 GEN = 89.641850
 LM_ARENA_REVIEW_PROXY = 73.105075
 OPS_long = 77.290005
@@ -2480,6 +2504,7 @@ HiLBench = 80.018016
 IFBench = 45.882142
 KimiClaw247Bench = 77.181208
 KimiCodeBenchV2 = 91.602346
+LMArenaCreative = 85.163737
 LMArenaDocument = 73.105075
 LMArenaText = 81.001541
 LiveCodingComposite = 90.492768
@@ -2541,6 +2566,7 @@ HiLBench = 22.330000
 IFBench = 62.244898
 KimiClaw247Bench = 50.400000
 KimiCodeBenchV2 = 67.400000
+LMArenaCreative = 1456.134218
 LMArenaDocument = 1470.811141
 LMArenaText = 1461.054152
 LongContextRecall = 67.666667
@@ -2704,6 +2730,10 @@ citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Cl
 class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Claude Opus 4.8 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -2879,9 +2909,9 @@ missing = 0.150730
 effective = 0.849270
 family_count = 9
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "deepswe", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.679472
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "gdpval", "lmarena", "terminal_bench"]
+core_direct = 0.678056
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "gdpval", "lmarena", "terminal_bench"]
 historical_family_count = 1
 historical_direct_families = ["swe"]
 qualification_path = "standard"
@@ -2909,9 +2939,9 @@ missing = 0.195000
 effective = 0.805000
 family_count = 9
 direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "gdpval", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.816254
-core_family_count = 8
-core_direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "gdpval", "lmarena", "terminal_bench"]
+core_direct = 0.805535
+core_family_count = 7
+core_direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "gdpval", "lmarena", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["aa_instruction", "aa_tooluse"]
 qualification_path = "standard"
@@ -2924,9 +2954,9 @@ missing = 0.237250
 effective = 0.762750
 family_count = 10
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "deepswe", "factory_code_review", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.738642
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "gdpval", "lmarena", "terminal_bench"]
+core_direct = 0.714815
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "gdpval", "lmarena", "terminal_bench"]
 historical_family_count = 1
 historical_direct_families = ["swe"]
 qualification_path = "standard"
@@ -2945,7 +2975,7 @@ aliases = ["Claude 4 Sonnet (20250514)", "anthropic/claude-sonnet-4", "claude 4 
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "gso", "livecodebench", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 6.602656
+i_raw = 6.854227
 p_raw = 10.649419
 b_raw = 38.735537
 r = 40.923224
@@ -2958,7 +2988,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 35.739835
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 8.386619
+CRE = 7.508368
 GEN = 3.895891
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 74.873906
@@ -2983,6 +3013,7 @@ GPQA = 6.082404
 GSO = 6.319589
 HLE = 4.964030
 IFBench = 19.462941
+LMArenaCreative = 4.167825
 LMArenaText = 0.750454
 LiveCodeBench = 50.000000
 LiveCodingComposite = 7.668543
@@ -3018,6 +3049,7 @@ GPQA = 77.700000
 GSO = 4.900000
 HLE = 9.600000
 IFBench = 54.693878
+LMArenaCreative = 1345.601539
 LMArenaText = 1348.350252
 LiveCodeBench = 68.530806
 LongContextRecall = 64.666667
@@ -3087,6 +3119,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -3244,7 +3280,7 @@ missing = 0.575843
 effective = 0.424157
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.601760
+core_direct = 0.622571
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -3253,13 +3289,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -3274,12 +3310,12 @@ missing = 0.652750
 effective = 0.347250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
 historical_direct_families = ["aa_instruction", "aa_tooluse"]
-qualification_path = "historical_breadth"
+qualification_path = "core_corroborated"
 provisional = false
 
 [models.evidence.roles."R"]
@@ -3289,7 +3325,7 @@ missing = 0.833500
 effective = 0.166500
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.290601
+core_direct = 0.317094
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -3310,7 +3346,7 @@ aliases = ["Claude 4.5 Sonnet (20250929)", "anthropic/claude-sonnet-4.5", "claud
 sources = ["arc_agi", "artificial_analysis", "bfcl", "eqbench_creative_writing", "gso", "lmarena", "mcp_atlas", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 33.141612
+i_raw = 35.561093
 p_raw = 23.291792
 b_raw = 40.741630
 r = 30.917875
@@ -3323,7 +3359,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 48.149210
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 35.987829
+CRE = 41.946724
 GEN = 27.180055
 LM_ARENA_REVIEW_PROXY = 23.806850
 OPS_long = 70.532144
@@ -3358,6 +3394,7 @@ GPQA = 35.723640
 GSO = 17.341898
 HLE = 16.086031
 IFBench = 27.080828
+LMArenaCreative = 56.134331
 LMArenaDocument = 39.215615
 LMArenaSearch = 8.398086
 LMArenaText = 46.110832
@@ -3406,6 +3443,7 @@ GPQA = 83.400000
 GSO = 12.740000
 HLE = 17.300000
 IFBench = 57.278912
+LMArenaCreative = 1422.157782
 LMArenaDocument = 1449.710000
 LMArenaSearch = 1151.625538
 LMArenaText = 1432.481685
@@ -3516,6 +3554,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -3695,7 +3737,7 @@ missing = 0.300974
 effective = 0.699026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -3704,13 +3746,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -3725,7 +3767,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -3740,7 +3782,7 @@ missing = 0.464000
 effective = 0.536000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -3761,7 +3803,7 @@ aliases = ["Claude Sonnet 4.6 (Adaptive Reasoning, Max Effort)", "Claude Sonnet 
 sources = ["agc_bench", "arc_agi", "artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 77.482799
+i_raw = 76.390461
 p_raw = 65.296578
 b_raw = 63.867255
 r = 73.867592
@@ -3774,7 +3816,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 65.523669
 CODE_REVIEW_DIRECT = 85.338067
-CRE = 79.103689
+CRE = 76.558830
 GEN = 73.518438
 LM_ARENA_REVIEW_PROXY = 85.786287
 OPS_long = 66.986370
@@ -3802,6 +3844,7 @@ FactoryCodeReviewRecall = 28.314028
 GPQA = 72.289187
 HLE = 62.072803
 IFBench = 24.906613
+LMArenaCreative = 69.067527
 LMArenaDocument = 88.845541
 LMArenaSearch = 82.727033
 LMArenaText = 75.158264
@@ -3848,6 +3891,7 @@ FactoryCodeReviewRecall = 47.300000
 GPQA = 87.500000
 HLE = 30.000000
 IFBench = 56.598639
+LMArenaCreative = 1434.759280
 LMArenaDocument = 1486.584711
 LMArenaSearch = 1218.666160
 LMArenaText = 1454.951081
@@ -3943,6 +3987,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -4126,7 +4174,7 @@ missing = 0.336348
 effective = 0.663652
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -4135,13 +4183,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -4156,7 +4204,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -4171,7 +4219,7 @@ missing = 0.281250
 effective = 0.718750
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "factory_code_review", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -4346,10 +4394,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.400000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["eqbench"]
 
@@ -4416,7 +4464,7 @@ missing = 0.680318
 effective = 0.319682
 family_count = 3
 direct_families = ["deepswe", "swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 1
@@ -4425,13 +4473,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.300000
+direct = 0.294737
 reported = 0.000000
-missing = 0.700000
-effective = 0.300000
+missing = 0.705263
+effective = 0.294737
 family_count = 1
 direct_families = ["eqbench"]
-core_direct = 0.300000
+core_direct = 0.294737
 core_family_count = 1
 core_direct_families = ["eqbench"]
 historical_family_count = 0
@@ -4446,7 +4494,7 @@ missing = 0.935000
 effective = 0.065000
 family_count = 1
 direct_families = ["terminal_bench"]
-core_direct = 0.091873
+core_direct = 0.097233
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -4461,7 +4509,7 @@ missing = 0.867250
 effective = 0.132750
 family_count = 3
 direct_families = ["deepswe", "swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 1
@@ -4470,7 +4518,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]
 
 [[models]]
@@ -4482,7 +4530,7 @@ aliases = ["DeepSeek V3.2", "DeepSeek V3.2 (high reasoning)", "DeepSeek V3.2 Rea
 sources = ["arc_agi", "artificial_analysis", "bfcl", "eqbench_creative_writing", "lmarena", "openrouter", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 17.107134
+i_raw = 17.160461
 p_raw = 26.757845
 b_raw = 26.808573
 r = 30.308855
@@ -4495,7 +4543,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 27.795146
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 14.006063
+CRE = 16.397059
 GEN = 23.707904
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 0.000000
@@ -4529,6 +4577,7 @@ EQBenchCreativeWriting = 13.212518
 GPQA = 41.069294
 HLE = 30.482137
 IFBench = 39.528326
+LMArenaCreative = 22.757983
 LMArenaText = 29.361227
 LiveCodingComposite = 15.469543
 LongContextComposite = 50.068231
@@ -4571,6 +4620,7 @@ EQBenchCreativeWriting = 1514.900000
 GPQA = 84.000000
 HLE = 22.200000
 IFBench = 60.680272
+LMArenaCreative = 1388.911242
 LMArenaText = 1419.636061
 LongContextRecall = 65.000000
 MMLUPro = 86.200000
@@ -4672,6 +4722,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -4831,7 +4885,7 @@ missing = 0.466142
 effective = 0.533858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -4840,13 +4894,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -4861,12 +4915,12 @@ missing = 0.652750
 effective = 0.347250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
 historical_direct_families = ["aa_instruction", "aa_tooluse", "terminal_bench"]
-qualification_path = "historical_breadth"
+qualification_path = "core_corroborated"
 provisional = false
 
 [models.evidence.roles."R"]
@@ -4876,7 +4930,7 @@ missing = 0.799000
 effective = 0.201000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -4897,7 +4951,7 @@ aliases = ["deepseek chat", "deepseek reasoner", "deepseek v4 flash", "deepseek-
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 30.862752
+i_raw = 30.758659
 p_raw = 41.274727
 b_raw = 56.967424
 r = 50.819664
@@ -4910,7 +4964,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 59.003861
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 21.317952
+CRE = 23.519583
 GEN = 53.426701
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 89.206194
@@ -4933,6 +4987,7 @@ GPQA = 84.229419
 HLE = 69.998755
 HLETools = 14.869760
 IFBench = 93.403838
+LMArenaCreative = 28.794896
 LMArenaText = 32.111093
 LiveCodingComposite = 29.679721
 LongContextComposite = 34.276783
@@ -4965,6 +5020,7 @@ GPQA = 89.400000
 HLE = 32.100000
 HLETools = 40.300000
 IFBench = 79.183673
+LMArenaCreative = 1396.079689
 LMArenaText = 1421.935269
 LongContextRecall = 63.000000
 MCPAtlas = 67.400000
@@ -5033,6 +5089,10 @@ citation = "DeepSeek V4 official release table, V4 Flash Think High mode, HLE wi
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -5114,10 +5174,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -5184,7 +5244,7 @@ missing = 0.515674
 effective = 0.484326
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "scale", "swe"]
-core_direct = 0.301760
+core_direct = 0.322571
 core_family_count = 2
 core_direct_families = ["aa_coding", "aa_longcontext"]
 historical_family_count = 2
@@ -5193,13 +5253,13 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 1
@@ -5214,7 +5274,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -5229,7 +5289,7 @@ missing = 0.735250
 effective = 0.264750
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "scale", "swe"]
-core_direct = 0.175457
+core_direct = 0.191453
 core_family_count = 2
 core_direct_families = ["aa_coding", "aa_longcontext"]
 historical_family_count = 2
@@ -5239,7 +5299,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
 canonical_id = "deepseek/deepseek-v4-pro"
@@ -5250,7 +5310,7 @@ aliases = ["deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 46.619231
+i_raw = 49.562944
 p_raw = 70.618633
 b_raw = 79.365500
 r = 75.522134
@@ -5263,7 +5323,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 81.139385
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 32.475557
+CRE = 45.240254
 GEN = 73.752595
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 82.014801
@@ -5287,6 +5347,7 @@ GPQA = 80.986301
 HLE = 81.591222
 HLETools = 39.843766
 IFBench = 90.008326
+LMArenaCreative = 74.668188
 LMArenaText = 66.115607
 LiveCodingComposite = 71.104639
 LongContextComposite = 60.791063
@@ -5320,6 +5381,7 @@ GPQA = 88.800000
 HLE = 35.900000
 HLETools = 44.700000
 IFBench = 76.462585
+LMArenaCreative = 1441.046078
 LMArenaText = 1447.147510
 LongContextRecall = 66.333333
 MCPAtlas = 74.200000
@@ -5392,6 +5454,10 @@ citation = "DeepSeek V4 official release table, V4 Pro Think High mode, HLE with
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -5473,10 +5539,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -5543,7 +5609,7 @@ missing = 0.435974
 effective = 0.564026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -5552,13 +5618,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 1
@@ -5573,7 +5639,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -5588,7 +5654,7 @@ missing = 0.711250
 effective = 0.288750
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -5598,7 +5664,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
 canonical_id = "google/gemini-2.5-flash"
@@ -5609,7 +5675,7 @@ aliases = ["gemini 2.5 flash", "gemini flash 2.5", "gemini-2-5-flash", "gemini-2
 sources = ["artificial_analysis", "bfcl", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 22.139521
+i_raw = 24.948206
 p_raw = 20.465206
 b_raw = 4.015137
 r = 6.799400
@@ -5622,7 +5688,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 4.593155
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 26.909732
+CRE = 31.994844
 GEN = 17.150270
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 93.869501
@@ -5653,6 +5719,7 @@ ContextWindow = 97.815659
 GPQA = 9.563023
 HLE = 6.304701
 IFBench = 10.384782
+LMArenaCreative = 35.045912
 LMArenaText = 26.909732
 LiveCodingComposite = 6.372580
 LongContextComposite = 25.222268
@@ -5687,6 +5754,7 @@ ContextWindow = 1048576.000000
 GPQA = 79.000000
 HLE = 11.100000
 IFBench = 50.272109
+LMArenaCreative = 1402.607116
 LMArenaText = 1417.477939
 LongContextRecall = 61.666667
 MMLUPro = 83.200000
@@ -5773,6 +5841,10 @@ source = "artificial_analysis"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaText"]
 class = "direct"
 source = "lmarena"
@@ -5844,10 +5916,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -5914,7 +5986,7 @@ missing = 0.710843
 effective = 0.289157
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.601760
+core_direct = 0.622571
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -5923,13 +5995,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -5944,7 +6016,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -5959,7 +6031,7 @@ missing = 0.880750
 effective = 0.119250
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.290601
+core_direct = 0.317094
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -5980,7 +6052,7 @@ aliases = ["gemini 2.5 pro", "gemini pro 2.5", "gemini-2-5-pro", "gemini-2.5-pro
 sources = ["artificial_analysis", "gso", "lmarena", "openrouter", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 66.542201
+i_raw = 69.044380
 p_raw = 59.262150
 b_raw = 8.620286
 r = 10.614756
@@ -5993,7 +6065,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 9.280601
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 77.482284
+CRE = 81.560848
 GEN = 55.099767
 LM_ARENA_REVIEW_PROXY = 6.822631
 OPS_long = 87.334657
@@ -6017,6 +6089,7 @@ GPQA = 44.763034
 GSO = 3.212745
 HLE = 26.694359
 IFBench = 8.201695
+LMArenaCreative = 84.007987
 LMArenaDocument = 8.422058
 LMArenaSearch = 5.223204
 LMArenaText = 77.482284
@@ -6047,6 +6120,7 @@ GPQA = 84.400000
 GSO = 0.000000
 HLE = 21.100000
 IFBench = 48.707483
+LMArenaCreative = 1454.126742
 LMArenaDocument = 1421.128331
 LMArenaSearch = 1143.000000
 LMArenaText = 1457.240378
@@ -6110,6 +6184,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -6190,10 +6268,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -6260,7 +6338,7 @@ missing = 0.631142
 effective = 0.368858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -6269,13 +6347,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -6290,7 +6368,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -6305,12 +6383,12 @@ missing = 0.656750
 effective = 0.343250
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
-qualification_path = "core_corroborated"
+qualification_path = "core_standard"
 provisional = false
 
 [models.missing]
@@ -6326,7 +6404,7 @@ aliases = ["gemini 3 flash", "gemini flash 3", "gemini-3-flash", "gemini-3-flash
 sources = ["arc_agi", "artificial_analysis", "eqbench_judgemark", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 62.421956
+i_raw = 65.237463
 p_raw = 46.623518
 b_raw = 44.306321
 r = 37.674326
@@ -6339,7 +6417,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 45.858323
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 56.062642
+CRE = 69.579449
 GEN = 69.113513
 LM_ARENA_REVIEW_PROXY = 37.060107
 OPS_long = 94.510802
@@ -6366,6 +6444,7 @@ GPQA = 86.131437
 GSO = 9.357525
 HLE = 78.351451
 IFBench = 92.033534
+LMArenaCreative = 86.573147
 LMArenaDocument = 4.902009
 LMArenaSearch = 69.218205
 LMArenaText = 85.010128
@@ -6413,6 +6492,7 @@ GPQA = 89.800000
 GSO = 7.840000
 HLE = 34.700000
 IFBench = 77.959184
+LMArenaCreative = 1458.765423
 LMArenaDocument = 1412.634481
 LMArenaSearch = 1205.853003
 LMArenaText = 1466.129710
@@ -6507,6 +6587,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -6628,10 +6712,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.600000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.400000
+effective = 0.600000
 family_count = 2
 direct_families = ["arc_agi", "lmarena"]
 
@@ -6698,7 +6782,7 @@ missing = 0.201348
 effective = 0.798652
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -6707,13 +6791,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.635830
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.364170
+effective = 0.635830
 family_count = 3
 direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.635830
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
@@ -6728,7 +6812,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -6743,7 +6827,7 @@ missing = 0.434000
 effective = 0.566000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -6764,7 +6848,7 @@ aliases = ["gemini 3 pro", "gemini pro 3", "gemini-3-pro", "gemini-3-pro-groundi
 sources = ["arc_agi", "artificial_analysis", "bfcl", "eqbench_creative_writing", "gso", "lmarena", "mcp_atlas", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 47.852911
+i_raw = 50.583420
 p_raw = 64.508502
 b_raw = 68.050473
 r = 58.705622
@@ -6777,7 +6861,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 71.050409
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 34.300278
+CRE = 48.935224
 GEN = 72.248418
 LM_ARENA_REVIEW_PROXY = 44.708773
 OPS_long = 50.000000
@@ -6812,6 +6896,7 @@ GPQA = 90.055257
 GSO = 29.922615
 HLE = 84.662966
 IFBench = 76.706194
+LMArenaCreative = 94.828909
 LMArenaDocument = 17.042651
 LMArenaSearch = 72.374895
 LMArenaText = 92.347595
@@ -6860,6 +6945,7 @@ GPQA = 90.800000
 GSO = 17.650000
 HLE = 37.200000
 IFBench = 70.408163
+LMArenaCreative = 1482.427536
 LMArenaDocument = 1432.920417
 LMArenaSearch = 1208.442434
 LMArenaText = 1479.564602
@@ -6971,6 +7057,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -7151,7 +7241,7 @@ missing = 0.216030
 effective = 0.783970
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.924047
+core_direct = 0.967085
 core_family_count = 5
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
@@ -7160,13 +7250,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -7181,7 +7271,7 @@ missing = 0.392750
 effective = 0.607250
 family_count = 6
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.582686
+core_direct = 0.616679
 core_family_count = 5
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "terminal_bench"]
 historical_family_count = 3
@@ -7196,7 +7286,7 @@ missing = 0.410000
 effective = 0.590000
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.722193
+core_direct = 0.760684
 core_family_count = 5
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
@@ -7217,7 +7307,7 @@ aliases = ["Gemini 3.1 Flash-Lite High", "gemini 3.1 flash lite", "gemini flash 
 sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "mcp_atlas", "openrouter", "sonar"]
 
 [models.scores]
-i_raw = 23.633957
+i_raw = 25.650042
 p_raw = 18.173019
 b_raw = 10.412341
 r = 8.988961
@@ -7230,7 +7320,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 13.502079
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 25.501040
+CRE = 29.256252
 GEN = 21.681142
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 96.511383
@@ -7251,6 +7341,7 @@ EQBenchJudgemark = 41.760357
 GPQA = 26.116259
 HLE = 13.733737
 IFBench = 91.072594
+LMArenaCreative = 31.509380
 LMArenaText = 25.501040
 LiveCodingComposite = 9.728527
 LongContextComposite = 52.789138
@@ -7279,6 +7370,7 @@ EQBenchJudgemarkCILow = 55.009100
 GPQA = 82.200000
 HLE = 16.200000
 IFBench = 77.210884
+LMArenaCreative = 1398.998915
 LMArenaText = 1416.181698
 LongContextRecall = 65.333333
 MCPAtlas = 57.100000
@@ -7335,6 +7427,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -7401,10 +7497,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -7471,7 +7567,7 @@ missing = 0.600974
 effective = 0.399026
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -7480,13 +7576,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -7501,7 +7597,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -7516,7 +7612,7 @@ missing = 0.769000
 effective = 0.231000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -7537,7 +7633,7 @@ aliases = ["Gemini 3.1 Pro High Preview", "gemini 3.1 pro", "gemini pro 3.1", "g
 sources = ["arc_agi", "artificial_analysis", "context_arena", "eqbench_creative_writing", "eqbench_judgemark", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 68.130480
+i_raw = 68.689004
 p_raw = 85.155134
 b_raw = 71.642929
 r = 67.397916
@@ -7550,7 +7646,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 71.618570
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 52.478499
+CRE = 60.982767
 GEN = 94.671716
 LM_ARENA_REVIEW_PROXY = 52.218234
 OPS_long = 86.732248
@@ -7580,6 +7676,7 @@ GSO = 42.955625
 HLE = 95.142414
 HiLBench = 70.411763
 IFBench = 90.980232
+LMArenaCreative = 94.941957
 LMArenaDocument = 24.252183
 LMArenaSearch = 80.184285
 LMArenaText = 93.267068
@@ -7631,6 +7728,7 @@ GSO = 21.570000
 HLE = 44.700000
 HiLBench = 20.330000
 IFBench = 77.142857
+LMArenaCreative = 1482.954887
 LMArenaDocument = 1439.430328
 LMArenaSearch = 1215.809683
 LMArenaText = 1482.018300
@@ -7739,6 +7837,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -7935,22 +8037,22 @@ missing = 0.120712
 effective = 0.879288
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.969208
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.967085
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -7965,9 +8067,9 @@ missing = 0.321250
 effective = 0.678750
 family_count = 7
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.637809
-core_family_count = 6
-core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena", "terminal_bench"]
+core_direct = 0.616679
+core_family_count = 5
+core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "terminal_bench"]
 historical_family_count = 3
 historical_direct_families = ["aa_instruction", "aa_tooluse", "terminal_bench"]
 qualification_path = "standard"
@@ -7980,9 +8082,9 @@ missing = 0.351500
 effective = 0.648500
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.780679
-core_family_count = 6
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.760684
+core_family_count = 5
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
@@ -8001,7 +8103,7 @@ aliases = ["gemini 3.5 flash", "gemini flash 3.5", "gemini-3-5-flash", "gemini-3
 sources = ["aa_enterprise_ops_gym", "arc_agi", "artificial_analysis", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 92.652603
+i_raw = 92.202425
 p_raw = 89.915243
 b_raw = 91.593251
 r = 88.817607
@@ -8014,7 +8116,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 91.215485
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 92.739795
+CRE = 91.754128
 GEN = 92.521932
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 92.734472
@@ -8039,6 +8141,7 @@ GPQA = 93.885200
 HLE = 91.293926
 HiLBench = 33.307089
 IFBench = 89.803096
+LMArenaCreative = 90.380471
 LMArenaText = 92.645632
 LiveCodingComposite = 86.636223
 LongContextComposite = 80.519854
@@ -8065,6 +8168,7 @@ GPQA = 92.200000
 HLE = 41.000000
 HiLBench = 14.330000
 IFBench = 76.326531
+LMArenaCreative = 1467.288474
 LMArenaText = 1480.328692
 LongContextRecall = 69.333333
 MCPAtlas = 83.600000
@@ -8124,6 +8228,10 @@ source = "hil_bench"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaText"]
 class = "direct"
 source = "lmarena"
@@ -8178,10 +8286,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.600000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.400000
+effective = 0.600000
 family_count = 2
 direct_families = ["arc_agi", "lmarena"]
 
@@ -8248,7 +8356,7 @@ missing = 0.459944
 effective = 0.540056
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "enterprise_workflow", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -8257,13 +8365,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.635830
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.364170
+effective = 0.635830
 family_count = 3
 direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.635830
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 0
@@ -8278,7 +8386,7 @@ missing = 0.383000
 effective = 0.617000
 family_count = 6
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "enterprise_workflow", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
@@ -8293,7 +8401,7 @@ missing = 0.687250
 effective = 0.312750
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "enterprise_workflow", "lmarena", "scale", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -8314,7 +8422,7 @@ aliases = ["Meta Muse Spark", "meta/muse-spark", "muse spark", "muse-spark"]
 sources = ["artificial_analysis", "lmarena", "mcp_atlas", "sweatlas_qna", "sweatlas_test_writing", "swebench_pro"]
 
 [models.scores]
-i_raw = 88.687691
+i_raw = 87.228343
 p_raw = 90.008323
 b_raw = 84.150946
 r = 67.743698
@@ -8327,7 +8435,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 82.107870
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 89.561911
+CRE = 86.693449
 GEN = 87.773328
 LM_ARENA_REVIEW_PROXY = 25.226013
 OPS_long = 50.000000
@@ -8345,6 +8453,7 @@ CopilotArenaOrLMArenaCode = 87.213834
 GPQA = 78.554343
 HLE = 89.699945
 IFBench = 89.164847
+LMArenaCreative = 84.972372
 LMArenaDocument = 25.226013
 LMArenaText = 89.561911
 LiveCodingComposite = 82.306878
@@ -8367,6 +8476,7 @@ CopilotArenaOrLMArenaCode = 1507.558012
 GPQA = 88.400000
 HLE = 39.900000
 IFBench = 75.918367
+LMArenaCreative = 1455.793170
 LMArenaDocument = 1440.197786
 LMArenaText = 1473.496552
 LongContextRecall = 69.666667
@@ -8401,6 +8511,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -8459,10 +8573,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -8529,7 +8643,7 @@ missing = 0.406199
 effective = 0.593801
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -8538,13 +8652,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -8559,7 +8673,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -8574,7 +8688,7 @@ missing = 0.603750
 effective = 0.396250
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.475457
+core_direct = 0.491453
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -8762,7 +8876,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -8774,7 +8888,7 @@ aliases = ["MiniMax M2.5", "MiniMax-M2.5", "minimax 2.5", "minimax m2.5", "minim
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "hil_bench", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 6.252213
+i_raw = 6.406438
 p_raw = 13.908653
 b_raw = 43.064041
 r = 36.382479
@@ -8787,7 +8901,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 55.414625
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 4.209366
+CRE = 3.727336
 GEN = 12.560925
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 80.564400
@@ -8810,6 +8924,7 @@ GPQA = 48.515489
 HLE = 20.621412
 HiLBench = 7.475387
 IFBench = 80.144138
+LMArenaCreative = 2.360113
 LMArenaText = 1.319039
 LiveCodingComposite = 24.493741
 LongContextComposite = 58.165861
@@ -8847,6 +8962,7 @@ GPQA = 84.800000
 HLE = 19.100000
 HiLBench = 7.330000
 IFBench = 71.632653
+LMArenaCreative = 1332.304836
 LMArenaText = 1358.486332
 LongContextRecall = 66.000000
 OutputSpeed = 224.670000
@@ -8912,6 +9028,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -9088,7 +9208,7 @@ missing = 0.363895
 effective = 0.636105
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -9097,13 +9217,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -9118,7 +9238,7 @@ missing = 0.620250
 effective = 0.379750
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -9133,7 +9253,7 @@ missing = 0.754000
 effective = 0.246000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -9154,7 +9274,7 @@ aliases = ["MiniMax M2.7", "MiniMax M2.7 Highspeed", "MiniMax-M2.7", "minimax 2.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 24.859127
+i_raw = 21.423675
 p_raw = 42.073957
 b_raw = 51.162594
 r = 48.641462
@@ -9167,7 +9287,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 51.929856
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 13.482983
+CRE = 7.637171
 GEN = 36.757646
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 66.755797
@@ -9188,6 +9308,7 @@ GDPval = 74.788680
 GPQA = 71.527411
 HLE = 54.284758
 IFBench = 88.832741
+LMArenaCreative = 4.129684
 LMArenaText = 13.482983
 LiveCodingComposite = 44.604433
 LongContextComposite = 76.873883
@@ -9218,6 +9339,7 @@ GDPval = 1495.000000
 GPQA = 87.400000
 HLE = 28.100000
 IFBench = 75.714286
+LMArenaCreative = 1345.384414
 LMArenaText = 1402.182776
 LongContextRecall = 68.666667
 OutputSpeed = 56.403000
@@ -9271,6 +9393,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -9356,10 +9482,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -9426,7 +9552,7 @@ missing = 0.466142
 effective = 0.533858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 1
@@ -9435,13 +9561,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -9456,7 +9582,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -9471,7 +9597,7 @@ missing = 0.799000
 effective = 0.201000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 1
@@ -9492,7 +9618,7 @@ aliases = ["MiniMax M3", "MiniMax-M3", "minimax m3", "minimax-m3", "minimax/mini
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 70.127738
+i_raw = 61.200269
 p_raw = 68.146388
 b_raw = 72.031023
 r = 57.209477
@@ -9505,7 +9631,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 74.315933
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 64.334202
+CRE = 47.538650
 GEN = 76.187303
 LM_ARENA_REVIEW_PROXY = 22.004255
 OPS_long = 55.010732
@@ -9525,6 +9651,7 @@ CopilotArenaOrLMArenaCode = 91.030048
 GPQA = 95.236368
 HLE = 84.442423
 IFBench = 96.306787
+LMArenaCreative = 37.461320
 LMArenaDocument = 22.004255
 LMArenaText = 64.334202
 LiveCodingComposite = 56.364512
@@ -9551,6 +9678,7 @@ CopilotArenaOrLMArenaCode = 1527.753177
 GPQA = 92.900000
 HLE = 37.100000
 IFBench = 82.857143
+LMArenaCreative = 1404.973771
 LMArenaDocument = 1437.574128
 LMArenaText = 1445.749994
 LongContextRecall = 74.000000
@@ -9595,6 +9723,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -9665,10 +9797,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -9735,7 +9867,7 @@ missing = 0.381030
 effective = 0.618970
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.624047
+core_direct = 0.667085
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "terminal_bench"]
 historical_family_count = 1
@@ -9744,13 +9876,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -9765,7 +9897,7 @@ missing = 0.497750
 effective = 0.502250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.434276
+core_direct = 0.459611
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "terminal_bench"]
 historical_family_count = 2
@@ -9780,7 +9912,7 @@ missing = 0.567750
 effective = 0.432250
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.607050
+core_direct = 0.635043
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "terminal_bench"]
 historical_family_count = 1
@@ -9801,7 +9933,7 @@ aliases = ["Kimi K2 Instruct 0905", "Kimi-K2-Instruct-0905", "kimi k2 0905", "ki
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 3.998353
+i_raw = 4.232511
 p_raw = 3.354694
 b_raw = 5.507378
 r = 5.145477
@@ -9814,7 +9946,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 4.926833
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 4.206682
+CRE = 4.643406
 GEN = 3.780457
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 31.173296
@@ -9837,6 +9969,7 @@ GDPval = 4.820813
 GPQA = 4.252745
 HLE = 2.904977
 IFBench = 2.712206
+LMArenaCreative = 4.905441
 LMArenaText = 4.206682
 LiveCodingComposite = 0.378205
 LongContextComposite = 1.571260
@@ -9865,6 +9998,7 @@ GDPval = 864.000000
 GPQA = 76.700000
 HLE = 6.300000
 IFBench = 41.700680
+LMArenaCreative = 1349.465261
 LMArenaText = 1379.648380
 LongContextRecall = 52.333333
 MMLUPro = 81.900000
@@ -9923,6 +10057,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -9996,10 +10134,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -10066,7 +10204,7 @@ missing = 0.680843
 effective = 0.319157
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.601760
+core_direct = 0.622571
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -10075,13 +10213,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -10096,7 +10234,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -10111,7 +10249,7 @@ missing = 0.870250
 effective = 0.129750
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.290601
+core_direct = 0.317094
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 2
@@ -10132,7 +10270,7 @@ aliases = ["kimi 2.5", "kimi k2.5", "kimi-k2-5", "kimi-k2-5-non-reasoning", "kim
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 33.531921
+i_raw = 34.581791
 p_raw = 37.449069
 b_raw = 55.569269
 r = 37.662859
@@ -10145,7 +10283,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 58.003212
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 26.284662
+CRE = 34.085018
 GEN = 47.831879
 LM_ARENA_REVIEW_PROXY = 13.805771
 OPS_long = 49.748935
@@ -10169,6 +10307,7 @@ GPQA = 75.207387
 HLE = 59.660173
 HLETools = 77.801101
 IFBench = 76.094599
+LMArenaCreative = 56.249039
 LMArenaDocument = 13.805771
 LMArenaText = 63.998879
 LiveCodingComposite = 61.462889
@@ -10210,6 +10349,7 @@ GPQA = 87.900000
 HLE = 29.400000
 HLETools = 50.200000
 IFBench = 70.204082
+LMArenaCreative = 1422.263269
 LMArenaDocument = 1429.268492
 LMArenaText = 1445.490533
 LongContextRecall = 65.333333
@@ -10284,6 +10424,10 @@ citation = "Moonshot Kimi K2.5 official release table, HLE with tools, https://w
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -10473,7 +10617,7 @@ missing = 0.201348
 effective = 0.798652
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -10482,13 +10626,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 1
@@ -10503,7 +10647,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -10518,7 +10662,7 @@ missing = 0.534000
 effective = 0.466000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -10539,7 +10683,7 @@ aliases = ["kimi 2.6", "kimi k2.6", "kimi-k2-6", "kimi-k2.6", "kimi-k2p6", "moon
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "hil_bench", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
-i_raw = 65.174569
+i_raw = 64.682873
 p_raw = 63.576084
 b_raw = 70.102552
 r = 57.605651
@@ -10552,7 +10696,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 74.597755
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 57.631041
+CRE = 60.820788
 GEN = 79.857817
 LM_ARENA_REVIEW_PROXY = 39.516736
 OPS_long = 69.873855
@@ -10580,6 +10724,7 @@ HiLBench = 35.300552
 IFBench = 89.273607
 KimiClaw247Bench = 0.000000
 KimiCodeBenchV2 = 0.000000
+LMArenaCreative = 68.532202
 LMArenaDocument = 39.516736
 LMArenaText = 74.980290
 LiveCodingComposite = 88.393326
@@ -10622,6 +10767,7 @@ HiLBench = 14.670000
 IFBench = 75.986395
 KimiClaw247Bench = 42.900000
 KimiCodeBenchV2 = 50.900000
+LMArenaCreative = 1434.194719
 LMArenaDocument = 1449.895091
 LMArenaText = 1454.781895
 LongContextRecall = 69.666667
@@ -10719,6 +10865,10 @@ citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Ki
 class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -10827,10 +10977,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -10897,7 +11047,7 @@ missing = 0.298352
 effective = 0.701648
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -10906,13 +11056,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -10927,7 +11077,7 @@ missing = 0.530250
 effective = 0.469750
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -10942,7 +11092,7 @@ missing = 0.549000
 effective = 0.451000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -10952,7 +11102,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
 canonical_id = "moonshotai/kimi-k2.7-code"
@@ -11196,7 +11346,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -11208,7 +11358,7 @@ aliases = ["gpt 5.2", "gpt-5-2", "gpt-5-2-2025-12-11", "gpt-5-2-high", "gpt-5-2-
 sources = ["arc_agi", "artificial_analysis", "bfcl", "eqbench_creative_writing", "gso", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 53.481101
+i_raw = 50.620756
 p_raw = 52.878387
 b_raw = 52.653712
 r = 46.875869
@@ -11221,7 +11371,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 55.863713
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 52.112076
+CRE = 42.224338
 GEN = 60.074563
 LM_ARENA_REVIEW_PROXY = 38.628908
 OPS_long = 62.687697
@@ -11257,6 +11407,7 @@ GPQA = 88.234377
 GSO = 60.479687
 HLE = 80.289158
 IFBench = 88.376114
+LMArenaCreative = 14.907983
 LMArenaDocument = 2.962442
 LMArenaSearch = 74.295375
 LMArenaText = 25.832822
@@ -11306,6 +11457,7 @@ GPQA = 90.300000
 GSO = 26.470000
 HLE = 35.400000
 IFBench = 75.442177
+LMArenaCreative = 1377.144024
 LMArenaDocument = 1404.949115
 LMArenaSearch = 1210.107382
 LMArenaText = 1416.491088
@@ -11421,6 +11573,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -11600,7 +11756,7 @@ missing = 0.300974
 effective = 0.699026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -11609,13 +11765,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -11630,7 +11786,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -11645,7 +11801,7 @@ missing = 0.464000
 effective = 0.536000
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.590601
+core_direct = 0.617094
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -11936,7 +12092,7 @@ missing = 0.466142
 effective = 0.533858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -11945,13 +12101,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.065333
+direct = 0.069433
 reported = 0.000000
-missing = 0.934667
-effective = 0.065333
+missing = 0.930567
+effective = 0.069433
 family_count = 1
 direct_families = ["aa_reasoning"]
-core_direct = 0.065333
+core_direct = 0.069433
 core_family_count = 1
 core_direct_families = ["aa_reasoning"]
 historical_family_count = 0
@@ -11966,7 +12122,7 @@ missing = 0.880250
 effective = 0.119750
 family_count = 2
 direct_families = ["aa_longcontext", "aa_reasoning"]
-core_direct = 0.169258
+core_direct = 0.179132
 core_family_count = 2
 core_direct_families = ["aa_longcontext", "aa_reasoning"]
 historical_family_count = 3
@@ -11981,7 +12137,7 @@ missing = 0.799000
 effective = 0.201000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -11990,7 +12146,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -12291,7 +12447,7 @@ missing = 0.393895
 effective = 0.606105
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 1
@@ -12300,13 +12456,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.065333
+direct = 0.069433
 reported = 0.000000
-missing = 0.934667
-effective = 0.065333
+missing = 0.930567
+effective = 0.069433
 family_count = 1
 direct_families = ["aa_reasoning"]
-core_direct = 0.065333
+core_direct = 0.069433
 core_family_count = 1
 core_direct_families = ["aa_reasoning"]
 historical_family_count = 0
@@ -12321,7 +12477,7 @@ missing = 0.847750
 effective = 0.152250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "scale"]
-core_direct = 0.169258
+core_direct = 0.179132
 core_family_count = 2
 core_direct_families = ["aa_longcontext", "aa_reasoning"]
 historical_family_count = 3
@@ -12336,7 +12492,7 @@ missing = 0.764500
 effective = 0.235500
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 1
@@ -12345,7 +12501,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEBenchMultilingual", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEBenchMultilingual", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -12357,7 +12513,7 @@ aliases = ["GPT 5.4 (Codex) xHigh", "GPT-5.4 (Codex CLI) xHigh", "GPT-5.4 (Codex
 sources = ["agc_bench", "arc_agi", "artificial_analysis", "context_arena", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench_pro", "swerebench"]
 
 [models.scores]
-i_raw = 88.575067
+i_raw = 86.679499
 p_raw = 75.839281
 b_raw = 81.649949
 r = 55.944552
@@ -12370,7 +12526,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 82.898547
 CODE_REVIEW_DIRECT = 6.856522
-CRE = 87.087570
+CRE = 83.783189
 GEN = 91.339607
 LM_ARENA_REVIEW_PROXY = 66.692534
 OPS_long = 66.837100
@@ -12405,6 +12561,7 @@ GSO = 72.964387
 HLE = 92.066212
 HiLBench = 11.968446
 IFBench = 85.566942
+LMArenaCreative = 74.975643
 LMArenaDocument = 74.040722
 LMArenaSearch = 59.344347
 LMArenaText = 88.093117
@@ -12458,6 +12615,7 @@ GSO = 30.390000
 HLE = 41.600000
 HiLBench = 9.330000
 IFBench = 73.945578
+LMArenaCreative = 1441.415536
 LMArenaDocument = 1471.517232
 LMArenaSearch = 1198.529753
 LMArenaText = 1470.860063
@@ -12582,6 +12740,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -12760,22 +12922,22 @@ missing = 0.205655
 effective = 0.794345
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "scale", "swe"]
-core_direct = 0.802933
-core_family_count = 5
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe"]
+core_direct = 0.789342
+core_family_count = 4
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -12790,9 +12952,9 @@ missing = 0.386250
 effective = 0.613750
 family_count = 6
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena", "scale"]
-core_direct = 0.545936
-core_family_count = 5
-core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "lmarena"]
+core_direct = 0.519447
+core_family_count = 4
+core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
 historical_direct_families = ["aa_instruction", "aa_tooluse"]
 qualification_path = "standard"
@@ -12805,9 +12967,9 @@ missing = 0.205500
 effective = 0.794500
 family_count = 7
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "factory_code_review", "lmarena", "scale", "swe"]
-core_direct = 0.649086
-core_family_count = 5
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "lmarena", "swe"]
+core_direct = 0.617094
+core_family_count = 4
+core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 0
 historical_direct_families = []
 qualification_path = "standard"
@@ -12826,7 +12988,7 @@ aliases = ["GPT-5.4 Mini (High)", "GPT-5.4 Mini (Low)", "GPT-5.4 Mini (Medium)",
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar"]
 
 [models.scores]
-i_raw = 28.299737
+i_raw = 27.163129
 p_raw = 24.770358
 b_raw = 54.589235
 r = 44.618356
@@ -12839,7 +13001,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 65.440699
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 28.404570
+CRE = 24.645321
 GEN = 31.954889
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 88.563649
@@ -12863,6 +13025,7 @@ GPQA = 72.289187
 HLE = 47.964292
 HLETools = 20.079360
 IFBench = 84.113590
+LMArenaCreative = 10.993094
 LMArenaText = 22.290600
 LiveCodingComposite = 59.016592
 LongContextComposite = 80.519854
@@ -12899,6 +13062,7 @@ GPQA = 87.500000
 HLE = 26.600000
 HLETools = 41.500000
 IFBench = 73.265306
+LMArenaCreative = 1369.229688
 LMArenaText = 1413.037195
 LongContextRecall = 69.333333
 MCPAtlas = 56.700000
@@ -12972,6 +13136,10 @@ citation = "OpenAI GPT-5.4 mini and nano launch evaluations, HLE with tools, htt
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -13128,7 +13296,7 @@ missing = 0.465974
 effective = 0.534026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -13137,13 +13305,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -13158,7 +13326,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -13173,7 +13341,7 @@ missing = 0.721750
 effective = 0.278250
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -13194,7 +13362,7 @@ aliases = ["GPT 5.5 (Codex) xHigh", "GPT-5.5 (Codex) xHigh", "gpt 5.5", "gpt-5-5
 sources = ["aa_automation_bench", "aa_enterprise_ops_gym", "aa_gdpval_v2", "aa_omniscience", "agc_bench", "arc_agi", "artificial_analysis", "context_arena", "deep_swe_v1_1", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 90.704625
+i_raw = 89.775384
 p_raw = 89.994665
 b_raw = 90.674821
 r = 72.854080
@@ -13207,7 +13375,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 91.107511
 CODE_REVIEW_DIRECT = 8.073794
-CRE = 89.499056
+CRE = 87.207186
 GEN = 92.694486
 LM_ARENA_REVIEW_PROXY = 91.880772
 OPS_long = 66.463551
@@ -13257,6 +13425,7 @@ HiLBench = 95.887328
 IFBench = 89.055121
 KimiClaw247Bench = 100.000000
 KimiCodeBenchV2 = 100.000000
+LMArenaCreative = 81.463379
 LMArenaDocument = 89.765862
 LMArenaSearch = 93.995683
 LMArenaText = 86.454388
@@ -13331,6 +13500,7 @@ HiLBench = 29.100000
 IFBench = 75.850340
 KimiClaw247Bench = 52.800000
 KimiCodeBenchV2 = 69.000000
+LMArenaCreative = 1450.087807
 LMArenaDocument = 1487.999296
 LMArenaSearch = 1238.737854
 LMArenaText = 1468.231891
@@ -13521,6 +13691,10 @@ citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GP
 class = "direct"
 source = "overrides"
 citation = "Moonshot Kimi K2.7 Code Hugging Face model card evaluation table, GPT-5.5 comparison row, Kimi Code Bench v2, https://huggingface.co/moonshotai/Kimi-K2.7-Code, accessed 2026-06-12"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -13738,22 +13912,22 @@ missing = 0.040487
 effective = 0.959513
 family_count = 10
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "deepswe", "enterprise_workflow", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.979472
-core_family_count = 7
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "gdpval", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.978056
+core_family_count = 6
+core_direct_families = ["aa_coding", "aa_longcontext", "gdpval", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.978222
+direct = 0.976856
 reported = 0.000000
-missing = 0.021778
-effective = 0.978222
+missing = 0.023144
+effective = 0.976856
 family_count = 5
 direct_families = ["aa_knowledge", "aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.978222
+core_direct = 0.976856
 core_family_count = 5
 core_direct_families = ["aa_knowledge", "aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -13768,9 +13942,9 @@ missing = 0.150417
 effective = 0.849583
 family_count = 10
 direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "enterprise_workflow", "gdpval", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.787397
-core_family_count = 8
-core_direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "context_arena", "gdpval", "lmarena", "terminal_bench"]
+core_direct = 0.774994
+core_family_count = 7
+core_direct_families = ["aa_knowledge", "aa_longcontext", "aa_reasoning", "arc_agi", "gdpval", "lmarena", "terminal_bench"]
 historical_family_count = 3
 historical_direct_families = ["aa_instruction", "aa_tooluse", "terminal_bench"]
 qualification_path = "standard"
@@ -13783,9 +13957,9 @@ missing = 0.070500
 effective = 0.929500
 family_count = 11
 direct_families = ["aa_coding", "aa_longcontext", "context_arena", "deepswe", "enterprise_workflow", "factory_code_review", "gdpval", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.853786
-core_family_count = 7
-core_direct_families = ["aa_coding", "aa_longcontext", "context_arena", "gdpval", "lmarena", "swe", "terminal_bench"]
+core_direct = 0.840456
+core_family_count = 6
+core_direct_families = ["aa_coding", "aa_longcontext", "gdpval", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 2
 historical_direct_families = ["swe", "terminal_bench"]
 qualification_path = "standard"
@@ -13947,7 +14121,7 @@ missing = 0.780056
 effective = 0.219944
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -13977,7 +14151,7 @@ missing = 0.935000
 effective = 0.065000
 family_count = 1
 direct_families = ["terminal_bench"]
-core_direct = 0.091873
+core_direct = 0.097233
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -13992,7 +14166,7 @@ missing = 0.898750
 effective = 0.101250
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14001,7 +14175,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -14163,7 +14337,7 @@ missing = 0.780056
 effective = 0.219944
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14172,13 +14346,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.021778
+direct = 0.023144
 reported = 0.000000
-missing = 0.978222
-effective = 0.021778
+missing = 0.976856
+effective = 0.023144
 family_count = 1
 direct_families = ["aa_reasoning"]
-core_direct = 0.021778
+core_direct = 0.023144
 core_family_count = 1
 core_direct_families = ["aa_reasoning"]
 historical_family_count = 0
@@ -14193,7 +14367,7 @@ missing = 0.914583
 effective = 0.085417
 family_count = 2
 direct_families = ["aa_reasoning", "terminal_bench"]
-core_direct = 0.120730
+core_direct = 0.127774
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "terminal_bench"]
 historical_family_count = 0
@@ -14208,7 +14382,7 @@ missing = 0.898750
 effective = 0.101250
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14217,7 +14391,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -14372,7 +14546,7 @@ missing = 0.780056
 effective = 0.219944
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14402,7 +14576,7 @@ missing = 0.935000
 effective = 0.065000
 family_count = 1
 direct_families = ["terminal_bench"]
-core_direct = 0.091873
+core_direct = 0.097233
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14417,7 +14591,7 @@ missing = 0.898750
 effective = 0.101250
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -14426,7 +14600,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -14438,7 +14612,7 @@ aliases = ["Qwen/Qwen3.5-397B-A17B", "Qwen3.5 397B A17B", "Qwen3.5-397B-A17B", "
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "openrouter", "overrides", "sonar", "swerebench"]
 
 [models.scores]
-i_raw = 35.938960
+i_raw = 34.320735
 p_raw = 58.068698
 b_raw = 62.123885
 r = 52.607167
@@ -14451,7 +14625,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 64.017996
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 23.155610
+CRE = 28.261949
 GEN = 59.314240
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 73.545809
@@ -14476,6 +14650,7 @@ GPQA = 83.721970
 HLE = 50.918055
 HLETools = 66.341585
 IFBench = 92.973333
+LMArenaCreative = 40.840699
 LMArenaText = 56.775787
 LiveCodingComposite = 25.145828
 LongContextComposite = 55.493575
@@ -14512,6 +14687,7 @@ GPQA = 89.300000
 HLE = 27.300000
 HLETools = 48.300000
 IFBench = 78.775510
+LMArenaCreative = 1408.186535
 LMArenaText = 1440.106813
 LongContextRecall = 65.666667
 MMLUPro = 87.800000
@@ -14587,6 +14763,10 @@ citation = "Alibaba Qwen3.5 launch table, Qwen3.5-397B-A17B HLE with tools row, 
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -14677,10 +14857,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -14747,7 +14927,7 @@ missing = 0.601142
 effective = 0.398858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -14756,13 +14936,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 1
@@ -14777,7 +14957,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -14792,7 +14972,7 @@ missing = 0.846250
 effective = 0.153750
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -14802,7 +14982,7 @@ provisional = true
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchPro", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
 canonical_id = "qwen/qwen3.6-max-preview"
@@ -14813,7 +14993,7 @@ aliases = ["Qwen3.6-Max-Preview", "alibaba/qwen3.6-max-preview", "qwen 3.6 max p
 sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 64.204066
+i_raw = 65.485731
 p_raw = 68.397929
 b_raw = 62.833947
 r = 76.866057
@@ -14826,7 +15006,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 64.014601
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 63.815986
+CRE = 66.309567
 GEN = 64.609966
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 40.784931
@@ -14847,6 +15027,7 @@ EQBenchJudgemark = 13.435903
 GPQA = 80.986301
 HLE = 57.612769
 IFBench = 90.209876
+LMArenaCreative = 67.805716
 LMArenaText = 63.815986
 LiveCodingComposite = 59.475193
 LongContextComposite = 82.172232
@@ -14870,6 +15051,7 @@ EQBenchJudgemarkCILow = 40.304800
 GPQA = 88.800000
 HLE = 28.900000
 IFBench = 76.598639
+LMArenaCreative = 1433.436780
 LMArenaText = 1445.349463
 LongContextRecall = 69.666667
 OutputSpeed = 38.070000
@@ -14923,6 +15105,10 @@ source = "artificial_analysis"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaText"]
 class = "direct"
 source = "lmarena"
@@ -14973,10 +15159,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -15043,7 +15229,7 @@ missing = 0.766142
 effective = 0.233858
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -15052,13 +15238,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -15073,7 +15259,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -15088,7 +15274,7 @@ missing = 0.904000
 effective = 0.096000
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -15109,7 +15295,7 @@ aliases = ["Qwen3.6-Plus", "alibaba/qwen3.6-plus", "qwen 3.6 plus", "qwen/qwen3.
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 53.137305
+i_raw = 46.969811
 p_raw = 65.188346
 b_raw = 71.668487
 r = 73.477921
@@ -15122,7 +15308,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 73.466161
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 52.466190
+CRE = 40.638202
 GEN = 53.839235
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 80.460317
@@ -15142,6 +15328,7 @@ CopilotArenaOrLMArenaCode = 74.080336
 GPQA = 77.256340
 HLE = 44.190250
 IFBench = 87.903359
+LMArenaCreative = 33.541409
 LMArenaText = 52.466190
 LiveCodingComposite = 35.322017
 LongContextComposite = 82.172232
@@ -15167,6 +15354,7 @@ CopilotArenaOrLMArenaCode = 1463.343736
 GPQA = 88.200000
 HLE = 25.700000
 IFBench = 75.170068
+LMArenaCreative = 1401.095455
 LMArenaText = 1437.011481
 LongContextRecall = 69.666667
 MCPAtlas = 74.100000
@@ -15211,6 +15399,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -15282,10 +15474,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -15352,7 +15544,7 @@ missing = 0.465974
 effective = 0.534026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -15361,13 +15553,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 1
@@ -15382,7 +15574,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -15397,7 +15589,7 @@ missing = 0.721750
 effective = 0.278250
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -15418,7 +15610,7 @@ aliases = ["Qwen3.7 Max", "Qwen3.7-Max", "alibaba/qwen3.7-max", "qwen 3.7 max", 
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 89.567077
+i_raw = 86.420610
 p_raw = 84.017320
 b_raw = 85.118995
 r = 86.858243
@@ -15431,7 +15623,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 86.549089
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 89.732550
+CRE = 83.663992
 GEN = 89.394005
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 93.641536
@@ -15453,6 +15645,7 @@ CopilotArenaOrLMArenaCode = 92.359087
 GPQA = 94.098157
 HLE = 86.534110
 IFBench = 94.667707
+LMArenaCreative = 80.022857
 LMArenaText = 89.732550
 LiveCodingComposite = 73.314651
 LongContextComposite = 78.753923
@@ -15479,6 +15672,7 @@ CopilotArenaOrLMArenaCode = 1536.641144
 GPQA = 92.300000
 HLE = 38.100000
 IFBench = 80.544218
+LMArenaCreative = 1447.989715
 LMArenaText = 1473.823665
 LongContextRecall = 69.000000
 MCPAtlas = 76.400000
@@ -15528,6 +15722,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -15599,10 +15797,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -15669,7 +15867,7 @@ missing = 0.435974
 effective = 0.564026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -15678,13 +15876,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -15699,7 +15897,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -15714,7 +15912,7 @@ missing = 0.711250
 effective = 0.288750
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -15981,7 +16179,7 @@ missing = 0.515674
 effective = 0.484326
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "scale", "swe"]
-core_direct = 0.301760
+core_direct = 0.322571
 core_family_count = 2
 core_direct_families = ["aa_coding", "aa_longcontext"]
 historical_family_count = 2
@@ -15990,13 +16188,13 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.065333
+direct = 0.069433
 reported = 0.000000
-missing = 0.934667
-effective = 0.065333
+missing = 0.930567
+effective = 0.069433
 family_count = 1
 direct_families = ["aa_reasoning"]
-core_direct = 0.065333
+core_direct = 0.069433
 core_family_count = 1
 core_direct_families = ["aa_reasoning"]
 historical_family_count = 1
@@ -16011,7 +16209,7 @@ missing = 0.685250
 effective = 0.314750
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "scale"]
-core_direct = 0.169258
+core_direct = 0.179132
 core_family_count = 2
 core_direct_families = ["aa_longcontext", "aa_reasoning"]
 historical_family_count = 3
@@ -16026,7 +16224,7 @@ missing = 0.735250
 effective = 0.264750
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "scale", "swe"]
-core_direct = 0.175457
+core_direct = 0.191453
 core_family_count = 2
 core_direct_families = ["aa_coding", "aa_longcontext"]
 historical_family_count = 2
@@ -16035,7 +16233,7 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWERebench", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -16047,7 +16245,7 @@ aliases = ["grok 4", "grok-4", "grok-4-0709", "grok-4-search", "x-ai/grok-4", "x
 sources = ["arc_agi", "artificial_analysis", "bfcl", "lmarena", "overrides", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 20.117930
+i_raw = 23.003270
 p_raw = 32.487226
 b_raw = 27.263865
 r = 17.479284
@@ -16060,7 +16258,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 28.824692
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 15.153056
+CRE = 21.955778
 GEN = 27.700447
 LM_ARENA_REVIEW_PROXY = 5.109020
 OPS_long = 50.000000
@@ -16092,6 +16290,7 @@ GDPval = 9.839176
 GPQA = 73.774440
 HLE = 36.879576
 IFBench = 16.940984
+LMArenaCreative = 31.195720
 LMArenaSearch = 5.109020
 LMArenaText = 19.411112
 LiveCodingComposite = 35.498867
@@ -16125,6 +16324,7 @@ GDPval = 983.000000
 GPQA = 87.700000
 HLE = 23.900000
 IFBench = 53.673469
+LMArenaCreative = 1398.669005
 LMArenaSearch = 1142.605004
 LMArenaText = 1409.929008
 LongContextRecall = 68.000000
@@ -16214,6 +16414,10 @@ source = "artificial_analysis"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaSearch"]
 class = "direct"
 source = "lmarena"
@@ -16276,10 +16480,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.600000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.400000
+effective = 0.600000
 family_count = 2
 direct_families = ["arc_agi", "lmarena"]
 
@@ -16346,7 +16550,7 @@ missing = 0.710843
 effective = 0.289157
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "swe"]
-core_direct = 0.601760
+core_direct = 0.622571
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 1
@@ -16355,13 +16559,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.635830
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.364170
+effective = 0.635830
 family_count = 3
 direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.635830
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 2
@@ -16376,12 +16580,12 @@ missing = 0.652750
 effective = 0.347250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
 historical_direct_families = ["aa_instruction", "aa_tooluse", "terminal_bench"]
-qualification_path = "historical_breadth"
+qualification_path = "core_corroborated"
 provisional = false
 
 [models.evidence.roles."R"]
@@ -16391,7 +16595,7 @@ missing = 0.780750
 effective = 0.219250
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.290601
+core_direct = 0.317094
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "swe"]
 historical_family_count = 1
@@ -16412,7 +16616,7 @@ aliases = ["Grok 4.20 (Reasoning)", "Grok 4.20 Reasoning", "grok 4.20", "grok-4-
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "hil_bench", "lmarena", "openrouter", "terminal_bench"]
 
 [models.scores]
-i_raw = 64.664190
+i_raw = 63.695030
 p_raw = 45.175453
 b_raw = 20.237909
 r = 20.372101
@@ -16425,7 +16629,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 31.874474
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 56.381565
+CRE = 57.635837
 GEN = 78.584569
 LM_ARENA_REVIEW_PROXY = 27.666142
 OPS_long = 92.049645
@@ -16449,6 +16653,7 @@ GPQA = 91.023587
 HLE = 70.352161
 HiLBench = 8.774278
 IFBench = 95.210505
+LMArenaCreative = 67.083532
 LMArenaDocument = 3.656064
 LMArenaSearch = 51.676220
 LMArenaText = 71.808769
@@ -16475,6 +16680,7 @@ GPQA = 91.100000
 HLE = 32.200000
 HiLBench = 8.000000
 IFBench = 81.224490
+LMArenaCreative = 1432.692183
 LMArenaDocument = 1408.140904
 LMArenaSearch = 1193.256716
 LMArenaText = 1451.889662
@@ -16533,6 +16739,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaDocument"]
 class = "direct"
@@ -16662,7 +16872,7 @@ missing = 0.763521
 effective = 0.236479
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -16671,13 +16881,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -16692,7 +16902,7 @@ missing = 0.620250
 effective = 0.379750
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -16707,7 +16917,7 @@ missing = 0.689000
 effective = 0.311000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale"]
-core_direct = 0.475457
+core_direct = 0.491453
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -16728,7 +16938,7 @@ aliases = ["grok 4.3", "grok-4-3", "grok-4-3-high", "grok-4-3-low", "grok-4-3-no
 sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 32.654859
+i_raw = 36.269583
 p_raw = 43.213990
 b_raw = 42.176721
 r = 43.829041
@@ -16741,7 +16951,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 42.327189
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 16.713891
+CRE = 24.748794
 GEN = 49.327811
 LM_ARENA_REVIEW_PROXY = 45.640659
 OPS_long = 90.372418
@@ -16763,6 +16973,7 @@ GDPval = 75.391922
 GPQA = 87.428497
 HLE = 79.198348
 IFBench = 95.261805
+LMArenaCreative = 29.569736
 LMArenaSearch = 45.640659
 LMArenaText = 16.713891
 LiveCodingComposite = 41.748666
@@ -16787,6 +16998,7 @@ GDPval = 1500.000000
 GPQA = 90.100000
 HLE = 35.000000
 IFBench = 81.292517
+LMArenaCreative = 1396.928478
 LMArenaSearch = 1189.157332
 LMArenaText = 1406.681648
 LongContextRecall = 64.333333
@@ -16845,6 +17057,10 @@ source = "artificial_analysis"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaSearch"]
 class = "direct"
 source = "lmarena"
@@ -16894,10 +17110,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -16964,7 +17180,7 @@ missing = 0.766142
 effective = 0.233858
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -16973,13 +17189,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 0
@@ -16994,7 +17210,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 2
@@ -17009,7 +17225,7 @@ missing = 0.804000
 effective = 0.196000
 family_count = 3
 direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 0
@@ -17173,7 +17389,7 @@ missing = 0.708483
 effective = 0.291517
 family_count = 4
 direct_families = ["deepswe", "enterprise_workflow", "swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -17203,7 +17419,7 @@ missing = 0.912250
 effective = 0.087750
 family_count = 2
 direct_families = ["enterprise_workflow", "terminal_bench"]
-core_direct = 0.091873
+core_direct = 0.097233
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -17218,7 +17434,7 @@ missing = 0.867250
 effective = 0.132750
 family_count = 4
 direct_families = ["deepswe", "enterprise_workflow", "swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -17227,7 +17443,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -17478,7 +17694,7 @@ missing = 0.631142
 effective = 0.368858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -17487,13 +17703,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.065333
+direct = 0.069433
 reported = 0.000000
-missing = 0.934667
-effective = 0.065333
+missing = 0.930567
+effective = 0.069433
 family_count = 1
 direct_families = ["aa_reasoning"]
-core_direct = 0.065333
+core_direct = 0.069433
 core_family_count = 1
 core_direct_families = ["aa_reasoning"]
 historical_family_count = 2
@@ -17508,7 +17724,7 @@ missing = 0.880250
 effective = 0.119750
 family_count = 2
 direct_families = ["aa_longcontext", "aa_reasoning"]
-core_direct = 0.169258
+core_direct = 0.179132
 core_family_count = 2
 core_direct_families = ["aa_longcontext", "aa_reasoning"]
 historical_family_count = 3
@@ -17523,7 +17739,7 @@ missing = 0.856750
 effective = 0.143250
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -17532,7 +17748,7 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "Tau3Banking", "TerminalBench21Composite"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -17544,7 +17760,7 @@ aliases = ["MiMo-V2.5", "XiaomiMiMo/MiMo-V2.5", "mimo v2.5", "mimo-v2-5", "mimo-
 sources = ["artificial_analysis", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 38.368581
+i_raw = 35.543640
 p_raw = 37.912338
 b_raw = 68.779949
 r = 64.340272
@@ -17557,7 +17773,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 69.939793
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 36.364270
+CRE = 31.061159
 GEN = 40.464926
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 84.894389
@@ -17577,6 +17793,7 @@ CopilotArenaOrLMArenaCode = 62.710500
 GPQA = 49.457898
 HLE = 42.119426
 IFBench = 65.679448
+LMArenaCreative = 27.879292
 LMArenaText = 36.364270
 LiveCodingComposite = 36.394275
 LongContextComposite = 31.866011
@@ -17600,6 +17817,7 @@ CopilotArenaOrLMArenaCode = 1436.387156
 GPQA = 84.900000
 HLE = 25.200000
 IFBench = 67.142857
+LMArenaCreative = 1395.058945
 LMArenaText = 1425.299270
 LongContextRecall = 62.666667
 MMLUPro = 65.800000
@@ -17642,6 +17860,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -17703,10 +17925,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -17773,7 +17995,7 @@ missing = 0.631142
 effective = 0.368858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -17782,13 +18004,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 1
@@ -17803,7 +18025,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -17818,7 +18040,7 @@ missing = 0.856750
 effective = 0.143250
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 1
@@ -17839,7 +18061,7 @@ aliases = ["MiMo-V2.5-Pro", "XiaomiMiMo/MiMo-V2.5-Pro", "mimo v2.5 pro", "mimo-v
 sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
-i_raw = 78.600646
+i_raw = 76.302291
 p_raw = 80.959861
 b_raw = 86.821931
 r = 81.729853
@@ -17852,7 +18074,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 87.702170
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 80.699376
+CRE = 76.133052
 GEN = 76.405545
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 62.688772
@@ -17873,6 +18095,7 @@ EQBenchJudgemark = 39.292794
 GPQA = 65.009010
 HLE = 75.663065
 IFBench = 94.067227
+LMArenaCreative = 73.393257
 LMArenaText = 80.699376
 LiveCodingComposite = 72.637353
 LongContextComposite = 93.857435
@@ -17900,6 +18123,7 @@ EQBenchJudgemarkCILow = 53.968900
 GPQA = 86.600000
 HLE = 33.800000
 IFBench = 79.863946
+LMArenaCreative = 1439.544624
 LMArenaText = 1460.706924
 LongContextRecall = 73.333333
 MMLUPro = 68.500000
@@ -17955,6 +18179,10 @@ source = "artificial_analysis"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -18021,10 +18249,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.200000
+direct = 0.400000
 reported = 0.000000
-missing = 0.800000
-effective = 0.200000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["lmarena"]
 
@@ -18091,7 +18319,7 @@ missing = 0.631142
 effective = 0.368858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.457771
+core_direct = 0.489342
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -18100,13 +18328,13 @@ qualification_path = "historical_breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.334667
+direct = 0.369433
 reported = 0.000000
-missing = 0.665333
-effective = 0.334667
+missing = 0.630567
+effective = 0.369433
 family_count = 2
 direct_families = ["aa_reasoning", "lmarena"]
-core_direct = 0.334667
+core_direct = 0.369433
 core_family_count = 2
 core_direct_families = ["aa_reasoning", "lmarena"]
 historical_family_count = 1
@@ -18121,7 +18349,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -18136,7 +18364,7 @@ missing = 0.856750
 effective = 0.143250
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.233521
+core_direct = 0.249518
 core_family_count = 3
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena"]
 historical_family_count = 2
@@ -18157,7 +18385,7 @@ aliases = ["GLM-4.6 (Non-reasoning)", "GLM-4.6 (Reasoning)", "GLM-4.6 (T=1)", "g
 sources = ["artificial_analysis", "bfcl", "eqbench_creative_writing", "lmarena", "openrouter", "overrides", "swebench", "swebench_pro", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 27.511234
+i_raw = 26.793591
 p_raw = 29.954261
 b_raw = 9.899922
 r = 17.190671
@@ -18170,7 +18398,7 @@ balanced_status = "provisional"
 [models.groups]
 BUILD = 9.621578
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 20.910247
+CRE = 28.375633
 GEN = 32.766508
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 62.153845
@@ -18206,6 +18434,7 @@ GPQA = 6.761734
 HLE = 8.888970
 HLETools = 0.863021
 IFBench = 3.566644
+LMArenaCreative = 46.257197
 LMArenaText = 57.353125
 LiveCodingComposite = 12.992342
 LongContextComposite = 2.977839
@@ -18247,6 +18476,7 @@ GPQA = 78.000000
 HLE = 13.300000
 HLETools = 30.400000
 IFBench = 43.401361
+LMArenaCreative = 1413.179527
 LMArenaText = 1440.526047
 LongContextRecall = 54.333333
 MMLUPro = 82.900000
@@ -18358,6 +18588,10 @@ citation = "Z.ai GLM-4.6 official model card, HLE with tools, https://docs.z.ai/
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaText"]
 class = "direct"
 source = "lmarena"
@@ -18438,10 +18672,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -18508,7 +18742,7 @@ missing = 0.466142
 effective = 0.533858
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -18517,13 +18751,13 @@ qualification_path = "core_standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -18538,7 +18772,7 @@ missing = 0.757750
 effective = 0.242250
 family_count = 3
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -18553,7 +18787,7 @@ missing = 0.799000
 effective = 0.201000
 family_count = 4
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -18563,7 +18797,7 @@ provisional = true
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
 canonical_id = "z-ai/glm-4.7"
@@ -18574,7 +18808,7 @@ aliases = ["glm 4.7", "glm-4-7", "glm-4.7", "glm-4p7", "z-ai/glm-4.7", "zai-org/
 sources = ["artificial_analysis", "eqbench_creative_writing", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 30.278088
+i_raw = 28.470136
 p_raw = 28.767122
 b_raw = 31.112798
 r = 39.180066
@@ -18587,7 +18821,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 35.949503
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 19.347636
+CRE = 23.711028
 GEN = 49.216823
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 71.029281
@@ -18614,6 +18848,7 @@ GPQA = 58.793726
 HLE = 41.708327
 HLETools = 27.139861
 IFBench = 68.426082
+LMArenaCreative = 34.577793
 LMArenaText = 51.030186
 LiveCodingComposite = 44.429461
 LongContextComposite = 41.967020
@@ -18653,6 +18888,7 @@ GPQA = 85.900000
 HLE = 25.100000
 HLETools = 42.800000
 IFBench = 67.891156
+LMArenaCreative = 1402.140139
 LMArenaText = 1435.988232
 LongContextRecall = 64.000000
 MCPAtlas = 58.100000
@@ -18736,6 +18972,10 @@ citation = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, HLE with t
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -18838,10 +19078,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -18908,7 +19148,7 @@ missing = 0.435974
 effective = 0.564026
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -18917,13 +19157,13 @@ qualification_path = "breadth"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 2
@@ -18938,7 +19178,7 @@ missing = 0.562750
 effective = 0.437250
 family_count = 4
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale"]
-core_direct = 0.342403
+core_direct = 0.362378
 core_family_count = 3
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena"]
 historical_family_count = 3
@@ -18953,7 +19193,7 @@ missing = 0.711250
 effective = 0.288750
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -18963,7 +19203,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchPro", "Tau3Banking", "TerminalBench21Composite"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
 canonical_id = "z-ai/glm-5"
@@ -18974,7 +19214,7 @@ aliases = ["glm 5", "glm-5", "glm-5-20260211", "glm-5-non-reasoning", "glm-5-thi
 sources = ["arc_agi", "artificial_analysis", "eqbench_creative_writing", "lmarena", "openrouter", "overrides", "sonar", "sweatlas_qna", "sweatlas_refactoring", "sweatlas_test_writing", "swebench", "swerebench", "terminal_bench"]
 
 [models.scores]
-i_raw = 32.964304
+i_raw = 36.188876
 p_raw = 38.151959
 b_raw = 58.809828
 r = 56.249772
@@ -18987,7 +19227,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 60.899680
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 29.316583
+CRE = 40.913025
 GEN = 38.879663
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 70.702753
@@ -19011,6 +19251,7 @@ GPQA = 24.687285
 HLE = 50.496000
 HLETools = 78.829825
 IFBench = 81.882412
+LMArenaCreative = 73.288682
 LMArenaText = 64.541775
 LiveCodingComposite = 48.511094
 LongContextComposite = 36.771506
@@ -19050,6 +19291,7 @@ GPQA = 82.000000
 HLE = 27.200000
 HLETools = 50.400000
 IFBench = 72.312925
+LMArenaCreative = 1439.423545
 LMArenaText = 1445.911151
 LongContextRecall = 63.333333
 MCPAtlas = 67.800000
@@ -19122,6 +19364,10 @@ citation = "Z.ai GLM-5.1 official model card, GLM-5 comparison row, HLE with too
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
 
 [models.metric_evidence."LMArenaText"]
 class = "direct"
@@ -19303,7 +19549,7 @@ missing = 0.336348
 effective = 0.663652
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.757771
+core_direct = 0.789342
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -19312,13 +19558,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.934667
+direct = 0.930567
 reported = 0.000000
-missing = 0.065333
-effective = 0.934667
+missing = 0.069433
+effective = 0.930567
 family_count = 4
 direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
-core_direct = 0.934667
+core_direct = 0.930567
 core_family_count = 4
 core_direct_families = ["aa_reasoning", "arc_agi", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -19333,7 +19579,7 @@ missing = 0.457750
 effective = 0.542250
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena", "scale"]
-core_direct = 0.490813
+core_direct = 0.519447
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "arc_agi", "lmarena"]
 historical_family_count = 3
@@ -19348,7 +19594,7 @@ missing = 0.681250
 effective = 0.318750
 family_count = 5
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe"]
-core_direct = 0.348665
+core_direct = 0.375159
 core_family_count = 4
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe"]
 historical_family_count = 2
@@ -19369,7 +19615,7 @@ aliases = ["glm 5.1", "glm-5-1", "glm-5-1-non-reasoning", "glm-5.1", "glm-5p1", 
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "swerebench", "terminal_bench_2_1"]
 
 [models.scores]
-i_raw = 55.352261
+i_raw = 57.120197
 p_raw = 62.749733
 b_raw = 52.333264
 r = 65.327002
@@ -19382,7 +19628,7 @@ balanced_status = "ranked"
 [models.groups]
 BUILD = 48.405510
 CODE_REVIEW_DIRECT = 50.000000
-CRE = 43.396931
+CRE = 56.737101
 GEN = 72.746306
 LM_ARENA_REVIEW_PROXY = 50.000000
 OPS_long = 70.581686
@@ -19408,6 +19654,7 @@ HLE = 53.865422
 HLETools = 86.878484
 HiLBench = 73.910654
 IFBench = 89.699086
+LMArenaCreative = 87.843494
 LMArenaText = 87.347416
 LiveCodingComposite = 50.282777
 LongContextComposite = 29.548565
@@ -19443,6 +19690,7 @@ HLE = 28.000000
 HLETools = 52.300000
 HiLBench = 21.000000
 IFBench = 76.258503
+LMArenaCreative = 1461.345184
 LMArenaText = 1469.628100
 LongContextRecall = 62.333333
 MCPAtlas = 75.600000
@@ -19526,6 +19774,10 @@ source = "hil_bench"
 class = "direct"
 source = "artificial_analysis"
 
+[models.metric_evidence."LMArenaCreative"]
+class = "direct"
+source = "lmarena"
+
 [models.metric_evidence."LMArenaText"]
 class = "direct"
 source = "lmarena"
@@ -19607,10 +19859,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.700000
+direct = 0.800000
 reported = 0.000000
-missing = 0.300000
-effective = 0.700000
+missing = 0.200000
+effective = 0.800000
 family_count = 2
 direct_families = ["eqbench", "lmarena"]
 
@@ -19677,7 +19929,7 @@ missing = 0.243408
 effective = 0.756592
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.924047
+core_direct = 0.967085
 core_family_count = 5
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 1
@@ -19686,13 +19938,13 @@ qualification_path = "standard"
 provisional = false
 
 [models.evidence.roles."I_raw"]
-direct = 0.634667
+direct = 0.664170
 reported = 0.000000
-missing = 0.365333
-effective = 0.634667
+missing = 0.335830
+effective = 0.664170
 family_count = 3
 direct_families = ["aa_reasoning", "eqbench", "lmarena"]
-core_direct = 0.634667
+core_direct = 0.664170
 core_family_count = 3
 core_direct_families = ["aa_reasoning", "eqbench", "lmarena"]
 historical_family_count = 0
@@ -19707,7 +19959,7 @@ missing = 0.465250
 effective = 0.534750
 family_count = 5
 direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "scale", "terminal_bench"]
-core_direct = 0.434276
+core_direct = 0.459611
 core_family_count = 4
 core_direct_families = ["aa_longcontext", "aa_reasoning", "lmarena", "terminal_bench"]
 historical_family_count = 3
@@ -19722,7 +19974,7 @@ missing = 0.605500
 effective = 0.394500
 family_count = 6
 direct_families = ["aa_coding", "aa_longcontext", "lmarena", "scale", "swe", "terminal_bench"]
-core_direct = 0.480258
+core_direct = 0.518748
 core_family_count = 5
 core_direct_families = ["aa_coding", "aa_longcontext", "lmarena", "swe", "terminal_bench"]
 historical_family_count = 1
@@ -19732,7 +19984,7 @@ provisional = false
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "Tau3Banking"]
-groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
 canonical_id = "z-ai/glm-5.2"
@@ -19824,10 +20076,10 @@ family_count = 0
 direct_families = []
 
 [models.evidence.groups."CRE"]
-direct = 0.500000
+direct = 0.400000
 reported = 0.000000
-missing = 0.500000
-effective = 0.500000
+missing = 0.600000
+effective = 0.400000
 family_count = 1
 direct_families = ["eqbench"]
 
@@ -19894,7 +20146,7 @@ missing = 0.780056
 effective = 0.219944
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.166276
+core_direct = 0.177743
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -19903,13 +20155,13 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.evidence.roles."I_raw"]
-direct = 0.300000
+direct = 0.294737
 reported = 0.000000
-missing = 0.700000
-effective = 0.300000
+missing = 0.705263
+effective = 0.294737
 family_count = 1
 direct_families = ["eqbench"]
-core_direct = 0.300000
+core_direct = 0.294737
 core_family_count = 1
 core_direct_families = ["eqbench"]
 historical_family_count = 0
@@ -19924,7 +20176,7 @@ missing = 0.935000
 effective = 0.065000
 family_count = 1
 direct_families = ["terminal_bench"]
-core_direct = 0.091873
+core_direct = 0.097233
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -19939,7 +20191,7 @@ missing = 0.898750
 effective = 0.101250
 family_count = 2
 direct_families = ["swe", "terminal_bench"]
-core_direct = 0.131593
+core_direct = 0.143590
 core_family_count = 1
 core_direct_families = ["terminal_bench"]
 historical_family_count = 0
@@ -19948,5 +20200,5 @@ qualification_path = "unqualified"
 provisional = true
 
 [models.missing]
-metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN"]

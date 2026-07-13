@@ -436,7 +436,10 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                     .get("category")
                     .and_then(Value::as_str)
                     .unwrap_or("overall");
-                if category != "overall" {
+                // Only each config's overall board is scored, plus a curated
+                // allowlist of text-arena subcategories (see subcategory_metric).
+                let subcategory = subcategory_metric(config, category);
+                if category != "overall" && subcategory.is_none() {
                     continue;
                 }
                 let rating = row.get("rating").and_then(number_like).ok_or_else(|| {
@@ -462,11 +465,17 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                 accumulated.prefer_label(model_name, vendor_hint, origin);
 
                 let mut fields = BTreeMap::new();
-                map_rating(config, rating, &mut fields);
-                copy_numeric(&mut fields, "Rank", row.get("rank"));
-                copy_numeric(&mut fields, "VoteCount", row.get("vote_count"));
-                copy_numeric(&mut fields, "RatingLower", row.get("rating_lower"));
-                copy_numeric(&mut fields, "RatingUpper", row.get("rating_upper"));
+                if let Some(metric) = subcategory {
+                    // Subcategory rows contribute only their own rating; the
+                    // rank/vote/CI aux fields describe the overall board.
+                    fields.insert(metric.to_string(), Value::from(rating));
+                } else {
+                    map_rating(config, rating, &mut fields);
+                    copy_numeric(&mut fields, "Rank", row.get("rank"));
+                    copy_numeric(&mut fields, "VoteCount", row.get("vote_count"));
+                    copy_numeric(&mut fields, "RatingLower", row.get("rating_lower"));
+                    copy_numeric(&mut fields, "RatingUpper", row.get("rating_upper"));
+                }
                 accumulated.merge_fields(fields, origin);
             }
         }
@@ -571,6 +580,18 @@ fn is_locked_dataset_error(err: &SourceError) -> bool {
                 || message.contains("501 Not Implemented")
         }
         _ => false,
+    }
+}
+
+/// Text-arena subcategories admitted as their own scored metric. Only this
+/// curated allowlist is kept; every other category (languages, industries,
+/// hard-prompts, etc.) stays diagnostic noise we drop. Creative Writing is a
+/// broadly covered creativity signal that shares the LM Arena cohort with the
+/// overall text rating.
+fn subcategory_metric(config: &str, category: &str) -> Option<&'static str> {
+    match (config, category) {
+        ("text", "creative_writing") => Some("LMArenaCreative"),
+        _ => None,
     }
 }
 
@@ -1083,6 +1104,41 @@ mod tests {
             model_a.fields.get("LMArenaDocument").and_then(number_like),
             Some(995.0)
         );
+    }
+
+    #[test]
+    fn text_arena_creative_writing_subcategory_maps_to_its_own_metric() {
+        let payload = json!({
+            "configs": {
+                "text": [{
+                    "rows": [
+                        {"row": {"model_name": "model-a", "organization": "openai", "rating": 1450.0, "category": "overall", "rank": 3}},
+                        {"row": {"model_name": "model-a", "organization": "openai", "rating": 1400.0, "category": "creative_writing", "rank": 9}},
+                        {"row": {"model_name": "model-a", "organization": "openai", "rating": 1490.0, "category": "hard_prompts"}}
+                    ],
+                    "num_rows_total": 3
+                }]
+            }
+        });
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        assert_eq!(rows.len(), 1);
+        let model_a = &rows[0];
+        // Overall text Elo and its aux rank are kept.
+        assert_eq!(
+            model_a.fields.get("LMArenaText").and_then(number_like),
+            Some(1450.0)
+        );
+        assert_eq!(model_a.fields.get("Rank").and_then(number_like), Some(3.0));
+        // Creative writing becomes its own metric with the subcategory rating,
+        // and does NOT overwrite the overall board's rank.
+        assert_eq!(
+            model_a.fields.get("LMArenaCreative").and_then(number_like),
+            Some(1400.0)
+        );
+        // Every other subcategory (hard_prompts, etc.) is dropped.
+        assert!(!model_a.fields.contains_key("LMArenaHardPrompts"));
+        assert_eq!(model_a.fields.get("Rank").and_then(number_like), Some(3.0));
     }
 
     #[test]

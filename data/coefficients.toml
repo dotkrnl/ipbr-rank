@@ -15,11 +15,17 @@ precedence_composites = ["TerminalBench21Composite"]
 # narrower and honest than wide and fake.
 
 [group_weights.CRE]
-# EQ-Bench Creative Writing v3 supplies a direct, current creativity signal.
-# LM Arena Text remains a modest preference/breadth input; ARC adds novelty.
-EQBenchCreativeWriting = 0.50
-LMArenaText = 0.20
-ARC_AGI_2 = 0.30
+# EQ-Bench Creative Writing v3 is the most direct creativity signal but has
+# not scored roughly half the current cohort, and ARC (novelty) is similarly
+# sparse. LM Arena's Creative Writing category Elo is broadly covered, so it
+# carries a real creativity input for models the specialist boards miss, while
+# LM Arena Text stays a general preference/breadth input. The two LM Arena
+# leaves share the `lmarena` family, so the 30% family cap keeps the platform
+# from dominating the Idea role.
+EQBenchCreativeWriting = 0.40
+LMArenaCreative = 0.25
+ARC_AGI_2 = 0.20
+LMArenaText = 0.15
 
 [group_weights.GEN]
 # Aggregate indices and their component evaluations must not both count.
@@ -347,6 +353,21 @@ family = "lmarena"
 higher_better = true
 log_scale = false
 groups = []
+transform = "percentile"
+
+# LM Arena text-arena "Creative Writing" category Elo — a genuine, current
+# creativity signal drawn from the same broadly covered cohort as the overall
+# text rating, unlike the retired fabricated key above. It gives CRE a
+# creativity input for models EQ-Bench has not scored yet. Anchors are the
+# direct-evidence p5/p95 of the matched creative-writing cohort.
+[metrics.LMArenaCreative]
+family = "lmarena"
+eligibility = "core"
+anchor_low = 1349.92
+anchor_high = 1483.23
+higher_better = true
+log_scale = false
+groups = ["CRE"]
 transform = "percentile"
 
 [metrics.CopilotArenaOrLMArenaCode]
@@ -974,9 +995,13 @@ log_scale = false
 groups = ["PLAN"]
 transform = "percentile"
 
+# Supplemental, not core: Context Arena is a single ~33-model board, too
+# narrow to serve as an eligibility pillar. It still moves the long-context
+# score through LongContextComposite where present; LongContextRecall is the
+# broadly covered core anchor for the long-context construct.
 [metrics.ContextArenaMRCR128k]
 family = "context_arena"
-eligibility = "core"
+eligibility = "supplemental"
 anchor_low = 25.953719
 anchor_high = 86.698585
 higher_better = true
