@@ -9,6 +9,13 @@ use std::sync::OnceLock;
 const ROLE_KEYS: &[&str] = &["I_raw", "P_raw", "B_raw", "R"];
 const EPS: f64 = 1e-12;
 
+/// Coverage below this fraction flags a group as `groups_shrunk` — a
+/// presentation-only diagnostic. Capability itself uses available same-product
+/// evidence and never switches formula at this threshold.
+fn shrink_coverage_cutoff(cfg: &crate::coefficients::AggregationConfig) -> f64 {
+    (cfg.trust_threshold + cfg.trust_transition_width / 2.0).clamp(0.0, 1.0)
+}
+
 #[derive(Debug, Clone)]
 struct Signal {
     value: f64,
@@ -268,8 +275,7 @@ fn aggregate_groups(
                     .map(|signal| signal.value)
                     .unwrap_or(prior),
             );
-            if evaluated.evidence.effective < crate::aggregate::shrink_coverage_cutoff(aggregation)
-            {
+            if evaluated.evidence.effective < shrink_coverage_cutoff(aggregation) {
                 r.missing.groups_shrunk.insert(group_key.clone());
             }
             r.evidence

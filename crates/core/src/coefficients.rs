@@ -71,8 +71,6 @@ pub struct EvidenceConfig {
     pub prior_score: f64,
     #[serde(default = "default_direct_reliability")]
     pub direct_reliability: f64,
-    #[serde(default = "default_reported_reliability")]
-    pub reported_reliability: f64,
     #[serde(default = "default_provisional_min_direct")]
     pub provisional_min_direct: f64,
     #[serde(default = "default_provisional_min_families")]
@@ -127,10 +125,6 @@ fn default_prior_score() -> f64 {
 
 fn default_direct_reliability() -> f64 {
     1.0
-}
-
-fn default_reported_reliability() -> f64 {
-    0.60
 }
 
 fn default_provisional_min_direct() -> f64 {
@@ -194,7 +188,6 @@ impl Default for EvidenceConfig {
         Self {
             prior_score: default_prior_score(),
             direct_reliability: default_direct_reliability(),
-            reported_reliability: default_reported_reliability(),
             provisional_min_direct: default_provisional_min_direct(),
             provisional_min_families: default_provisional_min_families(),
             provisional_breadth_min_direct: default_provisional_breadth_min_direct(),

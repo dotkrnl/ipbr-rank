@@ -1,4 +1,3 @@
-pub mod aggregate;
 pub mod alias;
 pub mod coefficients;
 pub mod ingest;

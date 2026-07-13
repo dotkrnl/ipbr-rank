@@ -347,7 +347,6 @@ groups = ["CRE"]
 [evidence]
 prior_score = 50.0
 direct_reliability = 1.0
-reported_reliability = 0.60
 provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
@@ -365,8 +364,7 @@ max_family_weight = 0.30
 ```
 
 Consumers must still read the effective file rather than hard-code this
-example. `reported_reliability` is a reserved compatibility setting for older
-snapshots; it is not applied to actual manual overrides.
+example.
 Anchor set `2026-07-12.v2` was derived from the frozen 2026-07-12 evidence
 snapshot. Active scored leaves use fixed anchors; explicitly unanchored
 diagnostic or custom metrics may use their configured fallback transform.

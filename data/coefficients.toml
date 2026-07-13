@@ -291,9 +291,6 @@ trust_transition_width = 0.10
 # weight.
 prior_score = 50.0
 direct_reliability = 1.0
-# Reserved for rehydrating older schema-2.1 snapshots. Fresh actual
-# observations, including manual overrides, use `direct_reliability`.
-reported_reliability = 0.60
 provisional_min_direct = 0.60
 provisional_min_families = 3
 provisional_breadth_min_direct = 0.35
