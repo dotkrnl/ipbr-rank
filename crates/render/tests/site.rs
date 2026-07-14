@@ -86,9 +86,8 @@ fn native_direct_provenance_note_is_visible_in_metric_tooltip() {
     render_site(&scoreboard, &site_dir).expect("site should render");
     let index = read(site_dir.join("index.html"));
 
-    assert!(index.contains(
-        "Direct observation from artificial_analysis: served product with automatic fallback"
-    ));
+    // The note survives, under the publisher's name rather than the feed's id.
+    assert!(index.contains("From Artificial Analysis: served product with automatic fallback"));
 }
 
 fn find_style_css(site_dir: &Path) -> PathBuf {
@@ -144,8 +143,9 @@ fn sample_scoreboard() -> Scoreboard {
                     ("LM_ARENA_REVIEW_PROXY", 84.0),
                 ],
                 metrics: &[("LMArenaText", 82.0), ("SWEBenchVerified", 77.0)],
+                raw_metrics: &[("LMArenaText", 1452.0), ("SWEBenchVerified", 74.2)],
                 sources: &["openrouter", "lmarena"],
-                missing: &["AI_recovery"],
+                missing: &["SWERebench"],
             }),
             model(ModelFixture {
                 canonical_id: "openai/gpt-5.5+thinking-high",
@@ -157,8 +157,9 @@ fn sample_scoreboard() -> Scoreboard {
                     ("LM_ARENA_REVIEW_PROXY", 73.5),
                 ],
                 metrics: &[("LMArenaCode", 85.0), ("TerminalBench", 74.0)],
+                raw_metrics: &[("TerminalBench", 61.5), ("OutputSpeed", 120.4)],
                 sources: &["openrouter"],
-                missing: &["AI_refusal", "AI_recovery"],
+                missing: &["SWERebench", "MCPAtlas"],
             }),
             model(ModelFixture {
                 canonical_id: "google/gemini-3.1-pro",
@@ -172,6 +173,10 @@ fn sample_scoreboard() -> Scoreboard {
                 metrics: &[
                     ("LMArenaText", 86.0),
                     ("ArtificialAnalysisIntelligence", 82.0),
+                ],
+                raw_metrics: &[
+                    ("LMArenaText", 1488.0),
+                    ("ArtificialAnalysisIntelligence", 58.3),
                 ],
                 sources: &["openrouter", "lmarena"],
                 missing: &[],
@@ -192,6 +197,9 @@ struct ModelFixture<'a> {
     vendor: Vendor,
     groups: &'a [(&'a str, f64)],
     metrics: &'a [(&'a str, f64)],
+    /// The observations behind `metrics`, in each benchmark's own units. Every
+    /// real model has these; the expansion lists them as its evidence.
+    raw_metrics: &'a [(&'a str, f64)],
     sources: &'a [&'a str],
     missing: &'a [&'a str],
 }
@@ -212,6 +220,11 @@ fn model(fixture: ModelFixture<'_>) -> ModelRecord {
         .iter()
         .map(|(key, score)| ((*key).to_string(), *score))
         .collect();
+    record.raw_metrics = fixture
+        .raw_metrics
+        .iter()
+        .map(|(key, raw)| ((*key).to_string(), *raw))
+        .collect();
     record.sources = fixture
         .sources
         .iter()
@@ -227,6 +240,19 @@ fn model(fixture: ModelFixture<'_>) -> ModelRecord {
     record.scores.p_raw = 81.0;
     record.scores.b_raw = 82.0;
     record.scores.r = 83.0;
+    // Every scored model carries role coverage; the expansion reports it.
+    for role in ["I_raw", "P_raw", "B_raw", "R"] {
+        record.evidence.roles.insert(
+            role.to_string(),
+            ipbr_core::EvidenceCoverage {
+                direct: 0.72,
+                missing: 0.28,
+                effective: 0.72,
+                family_count: 4,
+                ..Default::default()
+            },
+        );
+    }
     record
 }
 
@@ -322,9 +348,9 @@ fn leaderboard_has_row_and_expansion_per_model() {
     assert!(index.contains(r#"id="anthropic/claude-opus-4.7""#));
     assert!(index.contains(r#"id="google/gemini-3.1-pro""#));
 
-    // Expansion content includes the new ranked group/metric tables
-    assert!(index.contains("class=\"exp-table\""));
-    assert!(index.contains("class=\"exp-rank"));
+    // The expansion leads with one card per role, each carrying its inputs.
+    assert!(index.contains("class=\"det-role role-build\""));
+    assert!(index.contains("class=\"dr-inputs\""));
 
     // Sort buttons emit data-sort attribute on header; build is the default sort
     assert!(index.contains(r#"data-sort="b" aria-sort="descending" data-sort-active="desc""#));
@@ -336,8 +362,61 @@ fn leaderboard_has_row_and_expansion_per_model() {
     );
     assert!(index.contains("data-sort=\"i\""));
     assert!(index.contains("data-sort=\"r\""));
-    assert!(index.contains("role evidence"));
-    assert!(index.contains("raw → normalized"));
+}
+
+/// The expansion is for a reader, so nothing in it may be named the way the
+/// scoring engine names it: not the metric keys, not the group keys, not the
+/// evidence vocabulary. Scoped to the expansion panels — the methodology prose
+/// elsewhere on the page is free to define its own terms.
+#[test]
+fn the_expansion_speaks_english_not_engine() {
+    let scoreboard = sample_scoreboard();
+    let tmp = tempdir().expect("tempdir should be created");
+    let site_dir = tmp.path().join("site");
+
+    render_site(&scoreboard, &site_dir).expect("site should render");
+    let index = read(site_dir.join("index.html"));
+
+    let panels: String = index
+        .split(r#"<div class="detail">"#)
+        .skip(1)
+        .map(|panel| panel.split("</td></tr>").next().unwrap_or_default())
+        .collect();
+    assert!(!panels.is_empty(), "expected expansion panels to scan");
+
+    for jargon in [
+        "CODE_REVIEW_DIRECT",
+        "LM_ARENA_REVIEW_PROXY",
+        "REVIEW_DIRECT",
+        "OPS_long",
+        "OPS_precision",
+        "OPS_review",
+        "AAGeneralComposite",
+        "SWEComposite",
+        "AAOmniscienceNonHallucination",
+        "TerminalBench21Composite",
+        "I_raw",
+        "P_raw",
+        "B_raw",
+        "% direct",
+        "% confidence",
+        "families",
+        "rank input",
+        "group breakdown",
+        "raw → normalized",
+    ] {
+        assert!(
+            !panels.contains(jargon),
+            "the expansion must not show engine vocabulary: {jargon}"
+        );
+    }
+
+    // …and it says the same things in words a reader can use.
+    assert!(panels.contains("Every benchmark it was measured on"));
+    assert!(panels.contains("of the evidence this score looks for"));
+    assert!(panels.contains("Reference only — none of this moves a score."));
+    assert!(panels.contains("Not measured yet"));
+    assert!(panels.contains("Measured by"));
 }
 
 #[test]
@@ -612,14 +691,15 @@ fn provisional_models_remain_in_hero_rankings_with_marked_scores() {
     assert!(!index.contains(r#"<div class="role-head">[ review proxy ]</div>"#));
 }
 
+/// The hero is the page's only radar — the expansion explains a model in words
+/// and numbers instead. Each hero axis scales against the reference cohort, not
+/// against the model's own four scores.
 #[test]
-fn expansion_includes_mini_radar() {
+fn the_hero_holds_the_only_radar_and_scales_each_axis_against_the_cohort() {
     let mut scoreboard = sample_scoreboard();
     // All three fixture models tie at 80/81/82/83 by default. Give Claude a
     // standout Build score so its axis has real spread across the top-10
-    // reference cohort (here, all 3 models) while Idea/Plan/Review stay
-    // tied — a direct check that each axis scales independently against the
-    // shared cohort range rather than each row's own four scores.
+    // reference cohort (here, all 3 models) while Idea/Plan/Review stay tied.
     scoreboard.models[0].scores.b_raw = 90.0;
 
     let tmp = tempdir().expect("tempdir should be created");
@@ -628,15 +708,22 @@ fn expansion_includes_mini_radar() {
     render_site(&scoreboard, &site_dir).expect("site should render");
 
     let index = read(site_dir.join("index.html"));
-    let mini_count = index.matches("class=\"radar radar-mini\"").count();
     assert_eq!(
-        mini_count, 3,
-        "expected one mini radar per model row, got {mini_count}"
+        index.matches("class=\"radar ").count(),
+        1,
+        "the hero radar should be the only radar on the page"
     );
-    // Claude now sorts first (highest Build). Its own Build (90) sits 40% of
-    // the way through the cohort's floored (82, 92) range; Idea/Plan/Review
-    // are tied across the whole cohort, so those axes floor to a neutral
-    // window whose min equals every model's own score — 0% on each.
+    let panels: String = index
+        .split(r#"<div class="detail">"#)
+        .skip(1)
+        .map(|panel| panel.split("</td></tr>").next().unwrap_or_default())
+        .collect();
+    assert!(!panels.contains("<svg"), "the expansion carries no radar");
+
+    // Claude's Build (90) sits 40% of the way through the cohort's floored
+    // (82, 92) range; Idea/Plan/Review are tied across the whole cohort, so
+    // those axes floor to a neutral window whose min equals every model's own
+    // score — 0% on each.
     assert!(
         index.contains(r#"points="0,-0.0 0.0,0 0,40.0 -0.0,0""#),
         "Build axis must scale independently against the top-10 cohort range"

@@ -19,35 +19,17 @@ pub struct RadarSlice<'a> {
     pub provisional: bool,
 }
 
-#[derive(Clone, Copy, Debug)]
-pub enum RadarVariant {
-    /// 320px hero radar with axis labels and tick rings.
-    Hero,
-    /// ~96px expansion-row radar; tick rings only, no axis labels.
-    Mini,
-}
-
-/// Inline SVG for a 4-axis radar chart (Idea/Plan/Build/Review).
+/// Inline SVG for the hero's 4-axis radar chart (Idea/Plan/Build/Review).
 ///
-/// `scales` fixes each axis's [min, max] mapping to radius 50 — the same
-/// reference frame for every radar on the page (hero and per-row) so shapes
-/// are comparable to one another, not just internally self-consistent. Tick
-/// rings divide the scaled range into quarters. Hero variant places axis
-/// labels at radius 60; mini variant omits them.
-pub fn render_radar(
-    slices: &[RadarSlice<'_>],
-    variant: RadarVariant,
-    scales: RadarScales,
-) -> String {
-    let (class, view_box) = match variant {
-        RadarVariant::Hero => ("radar radar-hero", "-62 -62 124 124"),
-        RadarVariant::Mini => ("radar radar-mini", "-56 -56 112 112"),
-    };
-
+/// `scales` fixes each axis's [min, max] mapping to radius 50, so the slices
+/// drawn together are comparable to one another rather than each being
+/// self-normalized. Tick rings divide the scaled range into quarters and axis
+/// labels sit just outside the outermost ring.
+pub fn render_radar(slices: &[RadarSlice<'_>], scales: RadarScales) -> String {
     let mut svg = String::new();
     write!(
         svg,
-        r#"<svg class="{class}" viewBox="{view_box}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Role scores across Idea, Plan, Build, Review">"#
+        r#"<svg class="radar radar-hero" viewBox="-62 -62 124 124" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Role scores across Idea, Plan, Build, Review">"#
     )
     .unwrap();
 
@@ -86,19 +68,17 @@ pub fn render_radar(
         .unwrap();
     }
 
-    if matches!(variant, RadarVariant::Hero) {
-        for (label, x, y, role) in [
-            ("I", 0.0_f64, -56.0_f64, "idea"),
-            ("P", 56.0, 1.0, "plan"),
-            ("B", 0.0, 58.0, "build"),
-            ("R", -56.0, 1.0, "review"),
-        ] {
-            write!(
-                svg,
-                r#"<text class="radar-label {role}" x="{x:.1}" y="{y:.1}" text-anchor="middle" dominant-baseline="middle">{label}</text>"#
-            )
-            .unwrap();
-        }
+    for (label, x, y, role) in [
+        ("I", 0.0_f64, -56.0_f64, "idea"),
+        ("P", 56.0, 1.0, "plan"),
+        ("B", 0.0, 58.0, "build"),
+        ("R", -56.0, 1.0, "review"),
+    ] {
+        write!(
+            svg,
+            r#"<text class="radar-label {role}" x="{x:.1}" y="{y:.1}" text-anchor="middle" dominant-baseline="middle">{label}</text>"#
+        )
+        .unwrap();
     }
 
     svg.push_str("</svg>");
@@ -196,7 +176,7 @@ mod tests {
     #[test]
     fn from_range_maps_min_to_zero_and_max_to_full_radius() {
         let scales = uniform_scales(RadarScale::from_range(70.0, 90.0));
-        let svg = render_radar(&[slice(false)], RadarVariant::Mini, scales);
+        let svg = render_radar(&[slice(false)], scales);
         // (80-70)/20*50=25, (81-70)/20*50=27.5, (82-70)/20*50=30, (83-70)/20*50=32.5
         assert!(svg.contains(r#"points="0,-25.0 27.5,0 0,30.0 -32.5,0""#));
     }
@@ -230,7 +210,7 @@ mod tests {
             label: None,
             provisional: false,
         };
-        let svg = render_radar(&[mid], RadarVariant::Mini, scales);
+        let svg = render_radar(&[mid], scales);
         // Each score sits at the midpoint of its own axis's range, despite
         // the four ranges having wildly different widths (100/50/20/10) —
         // every axis should still plot at exactly half the radius.
@@ -256,7 +236,7 @@ mod tests {
             review: 200.0,
             ..below
         };
-        let svg = render_radar(&[below, above], RadarVariant::Mini, scales);
+        let svg = render_radar(&[below, above], scales);
         assert!(svg.contains(r#"points="0,-0.0 0.0,0 0,0.0 -0.0,0""#));
         assert!(svg.contains(r#"points="0,-50.0 50.0,0 0,50.0 -50.0,0""#));
     }
@@ -264,7 +244,7 @@ mod tests {
     #[test]
     fn provisional_slices_use_a_dedicated_class() {
         let scales = uniform_scales(RadarScale::from_range(70.0, 90.0));
-        let svg = render_radar(&[slice(true)], RadarVariant::Mini, scales);
+        let svg = render_radar(&[slice(true)], scales);
         assert!(svg.contains(r#"class="radar-poly solo provisional""#));
     }
 }

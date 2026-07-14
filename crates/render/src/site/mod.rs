@@ -7,7 +7,9 @@ use crate::toml_output::RenderError;
 use crate::toml_output::render_scoreboard;
 
 mod about;
+mod detail;
 mod index;
+mod labels;
 mod radar;
 mod scripts;
 mod theme;

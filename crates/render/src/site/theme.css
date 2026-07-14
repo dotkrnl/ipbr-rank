@@ -56,7 +56,6 @@ a, button, input, summary {
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-deep); text-decoration: underline; }
-.muted { color: var(--muted); }
 
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -382,14 +381,6 @@ table.leaderboard td.num[data-status="provisional"] .cell-score {
 .provisional-note {
   color: var(--muted); font-size: 0.78rem; font-style: italic;
 }
-.status-badge {
-  display: inline-block; border: 1px solid var(--line);
-  padding: 0 5px; color: var(--muted); font-size: 0.72em; line-height: 1.5;
-  font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
-  white-space: nowrap;
-}
-.status-badge.ranked { border-color: var(--build); color: var(--build); }
-.status-badge.provisional { border-color: var(--idea); color: var(--idea); }
 table.leaderboard tr.row:hover { background: color-mix(in srgb, var(--accent) 11%, transparent); }
 table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
@@ -402,67 +393,173 @@ table.leaderboard tr.row td.expand-toggle button {
 }
 table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); }
 
-/* Inline expansion contents */
-.expand .expand-inner {
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 18px;
-  align-items: start;
+/* === Expanded row: why a model scores what it scores ===
+   Read top to bottom: the four scores and what fed them, then the evidence
+   behind them, then what never touched them, then where it all came from.
+   Every heading here is a sentence a reader could say out loud — the scoring
+   engine's own vocabulary (CRE/GEN/OPS, I_raw, families, rank inputs) stops
+   at the render boundary. */
+.detail { padding: 4px 2px 2px; }
+.detail h5 {
+  margin: 0 0 8px; color: var(--text-strong);
+  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
 }
-.expand .exp-radar { padding-top: 4px; }
-.expand .exp-radar .radar-mini { width: 96px; height: 96px; }
-.expand .exp-tables { min-width: 0; }
-.expand .exp-block { margin-bottom: 16px; }
-.expand .exp-block:last-child { margin-bottom: 0; }
-.expand h4 { margin: 0 0 8px; color: var(--text-strong); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+.det-note { color: var(--muted); font-style: italic; margin: 6px 0 0; }
 
-.expand .exp-table {
+/* --- Top: one card per score --- */
+.det-top {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(120px, 2fr) 56px 64px;
-  gap: 7px 14px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px 18px;
 }
-.expand .exp-metric-table {
-  grid-template-columns: minmax(170px, 1.2fr) 72px minmax(90px, 1.4fr) 52px minmax(150px, 1fr) 64px;
+
+.det-role {
+  border: 1px solid var(--line); background: var(--bg);
+  padding: 10px 12px 12px; min-width: 0;
+  border-left: 3px solid var(--role-color);
 }
-/* Column headers for the bare-number grids — micro-labels in the same family
-   as the status/delta chips, so no new type step is introduced. */
-.expand .exp-col-head {
+.det-role.role-idea   { --role-color: var(--idea); }
+.det-role.role-plan   { --role-color: var(--plan); }
+.det-role.role-build  { --role-color: var(--build); }
+.det-role.role-review { --role-color: var(--review); }
+
+.dr-head {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px; align-items: baseline;
+  border-bottom: 1px solid var(--line-soft); padding-bottom: 6px;
+}
+.dr-title {
+  margin: 0; color: var(--role-color);
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: inherit;
+}
+.dr-score { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); }
+.dr-score[data-tier="high"] { color: var(--text-strong); }
+.dr-score[data-tier="low"] { color: var(--muted); }
+.dr-rank { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.dr-evidence { margin: 8px 0 10px; color: var(--muted); line-height: 1.5; }
+.dr-evidence b { color: var(--text); font-weight: 700; }
+.dr-badge {
+  display: inline-block; border: 1px solid var(--line);
+  padding: 0 5px; font-size: 0.72em; line-height: 1.6;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap; vertical-align: 1px;
+}
+.dr-badge.ranked { border-color: var(--build); color: var(--build); }
+.dr-badge.provisional { border-color: var(--idea); color: var(--idea); }
+/* Coverage read at a glance, beside the number it stands for. */
+.dr-meter {
+  display: inline-block; width: 34px; height: 6px; background: var(--line);
+  vertical-align: 1px;
+}
+.dr-meter i { display: block; height: 100%; background: var(--role-color); }
+
+/* Inputs: what fed the score, biggest share first. Shares are the real weights
+   through the scoring graph, so a reader who adds them up gets 100%. */
+.dr-inputs { list-style: none; padding: 0; margin: 0; }
+.dr-inputs li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px 50px 38px 36px;
+  gap: 7px; align-items: center;
+  padding: 3px 0; border-bottom: 1px solid var(--line-soft);
+}
+.dr-inputs li:last-child { border-bottom: 0; }
+.di-name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.di-name[title] { cursor: help; }
+.di-share {
+  color: var(--muted); text-align: right; font-variant-numeric: tabular-nums;
+  font-size: 0.88em;
+}
+.di-bar { display: block; height: 7px; background: var(--line); }
+.di-bar i { display: block; height: 100%; background: var(--role-color); opacity: 0.85; }
+.di-score { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+.di-score[data-tier="high"] { color: var(--text-strong); font-weight: 700; }
+.di-score[data-tier="low"] { color: var(--muted); }
+.di-rank { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.88em; }
+/* A weighted input with no result is part of the story, not a blank: it is why
+   a score carries less than full confidence. */
+.di-unmeasured .di-name { color: var(--muted); }
+/* Never wraps: a two-line "not measured" would make its row taller than every
+   row around it and the list would go ragged. */
+.di-none {
+  grid-column: 3 / -1; color: var(--muted); font-style: italic;
+  font-size: 0.88em; text-align: right; white-space: nowrap;
+}
+.di-minor .di-name { color: var(--muted); font-style: italic; }
+
+/* --- The evidence behind the panel above --- */
+.det-results { margin: 18px 0 0; border: 1px solid var(--line); }
+.det-results > summary {
+  cursor: pointer; padding: 8px 12px; font-weight: 700; color: var(--text-strong);
+  list-style: none;
+}
+.det-results > summary::-webkit-details-marker { display: none; }
+.det-results > summary::before { content: "▸ "; color: var(--muted); }
+.det-results[open] > summary::before { content: "▾ "; }
+.det-legend {
+  margin: 0; padding: 8px 12px; color: var(--muted);
+  border-top: 1px solid var(--line-soft); background: var(--bg);
+}
+.det-legend .lg { margin-right: 12px; white-space: nowrap; }
+.dot {
+  display: inline-block; width: 7px; height: 7px; margin-right: 5px;
+  background: var(--role-color);
+}
+.dot.role-idea   { --role-color: var(--idea); }
+.dot.role-plan   { --role-color: var(--plan); }
+.dot.role-build  { --role-color: var(--build); }
+.dot.role-review { --role-color: var(--review); }
+
+.det-area { padding: 12px 12px 14px; border-top: 1px solid var(--line-soft); }
+/* Left-packed rather than stretched across the panel: a row a reader's eye can
+   cross in one movement beats one that spans the full width of a 1200px page. */
+.res-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 36ch) 46px 92px 120px 44px 84px;
+  justify-content: start;
+  gap: 5px 14px; align-items: center;
+}
+.res-head {
   color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
   font-weight: 700; font-size: 0.72em; align-self: end;
   padding-bottom: 4px; border-bottom: 1px solid var(--line-soft);
   white-space: nowrap; overflow: hidden;
 }
-.expand .exp-col-head-num { text-align: right; }
-.expand .exp-label { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.expand .exp-raw { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
-.expand .evidence-kind { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.expand .exp-bar { display: block; background: var(--line); height: 7px; }
-.expand .exp-bar-fill { display: block; background: var(--accent); height: 100%; }
-.expand .exp-value { font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
-.expand .exp-value[data-tier="high"] { color: var(--text-strong); font-weight: 700; }
-.expand .exp-value[data-tier="low"] { color: var(--muted); }
-.expand .exp-rank { font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
-.expand .exp-rank.top { color: var(--accent); font-weight: 700; }
+.res-head-num { text-align: right; }
+.res-name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res-name[title] { cursor: help; }
+.res-feeds { display: flex; gap: 2px; }
+.res-raw { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.res-bar { display: block; height: 7px; background: var(--line); }
+.res-bar i { display: block; height: 100%; background: var(--accent); }
+.res-score { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+.res-score[data-tier="high"] { color: var(--text-strong); font-weight: 700; }
+.res-score[data-tier="low"] { color: var(--muted); }
+.res-rank { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.res-of { color: var(--muted); opacity: 0.7; }
 
-.expand .evidence-table {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(90px, auto)) minmax(78px, auto);
-  gap: 6px 14px;
-  align-items: center;
+/* --- Deliberately powerless: speed, price, context --- */
+.det-ref { margin-top: 18px; }
+.ref-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ref-stat {
+  flex: 1 1 150px; border: 1px solid var(--line); background: var(--bg);
+  padding: 7px 10px; display: flex; flex-direction: column; gap: 2px;
 }
-.expand .evidence-value { color: var(--text); font-variant-numeric: tabular-nums; }
+.ref-name { color: var(--muted); }
+.ref-value { color: var(--text-strong); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-.expand .exp-meta { color: var(--muted); }
-.expand .exp-meta-label {
-  color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
-  font-weight: 700; margin-right: 6px;
+/* --- Provenance --- */
+.det-prov {
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px;
 }
-.expand .exp-meta-label:not(:first-child) { margin-left: 18px; }
-.expand .pill {
+.prov-block { min-width: 0; }
+.pills { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.pill {
   display: inline-block; border: 1px solid var(--line);
-  padding: 1px 7px; margin: 2px 2px 2px 0; color: var(--muted);
+  padding: 1px 7px; color: var(--muted);
 }
+.pill-gap { border-style: dashed; }
 
 /* About page */
 .doc { max-width: 760px; }
@@ -483,6 +580,11 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
 @media (max-width: 960px) {
   .hero-body { grid-template-columns: minmax(180px, 200px) 1fr; gap: 18px; }
   .hero-radar-wrap .radar-hero { max-width: 180px; }
+
+  /* Two score cards side by side no longer leave room for an input's name, its
+     share, a bar, a score, and a rank — so each card takes the full width. */
+  .det-top { grid-template-columns: minmax(0, 1fr); }
+  .res-grid { grid-template-columns: minmax(150px, 1.4fr) 46px 88px minmax(50px, 1fr) 44px 76px; }
 }
 
 /* === Narrow (<820px): cells drop the rank chip ===
@@ -539,34 +641,27 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
   table.leaderboard td.model-name { max-width: none; }
 
   /* Pin expand content to the visible viewport even when the table is
-     scrolled horizontally — the expand <td> spans 10 columns so without
-     this the breakdown sits far offscreen-right. */
-  .expand-inner {
+     scrolled horizontally — the expand <td> spans every column, so without
+     this the panel sits far offscreen-right. */
+  .detail {
     position: sticky;
     left: 0;
     width: calc(100vw - 28px); /* shell padding */
     max-width: calc(100vw - 28px);
     box-sizing: border-box;
     padding: 12px 8px 14px;
-    grid-template-columns: 1fr;
-    gap: 10px;
   }
-  .expand .exp-radar { display: flex; justify-content: center; padding-top: 0; }
-  .expand .exp-radar .radar-mini { width: 80px; height: 80px; }
+  .det-top { gap: 10px; }
 
-  .expand .exp-table {
-    grid-template-columns: minmax(0, 1.4fr) minmax(50px, 1fr) 46px 52px;
-    gap: 4px 8px;
-  }
-  .expand .exp-metric-table {
-    grid-template-columns: minmax(110px, 1.2fr) 58px minmax(45px, 0.8fr) 42px minmax(105px, 1fr) 46px;
-  }
-  .expand .evidence-table {
-    grid-template-columns: minmax(90px, 1fr) repeat(2, minmax(75px, auto));
-  }
-  .expand .evidence-table .evidence-value:nth-of-type(3) { display: none; }
-  .expand h4 { margin-top: 6px; }
-  .expand .exp-meta-label:not(:first-child) { margin-left: 0; display: block; margin-top: 6px; }
+  /* Every score bar goes: at this width the name, its share, and the number it
+     scored are all a phone reader can hold at once. */
+  .dr-inputs li { grid-template-columns: minmax(0, 1fr) 34px 40px 44px; }
+  .di-bar { display: none; }
+  .di-none { grid-column: 3 / -1; }
+  .res-grid { grid-template-columns: minmax(0, 1fr) 44px 74px 44px 50px; }
+  .res-bar, .res-head-bar { display: none; }
+  .res-of { display: none; }
+  .det-prov { grid-template-columns: 1fr; }
 
   /* About page: overflow tables inside .doc-scroll wrappers; loosen prose */
   .doc-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0; }

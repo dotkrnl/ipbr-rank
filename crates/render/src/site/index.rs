@@ -3,7 +3,8 @@ use std::fmt::Write;
 
 use crate::Scoreboard;
 
-use super::radar::{RadarScale, RadarScales, RadarSlice, RadarVariant, render_radar};
+use super::detail::render_detail;
+use super::radar::{RadarScale, RadarScales, RadarSlice, render_radar};
 use super::{html_escape, layout};
 
 pub fn render_index(scoreboard: &Scoreboard) -> String {
@@ -20,7 +21,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
         r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#,
     );
 
-    body.push_str(&render_leaderboard(scoreboard, radar_scales, &ranks));
+    body.push_str(&render_leaderboard(scoreboard, &ranks));
 
     write!(
         body,
@@ -55,7 +56,7 @@ fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales, ranks: &RoleR
         })
         .rev() // draw rank-3 first so rank-1 sits on top
         .collect();
-    let radar_svg = render_radar(&radar_slices, RadarVariant::Hero, radar_scales);
+    let radar_svg = render_radar(&radar_slices, radar_scales);
 
     let mut legend = String::from(r#"<ul class="hero-radar-legend">"#);
     for (idx, model) in top3.iter().enumerate() {
@@ -120,8 +121,8 @@ fn composite(model: &ipbr_core::ModelRecord) -> f64 {
 const RADAR_REFERENCE_COHORT: usize = 10;
 
 /// Fixes each axis's [min, max] to the spread of the top-10 balanced-score
-/// models, so every radar on the page (hero and per-row) shares one
-/// reference frame instead of each self-normalizing to its own shape.
+/// models, so the hero's three shapes share one reference frame instead of each
+/// self-normalizing to its own.
 fn top10_axis_scales(scoreboard: &Scoreboard) -> RadarScales {
     let top10: Vec<&ipbr_core::ModelRecord> =
         dense_ranked_models(scoreboard.models.iter().collect(), composite)
@@ -203,7 +204,7 @@ fn rank_class(rank: usize) -> &'static str {
     }
 }
 
-fn score_tier(score: f64) -> &'static str {
+pub(super) fn score_tier(score: f64) -> &'static str {
     if score >= 70.0 {
         "high"
     } else if score >= 50.0 {
@@ -253,19 +254,20 @@ fn bar_opacity(value: f64, (min, max): (f64, f64)) -> Option<f64> {
     Some(BAR_OPACITY_FLOOR + t * (1.0 - BAR_OPACITY_FLOOR))
 }
 
-struct RoleSpec {
-    id: &'static str,
-    label: &'static str,
+pub(super) struct RoleSpec {
+    pub(super) id: &'static str,
+    pub(super) label: &'static str,
     /// Column key on the leaderboard table (`data-sort`, `col-*` class).
     col: &'static str,
-    evidence_key: &'static str,
-    from_record: fn(&ipbr_core::ModelRecord) -> f64,
+    /// Also the role's key in `final_score_weights`.
+    pub(super) evidence_key: &'static str,
+    pub(super) from_record: fn(&ipbr_core::ModelRecord) -> f64,
     from_scores: fn(&ipbr_core::RoleScores) -> f64,
 }
 
 /// The four roles in column order. Index into this array is the `role` index
 /// used by [`RoleRanks`] and by the per-axis bar scales.
-fn role_specs() -> [RoleSpec; 4] {
+pub(super) fn role_specs() -> [RoleSpec; 4] {
     [
         RoleSpec {
             id: "idea",
@@ -393,11 +395,7 @@ fn render_rank_delta(delta: Option<i64>) -> String {
     )
 }
 
-fn render_leaderboard(
-    scoreboard: &Scoreboard,
-    radar_scales: RadarScales,
-    ranks: &RoleRanks,
-) -> String {
+fn render_leaderboard(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
     // Default order: build score. Individual role columns remain
     // independently sortable.
@@ -456,7 +454,6 @@ fn render_leaderboard(
         html.push_str(&render_row(
             scoreboard,
             model,
-            radar_scales,
             bar_scales,
             ranks,
             position + 1,
@@ -470,7 +467,6 @@ fn render_leaderboard(
 fn render_row(
     scoreboard: &Scoreboard,
     model: &ipbr_core::ModelRecord,
-    radar_scales: RadarScales,
     bar_scales: [(f64, f64); 4],
     ranks: &RoleRanks,
     position: usize,
@@ -519,28 +515,10 @@ fn render_row(
     )
     .unwrap();
 
-    let mini_radar = render_radar(
-        &[RadarSlice {
-            idea: s.i_raw,
-            plan: s.p_raw,
-            build: s.b_raw,
-            review: s.r,
-            class: "solo",
-            label: Some(model.display_name.as_str()),
-            provisional: ipbr_core::balanced_is_provisional(model),
-        }],
-        RadarVariant::Mini,
-        radar_scales,
-    );
-
     write!(
         html,
-        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
-        evidence = render_role_evidence(model),
-        groups = render_group_table(scoreboard, model),
-        metrics = render_metric_table(scoreboard, model),
-        sources = render_source_pills(scoreboard, model),
-        missing = render_missing_pills(model),
+        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8">{detail}</td></tr>"#,
+        detail = render_detail(scoreboard, model),
     )
     .unwrap();
 
@@ -567,287 +545,6 @@ fn render_leader_score(value: f64, provisional: bool) -> String {
     }
 }
 
-fn rank_for(
-    scoreboard: &Scoreboard,
-    canonical_id: &str,
-    lookup: impl Fn(&ipbr_core::ModelRecord) -> Option<f64>,
-) -> Option<(usize, usize)> {
-    let mut scored: Vec<(f64, &str)> = scoreboard
-        .models
-        .iter()
-        .filter_map(|m| lookup(m).map(|v| (v, m.canonical_id.as_str())))
-        .collect();
-    if scored.is_empty() {
-        return None;
-    }
-    scored.sort_by(|a, b| {
-        b.0.partial_cmp(&a.0)
-            .unwrap_or(std::cmp::Ordering::Equal)
-            .then_with(|| a.1.cmp(b.1))
-    });
-    let mut dense_rank = 0;
-    let mut previous: Option<String> = None;
-    for (score, id) in &scored {
-        let display_key = display_score_key(*score);
-        if previous.as_ref() != Some(&display_key) {
-            dense_rank += 1;
-            previous = Some(display_key);
-        }
-        if *id == canonical_id {
-            return Some((dense_rank, scored.len()));
-        }
-    }
-    None
-}
-
-fn rank_bar_width(rank: Option<(usize, usize)>) -> f64 {
-    match rank {
-        Some((p, total)) if total > 0 => ((total - p + 1) as f64) / (total as f64) * 100.0,
-        _ => 0.0,
-    }
-}
-
-fn rank_text(rank: Option<(usize, usize)>) -> (String, &'static str) {
-    match rank {
-        Some((1, total)) => (format!("1 / {total}"), "exp-rank top"),
-        Some((p, total)) => (format!("{p} / {total}"), "exp-rank"),
-        None => (String::from("—"), "exp-rank"),
-    }
-}
-
-fn render_group_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    if model.groups.is_empty() {
-        return r#"<div class="muted">no group scores</div>"#.to_string();
-    }
-    let mut html = String::from(
-        r#"<div class="exp-table"><span class="exp-col-head">group</span><span class="exp-col-head" aria-hidden="true"></span><span class="exp-col-head exp-col-head-num">score</span><span class="exp-col-head exp-col-head-num">rank</span>"#,
-    );
-    for (group, score) in &model.groups {
-        let group_owned = group.clone();
-        let rank = rank_for(scoreboard, &model.canonical_id, |m| {
-            m.groups.get(&group_owned).copied()
-        });
-        let bar_width = rank_bar_width(rank);
-        let (rank_label, rank_class) = rank_text(rank);
-        html.push_str(&format!(
-            r#"<span class="exp-label">{label}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{score:.1}</span><span class="{rank_class}">{rank_label}</span>"#,
-            label = html_escape(group),
-            tier = score_tier(*score),
-        ));
-    }
-    html.push_str("</div>");
-    html
-}
-
-fn render_role_evidence(model: &ipbr_core::ModelRecord) -> String {
-    if model.evidence.roles.is_empty() {
-        return r#"<div class="muted">evidence summary unavailable</div>"#.to_string();
-    }
-    let mut html = String::from(r#"<div class="evidence-table">"#);
-    for (label, key) in [
-        ("idea", "I_raw"),
-        ("plan", "P_raw"),
-        ("build", "B_raw"),
-        ("review", "R"),
-    ] {
-        let Some(coverage) = model.evidence.roles.get(key) else {
-            continue;
-        };
-        let status = if coverage.provisional {
-            "provisional"
-        } else {
-            "ranked"
-        };
-        write!(
-            html,
-            r#"<span class="exp-label">{label}</span><span class="evidence-value">{direct:.0}% direct</span><span class="evidence-value">{effective:.0}% confidence</span><span class="evidence-value">{families} families</span><span class="status-badge {status}">{status}</span>"#,
-            direct = coverage.direct * 100.0,
-            effective = coverage.effective * 100.0,
-            families = coverage.family_count,
-        )
-        .unwrap();
-    }
-    html.push_str("</div>");
-    html
-}
-
-fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    if model.metrics.is_empty() {
-        return r#"<div class="muted">no metrics</div>"#.to_string();
-    }
-    let ranked_metrics = ranked_metric_keys(&scoreboard.coefficients);
-    let mut html = String::from(
-        r#"<div class="exp-table exp-metric-table"><span class="exp-col-head">metric</span><span class="exp-col-head exp-col-head-num">raw</span><span class="exp-col-head" aria-hidden="true"></span><span class="exp-col-head exp-col-head-num">norm</span><span class="exp-col-head">evidence</span><span class="exp-col-head exp-col-head-num">rank</span>"#,
-    );
-    for (key, value) in &model.metrics {
-        let key_owned = key.clone();
-        let rank = rank_for(scoreboard, &model.canonical_id, |m| {
-            m.metrics.get(&key_owned).copied()
-        });
-        let bar_width = rank_bar_width(rank);
-        let (rank_label, rank_class) = rank_text(rank);
-        let raw = model
-            .raw_metrics
-            .get(key)
-            .map(|raw| format_raw_metric(*raw))
-            .unwrap_or_else(|| "derived".to_string());
-        let (evidence_class, evidence_title) = metric_evidence(model, key);
-        let evidence_title = sanitize_evidence_tooltip(&evidence_title);
-        let use_class = if ranked_metrics.contains(key) {
-            "rank input"
-        } else {
-            "reference"
-        };
-        html.push_str(&format!(
-            r#"<span class="exp-label">{key}</span><span class="exp-raw">{raw}</span><span class="exp-bar"><span class="exp-bar-fill" style="width:{bar_width:.0}%"></span></span><span class="exp-value" data-tier="{tier}">{value:.1}</span><span class="evidence-kind" title="{evidence_title}">{evidence_class} · {use_class}</span><span class="{rank_class}">{rank_label}</span>"#,
-            key = html_escape(key),
-            raw = html_escape(&raw),
-            tier = score_tier(*value),
-            evidence_title = html_escape(&evidence_title),
-        ));
-    }
-    html.push_str("</div>");
-    html
-}
-
-fn metric_evidence(model: &ipbr_core::ModelRecord, metric: &str) -> (&'static str, String) {
-    if model.raw_metrics.contains_key(metric) {
-        let source = model
-            .metric_sources
-            .get(metric)
-            .map(String::as_str)
-            .unwrap_or("direct source");
-        let detail = if model.curated_overrides.contains(metric) {
-            "Curated direct observation; full citation is in scoreboard.toml".to_string()
-        } else if let Some(note) = model.metric_citations.get(metric) {
-            format!("Direct observation from {source}: {note}")
-        } else {
-            format!("Direct observation from {source}")
-        };
-        return ("direct", detail);
-    }
-    ("derived", "Composite of normalized inputs".to_string())
-}
-
-/// Evidence notes retain full upstream URLs in `scoreboard.toml`, but the
-/// static HTML deliberately has no external-reference markers. Sanitize those
-/// marker strings in tooltip text while preserving surrounding provenance.
-fn sanitize_evidence_tooltip(input: &str) -> String {
-    let mut remaining = input;
-    let mut output = String::with_capacity(input.len());
-    loop {
-        let http = remaining.find("http://");
-        let https = remaining.find("https://");
-        let Some(start) = (match (http, https) {
-            (Some(a), Some(b)) => Some(a.min(b)),
-            (Some(a), None) | (None, Some(a)) => Some(a),
-            (None, None) => None,
-        }) else {
-            output.push_str(remaining);
-            break;
-        };
-
-        output.push_str(&remaining[..start]);
-        output.push_str("[upstream URL in scoreboard.toml]");
-        let url = &remaining[start..];
-        let end = url
-            .find(|c: char| c.is_whitespace() || matches!(c, ';' | ',' | ')' | ']'))
-            .unwrap_or(url.len());
-        remaining = &url[end..];
-    }
-    // `data:` is also rejected by the self-contained-site validator. It can
-    // occur innocently inside prose such as `metadata:` even when no data URI
-    // exists, so keep the wording while changing the delimiter.
-    output.replace("data:", "data —")
-}
-
-fn format_raw_metric(value: f64) -> String {
-    if value.abs() >= 1_000.0 {
-        format!("{value:.1}")
-    } else if value.abs() >= 100.0 {
-        format!("{value:.2}")
-    } else {
-        format!("{value:.3}")
-    }
-}
-
-fn ranked_metric_keys(
-    coefficients: &ipbr_core::Coefficients,
-) -> std::collections::BTreeSet<String> {
-    fn expand(
-        metric: &str,
-        coefficients: &ipbr_core::Coefficients,
-        keys: &mut std::collections::BTreeSet<String>,
-        visiting: &mut std::collections::BTreeSet<String>,
-    ) {
-        keys.insert(metric.to_string());
-        if coefficients.precedence_composites.contains(metric) {
-            return;
-        }
-        let Some(inputs) = coefficients.composite_metrics.get(metric) else {
-            return;
-        };
-        if !visiting.insert(metric.to_string()) {
-            return;
-        }
-        for input in inputs.keys() {
-            expand(input, coefficients, keys, visiting);
-        }
-        visiting.remove(metric);
-    }
-
-    let mut keys = std::collections::BTreeSet::new();
-    for groups in coefficients.final_score_weights.values() {
-        for group in groups.keys() {
-            if let Some(metrics) = coefficients.group_weights.get(group) {
-                for metric in metrics.keys() {
-                    expand(
-                        metric,
-                        coefficients,
-                        &mut keys,
-                        &mut std::collections::BTreeSet::new(),
-                    );
-                }
-            }
-        }
-    }
-    keys
-}
-
-fn render_source_pills(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    if model.sources.is_empty() {
-        return r#"<div class="muted">no sources</div>"#.to_string();
-    }
-    let mut html = String::new();
-    for source in &model.sources {
-        let status = scoreboard
-            .source_summary
-            .get(source)
-            .map(|s| s.status.as_str())
-            .unwrap_or("unknown");
-        html.push_str(&format!(
-            r#"<span class="pill" title="{status}">{name}</span>"#,
-            name = html_escape(source),
-            status = html_escape(status),
-        ));
-    }
-    html
-}
-
-fn render_missing_pills(model: &ipbr_core::ModelRecord) -> String {
-    if model.missing.metrics.is_empty() {
-        return r#"<span class="muted">none</span>"#.to_string();
-    }
-    let mut html = String::new();
-    for metric in &model.missing.metrics {
-        html.push_str(&format!(
-            r#"<span class="pill">{m}</span>"#,
-            m = html_escape(metric),
-        ));
-    }
-    html
-}
-
 const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 <summary>how scoring works</summary>
 <div class="scoring-body">
@@ -868,7 +565,7 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 
 #[cfg(test)]
 mod tests {
-    use super::{dense_ranks, display_score_key, render_rank_delta, sanitize_evidence_tooltip};
+    use super::{dense_ranks, display_score_key, render_rank_delta};
 
     #[test]
     fn dense_tie_key_matches_the_rendered_tenth() {
@@ -898,19 +595,5 @@ mod tests {
         assert!(render_rank_delta(Some(-1)).contains("1 place down"));
         assert!(render_rank_delta(Some(0)).is_empty(), "held its rank");
         assert!(render_rank_delta(None).is_empty(), "no baseline rank");
-    }
-
-    #[test]
-    fn evidence_tooltips_redact_urls_but_keep_provenance() {
-        assert_eq!(
-            sanitize_evidence_tooltip(
-                "submission metadata: Model: https://huggingface.co/zai-org/GLM-4.6; Org: Z.ai"
-            ),
-            "submission metadata — Model: [upstream URL in scoreboard.toml]; Org: Z.ai"
-        );
-        assert_eq!(
-            sanitize_evidence_tooltip("source=http://example.test/model, agent=foo"),
-            "source=[upstream URL in scoreboard.toml], agent=foo"
-        );
     }
 }
