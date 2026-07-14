@@ -7,9 +7,7 @@ pub mod required_aliases;
 pub mod score;
 pub mod scoreboard;
 
-pub use alias::{
-    AliasCollision, AliasIndex, normalize_name, normalize_vendor_hint, warn_alias_collisions,
-};
+pub use alias::{AliasCollision, AliasIndex, normalize_name, warn_alias_collisions};
 pub use coefficients::{
     AggregationConfig, Coefficients, EffortException, EffortPolicy, EvidenceConfig, MetricDef,
     MetricEligibility, MetricTransform, NormalizationConfig,

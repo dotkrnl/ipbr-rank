@@ -213,9 +213,11 @@ impl EvidenceConfig {
         }
     }
 
-    pub fn reliability(&self, value: f64) -> f64 {
-        if value.is_finite() {
-            value.clamp(0.0, 1.0)
+    /// Configured reliability of a direct observation, clamped into 0..=1. A
+    /// non-finite value contributes nothing rather than poisoning every score.
+    pub fn effective_reliability(&self) -> f64 {
+        if self.direct_reliability.is_finite() {
+            self.direct_reliability.clamp(0.0, 1.0)
         } else {
             0.0
         }

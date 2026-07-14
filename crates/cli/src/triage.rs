@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
-use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name, normalize_vendor_hint};
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name};
 use ipbr_sources::{FetchOptions, Http, SecretStore, Source, SourceError};
 use serde::Serialize;
 use time::OffsetDateTime;
@@ -118,7 +118,7 @@ pub async fn cmd_triage(
                 *matched_counts.entry(source_id.clone()).or_default() += 1;
                 continue;
             }
-            let vendor_norm = normalize_vendor_hint(row.vendor_hint.as_deref().unwrap_or(""));
+            let vendor_norm = normalize_name(row.vendor_hint.as_deref().unwrap_or(""));
             let name_norm = normalize_name(&row.model_name);
             let key = UnmatchedKey {
                 source_id: source_id.clone(),
@@ -233,12 +233,6 @@ mod tests {
     use std::time::Duration;
 
     use ipbr_sources::{SweRebenchSource, cache_html_path, cache_json_path};
-
-    #[test]
-    fn normalize_vendor_hint_lowercases_and_normalizes() {
-        assert_eq!(normalize_vendor_hint("OpenAI"), "openai");
-        assert_eq!(normalize_vendor_hint("Moonshot AI"), "moonshot");
-    }
 
     #[test]
     fn cache_mtime_uses_consumed_payload_extension() {

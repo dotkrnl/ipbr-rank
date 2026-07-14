@@ -14,10 +14,6 @@ const ORG_ALIASES: &[(&str, &str)] = &[
     ("z ai", "zai"),
 ];
 
-pub fn normalize_vendor_hint(s: &str) -> String {
-    normalize_name(s)
-}
-
 const KNOWN_SUFFIXES: &[&str] = &[
     "non reasoning",
     "reasoning",
@@ -39,44 +35,40 @@ const DISTINCT_VARIANT_TOKENS: &[&str] = &[
 
 fn html_unescape(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
-    let bytes = s.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] == b'&'
-            && let Some(end) = s[i..].find(';')
-        {
-            let entity = &s[i + 1..i + end];
-            let replacement = match entity {
-                "amp" => Some("&"),
-                "lt" => Some("<"),
-                "gt" => Some(">"),
-                "quot" => Some("\""),
-                "apos" | "#39" => Some("'"),
-                "nbsp" => Some(" "),
-                _ => None,
-            };
-            if let Some(r) = replacement {
-                out.push_str(r);
-                i += end + 1;
-                continue;
+    let mut rest = s;
+    while let Some(amp) = rest.find('&') {
+        out.push_str(&rest[..amp]);
+        rest = &rest[amp..];
+        // No terminator left anywhere, so no entity can follow either.
+        let Some(end) = rest.find(';') else { break };
+        let decoded = match &rest[1..end] {
+            "amp" => Some('&'),
+            "lt" => Some('<'),
+            "gt" => Some('>'),
+            "quot" => Some('"'),
+            "apos" => Some('\''),
+            "nbsp" => Some(' '),
+            entity => entity
+                .strip_prefix('#')
+                .and_then(|digits| match digits.strip_prefix(['x', 'X']) {
+                    Some(hex) => u32::from_str_radix(hex, 16).ok(),
+                    None => digits.parse().ok(),
+                })
+                .and_then(char::from_u32),
+        };
+        match decoded {
+            Some(c) => {
+                out.push(c);
+                rest = &rest[end + 1..];
             }
-            if let Some(rest) = entity.strip_prefix('#') {
-                let n = if let Some(hex) = rest.strip_prefix('x').or_else(|| rest.strip_prefix('X'))
-                {
-                    u32::from_str_radix(hex, 16).ok()
-                } else {
-                    rest.parse::<u32>().ok()
-                };
-                if let Some(c) = n.and_then(char::from_u32) {
-                    out.push(c);
-                    i += end + 1;
-                    continue;
-                }
+            // Not an entity after all — keep the `&` and resume scanning.
+            None => {
+                out.push('&');
+                rest = &rest[1..];
             }
         }
-        out.push(bytes[i] as char);
-        i += 1;
     }
+    out.push_str(rest);
     out
 }
 
@@ -132,14 +124,14 @@ pub fn normalize_name(s: &str) -> String {
     out
 }
 
-pub fn compact_key(s: &str) -> String {
+pub(crate) fn compact_key(s: &str) -> String {
     normalize_name(s)
         .chars()
         .filter(|c| c.is_ascii_alphanumeric())
         .collect()
 }
 
-pub fn strip_known_suffixes(input: &str) -> Vec<String> {
+pub(crate) fn strip_known_suffixes(input: &str) -> Vec<String> {
     let mut stripped = Vec::new();
     // Normalize before stripping so spaces, hyphens, underscores, and slashes
     // all use the same token-boundary rules.
@@ -385,14 +377,6 @@ fn input_extends_candidate_with_char(input_ck: &str, candidate_ck: &str, suffix:
     false
 }
 
-pub fn match_record(
-    records: &[ModelRecord],
-    input: &str,
-    vendor_hint: Option<&str>,
-) -> Option<usize> {
-    AliasIndex::build(records).match_record(input, vendor_hint)
-}
-
 /// A normalized or compact alias key claimed by two distinct canonical models.
 /// `AliasIndex` resolves these first-record-wins and silently, so a colliding
 /// alias reroutes another model's benchmark rows with no other signal.
@@ -405,8 +389,9 @@ pub struct AliasCollision {
 }
 
 /// Detect alias keys shared across distinct canonical models. Emits a CRITICAL
-/// warning per collision to stderr (no logging dependency in `ipbr-core`) and
-/// returns them so the CLI can fail loudly and tests can assert on the set.
+/// warning per collision to stderr (no logging dependency in `ipbr-core`); the
+/// run continues, so the warning is the only signal. The returned list lets
+/// tests assert on the set.
 pub fn warn_alias_collisions(records: &[ModelRecord]) -> Vec<AliasCollision> {
     let mut normalized: BTreeMap<String, usize> = BTreeMap::new();
     let mut compact: BTreeMap<String, usize> = BTreeMap::new();

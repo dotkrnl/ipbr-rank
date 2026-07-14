@@ -193,14 +193,14 @@ fn normalize_population(
                 let family = def.family.clone().unwrap_or_else(|| metric_key.clone());
                 let mut direct_families = BTreeSet::new();
                 direct_families.insert(family);
-                let reliability = evidence_cfg.reliability(evidence_cfg.direct_reliability);
-                let mut coverage = EvidenceCoverage {
+                let reliability = evidence_cfg.effective_reliability();
+                let coverage = EvidenceCoverage {
                     direct: 1.0,
                     direct_families,
                     family_count: 1,
+                    effective: reliability,
                     ..Default::default()
                 };
-                coverage.effective = reliability;
                 let final_value = prior + reliability * (v - prior);
                 r.metrics.insert(metric_key.clone(), final_value);
                 signals[idx].insert(

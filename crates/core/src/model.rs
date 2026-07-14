@@ -70,12 +70,6 @@ pub struct EvidenceSummary {
     pub roles: BTreeMap<String, EvidenceCoverage>,
 }
 
-impl MissingInfo {
-    pub fn new() -> Self {
-        Self::default()
-    }
-}
-
 pub type MetricKey = String;
 pub type GroupKey = String;
 
@@ -204,7 +198,7 @@ impl ModelRecord {
             metrics: BTreeMap::new(),
             groups: BTreeMap::new(),
             scores: RoleScores::default(),
-            missing: MissingInfo::new(),
+            missing: MissingInfo::default(),
             curated_overrides: BTreeSet::new(),
             metric_sources: BTreeMap::new(),
             metric_citations: BTreeMap::new(),
