@@ -20,6 +20,7 @@
         if (alreadyActive) {
           // Restore default order — only "row" rows; expand rows follow their parent.
           relayout(table, defaultOrder);
+          syncTable(table);
           return;
         }
         th.setAttribute('data-sort-active', 'desc');
@@ -34,6 +35,7 @@
           return av > bv ? -1 : 1; // DESC only
         });
         relayout(table, rows);
+        syncTable(table);
       });
     });
   }
@@ -54,6 +56,34 @@
     });
   }
   function cssEscape(s) { return s.replace(/(["\\])/g, '\\$1'); }
+
+  // === Rank column, leader tick, and active-column wash ===
+  // The `#` column is a position marker (1..N of the current view), and the
+  // leader + column wash follow whichever score column drives the ordering.
+  // Default ordering is build, so an inactive header resolves to 'b'.
+  function isScoreCol(key) { return key === 'i' || key === 'p' || key === 'b' || key === 'r'; }
+  function currentSortKey(table) {
+    var active = table.querySelector('th[data-sort-active="desc"]');
+    return active ? active.getAttribute('data-sort') : 'b';
+  }
+  function syncTable(table) {
+    if (!table) return;
+    var key = currentSortKey(table);
+    if (isScoreCol(key)) table.setAttribute('data-active-col', key);
+    else table.removeAttribute('data-active-col');
+    var rows = table.tBodies[0].rows;
+    var leaderKey = isScoreCol(key) ? key : null;
+    var n = 0, leaderDone = false;
+    Array.prototype.forEach.call(rows, function (r) {
+      if (!r.classList || !r.classList.contains('row')) return;
+      r.classList.remove('leader');
+      if (r.hidden) return;
+      n += 1;
+      var cell = r.querySelector('td.rank');
+      if (cell) cell.textContent = n;
+      if (leaderKey && !leaderDone) { r.classList.add('leader'); leaderDone = true; }
+    });
+  }
 
   // === Filter (text + vendor chips) ===
   function initFilter() {
@@ -81,6 +111,7 @@
           expand.hidden = false;
         }
       });
+      syncTable(table);
     }
 
     input.addEventListener('input', function () {
@@ -152,6 +183,7 @@
     initExpand();
     initAnchor();
     initLocalTime();
+    syncTable(document.getElementById('leaderboard-table'));
   }
 
   // === Local time conversion for <time data-local-time> elements ===

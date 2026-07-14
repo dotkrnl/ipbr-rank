@@ -278,7 +278,43 @@ table.leaderboard th {
   background: var(--bg); font-weight: 700;
   color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
 }
+/* Keep column labels visible while scanning a long table. Only where the
+   table isn't the horizontal scroll container — an overflow ancestor would
+   otherwise trap the sticky (see the phone block below). */
+@media (min-width: 561px) {
+  .lb-scroll { overflow-x: visible; }
+  table.leaderboard thead th { position: sticky; top: 0; z-index: 2; }
+}
 table.leaderboard th.num { text-align: right; }
+
+/* Position column: a plain 1..N marker for the current ordering. */
+table.leaderboard th.rank, table.leaderboard td.rank {
+  text-align: right; color: var(--muted); font-variant-numeric: tabular-nums;
+  width: 1%; white-space: nowrap; padding-right: 4px;
+}
+
+/* Active sort column — a faint vertical wash so the ranked metric reads at a
+   glance. `data-active-col` is set on the table (default build). */
+table.leaderboard[data-active-col="i"] td.col-i,
+table.leaderboard[data-active-col="p"] td.col-p,
+table.leaderboard[data-active-col="b"] td.col-b,
+table.leaderboard[data-active-col="r"] td.col-r {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+table.leaderboard[data-active-col="i"] thead th[data-sort="i"],
+table.leaderboard[data-active-col="p"] thead th[data-sort="p"],
+table.leaderboard[data-active-col="b"] thead th[data-sort="b"],
+table.leaderboard[data-active-col="r"] thead th[data-sort="r"] {
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg));
+}
+
+/* Leader of the current score ordering — a quiet left tick + brighter name. */
+table.leaderboard tr.row.leader td.rank {
+  color: var(--accent); box-shadow: inset 2px 0 0 var(--accent);
+}
+table.leaderboard tr.row.leader td.model-name {
+  color: var(--text-strong); font-weight: 700;
+}
 table.leaderboard th button.sort {
   font: inherit; color: inherit; background: transparent; border: 0; padding: 0; cursor: pointer;
   letter-spacing: inherit; text-transform: inherit; text-align: inherit;
@@ -318,7 +354,7 @@ table.leaderboard td.num[data-status="provisional"] .cell-score {
 }
 .status-badge.ranked { border-color: var(--build); color: var(--build); }
 .status-badge.provisional { border-color: var(--idea); color: var(--idea); }
-table.leaderboard tr.row:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+table.leaderboard tr.row:hover { background: color-mix(in srgb, var(--accent) 11%, transparent); }
 table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
 table.leaderboard tr.expand.open { display: table-row; background: var(--panel); }
@@ -347,16 +383,25 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .expand .exp-table {
   display: grid;
   grid-template-columns: minmax(150px, 1fr) minmax(120px, 2fr) 56px 64px;
-  gap: 5px 14px;
+  gap: 7px 14px;
   align-items: center;
 }
 .expand .exp-metric-table {
   grid-template-columns: minmax(170px, 1.2fr) 72px minmax(90px, 1.4fr) 52px minmax(150px, 1fr) 64px;
 }
-.expand .exp-label { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Column headers for the bare-number grids — micro-labels in the same family
+   as the status/delta chips, so no new type step is introduced. */
+.expand .exp-col-head {
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: 700; font-size: 0.72em; align-self: end;
+  padding-bottom: 4px; border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap; overflow: hidden;
+}
+.expand .exp-col-head-num { text-align: right; }
+.expand .exp-label { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .expand .exp-raw { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .expand .evidence-kind { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.expand .exp-bar { display: block; background: var(--line); height: 6px; }
+.expand .exp-bar { display: block; background: var(--line); height: 7px; }
 .expand .exp-bar-fill { display: block; background: var(--accent); height: 100%; }
 .expand .exp-value { font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
 .expand .exp-value[data-tier="high"] { color: var(--text-strong); font-weight: 700; }

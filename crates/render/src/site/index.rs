@@ -307,7 +307,8 @@ fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> Str
             v = html_escape(vendor),
         ));
     }
-    html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table"><thead><tr>"#);
+    html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table" data-active-col="b"><thead><tr>"#);
+    html.push_str(r#"<th scope="col" class="rank" aria-label="rank">#</th>"#);
     html.push_str(
         r#"<th scope="col" data-sort="model" aria-sort="none"><button type="button" class="sort" aria-label="sort by model descending">model</button></th>"#,
     );
@@ -331,8 +332,8 @@ fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> Str
     );
     html.push_str(r#"<th scope="col" aria-label="details"></th></tr></thead><tbody>"#);
 
-    for model in &models {
-        html.push_str(&render_row(scoreboard, model, radar_scales));
+    for (position, model) in models.iter().enumerate() {
+        html.push_str(&render_row(scoreboard, model, radar_scales, position + 1));
     }
 
     html.push_str(r#"</tbody></table></div></section>"#);
@@ -343,6 +344,7 @@ fn render_row(
     scoreboard: &Scoreboard,
     model: &ipbr_core::ModelRecord,
     radar_scales: RadarScales,
+    position: usize,
 ) -> String {
     let mut html = String::new();
     let s = &model.scores;
@@ -356,7 +358,7 @@ fn render_row(
 
     write!(
         html,
-        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="model-name">{name}</td><td>{vendor}</td>"#,
+        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="rank" data-rank>{position}</td><td class="model-name">{name}</td><td>{vendor}</td>"#,
         name_lc = name.to_lowercase(),
         i = s.i_raw,
         p = s.p_raw,
@@ -366,19 +368,19 @@ fn render_row(
     .unwrap();
 
     type ScoreAccessor = fn(&ipbr_core::RoleScores) -> f64;
-    let columns: [(f64, ScoreAccessor, &str); 4] = [
-        (s.i_raw, |x| x.i_raw, "I_raw"),
-        (s.p_raw, |x| x.p_raw, "P_raw"),
-        (s.b_raw, |x| x.b_raw, "B_raw"),
-        (s.r, |x| x.r, "R"),
+    let columns: [(f64, ScoreAccessor, &str, &str); 4] = [
+        (s.i_raw, |x| x.i_raw, "I_raw", "i"),
+        (s.p_raw, |x| x.p_raw, "P_raw", "p"),
+        (s.b_raw, |x| x.b_raw, "B_raw", "b"),
+        (s.r, |x| x.r, "R", "r"),
     ];
-    for (raw, accessor, role) in columns {
+    for (raw, accessor, role, colkey) in columns {
         let provisional = role_is_provisional(model, role);
         let prev_score = prev.map(accessor);
         let delta = render_delta(raw, prev_score);
         write!(
             html,
-            r#"<td class="num" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
+            r#"<td class="num col-{colkey}" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
             tier = score_tier(raw),
             status = if provisional { "provisional" } else { "ranked" },
             score = render_score_value(raw, provisional),
@@ -408,7 +410,7 @@ fn render_row(
 
     write!(
         html,
-        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="7"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
+        r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8"><div class="expand-inner"><div class="exp-radar">{mini_radar}</div><div class="exp-tables"><section class="exp-block"><h4>role evidence</h4>{evidence}</section><section class="exp-block"><h4>group breakdown</h4>{groups}</section><section class="exp-block"><h4>metrics · raw → normalized</h4>{metrics}</section><section class="exp-block exp-meta"><span class="exp-meta-label">sources</span> {sources}<span class="exp-meta-label">missing ranked inputs</span> {missing}</section></div></div></td></tr>"#,
         evidence = render_role_evidence(model),
         groups = render_group_table(scoreboard, model),
         metrics = render_metric_table(scoreboard, model),
@@ -492,7 +494,9 @@ fn render_group_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -
     if model.groups.is_empty() {
         return r#"<div class="muted">no group scores</div>"#.to_string();
     }
-    let mut html = String::from(r#"<div class="exp-table">"#);
+    let mut html = String::from(
+        r#"<div class="exp-table"><span class="exp-col-head">group</span><span class="exp-col-head" aria-hidden="true"></span><span class="exp-col-head exp-col-head-num">score</span><span class="exp-col-head exp-col-head-num">rank</span>"#,
+    );
     for (group, score) in &model.groups {
         let group_owned = group.clone();
         let rank = rank_for(scoreboard, &model.canonical_id, |m| {
@@ -547,7 +551,9 @@ fn render_metric_table(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) 
         return r#"<div class="muted">no metrics</div>"#.to_string();
     }
     let ranked_metrics = ranked_metric_keys(&scoreboard.coefficients);
-    let mut html = String::from(r#"<div class="exp-table exp-metric-table">"#);
+    let mut html = String::from(
+        r#"<div class="exp-table exp-metric-table"><span class="exp-col-head">metric</span><span class="exp-col-head exp-col-head-num">raw</span><span class="exp-col-head" aria-hidden="true"></span><span class="exp-col-head exp-col-head-num">norm</span><span class="exp-col-head">evidence</span><span class="exp-col-head exp-col-head-num">rank</span>"#,
+    );
     for (key, value) in &model.metrics {
         let key_owned = key.clone();
         let rank = rank_for(scoreboard, &model.canonical_id, |m| {
