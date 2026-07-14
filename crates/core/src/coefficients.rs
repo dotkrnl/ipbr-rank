@@ -552,7 +552,6 @@ mod tests {
         let ranked = ranked_leaves(&c);
         assert!(ranked.contains("EQBenchCreativeWriting"));
         assert!(!ranked.contains("EQBenchJudgemark"));
-        assert!(!ranked.contains("LMArenaCreativeOrOpenEnded"));
         assert!(!ranked.contains("ArtificialAnalysisReasoning"));
         assert!(!ranked.contains("GPQA_HLE_Reasoning"));
     }

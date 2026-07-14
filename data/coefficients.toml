@@ -344,20 +344,11 @@ log_scale = false
 groups = ["CRE", "GEN"]
 transform = "percentile"
 
-[metrics.LMArenaCreativeOrOpenEnded]
-family = "lmarena"
-# Retained as an unscored schema key for older consumers. The source no longer
-# fabricates it from the identical LMArenaText rating.
-higher_better = true
-log_scale = false
-groups = []
-transform = "percentile"
-
 # LM Arena text-arena "Creative Writing" category Elo — a genuine, current
 # creativity signal drawn from the same broadly covered cohort as the overall
-# text rating, unlike the retired fabricated key above. It gives CRE a
-# creativity input for models EQ-Bench has not scored yet. Anchors are the
-# direct-evidence p5/p95 of the matched creative-writing cohort.
+# text rating. It gives CRE a creativity input for models EQ-Bench has not
+# scored yet. Anchors are the direct-evidence p5/p95 of the matched
+# creative-writing cohort.
 [metrics.LMArenaCreative]
 family = "lmarena"
 eligibility = "core"
