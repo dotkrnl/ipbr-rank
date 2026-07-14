@@ -35,6 +35,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
 }
 
 fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales, ranks: &RoleRanks) -> String {
+    let evidence = scoreboard.coefficients.evidence.clone().unwrap_or_default();
     let top3: Vec<&ipbr_core::ModelRecord> =
         dense_ranked_models(scoreboard.models.iter().collect(), composite)
             .into_iter()
@@ -52,7 +53,7 @@ fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales, ranks: &RoleR
             review: model.scores.r,
             class: rank_class(idx),
             label: Some(model.display_name.as_str()),
-            provisional: ipbr_core::balanced_is_provisional(model),
+            provisional: ipbr_core::balanced_is_provisional(model, &evidence),
         })
         .rev() // draw rank-3 first so rank-1 sits on top
         .collect();

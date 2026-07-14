@@ -4,7 +4,6 @@ use crate::model::{
 };
 use crate::normalize::{anchored_logistic_norm, as_score_0_100, robust_norm, tail_penalty_norm};
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::OnceLock;
 
 const ROLE_KEYS: &[&str] = &["I_raw", "P_raw", "B_raw", "R"];
 const EPS: f64 = 1e-12;
@@ -59,18 +58,7 @@ pub fn compute_scores_with(records: &mut [ModelRecord], coef: &Coefficients) {
 /// must qualify independently, and the remaining role must still have 20%
 /// (configurable) direct current evidence. Numeric Balanced capability remains
 /// the unchanged arithmetic mean of the four role scores.
-pub fn balanced_is_provisional(model: &ModelRecord) -> bool {
-    static CONFIG: OnceLock<EvidenceConfig> = OnceLock::new();
-    let config = CONFIG.get_or_init(|| {
-        Coefficients::load_embedded()
-            .expect("embedded coefficients are valid")
-            .evidence
-            .unwrap_or_default()
-    });
-    balanced_is_provisional_with(model, config)
-}
-
-pub fn balanced_is_provisional_with(model: &ModelRecord, config: &EvidenceConfig) -> bool {
+pub fn balanced_is_provisional(model: &ModelRecord, config: &EvidenceConfig) -> bool {
     let qualifying_roles = ROLE_KEYS
         .iter()
         .filter_map(|role| model.evidence.roles.get(*role))
@@ -968,14 +956,14 @@ mod tests {
         }
         model.evidence.roles.get_mut("R").unwrap().provisional = true;
         model.evidence.roles.get_mut("R").unwrap().direct = 0.20;
-        assert!(!balanced_is_provisional_with(&model, &config));
+        assert!(!balanced_is_provisional(&model, &config));
 
         model.evidence.roles.get_mut("R").unwrap().direct = 0.199;
-        assert!(balanced_is_provisional_with(&model, &config));
+        assert!(balanced_is_provisional(&model, &config));
 
         model.evidence.roles.get_mut("B_raw").unwrap().provisional = true;
         model.evidence.roles.get_mut("R").unwrap().direct = 0.80;
-        assert!(balanced_is_provisional_with(&model, &config));
+        assert!(balanced_is_provisional(&model, &config));
     }
 
     #[test]

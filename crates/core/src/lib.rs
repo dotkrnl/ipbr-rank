@@ -21,5 +21,5 @@ pub use model::{
     EligibilityQualificationPath, EvidenceCoverage, EvidenceSummary, GroupKey, MetricKey,
     MissingInfo, ModelRecord, RawRow, RoleScores, SourceId, Vendor,
 };
-pub use score::{balanced_is_provisional, balanced_is_provisional_with, compute_scores_with};
+pub use score::{balanced_is_provisional, compute_scores_with};
 pub use scoreboard::{SCHEMA_VERSION, Scoreboard, SourceSummary};

@@ -35,6 +35,7 @@ pub fn write_coefficients(
 }
 
 pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
+    let evidence = scoreboard.coefficients.evidence.clone().unwrap_or_default();
     let mut out = String::new();
     out.push_str(&format!(
         "schema_version = {}\n",
@@ -126,7 +127,7 @@ pub(crate) fn render_scoreboard(scoreboard: &Scoreboard) -> String {
         ));
         out.push_str(&format!(
             "balanced_status = {}\n\n",
-            toml_string(if balanced_is_provisional(model) {
+            toml_string(if balanced_is_provisional(model, &evidence) {
                 "provisional"
             } else {
                 "ranked"
