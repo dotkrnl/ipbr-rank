@@ -66,75 +66,17 @@ TerminalBench21Composite = 0.080
 DeepSWE = 0.07
 LongContextComposite = 0.05
 
+# Efforts outside the scoring set (default | medium | thinking | high | xhigh |
+# max) are dropped at ingest. Add an exception here to admit a blocked variant
+# — currently `low`, `non reasoning`, or an unrecognized effort — for a given
+# source, vendor, or canonical id. Listing an already-scoreable effort has no
+# effect.
+[effort_policy]
+exceptions = []
+
 # Composite metrics — per-model weighted average of normalized input metrics.
 # Treated as a single derived metric in scoring so several SWE-flavor sources
 # don't pile up as independent weights.
-#
-# Active composites and precedence fallbacks are defined below.
-[effort_policy]
-# Exceptions to the default scoring effort set
-# (default | medium | thinking | high | xhigh | max). These are retained for
-# product-tier aliases and any future explicitly blocked variants.
-
-# Qwen "Max" is a product tier, not a reasoning-effort marker.
-[[effort_policy.exceptions]]
-effort = "max"
-canonical_id = "qwen/qwen3.6-max-preview"
-
-[[effort_policy.exceptions]]
-effort = "max"
-canonical_id = "qwen/qwen3.7-max"
-
-# Historical MCP-Atlas carve-outs; high/max are globally scoreable now.
-[[effort_policy.exceptions]]
-effort = "max"
-source = "mcp_atlas"
-vendor = "anthropic"
-
-[[effort_policy.exceptions]]
-effort = "high"
-source = "mcp_atlas"
-vendor = "anthropic"
-
-# Historical Artificial Analysis carve-outs; high is globally scoreable now.
-[[effort_policy.exceptions]]
-effort = "high"
-source = "artificial_analysis"
-canonical_id = "google/gemini-3-pro-preview"
-
-[[effort_policy.exceptions]]
-effort = "high"
-source = "artificial_analysis"
-canonical_id = "google/gemini-3.5-flash"
-
-[[effort_policy.exceptions]]
-effort = "high"
-source = "artificial_analysis"
-canonical_id = "xai/grok-4.3"
-
-[[effort_policy.exceptions]]
-effort = "max"
-source = "artificial_analysis"
-canonical_id = "z-ai/glm-5.2"
-
-[[effort_policy.exceptions]]
-effort = "max"
-source = "lmarena"
-canonical_id = "z-ai/glm-5.2"
-
-# Scale SWE Atlas harness submissions are benchmark observations.
-[[effort_policy.exceptions]]
-effort = "max"
-source = "sweatlas_*"
-
-[[effort_policy.exceptions]]
-effort = "high"
-source = "sweatlas_*"
-
-[[effort_policy.exceptions]]
-effort = "thinking"
-source = "sweatlas_*"
-
 [composite_metrics.SWEComposite]
 # SWE-bench Verified is retained as a diagnostic but retired from the primary
 # rank because it is static, saturated at the frontier, and redundant with the

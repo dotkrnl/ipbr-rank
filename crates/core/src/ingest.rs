@@ -314,11 +314,21 @@ impl EffortPreference {
         }
     }
 
-    fn is_scoring_allowed(self) -> bool {
-        matches!(
-            self,
-            Self::Default | Self::Medium | Self::Thinking | Self::High | Self::XHigh | Self::Max
-        )
+    /// `None` for efforts in the default scoring set, which always score.
+    /// `Some(policy name)` for blocked variants, which score only when an
+    /// `[effort_policy]` exception admits them.
+    fn blocked_effort_name(self) -> Option<&'static str> {
+        match self {
+            Self::Default
+            | Self::Medium
+            | Self::Thinking
+            | Self::High
+            | Self::XHigh
+            | Self::Max => None,
+            Self::Low => Some("low"),
+            Self::NonReasoning => Some("non reasoning"),
+            Self::Other => Some("other"),
+        }
     }
 }
 
@@ -347,10 +357,9 @@ fn evidence_note_metric(key: &str) -> Option<&str> {
         .filter(|metric| !metric.is_empty())
 }
 
-/// Variant policy driven by `[effort_policy]` in `coefficients.toml`. The
-/// default scoring set is `default | medium | thinking | high | xhigh | max`.
-/// Exceptions remain for intentionally blocked variants, currently low and
-/// non-reasoning rows.
+/// Variant policy driven by `[effort_policy]` in `coefficients.toml`. Efforts
+/// in the default scoring set (`default | medium | thinking | high | xhigh |
+/// max`) always score; the rest are dropped unless an exception admits them.
 fn is_scoring_allowed_for(
     preference: EffortPreference,
     source_id: &str,
@@ -358,19 +367,8 @@ fn is_scoring_allowed_for(
     vendor: &Vendor,
     effort_policy: &crate::coefficients::EffortPolicy,
 ) -> bool {
-    if preference.is_scoring_allowed() {
+    let Some(effort_name) = preference.blocked_effort_name() else {
         return true;
-    }
-    let effort_name = match preference {
-        EffortPreference::High => "high",
-        EffortPreference::XHigh => "xhigh",
-        EffortPreference::Max => "max",
-        EffortPreference::Thinking => "thinking",
-        EffortPreference::Low => "low",
-        EffortPreference::NonReasoning => "non reasoning",
-        EffortPreference::Medium => "medium",
-        EffortPreference::Default => "default",
-        EffortPreference::Other => "other",
     };
     effort_policy.allows(effort_name, source_id, vendor.as_str(), canonical_id)
 }
@@ -738,7 +736,11 @@ mod tests {
         for label in ["gemini-3-flash (thinking-minimal)", "kimi-k2.5-instant"] {
             let preference = EffortPreference::from_text(label);
             assert_eq!(preference, EffortPreference::Low, "label={label:?}");
-            assert!(!preference.is_scoring_allowed(), "label={label:?}");
+            assert_eq!(
+                preference.blocked_effort_name(),
+                Some("low"),
+                "label={label:?}"
+            );
         }
     }
 
@@ -775,7 +777,7 @@ mod tests {
         for label in ["GPT-5.5 Instant (June 2026)", "Claude Instant"] {
             let preference = EffortPreference::from_text(label);
             assert_eq!(preference, EffortPreference::Default, "label={label:?}");
-            assert!(preference.is_scoring_allowed(), "label={label:?}");
+            assert_eq!(preference.blocked_effort_name(), None, "label={label:?}");
         }
     }
 
