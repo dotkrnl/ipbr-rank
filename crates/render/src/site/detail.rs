@@ -222,7 +222,7 @@ fn render_results(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> St
             .collect::<String>(),
     );
 
-    for area in Area::all() {
+    for area in Area::results_order() {
         let Some(rows) = by_area.get(&area) else {
             continue;
         };

@@ -197,18 +197,6 @@ mod tests {
     }
 
     #[test]
-    fn single_value_returns_50() {
-        let v = robust_norm(7.0, &[7.0], true, false).unwrap();
-        approx(v, 50.0);
-    }
-
-    #[test]
-    fn identical_population_returns_50() {
-        let v = robust_norm(3.0, &[3.0, 3.0, 3.0], true, false).unwrap();
-        approx(v, 50.0);
-    }
-
-    #[test]
     fn linear_distribution_endpoints() {
         let pop: Vec<f64> = (0..=100).map(|i| i as f64).collect();
         let lo = robust_norm(5.0, &pop, true, false).unwrap();
@@ -316,21 +304,22 @@ mod tests {
         approx(as_score_0_100(-5.0).unwrap(), 0.0);
     }
 
+    /// A population with no spread has no percentile to place a value against,
+    /// so both robust normalizers bail out to the neutral 50 before they ever
+    /// consult `higher_better`.
     #[test]
-    fn tail_penalty_identical_population_returns_50() {
-        let v = tail_penalty_norm(5.0, &[5.0, 5.0, 5.0], true, false).unwrap();
-        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
-    }
-
-    #[test]
-    fn tail_penalty_single_value_returns_50() {
-        let v = tail_penalty_norm(7.0, &[7.0], true, false).unwrap();
-        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
-    }
-
-    #[test]
-    fn tail_penalty_lower_better_identical_population_returns_50() {
-        let v = tail_penalty_norm(5.0, &[5.0, 5.0], false, false).unwrap();
-        assert!((v - 50.0).abs() < 1e-6, "expected 50, got {v}");
+    fn degenerate_population_returns_50() {
+        for higher_better in [true, false] {
+            for pop in [&[7.0][..], &[5.0, 5.0], &[3.0, 3.0, 3.0]] {
+                approx(
+                    robust_norm(pop[0], pop, higher_better, false).unwrap(),
+                    50.0,
+                );
+                approx(
+                    tail_penalty_norm(pop[0], pop, higher_better, false).unwrap(),
+                    50.0,
+                );
+            }
+        }
     }
 }

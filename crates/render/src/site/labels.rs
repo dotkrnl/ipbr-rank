@@ -34,8 +34,9 @@ impl Area {
         }
     }
 
-    /// Reading order for the results section.
-    pub fn all() -> [Area; 6] {
+    /// Reading order for the results section. `Reference` is deliberately
+    /// absent: it moves no score and gets its own section below the results.
+    pub fn results_order() -> [Area; 6] {
         [
             Area::Software,
             Area::Agentic,
