@@ -86,12 +86,15 @@ pub async fn cmd_triage(
     for source in sources {
         match source.as_ref().fetch(http, fetch_opts, secrets).await {
             Ok(rows) => {
-                let mtime = get_cache_mtime(cache_dir, source.as_ref())?;
-                let formatted = mtime
-                    .format(&Rfc3339)
-                    .context("failed formatting cache mtime")?;
-                provenance.insert(source.id().to_string(), formatted);
-                provenance_times.insert(source.id().to_string(), mtime);
+                // Sources with no on-disk cache (the embedded overrides file)
+                // still contribute rows; they just have no fetch timestamp.
+                if let Some(mtime) = get_cache_mtime(cache_dir, source.as_ref())? {
+                    let formatted = mtime
+                        .format(&Rfc3339)
+                        .context("failed formatting cache mtime")?;
+                    provenance.insert(source.id().to_string(), formatted);
+                    provenance_times.insert(source.id().to_string(), mtime);
+                }
                 ingested_counts.insert(source.id().to_string(), rows.len());
                 all_rows.insert(source.id().to_string(), rows);
             }
@@ -201,16 +204,18 @@ pub async fn cmd_triage(
     Ok(())
 }
 
-fn get_cache_mtime(cache_dir: &Path, source: &dyn Source) -> anyhow::Result<OffsetDateTime> {
+fn get_cache_mtime(
+    cache_dir: &Path,
+    source: &dyn Source,
+) -> anyhow::Result<Option<OffsetDateTime>> {
     let candidates = source.cache_paths(cache_dir);
-    let path = candidates
-        .iter()
-        .find(|p| p.exists())
-        .ok_or_else(|| anyhow::anyhow!("no cache file found for {}", source.id()))?;
+    let Some(path) = candidates.iter().find(|p| p.exists()) else {
+        return Ok(None);
+    };
 
     let meta = fs::metadata(path)?;
     let mtime = meta.modified()?;
-    Ok(OffsetDateTime::from(mtime))
+    Ok(Some(OffsetDateTime::from(mtime)))
 }
 
 fn extract_sample_fields(fields: &BTreeMap<String, serde_json::Value>) -> Vec<SampleField> {
@@ -232,7 +237,7 @@ mod tests {
     use super::*;
     use std::time::Duration;
 
-    use ipbr_sources::{SweRebenchSource, cache_html_path, cache_json_path};
+    use ipbr_sources::{OverridesSource, SweRebenchSource, cache_html_path, cache_json_path};
 
     #[test]
     fn cache_mtime_uses_consumed_payload_extension() {
@@ -254,6 +259,16 @@ mod tests {
         );
         let actual = get_cache_mtime(tmp.path(), &SweRebenchSource).expect("mtime should resolve");
 
-        assert_eq!(actual, expected);
+        assert_eq!(actual, Some(expected));
+    }
+
+    #[test]
+    fn cacheless_source_has_no_mtime() {
+        let tmp = tempfile::tempdir().expect("tempdir should be created");
+
+        let actual = get_cache_mtime(tmp.path(), &OverridesSource::default())
+            .expect("a cacheless source should not be an error");
+
+        assert_eq!(actual, None);
     }
 }
