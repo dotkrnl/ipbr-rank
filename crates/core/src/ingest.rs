@@ -247,6 +247,12 @@ const EFFORT_FIELDS: &[&str] = &[
     "Effort",
     "reasoning_effort",
     "ReasoningEffort",
+    // The AA evaluation pages resolve each row to a canonical id, which carries
+    // no effort token, and keep the effort-bearing text ("GPT-5.6 Sol (max)",
+    // "... (Non-reasoning)") only here. Without this field every such row reads
+    // as Default, the tie-break degrades to last-write-wins, and the weakest
+    // effort silently displaces the strongest.
+    "UpstreamModelLabel",
 ];
 
 impl EffortPreference {
@@ -425,6 +431,45 @@ mod tests {
             vendor_hint: None,
             fields: map,
         }
+    }
+
+    /// The AA evaluation pages resolve rows to a canonical id, so the effort
+    /// survives only in `UpstreamModelLabel`. The non-reasoning row is emitted
+    /// last (the source orders efforts strongest-first), so if core cannot read
+    /// that label the tie-break degrades to last-write-wins and the weakest
+    /// effort displaces the strongest.
+    #[test]
+    fn upstream_label_effort_keeps_the_strongest_row() {
+        let mut records = vec![{
+            let mut r = ModelRecord::new(
+                "openai/gpt-5.6-sol".to_string(),
+                "gpt-5.6-sol".to_string(),
+                Vendor::Openai,
+            );
+            r.aliases.insert("openai/gpt-5.6-sol".to_string());
+            r
+        }];
+        let rows = vec![
+            raw(
+                "aa_critpt",
+                "openai/gpt-5.6-sol",
+                &[
+                    ("CritPt", json!(32.29)),
+                    ("UpstreamModelLabel", json!("GPT-5.6 Sol (max)")),
+                ],
+            ),
+            raw(
+                "aa_critpt",
+                "openai/gpt-5.6-sol",
+                &[
+                    ("CritPt", json!(5.14)),
+                    ("UpstreamModelLabel", json!("GPT-5.6 Sol (Non-reasoning)")),
+                ],
+            ),
+        ];
+        let stats = ingest_rows(&mut records, rows);
+        assert_eq!(stats.matched, 2);
+        assert_eq!(records[0].raw_metrics.get("CritPt"), Some(&32.29));
     }
 
     #[test]
