@@ -4,7 +4,6 @@ use std::time::{Duration, SystemTime};
 use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name, required_aliases};
 
 pub mod agc_bench;
-pub mod aistupidlevel;
 pub mod arc_agi;
 pub mod artificial_analysis;
 pub mod bfcl;
@@ -29,7 +28,6 @@ pub mod swerebench;
 pub mod terminal_bench;
 
 pub use agc_bench::AgcBenchSource;
-pub use aistupidlevel::AiStupidLevelSource;
 pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
 pub use artificial_analysis::evaluations::{

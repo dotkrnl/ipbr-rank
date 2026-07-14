@@ -304,8 +304,6 @@ impl EffortPolicy {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Coefficients {
-    #[serde(default)]
-    pub ai_stupid_perspective_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub group_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub final_score_weights: BTreeMap<String, BTreeMap<String, f64>>,
     pub metrics: BTreeMap<String, MetricDef>,
@@ -391,10 +389,6 @@ mod tests {
     #[test]
     fn embedded_coefficients_parse() {
         let c = Coefficients::load_embedded().expect("coefficients.toml must parse");
-        assert!(
-            c.ai_stupid_perspective_weights.is_empty(),
-            "AISL perspective weights should remain retired from active scoring"
-        );
         assert!(c.group_weights.len() >= 8);
         assert_eq!(c.final_score_weights.len(), 4);
         assert!(
@@ -431,18 +425,6 @@ mod tests {
             !c.final_score_weights["R"].contains_key("JUDGE"),
             "R should no longer expose the old JUDGE group"
         );
-    }
-
-    #[test]
-    fn perspective_weights_sum_to_one() {
-        let c = Coefficients::load_embedded().unwrap();
-        for (perspective, weights) in &c.ai_stupid_perspective_weights {
-            let sum: f64 = weights.values().sum();
-            assert!(
-                (sum - 1.0).abs() < 1e-9,
-                "{perspective} weights sum to {sum}, expected 1.0"
-            );
-        }
     }
 
     #[test]

@@ -27,7 +27,7 @@ source_ids=$(
         sed -n '/fn id(/,/^[[:space:]]*}/{s/^[[:space:]]*"\([^"]*\)"[[:space:]]*$/\1/p;}' "$SOURCES_DIR"/*.rs
         sed -n 's/^[[:space:]]*source_id: "\([^"]*\)",[[:space:]]*$/\1/p' \
             "$SOURCES_DIR/artificial_analysis/evaluations.rs"
-    } | grep -vx 'aistupidlevel' | sort -u
+    } | sort -u
 )
 
 # Extract H2 headings from docs/sources.md.

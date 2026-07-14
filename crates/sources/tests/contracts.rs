@@ -2,7 +2,7 @@ use std::path::Path;
 
 use ipbr_core::{ModelRecord, ingest_rows, required_aliases};
 use ipbr_sources::{
-    AgcBenchSource, AiStupidLevelSource, ArtificialAnalysisSource, BfclSource, ContextArenaSource,
+    AgcBenchSource, ArtificialAnalysisSource, BfclSource, ContextArenaSource,
     EqBenchCreativeWritingSource, EqBenchJudgemarkSource, FactoryCodeReviewSource, FetchOptions,
     Http, LiveCodeBenchSource, LmArenaSource, OpenRouterSource, SecretStore, Source, SourceError,
     SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchSource,
@@ -327,62 +327,6 @@ async fn eqbench_judgemark_fixture_contract() {
     assert!(records.iter().any(|record| {
         record.canonical_id == "openai/gpt-5.5"
             && record.raw_metrics.contains_key("EQBenchJudgemark")
-    }));
-}
-
-#[tokio::test]
-async fn aistupidlevel_fixture_contract() {
-    let source = AiStupidLevelSource;
-    let rows = source
-        .fetch(
-            &OfflineOnlyHttp,
-            FetchOptions {
-                cache_dir: Some(fixture_dir()),
-                offline: true,
-            },
-            &SecretStore::default(),
-        )
-        .await
-        .expect("aistupidlevel fixture should parse");
-
-    assert!(
-        rows.len() >= 5,
-        "expected at least 5 fixture rows, got {}",
-        rows.len()
-    );
-    assert!(rows.iter().all(|row| {
-        let metric_count = [
-            "AI_correctness",
-            "AI_spec",
-            "AI_code",
-            "AI_efficiency",
-            "AI_stability",
-            "AI_refusal",
-            "AI_recovery",
-            "AI_complexity",
-            "AI_edge_cases",
-            "AI_hallucination_resistance",
-            "AI_plan_coherence",
-            "AI_memory_retention",
-            "AI_context_awareness",
-            "AI_task_completion",
-            "AI_tool_selection",
-            "AI_parameter_accuracy",
-        ]
-        .iter()
-        .filter(|key| row.fields.contains_key(**key))
-        .count();
-        metric_count >= 3
-    }));
-
-    let (records, matched) = ingest_fixture_rows(rows);
-    assert!(
-        matched >= 5,
-        "expected at least 5 alias matches, got {matched}"
-    );
-    assert!(records.iter().any(|record| {
-        record.canonical_id == "anthropic/claude-opus-4.7"
-            && record.raw_metrics.contains_key("AI_correctness")
     }));
 }
 

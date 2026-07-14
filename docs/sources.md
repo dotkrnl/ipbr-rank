@@ -167,13 +167,10 @@ upstream display label is retained as provenance.
 
 ### aistupidlevel
 
-Removed from active scoring on 2026-05-21. We reproduced the benchmark
-locally and found the tasks not representative enough of real model quality
-and too noise-prone for the role scores. The source implementation and
-fixture remain in the repo for audit/history, but `AiStupidLevelSource` is
-not registered, the `AI_*` metrics are no longer in `data/coefficients.toml`,
-the `A_*` perspective groups are gone, and the canary-health penalty is no
-longer applied.
+Removed on 2026-05-21. We reproduced the benchmark locally and found the
+tasks not representative enough of real model quality and too noise-prone for
+the role scores. The source implementation, its `AI_*` metrics, the `A_*`
+perspective groups, and the canary-health penalty have all been deleted.
 
 ### openevals
 
