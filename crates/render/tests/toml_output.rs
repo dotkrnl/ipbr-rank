@@ -1,33 +1,11 @@
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
 
-use ipbr_core::{
-    Coefficients, ModelRecord, RawRow, SourceSummary, Vendor, compute_scores_with,
-    ingest_rows_with_policy, required_aliases,
-};
+use ipbr_core::{Coefficients, ModelRecord, Vendor, compute_scores_with};
 use ipbr_render::{
     Scoreboard,
     toml_output::{write_coefficients, write_missing, write_scoreboard},
 };
-use ipbr_sources::{Http, SourceError, registry::registry};
 use tempfile::tempdir;
-
-struct OfflineOnlyHttp;
-
-#[async_trait::async_trait]
-impl Http for OfflineOnlyHttp {
-    async fn get_json(
-        &self,
-        _url: &str,
-        _headers: &[(&str, &str)],
-    ) -> Result<serde_json::Value, SourceError> {
-        panic!("offline fixture tests must not hit the network")
-    }
-
-    async fn get_text(&self, _url: &str, _headers: &[(&str, &str)]) -> Result<String, SourceError> {
-        panic!("offline fixture tests must not hit the network")
-    }
-}
 
 #[test]
 fn writes_valid_nested_scoreboard_toml() {
@@ -196,32 +174,6 @@ fn missing_output_uses_current_core_missing_diagnostics() {
     );
 }
 
-#[tokio::test]
-async fn golden_scoreboard_matches_fixture_pipeline() {
-    let tmp = tempdir().expect("tempdir should be created");
-    let out_dir = tmp.path().join("out");
-    let scoreboard = fixture_scoreboard("2026-01-01T00:00:00Z")
-        .await
-        .expect("fixture scoreboard should build");
-
-    write_scoreboard(&scoreboard, &out_dir).expect("scoreboard should render");
-    let rendered = std::fs::read_to_string(out_dir.join("scoreboard.toml"))
-        .expect("rendered scoreboard should exist");
-    toml::from_str::<toml::Value>(&rendered).expect("golden output should parse");
-
-    let golden_path = repo_root().join("tests/golden/scoreboard.toml");
-    if std::env::var("UPDATE_GOLDEN").as_deref() == Ok("1") {
-        if let Some(parent) = golden_path.parent() {
-            std::fs::create_dir_all(parent).expect("golden parent should exist");
-        }
-        std::fs::write(&golden_path, &rendered).expect("golden file should be updated");
-    }
-
-    let expected =
-        std::fs::read_to_string(&golden_path).expect("golden scoreboard.toml must be present");
-    assert_eq!(rendered, expected, "golden scoreboard drifted");
-}
-
 fn sample_scoreboard() -> Scoreboard {
     let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
     let mut model_b = ModelRecord::new(
@@ -292,71 +244,4 @@ fn sample_scoreboard() -> Scoreboard {
         source_summary: BTreeMap::new(),
         prev_scores: None,
     }
-}
-
-async fn fixture_scoreboard(now: &str) -> Result<Scoreboard, SourceError> {
-    let fixture_dir = repo_root().join("data/fixtures");
-    let mut records = required_aliases::load_embedded().expect("embedded aliases should load");
-    let coefficients = Coefficients::load_embedded().expect("embedded coefficients should parse");
-    let mut source_summary = BTreeMap::new();
-    let http = OfflineOnlyHttp;
-    let mut rows_by_source: BTreeMap<String, Vec<RawRow>> = BTreeMap::new();
-    let mut fetched_rows: BTreeMap<String, usize> = BTreeMap::new();
-    let mut fetched_statuses: BTreeMap<String, String> = BTreeMap::new();
-
-    for source in registry() {
-        let rows = source
-            .fetch(
-                &http,
-                ipbr_sources::FetchOptions {
-                    cache_dir: Some(&fixture_dir),
-                    offline: true,
-                },
-                &ipbr_sources::SecretStore::default(),
-            )
-            .await?;
-        fetched_rows.insert(source.id().to_string(), rows.len());
-        fetched_statuses.insert(
-            source.id().to_string(),
-            format!("{:?}", source.status()).to_lowercase(),
-        );
-        rows_by_source.insert(source.id().to_string(), rows);
-    }
-
-    for (source_id, rows) in rows_by_source {
-        let row_count = fetched_rows.get(&source_id).copied().unwrap_or(rows.len());
-        let status = fetched_statuses
-            .get(&source_id)
-            .cloned()
-            .unwrap_or_else(|| "verified".to_string());
-        let stats = ingest_rows_with_policy(&mut records, rows, &coefficients.effort_policy);
-        source_summary.insert(
-            source_id,
-            SourceSummary {
-                status,
-                rows: row_count,
-                matched: stats.matched,
-                unmatched: stats.unmatched.len(),
-            },
-        );
-    }
-
-    compute_scores_with(&mut records, &coefficients);
-
-    Ok(Scoreboard {
-        models: records,
-        coefficients,
-        generated_at: now.to_string(),
-        generator: "ipbr-rank 0.1.0".to_string(),
-        methodology: "v3".to_string(),
-        source_summary,
-        prev_scores: None,
-    })
-}
-
-fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .expect("workspace root should exist")
 }

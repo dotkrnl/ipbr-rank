@@ -747,14 +747,10 @@ dependencies = [
 name = "ipbr-rank-render"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "ipbr-rank-core",
- "ipbr-rank-sources",
  "serde",
- "serde_json",
  "tempfile",
  "thiserror",
- "tokio",
  "toml",
 ]
 

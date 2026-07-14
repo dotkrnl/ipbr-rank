@@ -30,8 +30,17 @@ fn offline_all_matches_golden_scoreboard() {
 
     let got = std::fs::read_to_string(out.join("scoreboard.toml"))
         .expect("scoreboard.toml should be written");
-    let expected = std::fs::read_to_string(golden).expect("golden scoreboard should be present");
-    assert_eq!(got, expected);
+
+    // Regenerate the checked-in golden from this very run: the binary's own
+    // output is the only thing it is ever compared against.
+    if std::env::var("UPDATE_GOLDEN").as_deref() == Ok("1") {
+        std::fs::create_dir_all(golden.parent().expect("golden has a parent"))
+            .expect("golden parent should be creatable");
+        std::fs::write(&golden, &got).expect("golden should be writable");
+    }
+
+    let expected = std::fs::read_to_string(&golden).expect("golden scoreboard should be present");
+    assert_eq!(got, expected, "golden scoreboard drifted");
 
     assert!(out.join("missing.toml").is_file());
     assert!(out.join("coefficients.toml").is_file());

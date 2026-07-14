@@ -376,9 +376,8 @@ cargo test --workspace
 # Live source verification (best-effort, network-dependent)
 cargo run -p ipbr-rank-cli -- --cache /tmp/ipbr-live-cache verify-sources
 
-# Update the deterministic scoreboard golden, then verify it through the CLI
-UPDATE_GOLDEN=1 cargo test -p ipbr-rank-render --test toml_output golden_scoreboard_matches_fixture_pipeline
-cargo test -p ipbr-rank-cli --test golden
+# Regenerate the deterministic scoreboard golden from the CLI's own output
+UPDATE_GOLDEN=1 cargo test -p ipbr-rank-cli --test golden
 ```
 
 ## License
