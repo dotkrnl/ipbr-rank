@@ -8,13 +8,8 @@
 //! to capture "is the generated code actually well-written" instead of
 //! just "does it pass tests."
 //!
-//! The page is a client-rendered SPA. Older revisions fetched a single flat
-//! JSON file:
-//!
-//!   `…/leaderboard/data.json`
-//!
-//! Current revisions fetch a model registry and then one metrics file per
-//! model:
+//! The page is a client-rendered SPA. We fetch a model registry and then one
+//! metrics file per model:
 //!
 //!   `…/leaderboard/data/models.json`
 //!   `…/leaderboard/data/<org>/<model>-metrics.json`
@@ -123,12 +118,6 @@ async fn fetch_live_payload(http: &dyn Http) -> Result<Value, SourceError> {
     let registry = http
         .get_json(REGISTRY_URL, &[("User-Agent", "ipbr-rank")])
         .await?;
-
-    // Back-compat guard for mirrors/tests that may still expose the legacy
-    // flat shape at the registry URL.
-    if registry.get("models").and_then(Value::as_array).is_some() {
-        return Ok(registry);
-    }
 
     let registry_obj = registry
         .as_object()
