@@ -60,6 +60,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <li><strong>Direct coverage</strong> — the share of a role's nominal path supported by direct benchmark observations.</li>
 <li><strong>Confidence</strong> — direct same-product evidence coverage; missing leaves contribute no confidence.</li>
 <li><strong>Provisional</strong> — a numeric role score that meets none of the full-current, core-current, or established-history evidence gates. It remains in the same rank order, italicized and starred, with a dotted radar outline.</li>
+<li><strong>Rank change</strong> — the ▲/▼ chip beside a score: places gained or lost in that role since the scoreboard as it stood at the start of last week. Weeks open on Sunday, so the comparison point holds for a whole week instead of moving with every refresh. A model that was not on the board then has no rank to have moved from, and shows no chip.</li>
 <li><strong>Core / supplemental / historical support</strong> — eligibility classes for broad current evidence, narrow scored evidence, and unscored retired direct evidence respectively.</li>
 <li><strong>Composite</strong> — a weighted blend used to collapse overlapping components before role aggregation, such as the SWE, Sonar, or AA reasoning families.</li>
 <li><strong>Fixed anchor</strong> — a versioned raw benchmark value used to keep normalization stable across changing model cohorts.</li>

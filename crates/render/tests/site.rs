@@ -643,39 +643,116 @@ fn expansion_includes_mini_radar() {
     );
 }
 
-#[test]
-fn deltas_render_only_when_prev_scores_are_supplied() {
-    use std::collections::BTreeMap;
+/// Baseline board where the idea column is the only role that moved: Claude
+/// sat third, Gemini second, GPT first. Every model now scores 80.0 on idea, so
+/// all three tie at dense rank 1 — Claude gained two places, Gemini one, and
+/// GPT held its rank.
+fn idea_movement_baseline() -> BTreeMap<String, ipbr_core::RoleScores> {
+    [
+        ("anthropic/claude-opus-4.7", 70.0),
+        ("google/gemini-3.1-pro", 75.0),
+        ("openai/gpt-5.5+thinking-high", 80.0),
+    ]
+    .into_iter()
+    .map(|(id, i_raw)| {
+        (
+            id.to_string(),
+            ipbr_core::RoleScores {
+                i_raw,
+                // Unchanged, so plan/build/review show no movement.
+                p_raw: 81.0,
+                b_raw: 82.0,
+                r: 83.0,
+            },
+        )
+    })
+    .collect()
+}
 
+/// The `<tr class="row">` for one model, up to its closing tag.
+fn row_html<'a>(index: &'a str, canonical_id: &str) -> &'a str {
+    let needle = format!(r#"id="{canonical_id}""#);
+    let start = index
+        .find(&needle)
+        .unwrap_or_else(|| panic!("expected a row for {canonical_id}"));
+    let rest = &index[start..];
+    let end = rest.find("</tr>").expect("row should close");
+    &rest[..end]
+}
+
+#[test]
+fn rank_changes_render_against_the_baseline_board() {
     let mut scoreboard = sample_scoreboard();
     let tmp = tempdir().expect("tempdir should be created");
 
-    // Without prev_scores, no delta chips.
+    // Without a baseline, nothing to compare against → no chips.
     render_site(&scoreboard, &tmp.path().join("site_a")).expect("site should render");
     let index_no_prev = read(tmp.path().join("site_a/index.html"));
     assert!(
         !index_no_prev.contains("class=\"delta"),
-        "no deltas should render without --prev"
+        "no rank changes should render without --prev"
     );
 
-    // With prev_scores, at least one delta chip appears.
-    let mut prev = BTreeMap::new();
-    prev.insert(
-        "anthropic/claude-opus-4.7".to_string(),
-        ipbr_core::RoleScores {
-            i_raw: 78.0, // current 80.0 → delta +2.0
-            p_raw: 81.0,
-            b_raw: 82.0,
-            r: 83.0,
-        },
-    );
-    scoreboard.prev_scores = Some(prev);
-
+    scoreboard.prev_scores = Some(idea_movement_baseline());
     render_site(&scoreboard, &tmp.path().join("site_b")).expect("site should render");
-    let index_with_prev = read(tmp.path().join("site_b/index.html"));
+    let index = read(tmp.path().join("site_b/index.html"));
+
+    // In a cell, the chip trails the score.
     assert!(
-        index_with_prev.contains("delta-up"),
-        "expected at least one ▲ delta chip when --prev provided"
+        index.contains(
+            r#"<span class="cell-score">80.0</span><span class="delta delta-up" aria-hidden="true" title="2 places up since the start of last week">▲2</span>"#
+        ),
+        "cell chip should follow the score and read ▲2"
+    );
+    // Among the ranked leaders, it trails the model name instead, and still
+    // sits ahead of the score.
+    assert!(
+        index.contains(
+            r#"<span class="name">Claude Opus 4.7</span><span class="delta delta-up" aria-hidden="true" title="2 places up since the start of last week">▲2</span><span class="sr-only"> up 2 places since the start of last week</span></span><span class="score""#
+        ),
+        "leader chip should follow the model name, ahead of the score"
+    );
+
+    // Claude (▲2) and Gemini (▲1) each get a chip in the idea cell and in the
+    // idea leaders list; GPT held rank 1, and plan/build/review did not move.
+    assert_eq!(
+        index.matches("delta delta-up").count(),
+        4,
+        "only the two models that gained places, in the one role that moved"
+    );
+    assert!(
+        !index.contains("delta-down"),
+        "no model lost places against this baseline"
+    );
+    assert!(
+        !row_html(&index, "openai/gpt-5.5+thinking-high").contains("class=\"delta"),
+        "a model that held its rank gets no chip"
+    );
+}
+
+#[test]
+fn a_model_missing_from_the_baseline_shows_no_rank_change() {
+    let mut scoreboard = sample_scoreboard();
+    let tmp = tempdir().expect("tempdir should be created");
+
+    // Gemini was not on the board last week — it has no rank to have moved from.
+    let mut baseline = idea_movement_baseline();
+    baseline.remove("google/gemini-3.1-pro");
+    scoreboard.prev_scores = Some(baseline);
+
+    let site_dir = tmp.path().join("site");
+    render_site(&scoreboard, &site_dir).expect("site should render");
+    let index = read(site_dir.join("index.html"));
+
+    assert!(
+        !row_html(&index, "google/gemini-3.1-pro").contains("class=\"delta"),
+        "a new entry gets no chip rather than a fabricated one"
+    );
+    // Claude still moves: it was second of the two models on that board, and is
+    // now tied at rank 1.
+    assert!(
+        row_html(&index, "anthropic/claude-opus-4.7").contains("▲1"),
+        "surviving models are ranked within the baseline's own population"
     );
 }
 

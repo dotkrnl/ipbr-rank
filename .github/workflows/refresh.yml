@@ -46,63 +46,25 @@ jobs:
       - name: Build CLI
         run: cargo build --release -p ipbr-rank-cli
 
-      # Daily snapshot: the delta indicator compares against yesterday's
-      # scoreboard, not the last ~10-min refresh. The cache restores the
-      # previous daily snapshot; if today's snapshot already exists (i.e.
-      # this is not the first run of the day), we skip overwriting it so
-      # every run this hour shares the same baseline.
-      - name: Fetch live scoreboard and manage daily snapshot
-        id: prev-fetch
+      # Rank-change chips compare against the scoreboard as it stood at the
+      # start of last week, so the baseline is stable for a whole week rather
+      # than shifting with every ~10-min refresh. The weekly snapshots ride
+      # along in the restored `cache` directory; the script freezes this week's
+      # snapshot on its first run and prunes weeks older than the baseline.
+      - name: Resolve weekly rank-change baseline
+        id: baseline
         continue-on-error: true
         run: |
-          mkdir -p cache
-          today="$(date -u +%Y-%m-%d)"
-          live="cache/prev_scoreboard.toml"
-          snapshot="cache/daily_snapshot_${today}.toml"
-          prev_arg=""
-
-          # Always fetch the current live scoreboard (may be used to
-          # create today's snapshot).
-          fetched=false
-          if curl -fsS --max-time 10 \
-              https://ipbr.pages.dev/scoreboard.toml \
-              -o "$live"; then
-            fetched=true
-            echo "fetched live scoreboard ($(wc -c < "$live") bytes)"
-          else
-            rm -f "$live"
-            echo "note: live scoreboard fetch failed"
+          baseline="$(scripts/weekly_baseline.sh cache)"
+          if [[ -n "$baseline" ]]; then
+            echo "prev_arg=--prev $baseline" >> "$GITHUB_OUTPUT"
           fi
-
-          # If today's snapshot doesn't exist yet, create it from the
-          # live scoreboard. This happens on the first successful run
-          # of each day.
-          if [[ ! -f "$snapshot" ]] && $fetched; then
-            cp "$live" "$snapshot"
-            echo "created daily snapshot for $today"
-          fi
-
-          # Find the most recent daily snapshot that is NOT today's.
-          # That is yesterday's (or older) baseline for deltas.
-          yesterday_snapshot="$(ls -t cache/daily_snapshot_*.toml 2>/dev/null \
-            | grep -v "$today" | head -1)"
-          if [[ -n "$yesterday_snapshot" ]]; then
-            prev_arg="--prev $yesterday_snapshot"
-            echo "using daily snapshot: $yesterday_snapshot"
-          else
-            echo "note: no prior-day snapshot found; deltas will be omitted this run"
-          fi
-
-          echo "prev_arg=$prev_arg" >> "$GITHUB_OUTPUT"
-
-          # Prune snapshots older than 7 days.
-          find cache -name 'daily_snapshot_*.toml' -mtime +7 -delete 2>/dev/null || true
 
       - name: Run pipeline
         env:
           AA_API_KEY: ${{ secrets.AA_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: ./target/release/ipbr-rank --cache cache --out out all ${{ steps.prev-fetch.outputs.prev_arg }}
+        run: ./target/release/ipbr-rank --cache cache --out out all ${{ steps.baseline.outputs.prev_arg }}
 
       - name: Save upstream response cache
         if: always()

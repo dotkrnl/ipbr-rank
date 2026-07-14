@@ -60,6 +60,26 @@ The current production deployment is at https://ipbr.pages.dev. CI re-runs
 `.github/workflows/refresh.yml`), so the site stays current without manual
 intervention.
 
+### Rank change
+
+The `▲2` / `▼1` chips on the site are **places gained or lost in that role**,
+measured against the scoreboard as it stood at the **start of last week**. Weeks
+open on Sunday, so every refresh from Sun 2026-07-12 through Sat 2026-07-18
+compares against the snapshot frozen on Sun 2026-07-05 — one stable baseline per
+week, rather than a number that twitches with each 10-minute refresh.
+
+`scripts/weekly_baseline.sh` maintains that cache. It fetches the live published
+scoreboard, freezes `cache/week_<sunday>.toml` on the first run of each week,
+prints last week's snapshot for the pipeline's `--prev` flag, and prunes weeks
+older than the baseline (by week, never by mtime — the baseline can be 15 days
+old). With no snapshot from last week (a fresh cache, or the first run under
+this scheme) it seeds the baseline from today, so changes accrue from now
+instead of disappearing for a week.
+
+Baseline ranks are computed within the baseline board's *own* population: a
+model that has since arrived has no prior rank and shows no chip, and models
+that were pushed down by new arrivals show that as real movement.
+
 ## Four Building Roles
 
 - **I** (Idea): Creativity, general intelligence, open-ended generation
@@ -329,7 +349,8 @@ ipbr-rank/
 │   ├── adding-a-source.md      # Verification protocol
 │   └── output-schema.md        # TOML schema reference
 └── scripts/
-    └── refresh.sh              # One-shot fetch → score → render (+ optional --publish)
+    ├── refresh.sh              # One-shot fetch → score → render (+ optional --publish)
+    └── weekly_baseline.sh      # Weekly rank-change baseline (see below)
 ```
 
 The static site (theme, scripts, HTML) is generated entirely from Rust in

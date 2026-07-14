@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt::Write;
 
 use crate::Scoreboard;
@@ -9,8 +10,9 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
     let mut body = String::new();
 
     let radar_scales = top10_axis_scales(scoreboard);
+    let ranks = RoleRanks::build(scoreboard);
 
-    body.push_str(&render_hero(scoreboard, radar_scales));
+    body.push_str(&render_hero(scoreboard, radar_scales, &ranks));
 
     body.push_str(SCORING_PANEL);
 
@@ -18,7 +20,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
         r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#,
     );
 
-    body.push_str(&render_leaderboard(scoreboard, radar_scales));
+    body.push_str(&render_leaderboard(scoreboard, radar_scales, &ranks));
 
     write!(
         body,
@@ -31,7 +33,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
     layout("ipbr · live llm coding scoreboard", &body)
 }
 
-fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
+fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales, ranks: &RoleRanks) -> String {
     let top3: Vec<&ipbr_core::ModelRecord> =
         dense_ranked_models(scoreboard.models.iter().collect(), composite)
             .into_iter()
@@ -67,7 +69,7 @@ fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
     }
     legend.push_str("</ul>");
 
-    let leaders = render_leaders(scoreboard);
+    let leaders = render_leaders(scoreboard, ranks);
 
     format!(
         r#"<section class="hero" id="hero"><div class="hero-head"><p class="hero-tagline"><span class="beat beat-lead">Models drift.</span> <span class="beat">Evidence accumulates.</span> <span class="beat beat-final">Ranks update.</span></p><p class="hero-status"><span class="hero-stat"><span class="live-dot" aria-hidden="true"></span><span class="live-label">live</span></span><span class="hero-stat">refreshed <time datetime="{generated_at}" data-local-time>{generated_at}</time></span><span class="hero-stat">{sources} sources</span><span class="hero-stat">{models} models</span></p></div><div class="hero-body"><div class="hero-radar-wrap">{radar_svg}{legend}</div><div class="hero-leaders">{leaders}</div></div></section>"#,
@@ -77,10 +79,10 @@ fn render_hero(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
     )
 }
 
-fn render_leaders(scoreboard: &Scoreboard) -> String {
+fn render_leaders(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
     let mut html =
         String::from(r#"<h3 class="leaders-title">ranked leaders</h3><div class="leaders-grid">"#);
-    for spec in role_specs() {
+    for (role, spec) in role_specs().into_iter().enumerate() {
         let ranked = dense_ranked_models(scoreboard.models.iter().collect(), spec.from_record);
         write!(
             html,
@@ -91,19 +93,16 @@ fn render_leaders(scoreboard: &Scoreboard) -> String {
         .unwrap();
         for (pos, model) in ranked.iter().take(3) {
             let row_class = if *pos == 1 { "row top" } else { "row" };
-            let score = (spec.from_record)(model);
-            let prev = scoreboard
-                .prev_scores
-                .as_ref()
-                .and_then(|map| map.get(&model.canonical_id))
-                .map(spec.from_scores);
-            let delta = render_delta(score, prev);
-            let score = render_leader_score(score, role_is_provisional(model, spec.evidence_key));
+            let value = (spec.from_record)(model);
+            // The chip trails the name here — a leader's movement is about the
+            // model, not about the number it happens to sit at.
+            let delta = render_rank_delta(ranks.delta(&model.canonical_id, role));
+            let score = render_leader_score(value, role_is_provisional(model, spec.evidence_key));
             write!(
                 html,
-                r#"<li class="{row_class}"><span class="pos">{pos}</span><span class="name">{name}</span><span class="score" data-tier="{tier}">{score}</span>{delta}</li>"#,
+                r#"<li class="{row_class}"><span class="pos">{pos}</span><span class="name-wrap"><span class="name">{name}</span>{delta}</span><span class="score" data-tier="{tier}">{score}</span></li>"#,
                 name = html_escape(&model.display_name),
-                tier = score_tier((spec.from_record)(model)),
+                tier = score_tier(value),
             )
             .unwrap();
         }
@@ -257,16 +256,21 @@ fn bar_opacity(value: f64, (min, max): (f64, f64)) -> Option<f64> {
 struct RoleSpec {
     id: &'static str,
     label: &'static str,
+    /// Column key on the leaderboard table (`data-sort`, `col-*` class).
+    col: &'static str,
     evidence_key: &'static str,
     from_record: fn(&ipbr_core::ModelRecord) -> f64,
     from_scores: fn(&ipbr_core::RoleScores) -> f64,
 }
 
+/// The four roles in column order. Index into this array is the `role` index
+/// used by [`RoleRanks`] and by the per-axis bar scales.
 fn role_specs() -> [RoleSpec; 4] {
     [
         RoleSpec {
             id: "idea",
             label: "idea",
+            col: "i",
             evidence_key: "I_raw",
             from_record: |m| m.scores.i_raw,
             from_scores: |s| s.i_raw,
@@ -274,6 +278,7 @@ fn role_specs() -> [RoleSpec; 4] {
         RoleSpec {
             id: "plan",
             label: "plan",
+            col: "p",
             evidence_key: "P_raw",
             from_record: |m| m.scores.p_raw,
             from_scores: |s| s.p_raw,
@@ -281,6 +286,7 @@ fn role_specs() -> [RoleSpec; 4] {
         RoleSpec {
             id: "build",
             label: "build",
+            col: "b",
             evidence_key: "B_raw",
             from_record: |m| m.scores.b_raw,
             from_scores: |s| s.b_raw,
@@ -288,6 +294,7 @@ fn role_specs() -> [RoleSpec; 4] {
         RoleSpec {
             id: "review",
             label: "review",
+            col: "r",
             evidence_key: "R",
             from_record: |m| m.scores.r,
             from_scores: |s| s.r,
@@ -295,29 +302,102 @@ fn role_specs() -> [RoleSpec; 4] {
     ]
 }
 
-/// Renders a `▲+1.2` / `▼-0.8` chip when the prior score differs by ≥0.05.
-/// Returns an empty string when there is no prior score or the change is
-/// below the noise floor.
-fn render_delta(current: f64, prev: Option<f64>) -> String {
-    let Some(prev) = prev else {
+/// Dense role ranks keyed by canonical_id, one map per role in `role_specs()`
+/// order. Baseline ranks are ranked *within the baseline scoreboard's own
+/// population*, so "up 2" means the model gained two places against the board
+/// as it stood at the start of last week — models that have since arrived or
+/// left are part of that movement, exactly as a reader would count it.
+struct RoleRanks {
+    current: [BTreeMap<String, usize>; 4],
+    baseline: Option<[BTreeMap<String, usize>; 4]>,
+}
+
+impl RoleRanks {
+    fn build(scoreboard: &Scoreboard) -> Self {
+        let specs = role_specs();
+        let current = std::array::from_fn(|role| {
+            dense_ranks(
+                scoreboard
+                    .models
+                    .iter()
+                    .map(|model| {
+                        (
+                            model.canonical_id.as_str(),
+                            (specs[role].from_record)(model),
+                        )
+                    })
+                    .collect(),
+            )
+        });
+        let baseline = scoreboard.prev_scores.as_ref().map(|prior| {
+            std::array::from_fn(|role| {
+                dense_ranks(
+                    prior
+                        .iter()
+                        .map(|(id, scores)| (id.as_str(), (specs[role].from_scores)(scores)))
+                        .collect(),
+                )
+            })
+        });
+        Self { current, baseline }
+    }
+
+    /// Places gained in `role` since the baseline; positive is upward. `None`
+    /// when there is no baseline, or when the model was not on the baseline
+    /// board (a new entry has nothing to have moved from).
+    fn delta(&self, canonical_id: &str, role: usize) -> Option<i64> {
+        let baseline = self.baseline.as_ref()?[role].get(canonical_id)?;
+        let current = self.current[role].get(canonical_id)?;
+        Some(*baseline as i64 - *current as i64)
+    }
+}
+
+/// Dense-ranks `(canonical_id, score)` pairs, sharing a rank between scores
+/// that render as the same tenth — the same tie rule as `dense_ranked_models`.
+fn dense_ranks(mut scored: Vec<(&str, f64)>) -> BTreeMap<String, usize> {
+    scored.sort_by(|a, b| {
+        b.1.partial_cmp(&a.1)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| a.0.cmp(b.0))
+    });
+    let mut ranks = BTreeMap::new();
+    let mut dense_rank = 0;
+    let mut previous: Option<String> = None;
+    for (id, score) in scored {
+        let display_key = display_score_key(score);
+        if previous.as_ref() != Some(&display_key) {
+            dense_rank += 1;
+            previous = Some(display_key);
+        }
+        ranks.insert(id.to_string(), dense_rank);
+    }
+    ranks
+}
+
+/// Renders a `▲2` / `▼1` chip for places gained or lost in a role since the
+/// start of last week. Empty when the model held its rank, is new to the
+/// board, or when no baseline snapshot was available.
+fn render_rank_delta(delta: Option<i64>) -> String {
+    let Some(delta) = delta.filter(|places| *places != 0) else {
         return String::new();
     };
-    let delta = current - prev;
-    if delta.abs() < 0.05 {
-        return String::new();
-    }
-    let (arrow, cls, dir) = if delta > 0.0 {
+    let (arrow, cls, dir) = if delta > 0 {
         ("▲", "delta delta-up", "up")
     } else {
         ("▼", "delta delta-down", "down")
     };
+    let places = delta.abs();
     format!(
-        r#"<span class="{cls}" aria-hidden="true">{arrow}{delta:+.1}</span><span class="sr-only"> {dir} {abs:.1} since yesterday</span>"#,
-        abs = delta.abs(),
+        r#"<span class="{cls}" aria-hidden="true" title="{places} {noun} {dir} since the start of last week">{arrow}{places}</span><span class="sr-only"> {dir} {places} {noun} since the start of last week</span>"#,
+        noun = if places == 1 { "place" } else { "places" },
     )
 }
 
-fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> String {
+fn render_leaderboard(
+    scoreboard: &Scoreboard,
+    radar_scales: RadarScales,
+    ranks: &RoleRanks,
+) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
     // Default order: build score. Individual role columns remain
     // independently sortable.
@@ -357,19 +437,18 @@ fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> Str
     );
 
     // Score columns — build is the default sort.
-    for (label, key) in [("idea", "i"), ("plan", "p"), ("build", "b")] {
-        let (active_attr, aria_sort) = if key == "b" {
+    for spec in role_specs() {
+        let (active_attr, aria_sort) = if spec.col == "b" {
             (r#" data-sort-active="desc""#, "descending")
         } else {
             ("", "none")
         };
         html.push_str(&format!(
-            r#"<th scope="col" class="num" data-sort="{key}" aria-sort="{aria_sort}"{active_attr}><button type="button" class="sort" aria-label="sort by {label} score descending">{label}</button></th>"#
+            r#"<th scope="col" class="num" data-sort="{key}" aria-sort="{aria_sort}"{active_attr}><button type="button" class="sort" aria-label="sort by {label} score descending">{label}</button></th>"#,
+            key = spec.col,
+            label = spec.label,
         ));
     }
-    html.push_str(
-        r#"<th scope="col" class="num" data-sort="r" aria-sort="none"><button type="button" class="sort" aria-label="sort by review score descending">review</button></th>"#,
-    );
     html.push_str(r#"<th scope="col" aria-label="details"></th></tr></thead><tbody>"#);
 
     let bar_scales = top10_bar_scales(scoreboard);
@@ -379,6 +458,7 @@ fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> Str
             model,
             radar_scales,
             bar_scales,
+            ranks,
             position + 1,
         ));
     }
@@ -392,6 +472,7 @@ fn render_row(
     model: &ipbr_core::ModelRecord,
     radar_scales: RadarScales,
     bar_scales: [(f64, f64); 4],
+    ranks: &RoleRanks,
     position: usize,
 ) -> String {
     let mut html = String::new();
@@ -399,10 +480,6 @@ fn render_row(
     let id = html_escape(&model.canonical_id);
     let vendor = html_escape(model.vendor.as_str());
     let name = html_escape(&model.display_name);
-    let prev = scoreboard
-        .prev_scores
-        .as_ref()
-        .and_then(|map| map.get(&model.canonical_id));
 
     write!(
         html,
@@ -415,25 +492,20 @@ fn render_row(
     )
     .unwrap();
 
-    type ScoreAccessor = fn(&ipbr_core::RoleScores) -> f64;
-    let columns: [(f64, ScoreAccessor, &str, &str); 4] = [
-        (s.i_raw, |x| x.i_raw, "I_raw", "i"),
-        (s.p_raw, |x| x.p_raw, "P_raw", "p"),
-        (s.b_raw, |x| x.b_raw, "B_raw", "b"),
-        (s.r, |x| x.r, "R", "r"),
-    ];
-    for (idx, (raw, accessor, role, colkey)) in columns.into_iter().enumerate() {
-        let provisional = role_is_provisional(model, role);
-        let prev_score = prev.map(accessor);
-        let delta = render_delta(raw, prev_score);
+    for (role, spec) in role_specs().into_iter().enumerate() {
+        let raw = (spec.from_record)(model);
+        let provisional = role_is_provisional(model, spec.evidence_key);
+        // The chip trails the score, which is the cell's subject.
+        let delta = render_rank_delta(ranks.delta(&model.canonical_id, role));
         // No `--bar-op` below the axis's top-10 min → CSS falls back to opacity 0.
-        let bar_style = match bar_opacity(raw, bar_scales[idx]) {
+        let bar_style = match bar_opacity(raw, bar_scales[role]) {
             Some(op) => format!(r#" style="--bar-op:{op:.2}""#),
             None => String::new(),
         };
         write!(
             html,
             r#"<td class="num col-{colkey}" data-tier="{tier}" data-status="{status}"{bar_style}>{score}{delta}</td>"#,
+            colkey = spec.col,
             tier = score_tier(raw),
             status = if provisional { "provisional" } else { "ranked" },
             score = render_score_value(raw, provisional),
@@ -796,12 +868,36 @@ const SCORING_PANEL: &str = r##"<details class="scoring" id="scoring">
 
 #[cfg(test)]
 mod tests {
-    use super::{display_score_key, sanitize_evidence_tooltip};
+    use super::{dense_ranks, display_score_key, render_rank_delta, sanitize_evidence_tooltip};
 
     #[test]
     fn dense_tie_key_matches_the_rendered_tenth() {
         assert_ne!(display_score_key(10.051), display_score_key(10.049));
         assert_eq!(display_score_key(10.04), display_score_key(9.96));
+    }
+
+    #[test]
+    fn ranks_are_dense_and_shared_between_models_that_display_the_same_tenth() {
+        let ranks = dense_ranks(vec![
+            ("a", 90.0),
+            ("b", 80.04), // displays as 80.0, so it ties with `c`
+            ("c", 79.96),
+            ("d", 70.0),
+        ]);
+        assert_eq!(ranks["a"], 1);
+        assert_eq!(ranks["b"], 2);
+        assert_eq!(ranks["c"], 2);
+        assert_eq!(ranks["d"], 3, "the next distinct score takes the next rank");
+    }
+
+    #[test]
+    fn rank_chips_read_as_places_gained_and_vanish_when_nothing_moved() {
+        assert!(render_rank_delta(Some(2)).contains("▲2"));
+        assert!(render_rank_delta(Some(2)).contains("2 places up"));
+        assert!(render_rank_delta(Some(-1)).contains("▼1"));
+        assert!(render_rank_delta(Some(-1)).contains("1 place down"));
+        assert!(render_rank_delta(Some(0)).is_empty(), "held its rank");
+        assert!(render_rank_delta(None).is_empty(), "no baseline rank");
     }
 
     #[test]
