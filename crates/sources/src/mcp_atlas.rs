@@ -124,7 +124,8 @@ pub(crate) fn parse_rows_with_model_map(
             break;
         };
         let name_end = name_start + name_end_rel;
-        let model_name = html[name_start..name_end].trim();
+        let decoded = decode_rsc_escapes(&html[name_start..name_end]);
+        let model_name = decoded.trim();
         cursor = name_end + 2; // skip past `\"`
 
         if model_name.is_empty() {
@@ -206,6 +207,22 @@ pub(crate) fn parse_rows_with_model_map(
         )));
     }
     Ok(rows)
+}
+
+/// Decode the whitespace escapes in an RSC-embedded model name.
+///
+/// The payload is a JSON document inside a JS string literal, so a value's
+/// escapes reach us doubled: a trailing newline in Scale's data arrives as the
+/// three characters `\`, `\`, `n`. Left alone it defeats both `trim` and the
+/// harness-suffix stripping, and the row survives only on a fuzzy alias match.
+/// Anything unrecognized is left exactly as it is.
+fn decode_rsc_escapes(raw: &str) -> String {
+    raw.replace("\\\\n", "\n")
+        .replace("\\\\t", "\t")
+        .replace("\\\\r", "\r")
+        .replace("\\n", "\n")
+        .replace("\\t", "\t")
+        .replace("\\r", "\r")
 }
 
 /// Finds the index of an escaped closing quote `\"` in the byte slice.

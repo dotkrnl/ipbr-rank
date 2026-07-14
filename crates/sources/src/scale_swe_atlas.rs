@@ -223,6 +223,24 @@ mod tests {
         );
     }
 
+    /// Scale emits a trailing newline inside some model names. It reaches the
+    /// RSC scanner doubly escaped, and until it is decoded the harness suffix
+    /// will not strip, leaving the row to be rescued by a fuzzy alias match.
+    #[test]
+    fn strips_harness_suffix_after_an_escaped_trailing_newline() {
+        let html = r#"<html>self.__next_f.push([1,"{\"model\":\"Opus 4.8 (Claude Code)\\n\",\"score\":51.2}"])</html>"#;
+        let rows = parse_rows_with_model_map(
+            html,
+            "SWEAtlasRefactoring",
+            "sweatlas_refactoring",
+            clean_swe_atlas_model_name,
+        )
+        .expect("fixture should parse");
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "Opus 4.8");
+    }
+
     #[test]
     fn parses_scale_rsc_fixture() {
         let html = r#"<html>self.__next_f.push([1,"{\"model\":\"GPT 5.5 (Codex)\",\"score\":45.43},{\"model\":\"Opus-4.7 (Claude Code)\",\"score\":48.57}"])</html>"#;
