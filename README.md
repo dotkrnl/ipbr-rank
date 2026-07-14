@@ -258,11 +258,16 @@ ipbr-rank [OPTIONS] <COMMAND>
 Commands:
   fetch            Download all enabled sources into --cache
   score            Read --cache, write scoreboard.toml + missing.toml + coefficients.toml
-  render           Read scoreboard.toml, write static site to out/site/
+  render           Read scoreboard.toml + coefficients.toml, write static site to out/site/
   all              fetch -> score -> render (default)
   verify-sources   Run contract tests against live endpoints
   list-models      Emit canonical IDs + vendor from required_aliases.toml
   triage           List unmatched leaderboard rows from the cache (--min-count N)
+
+Command options (render, all):
+  --prev PATH                   Prior scoreboard.toml to measure rank change
+                                against (see "Rank change"). Render-only; never
+                                persisted. Missing/unreadable file -> no chips.
 
 Options:
   --out DIR                     Output directory [default: out]
@@ -326,6 +331,10 @@ ipbr-rank all --coefficients my_coefficients.toml
 # The effective coefficients are echoed to out/coefficients.toml
 ```
 
+A standalone `render` reads those echoed coefficients back, so the site is
+always labelled with the set the scores were actually produced under. Passing
+`--coefficients` to `render` overrides them.
+
 ## Adding a Source
 
 See [`docs/adding-a-source.md`](docs/adding-a-source.md) for the verification protocol and implementation checklist.
@@ -350,7 +359,8 @@ ipbr-rank/
 │   └── output-schema.md        # TOML schema reference
 └── scripts/
     ├── refresh.sh              # One-shot fetch → score → render (+ optional --publish)
-    └── weekly_baseline.sh      # Weekly rank-change baseline (see below)
+    ├── weekly_baseline.sh      # Weekly rank-change baseline (see "Rank change")
+    └── check-docs.sh           # Fails if a source or schema value is undocumented
 ```
 
 The static site (theme, scripts, HTML) is generated entirely from Rust in
