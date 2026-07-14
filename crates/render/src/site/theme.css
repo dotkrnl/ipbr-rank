@@ -327,9 +327,32 @@ table.leaderboard th[data-sort-active="desc"] button.sort::after { visibility: v
 table.leaderboard th.num button.sort::after { content: none; }
 table.leaderboard th.num button.sort::before { content: "▼ "; visibility: hidden; }
 table.leaderboard th.num[data-sort-active="desc"] button.sort::before { visibility: visible; }
-table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; position: relative; }
 table.leaderboard td.model-name { font: inherit; }
 table.leaderboard td.num .cell-score { display: inline-block; }
+
+/* Per-role score bar — a right-edge tick in the role colour whose opacity
+   encodes the score, mapped across each axis's top-10 min/max (set per cell in
+   Rust via --bar-op) so the leaders visibly separate. Cells below an axis's
+   10th-best score carry no --bar-op and fall back to opacity 0 (no tick). The
+   tick sits on the right so it hugs the right-aligned number and reads as
+   belonging to its own column; the number keeps its tier styling below. */
+table.leaderboard td.col-i { --bar-color: var(--idea); }
+table.leaderboard td.col-p { --bar-color: var(--plan); }
+table.leaderboard td.col-b { --bar-color: var(--build); }
+table.leaderboard td.col-r { --bar-color: var(--review); }
+table.leaderboard td.num::before {
+  content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--bar-color); opacity: var(--bar-op, 0); pointer-events: none;
+}
+/* Provisional: dashed tick — sparse direct evidence shouldn't read as a solid
+   mark, matching the greyed/italic number beside it. */
+table.leaderboard td.num[data-status="provisional"]::before {
+  background: repeating-linear-gradient(to bottom, var(--bar-color) 0 2px, transparent 2px 4px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  table.leaderboard td.num::before { transition: opacity .15s ease-out; }
+}
 table.leaderboard td.num[data-tier="high"] .cell-score { color: var(--text-strong); font-weight: 700; }
 table.leaderboard td.num[data-tier="low"] .cell-score { color: var(--muted); }
 /* Provisional role scores are greyed out regardless of tier: sparse direct

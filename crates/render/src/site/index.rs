@@ -214,6 +214,46 @@ fn score_tier(score: f64) -> &'static str {
     }
 }
 
+const BAR_REFERENCE_COHORT: usize = 10;
+const BAR_OPACITY_FLOOR: f64 = 0.2;
+
+/// Per-axis `(min, max)` taken from the ten highest scorers on each axis, in
+/// column order `[idea, plan, build, review]`. Score bars map across this
+/// range so differences between the leaders are apparent instead of all
+/// crowding the top of a 0–100 (or fixed-band) scale.
+fn top10_bar_scales(scoreboard: &Scoreboard) -> [(f64, f64); 4] {
+    let axis = |get: fn(&ipbr_core::RoleScores) -> f64| -> (f64, f64) {
+        let mut values: Vec<f64> = scoreboard.models.iter().map(|m| get(&m.scores)).collect();
+        values.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
+        let top = &values[..values.len().min(BAR_REFERENCE_COHORT)];
+        let max = top.first().copied().unwrap_or(0.0);
+        let min = top.last().copied().unwrap_or(0.0);
+        (min, max)
+    };
+    [
+        axis(|s| s.i_raw),
+        axis(|s| s.p_raw),
+        axis(|s| s.b_raw),
+        axis(|s| s.r),
+    ]
+}
+
+/// Opacity for a cell's score bar within its axis's top-10 range, or `None`
+/// (no bar) when the value falls below the axis's 10th-best score. The floor
+/// keeps the 10th-place bar visibly distinct from the empty cells below it.
+fn bar_opacity(value: f64, (min, max): (f64, f64)) -> Option<f64> {
+    if value < min {
+        return None;
+    }
+    let span = max - min;
+    let t = if span > f64::EPSILON {
+        ((value - min) / span).clamp(0.0, 1.0)
+    } else {
+        1.0
+    };
+    Some(BAR_OPACITY_FLOOR + t * (1.0 - BAR_OPACITY_FLOOR))
+}
+
 struct RoleSpec {
     id: &'static str,
     label: &'static str,
@@ -332,8 +372,15 @@ fn render_leaderboard(scoreboard: &Scoreboard, radar_scales: RadarScales) -> Str
     );
     html.push_str(r#"<th scope="col" aria-label="details"></th></tr></thead><tbody>"#);
 
+    let bar_scales = top10_bar_scales(scoreboard);
     for (position, model) in models.iter().enumerate() {
-        html.push_str(&render_row(scoreboard, model, radar_scales, position + 1));
+        html.push_str(&render_row(
+            scoreboard,
+            model,
+            radar_scales,
+            bar_scales,
+            position + 1,
+        ));
     }
 
     html.push_str(r#"</tbody></table></div></section>"#);
@@ -344,6 +391,7 @@ fn render_row(
     scoreboard: &Scoreboard,
     model: &ipbr_core::ModelRecord,
     radar_scales: RadarScales,
+    bar_scales: [(f64, f64); 4],
     position: usize,
 ) -> String {
     let mut html = String::new();
@@ -374,13 +422,18 @@ fn render_row(
         (s.b_raw, |x| x.b_raw, "B_raw", "b"),
         (s.r, |x| x.r, "R", "r"),
     ];
-    for (raw, accessor, role, colkey) in columns {
+    for (idx, (raw, accessor, role, colkey)) in columns.into_iter().enumerate() {
         let provisional = role_is_provisional(model, role);
         let prev_score = prev.map(accessor);
         let delta = render_delta(raw, prev_score);
+        // No `--bar-op` below the axis's top-10 min → CSS falls back to opacity 0.
+        let bar_style = match bar_opacity(raw, bar_scales[idx]) {
+            Some(op) => format!(r#" style="--bar-op:{op:.2}""#),
+            None => String::new(),
+        };
         write!(
             html,
-            r#"<td class="num col-{colkey}" data-tier="{tier}" data-status="{status}">{score}{delta}</td>"#,
+            r#"<td class="num col-{colkey}" data-tier="{tier}" data-status="{status}"{bar_style}>{score}{delta}</td>"#,
             tier = score_tier(raw),
             status = if provisional { "provisional" } else { "ranked" },
             score = render_score_value(raw, provisional),
