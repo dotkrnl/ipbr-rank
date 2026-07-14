@@ -1,6 +1,12 @@
-#![allow(dead_code)]
-
 //! Strict round-trip regression for the public scoreboard schema v2.1.
+//!
+//! Most fields below are never read, and that is the point: paired with
+//! `deny_unknown_fields`, declaring the whole schema makes this a two-way
+//! contract. A key the renderer stops emitting fails to deserialize, and a key
+//! it starts emitting is rejected as unknown — so the schema cannot drift from
+//! docs/output-schema.md without a test failure, whether or not an assertion
+//! reads the value.
+#![allow(dead_code)]
 
 use std::collections::BTreeMap;
 
