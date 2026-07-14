@@ -926,6 +926,23 @@ log_scale = false
 groups = ["PLAN"]
 transform = "percentile"
 
+# ITBench-AA scores Kubernetes incident root-cause analysis. It belongs to the
+# same agentic-operations contour as the other two EnterpriseWorkflowComposite
+# leaves, and Plan is its best construct match empirically (rank correlation
+# +0.83 against PLAN, above BUILD and GEN). It stays diagnostic only because
+# the cohort omits the current leaders: Fable 5 and Opus 4.8 have no ITBench
+# row, so scoring it now would move Plan for their challengers on an axis the
+# leaders were never measured on. Promote by giving it a share of
+# EnterpriseWorkflowComposite (PLAN's 0.10 leaf weight is unaffected) with
+# anchors from a frozen direct-evidence p5/p95 snapshot.
+[metrics.ITBenchAA]
+family = "enterprise_workflow"
+eligibility = "supplemental"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
 # Supplemental, not core: Context Arena is a single ~33-model board, too
 # narrow to serve as an eligibility pillar. It still moves the long-context
 # score through LongContextComposite where present; LongContextRecall is the

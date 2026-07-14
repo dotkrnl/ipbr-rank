@@ -122,6 +122,14 @@ upstream display label is retained as provenance.
 - **Metric**: `AutomationBenchAA`, a supplemental input to the correlated enterprise-workflow Plan composite.
 - **Fixture**: `data/fixtures/aa_automation_bench.html`
 
+## aa_itbench
+
+- **Status**: Verified
+- **Metric**: `ITBenchAA`, Artificial Analysis's run of IBM's ITBench SRE track: Kubernetes incident root-cause analysis over 59 offline incident snapshots, scored as average precision at full recall.
+- **Cohort**: 32 models, published at each product's strongest effort (GPT-5.6 Sol at max, Claude Opus 4.7 at max), so the rows match this ranking's best-available-effort policy.
+- **Ranking use**: Diagnostic. `ITBenchAA` carries no group weight and no path to any role or Balanced rank. Its natural home is Plan — it shares the `enterprise_workflow` family and the agentic-operations contour with `EnterpriseOpsGymAA` and `AutomationBenchAA`, and Plan is its strongest construct match (rank correlation +0.83 against PLAN, versus +0.77 BUILD and +0.63 GEN over the 20 models carrying both). It is held diagnostic because the cohort omits the current leaders: Claude Fable 5 and Claude Opus 4.8 have no ITBench row, so scoring it would move Plan for their challengers on an axis the leaders were never measured on. To promote once AA covers them, give it a share of `EnterpriseWorkflowComposite` — Plan's 0.10 leaf weight is unaffected, only the composite's internal split — with anchors from a frozen direct-evidence p5/p95 snapshot.
+- **Fixture**: `data/fixtures/aa_itbench.html`
+
 ## deep_swe_v1_1
 
 - **Status**: Verified

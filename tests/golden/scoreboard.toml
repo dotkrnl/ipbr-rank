@@ -28,6 +28,12 @@ n_rows_ingested = 3
 n_rows_matched = 3
 n_rows_unmatched = 0
 
+[sources."aa_itbench"]
+status = "verified"
+n_rows_ingested = 3
+n_rows_matched = 3
+n_rows_unmatched = 0
+
 [sources."aa_omniscience"]
 status = "verified"
 n_rows_ingested = 3
@@ -1884,7 +1890,7 @@ display_name = "claude-opus-4.7"
 vendor = "anthropic"
 thinking_effort = "best_available"
 aliases = ["Agentless w/ Claude Opus 4.7", "Composio Coding Agent w/ Claude Opus 4.7", "anthropic/claude-opus-4.7", "claude 4.7", "claude opus 4.7", "claude-4-7", "claude-4-7-opus", "claude-4.7-opus", "claude-opus-4-7", "claude-opus-4-7-adaptive", "claude-opus-4-7-non-reasoning", "claude-opus-4-7-thinking", "claude-opus-4.7", "opus 4.7"]
-sources = ["agc_bench", "arc_agi", "artificial_analysis", "context_arena", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring", "swerebench", "terminal_bench", "terminal_bench_2_1"]
+sources = ["aa_itbench", "agc_bench", "arc_agi", "artificial_analysis", "context_arena", "eqbench_creative_writing", "eqbench_judgemark", "factory_code_review", "gso", "hil_bench", "lmarena", "mcp_atlas", "openrouter", "overrides", "sonar", "sweatlas_refactoring", "swerebench", "terminal_bench", "terminal_bench_2_1"]
 
 [models.scores]
 i_raw = 94.486578
@@ -1936,6 +1942,7 @@ HLE = 89.222416
 HLETools = 93.196539
 HiLBench = 94.141957
 IFBench = 31.769644
+ITBenchAA = 0.000000
 LMArenaCreative = 94.288857
 LMArenaDocument = 93.306150
 LMArenaSearch = 93.559592
@@ -1993,6 +2000,7 @@ HLE = 39.600000
 HLETools = 54.700000
 HiLBench = 27.670000
 IFBench = 58.639456
+ITBenchAA = 46.657250
 LMArenaCreative = 1480.049529
 LMArenaDocument = 1494.795547
 LMArenaSearch = 1237.470823
@@ -2126,6 +2134,10 @@ source = "hil_bench"
 [models.metric_evidence."IFBench"]
 class = "direct"
 source = "artificial_analysis"
+
+[models.metric_evidence."ITBenchAA"]
+class = "direct"
+source = "aa_itbench"
 
 [models.metric_evidence."LMArenaCreative"]
 class = "direct"
@@ -13680,7 +13692,7 @@ display_name = "gpt-5.6-sol"
 vendor = "openai"
 thinking_effort = "best_available"
 aliases = ["GPT-5.6 Sol", "GPT-5.6 Sol (Non-reasoning)", "GPT-5.6 Sol (high)", "GPT-5.6 Sol (low)", "GPT-5.6 Sol (max)", "GPT-5.6 Sol (medium)", "GPT-5.6 Sol (xhigh)", "gpt 5.6", "gpt 5.6 sol", "gpt-5-6", "gpt-5-6-sol", "gpt-5-6-sol-high", "gpt-5-6-sol-low", "gpt-5-6-sol-max", "gpt-5-6-sol-medium", "gpt-5-6-sol-non-reasoning", "gpt-5-6-sol-xhigh", "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-sol-xhigh (codex-harness)", "openai/gpt-5.6", "openai/gpt-5.6-sol", "openai:gpt-5.6-sol"]
-sources = ["aa_critpt", "overrides"]
+sources = ["aa_critpt", "aa_itbench", "overrides"]
 
 [models.scores]
 i_raw = 99.795232
@@ -13709,6 +13721,7 @@ REVIEW_DIRECT = 50.000000
 AAGeneralComposite = 99.795232
 BrowseComp = 97.463631
 CritPt = 99.795232
+ITBenchAA = 100.000000
 SWEBenchPro = 98.649536
 SWEComposite = 98.649536
 TerminalBench21 = 98.858746
@@ -13718,6 +13731,7 @@ Toolathlon = 94.626440
 [models.raw_metrics]
 BrowseComp = 90.400000
 CritPt = 32.285714
+ITBenchAA = 56.214689
 SWEBenchPro = 64.600000
 TerminalBench21 = 88.800000
 Toolathlon = 58.000000
@@ -13730,6 +13744,10 @@ citation = "OpenAI GPT-5.6 launch evaluations, BrowseComp single-agent Sol (not 
 [models.metric_evidence."CritPt"]
 class = "direct"
 source = "aa_critpt"
+
+[models.metric_evidence."ITBenchAA"]
+class = "direct"
+source = "aa_itbench"
 
 [models.metric_evidence."SWEBenchPro"]
 class = "direct"
@@ -13882,7 +13900,7 @@ display_name = "gpt-5.6-terra"
 vendor = "openai"
 thinking_effort = "best_available"
 aliases = ["GPT-5.6 Terra", "GPT-5.6 Terra (Non-reasoning)", "GPT-5.6 Terra (high)", "GPT-5.6 Terra (low)", "GPT-5.6 Terra (max)", "GPT-5.6 Terra (medium)", "GPT-5.6 Terra (xhigh)", "gpt 5.6 terra", "gpt-5-6-terra", "gpt-5-6-terra-high", "gpt-5-6-terra-low", "gpt-5-6-terra-max", "gpt-5-6-terra-medium", "gpt-5-6-terra-non-reasoning", "gpt-5-6-terra-xhigh", "gpt-5.6-terra", "openai/gpt-5.6-terra", "openai:gpt-5.6-terra"]
-sources = ["overrides"]
+sources = ["aa_itbench", "overrides"]
 
 [models.scores]
 i_raw = 50.000000
@@ -13909,6 +13927,7 @@ REVIEW_DIRECT = 50.000000
 
 [models.metrics]
 BrowseComp = 96.008558
+ITBenchAA = 45.812808
 SWEBenchPro = 98.350568
 SWEComposite = 98.350568
 TerminalBench21 = 98.328650
@@ -13917,6 +13936,7 @@ Toolathlon = 85.682067
 
 [models.raw_metrics]
 BrowseComp = 87.500000
+ITBenchAA = 51.035782
 SWEBenchPro = 63.400000
 TerminalBench21 = 87.400000
 Toolathlon = 53.100000
@@ -13925,6 +13945,10 @@ Toolathlon = 53.100000
 class = "direct"
 source = "overrides"
 citation = "OpenAI GPT-5.6 launch evaluations, BrowseComp Terra (effort not separately specified), https://openai.com/index/gpt-5-6/, accessed 2026-07-12"
+
+[models.metric_evidence."ITBenchAA"]
+class = "direct"
+source = "aa_itbench"
 
 [models.metric_evidence."SWEBenchPro"]
 class = "direct"

@@ -149,6 +149,21 @@ const AUTOMATION_BENCH_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     rsc_upper_path: &[],
 }];
 
+// AA re-implements IBM's ITBench SRE track: Kubernetes incident root-cause
+// analysis scored as average precision at full recall. JSON-LD and RSC both
+// publish the score as a fraction.
+const ITBENCH_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "ITBench-AA: Score",
+    upstream_key: "ITBench-AA",
+    metric: "ITBenchAA",
+    transform: Transform::Percent,
+    rsc_transform: Transform::Percent,
+    interval: false,
+    rsc_path: &["it_bench_sre"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
 const GDPVAL_CONFIG: EvaluationConfig = EvaluationConfig {
     source_id: "aa_gdpval_v2",
     cache_key: "aa_gdpval_v2",
@@ -182,6 +197,13 @@ const AUTOMATION_BENCH_CONFIG: EvaluationConfig = EvaluationConfig {
     cache_key: "aa_automation_bench",
     url: "https://artificialanalysis.ai/evaluations/automationbench-aa",
     datasets: AUTOMATION_BENCH_DATASETS,
+};
+
+const ITBENCH_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_itbench",
+    cache_key: "aa_itbench",
+    url: "https://artificialanalysis.ai/evaluations/itbench-aa",
+    datasets: ITBENCH_DATASETS,
 };
 
 macro_rules! evaluation_source {
@@ -232,6 +254,7 @@ evaluation_source!(AaCritPtSource, CRITPT_CONFIG);
 evaluation_source!(AaOmniscienceSource, OMNISCIENCE_CONFIG);
 evaluation_source!(AaEnterpriseOpsGymSource, ENTERPRISE_OPS_CONFIG);
 evaluation_source!(AaAutomationBenchSource, AUTOMATION_BENCH_CONFIG);
+evaluation_source!(AaItBenchSource, ITBENCH_CONFIG);
 
 async fn fetch_evaluation(
     http: &dyn Http,
@@ -1054,6 +1077,30 @@ mod tests {
             .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
             .expect("GPT AutomationBench row");
         assert!((numeric(gpt, "AutomationBenchAA").unwrap() - 44.25).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parses_itbench_fraction_and_keeps_max_effort_identity() {
+        let rows = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_itbench.html"),
+            ITBENCH_CONFIG,
+        )
+        .expect("ITBench fixture should parse");
+        assert_eq!(rows.len(), 3);
+
+        let sol = rows
+            .iter()
+            .find(|row| upstream_label(row) == "GPT-5.6 Sol (max)")
+            .expect("GPT-5.6 Sol row");
+        assert_eq!(sol.model_name, "openai/gpt-5.6-sol");
+        assert!((numeric(sol, "ITBenchAA").unwrap() - 56.2146892655367).abs() < 1e-10);
+
+        let opus = rows
+            .iter()
+            .find(|row| upstream_label(row) == "Claude Opus 4.7 (max)")
+            .expect("Claude Opus 4.7 row");
+        assert_eq!(opus.model_name, "anthropic/claude-opus-4.7");
+        assert!((numeric(opus, "ITBenchAA").unwrap() - 46.6572504708098).abs() < 1e-10);
     }
 
     #[test]

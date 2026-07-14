@@ -1,11 +1,12 @@
 use crate::{
     AaAutomationBenchSource, AaCritPtSource, AaEnterpriseOpsGymSource, AaGdpvalV2Source,
-    AaOmniscienceSource, AgcBenchSource, ArcAgiSource, ArtificialAnalysisSource, BfclSource,
-    ContextArenaSource, DeepSweV11Source, EqBenchCreativeWritingSource, EqBenchJudgemarkSource,
-    FactoryCodeReviewSource, GsoSource, HilBenchSource, LiveCodeBenchSource, LmArenaSource,
-    McpAtlasSource, OpenRouterSource, OverridesSource, SonarSource, Source, SweAtlasQnaSource,
-    SweAtlasRefactoringSource, SweAtlasTestWritingSource, SweBenchProSource, SweBenchSource,
-    SweRebenchSource, TerminalBench21Source, TerminalBenchSource,
+    AaItBenchSource, AaOmniscienceSource, AgcBenchSource, ArcAgiSource, ArtificialAnalysisSource,
+    BfclSource, ContextArenaSource, DeepSweV11Source, EqBenchCreativeWritingSource,
+    EqBenchJudgemarkSource, FactoryCodeReviewSource, GsoSource, HilBenchSource,
+    LiveCodeBenchSource, LmArenaSource, McpAtlasSource, OpenRouterSource, OverridesSource,
+    SonarSource, Source, SweAtlasQnaSource, SweAtlasRefactoringSource, SweAtlasTestWritingSource,
+    SweBenchProSource, SweBenchSource, SweRebenchSource, TerminalBench21Source,
+    TerminalBenchSource,
 };
 
 pub fn registry() -> Vec<Box<dyn Source>> {
@@ -18,6 +19,7 @@ pub fn registry() -> Vec<Box<dyn Source>> {
         Box::new(AaOmniscienceSource),
         Box::new(AaEnterpriseOpsGymSource),
         Box::new(AaAutomationBenchSource),
+        Box::new(AaItBenchSource),
         Box::new(SweBenchSource),
         Box::new(SweBenchProSource),
         Box::new(SweAtlasQnaSource),

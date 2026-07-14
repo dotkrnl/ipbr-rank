@@ -102,6 +102,7 @@ reported in the output):
 - EQ-Bench Judgemark v4 — diagnostic judge-discrimination score with a published 95% confidence interval
 - Artificial Analysis model API — GPQA, HLE, SciCode, AA-LCR, current tau3-Banking, Terminal-Bench 2.1 fallback, and legacy/operational diagnostics. Vendor-automatic fallback is part of the served ranked product and counts as direct evidence with explicit provenance.
 - Artificial Analysis evaluation pages — direct GDPval-AA v2, CritPt, AA-Omniscience, EnterpriseOps-Gym-AA, and AutomationBench-AA observations
+- ITBench-AA — Kubernetes incident root-cause analysis (SRE); diagnostic, since failure diagnosis is a different construct from the authoring work the four roles measure
 - DeepSWE v1.1 — original long-horizon repository work under one fixed mini-swe-agent harness; supplemental Build evidence
 - Context Arena — eight-needle GDM-MRCRv2 AUC through 128k, combined with AA-LCR as one long-context signal
 - AGC-Bench — broad creativity meta-benchmark, currently diagnostic while the new suite matures

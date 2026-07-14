@@ -32,7 +32,7 @@ pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
 pub use artificial_analysis::evaluations::{
     AaAutomationBenchSource, AaCritPtSource, AaEnterpriseOpsGymSource, AaGdpvalV2Source,
-    AaOmniscienceSource,
+    AaItBenchSource, AaOmniscienceSource,
 };
 pub use bfcl::BfclSource;
 pub use context_arena::ContextArenaSource;
