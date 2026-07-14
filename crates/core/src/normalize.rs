@@ -64,16 +64,15 @@ pub(crate) fn percentile_linear(sorted: &[f64], q: f64) -> f64 {
     }
 }
 
-pub fn robust_norm(
-    value: f64,
-    all_values: &[f64],
-    higher_better: bool,
-    log_scale: bool,
-) -> Option<f64> {
+/// Map `value` and the population into the shared (optionally log) space both
+/// robust normalizers use, returning the mapped value alongside the finite,
+/// ascending-sorted population. `None` when `value` is non-finite (or
+/// non-positive in log space) or no population value survives filtering.
+fn prepare_population(value: f64, all_values: &[f64], log_scale: bool) -> Option<(f64, Vec<f64>)> {
     if !value.is_finite() {
         return None;
     }
-    let mapped: Vec<f64> = if log_scale {
+    let mut sorted: Vec<f64> = if log_scale {
         all_values
             .iter()
             .filter(|v| v.is_finite() && **v > 0.0)
@@ -86,7 +85,7 @@ pub fn robust_norm(
             .copied()
             .collect()
     };
-    if mapped.is_empty() {
+    if sorted.is_empty() {
         return None;
     }
     let v = if log_scale {
@@ -97,8 +96,17 @@ pub fn robust_norm(
     } else {
         value
     };
-    let mut sorted = mapped;
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    Some((v, sorted))
+}
+
+pub fn robust_norm(
+    value: f64,
+    all_values: &[f64],
+    higher_better: bool,
+    log_scale: bool,
+) -> Option<f64> {
+    let (v, sorted) = prepare_population(value, all_values, log_scale)?;
     let p5 = percentile_linear(&sorted, 0.05);
     let p95 = percentile_linear(&sorted, 0.95);
     if (p95 - p5).abs() < EPS {
@@ -127,35 +135,7 @@ pub fn tail_penalty_norm(
     higher_better: bool,
     log_scale: bool,
 ) -> Option<f64> {
-    if !value.is_finite() {
-        return None;
-    }
-    let mapped: Vec<f64> = if log_scale {
-        all_values
-            .iter()
-            .filter(|v| v.is_finite() && **v > 0.0)
-            .map(|v| v.ln())
-            .collect()
-    } else {
-        all_values
-            .iter()
-            .filter(|v| v.is_finite())
-            .copied()
-            .collect()
-    };
-    if mapped.is_empty() {
-        return None;
-    }
-    let v = if log_scale {
-        if value <= 0.0 {
-            return None;
-        }
-        value.ln()
-    } else {
-        value
-    };
-    let mut sorted = mapped;
-    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let (v, sorted) = prepare_population(value, all_values, log_scale)?;
     // For small populations p2/p98 is dominated by individual rows and the
     // bend point becomes noisy. Fall back to min/max so the tail keeps the
     // intended shape; switch to p2/p98 once we have enough rows that the
