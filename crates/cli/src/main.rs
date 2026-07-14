@@ -656,26 +656,7 @@ impl SourceSummaryToml {
 
 impl ModelToml {
     fn into_model_record(self) -> ModelRecord {
-        let vendor = match self.vendor.to_lowercase().as_str() {
-            "openai" => ipbr_core::Vendor::Openai,
-            "anthropic" => ipbr_core::Vendor::Anthropic,
-            "google" => ipbr_core::Vendor::Google,
-            "moonshot" | "moonshotai" => ipbr_core::Vendor::Moonshot,
-            "zai" | "z-ai" | "z.ai" => ipbr_core::Vendor::Zai,
-            "xai" => ipbr_core::Vendor::Xai,
-            "alibaba" => ipbr_core::Vendor::Alibaba,
-            "deepseek" => ipbr_core::Vendor::Deepseek,
-            "mistral" => ipbr_core::Vendor::Mistral,
-            "meta" => ipbr_core::Vendor::Meta,
-            "minimax" => ipbr_core::Vendor::Minimax,
-            "nvidia" => ipbr_core::Vendor::Nvidia,
-            "baidu" => ipbr_core::Vendor::Baidu,
-            "tencent" => ipbr_core::Vendor::Tencent,
-            "inclusionai" => ipbr_core::Vendor::Inclusionai,
-            "xiaomi" => ipbr_core::Vendor::Xiaomi,
-            other => ipbr_core::Vendor::Other(other.to_string()),
-        };
-
+        let vendor = ipbr_core::Vendor::from_label(&self.vendor);
         let mut record = ModelRecord::new(self.canonical_id, self.display_name, vendor);
         record.aliases = self.aliases.into_iter().collect();
         record.sources = self.sources.into_iter().collect();

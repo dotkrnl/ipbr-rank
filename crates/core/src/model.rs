@@ -103,6 +103,31 @@ pub enum Vendor {
 }
 
 impl Vendor {
+    /// Map a free-form vendor label (case-insensitive, with the handful of
+    /// spelling variants sources emit) onto a canonical vendor. Unknown labels
+    /// are preserved verbatim as `Other`.
+    pub fn from_label(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "openai" => Self::Openai,
+            "anthropic" => Self::Anthropic,
+            "google" => Self::Google,
+            "moonshot" | "moonshotai" => Self::Moonshot,
+            "zai" | "z-ai" | "z.ai" => Self::Zai,
+            "xai" => Self::Xai,
+            "alibaba" => Self::Alibaba,
+            "deepseek" => Self::Deepseek,
+            "mistral" => Self::Mistral,
+            "meta" => Self::Meta,
+            "minimax" => Self::Minimax,
+            "nvidia" => Self::Nvidia,
+            "baidu" => Self::Baidu,
+            "tencent" => Self::Tencent,
+            "inclusionai" => Self::Inclusionai,
+            "xiaomi" => Self::Xiaomi,
+            other => Self::Other(other.to_string()),
+        }
+    }
+
     pub fn as_str(&self) -> &str {
         match self {
             Self::Openai => "openai",
