@@ -71,9 +71,6 @@ for snapshot in "$cache_dir"/week_*.toml; do
   fi
 done
 
-# Leftovers from the retired daily-snapshot scheme (deltas against yesterday).
-rm -f "$cache_dir"/daily_snapshot_*.toml "$cache_dir/prev_scoreboard.toml"
-
 if [[ -f "$baseline" ]]; then
   echo "$baseline"
 else

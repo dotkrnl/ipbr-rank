@@ -289,11 +289,19 @@ async fn cmd_render(cli: &Cli, prev: Option<PathBuf>) -> anyhow::Result<()> {
     let parsed: ScoreboardToml = toml::from_str(&raw)
         .with_context(|| format!("failed parsing {}", scoreboard_path.display()))?;
 
-    let coefficients = match std::fs::read_to_string(cli.out.join("coefficients.toml")) {
-        Ok(raw) => {
-            Coefficients::load_from_str(&raw).context("failed parsing out/coefficients.toml")?
+    // `score`/`all` write coefficients.toml beside the scoreboard, so it is the
+    // config those scores were produced with — rendering with anything else
+    // would mislabel eligibility. An explicit --coefficients still wins, as it
+    // does for every other subcommand.
+    let coefficients = match &cli.coefficients {
+        Some(_) => load_coefficients(cli)?,
+        None => {
+            let path = cli.out.join("coefficients.toml");
+            let raw = std::fs::read_to_string(&path)
+                .with_context(|| format!("failed reading {}", path.display()))?;
+            Coefficients::load_from_str(&raw)
+                .with_context(|| format!("failed parsing {}", path.display()))?
         }
-        Err(_) => Coefficients::load_embedded().context("failed parsing embedded coefficients")?,
     };
 
     let models = parsed
@@ -478,10 +486,8 @@ async fn build_scoreboard(
     let http = ReqwestHttp::default();
     let sources = registry();
     let selected = selected_sources(cli, &sources);
-    let mut source_summary = BTreeMap::new();
+    let mut source_summary: BTreeMap<String, SourceSummary> = BTreeMap::new();
     let mut rows_by_source: BTreeMap<String, Vec<RawRow>> = BTreeMap::new();
-    let mut fetched_rows: BTreeMap<String, usize> = BTreeMap::new();
-    let mut fetched_statuses: BTreeMap<String, String> = BTreeMap::new();
 
     for source in selected {
         if matches!(mode, FetchMode::Online)
@@ -510,43 +516,34 @@ async fn build_scoreboard(
             .fetch(&http, fetch_opts, secrets)
             .await
             .with_context(|| format!("fetch failed for source {}", source.id()))?;
-        fetched_rows.insert(source.id().to_string(), rows.len());
-        fetched_statuses.insert(
+        // Match counts are unknown until every source has been ingested below.
+        source_summary.insert(
             source.id().to_string(),
-            format!("{:?}", source.status()).to_lowercase(),
+            SourceSummary {
+                status: format!("{:?}", source.status()).to_lowercase(),
+                rows: rows.len(),
+                matched: 0,
+                unmatched: 0,
+            },
         );
         rows_by_source.insert(source.id().to_string(), rows);
     }
 
-    // Surface override entries duplicated by a real source — once a public
-    // leaderboard catches up, the hand-curated number gets clobbered by
-    // ingest precedence and the entry can be retired.
-    let _stale_overrides = ipbr_core::warn_stale_overrides(&rows_by_source, &records);
-
-    // Loudly flag alias keys shared by two canonical models: they silently
-    // reroute benchmark rows to the first-registered record.
-    let _collisions = ipbr_core::warn_alias_collisions(&records);
-
-    // Log rows that resolved only through fuzzy substring matching so each can
-    // be audited by hand; exact/suffix-stripped matches are trusted silently.
-    let _fuzzy = ipbr_core::audit_fuzzy_matches(&rows_by_source, &records);
+    // These three write their findings to stderr; the returned lists exist for
+    // tests. Each flags a way rows can be silently mis-attributed: an override
+    // a public leaderboard has caught up with, an alias key claimed by two
+    // canonical models, or a row that resolved only by fuzzy substring match.
+    ipbr_core::warn_stale_overrides(&rows_by_source, &records);
+    ipbr_core::warn_alias_collisions(&records);
+    ipbr_core::audit_fuzzy_matches(&rows_by_source, &records);
 
     for (source_id, rows) in rows_by_source {
-        let row_count = fetched_rows.get(&source_id).copied().unwrap_or(rows.len());
-        let status = fetched_statuses
-            .get(&source_id)
-            .map(String::as_str)
-            .unwrap_or("verified");
-        let effort_policy = &coefficients.effort_policy;
-        record_source_summary(
-            &mut source_summary,
-            &source_id,
-            status,
-            row_count,
-            &mut records,
-            rows,
-            effort_policy,
-        );
+        let stats: IngestStats =
+            ingest_rows_with_policy(&mut records, rows, &coefficients.effort_policy);
+        if let Some(summary) = source_summary.get_mut(&source_id) {
+            summary.matched = stats.matched;
+            summary.unmatched = stats.unmatched.len();
+        }
     }
 
     ipbr_core::compute_scores_with(&mut records, &coefficients);
@@ -563,27 +560,6 @@ async fn build_scoreboard(
         },
         coefficients,
     ))
-}
-
-fn record_source_summary(
-    source_summary: &mut BTreeMap<String, SourceSummary>,
-    source_id: &str,
-    status: &str,
-    row_count: usize,
-    records: &mut [ModelRecord],
-    rows: Vec<ipbr_core::RawRow>,
-    effort_policy: &ipbr_core::EffortPolicy,
-) {
-    let stats: IngestStats = ingest_rows_with_policy(records, rows, effort_policy);
-    source_summary.insert(
-        source_id.to_string(),
-        SourceSummary {
-            status: status.to_string(),
-            rows: row_count,
-            matched: stats.matched,
-            unmatched: stats.unmatched.len(),
-        },
-    );
 }
 
 #[derive(Debug, Deserialize)]
