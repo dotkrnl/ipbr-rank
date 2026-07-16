@@ -353,6 +353,21 @@ aliases = [
     "gemini-2.5-pro-grounding",
 ]
 
+# Kimi K3 — Moonshot's 2.8T-parameter flagship released 2026-07-14
+# (https://www.kimi.com/blog/kimi-k3). Thinking is always on and at launch
+# only `max` reasoning effort exists, so there are no effort variants to
+# disambiguate yet. The retired `kimi-latest` route and new-user access to
+# `kimi-k2.5` now point to K3 per https://platform.kimi.com/docs/models —
+# keep those IDs unmatched; only explicit K3 spellings alias here.
+[models."moonshotai/kimi-k3"]
+vendor = "moonshot"
+aliases = [
+    "kimi 3", "kimi k3",
+    "kimi-k3",
+    "moonshot/kimi-k3", "moonshotai/kimi-k3",
+    "moonshotai/Kimi-K3",
+]
+
 [models."moonshotai/kimi-k2.7-code"]
 vendor = "moonshot"
 aliases = [

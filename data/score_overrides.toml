@@ -1261,3 +1261,77 @@ canonical_id = "z-ai/glm-4.7"
 metric = "HLETools"
 value = 42.8
 note = "Z.ai GLM-5.1 official model card, GLM-4.7 comparison row, HLE with tools, https://docs.z.ai/guides/llm/glm-5.1, accessed 2026-06-11"
+
+# ---------------------------------------------------------------------
+# Kimi K3 — official launch figures from the Kimi K3 tech blog
+# (https://www.kimi.com/blog/kimi-k3, released 2026-07-14). All K3 results
+# are reported at reasoning effort 'max' (the only effort offered at
+# launch) with temperature 1.0 / top-p 1.0. Native public rows replace
+# these one by one as the leaderboards ingest K3.
+# ---------------------------------------------------------------------
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "TerminalBench21"
+value = 88.3
+note = "Moonshot Kimi K3 tech blog, Terminal-Bench 2.1 with the KimiCode harness, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "DeepSWE"
+value = 67.3
+note = "Moonshot Kimi K3 tech blog footnote 1, official DeepSWE leaderboard (https://deepswe.datacurve.ai/) under the mini-SWE-agent harness; the KimiCode-harness table value is 67.5, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "MCPAtlas"
+value = 84.2
+note = "Moonshot Kimi K3 tech blog, MCP Atlas 500-task public subset, 100-turn limit, Gemini 3.1 Pro judge (blog footnote 10), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "GPQA"
+value = 93.5
+note = "Moonshot Kimi K3 tech blog, GPQA-Diamond without tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "HLE"
+value = 43.5
+note = "Moonshot Kimi K3 tech blog, HLE-Full without tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "HLETools"
+value = 56.0
+note = "Moonshot Kimi K3 tech blog, HLE-Full with tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "BrowseComp"
+value = 91.2
+note = "Moonshot Kimi K3 tech blog, BrowseComp with context compaction triggered at 300K tokens; 90.4 with the full 1M context and no context management (blog footnote 12), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "Toolathlon"
+value = 73.2
+note = "Moonshot Kimi K3 tech blog, Toolathlon-Verified, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "KimiCodeBenchV2"
+value = 72.9
+note = "Moonshot Kimi K3 tech blog, Kimi Code Bench 2.0 (Internal) with the KimiCode harness, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "ProgramBench"
+value = 77.8
+note = "Moonshot Kimi K3 tech blog, Program Bench with the KimiCode harness (blog footnote 3), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[[entries]]
+canonical_id = "moonshotai/kimi-k3"
+metric = "MLSBenchLite"
+value = 48.3
+note = "Moonshot Kimi K3 tech blog, MLS Bench Lite with the KimiCode harness (blog footnote 7), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"

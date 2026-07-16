@@ -132,8 +132,8 @@ n_rows_unmatched = 274
 
 [sources."overrides"]
 status = "verified"
-n_rows_ingested = 196
-n_rows_matched = 196
+n_rows_ingested = 207
+n_rows_matched = 207
 n_rows_unmatched = 0
 
 [sources."sonar"]
@@ -2445,7 +2445,7 @@ HLE = 95.865937
 HiLBench = 80.018016
 IFBench = 45.882142
 KimiClaw247Bench = 77.181208
-KimiCodeBenchV2 = 91.602346
+KimiCodeBenchV2 = 75.157895
 LMArenaCreative = 85.163737
 LMArenaDocument = 73.105075
 LMArenaText = 81.001541
@@ -2454,9 +2454,9 @@ LongContextComposite = 80.529015
 LongContextRecall = 70.564940
 MCPAtlas = 93.708055
 MCPMarkVerified = 17.200675
-MLSBenchLite = 100.000000
+MLSBenchLite = 76.620616
 OutputSpeed = 73.137279
-ProgramBench = 76.548673
+ProgramBench = 54.082397
 SWEAtlasComposite = 89.104489
 SWEAtlasQnA = 93.390134
 SWEAtlasRefactoring = 90.159917
@@ -10761,11 +10761,11 @@ DeepSWECIHigh = 0.000000
 DeepSWECILow = 0.000000
 DeepSWEPassAt4 = 0.000000
 KimiClaw247Bench = 38.031320
-KimiCodeBenchV2 = 58.258722
+KimiCodeBenchV2 = 46.736842
 MCPAtlas = 79.056233
 MCPMarkVerified = 43.620011
-MLSBenchLite = 51.946162
-ProgramBench = 23.451327
+MLSBenchLite = 35.706695
+ProgramBench = 15.880150
 
 [models.raw_metrics]
 DeepSWE = 30.530973
@@ -10953,6 +10953,251 @@ provisional = true
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
+canonical_id = "moonshotai/kimi-k3"
+display_name = "kimi-k3"
+vendor = "moonshot"
+thinking_effort = "best_available"
+aliases = ["kimi 3", "kimi k3", "kimi-k3", "moonshot/kimi-k3", "moonshotai/Kimi-K3", "moonshotai/kimi-k3"]
+sources = ["overrides"]
+
+[models.scores]
+i_raw = 94.798354
+p_raw = 96.123832
+b_raw = 96.168056
+r = 96.331487
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 96.243042
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 94.798354
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 96.572407
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+AAGeneralComposite = 94.798354
+AAReasoningComposite = 95.139769
+BrowseComp = 97.764237
+DeepSWE = 94.252508
+GPQA = 96.164016
+HLE = 94.115523
+HLETools = 95.307230
+KimiCodeBenchV2 = 100.000000
+MCPAtlas = 95.865924
+MLSBenchLite = 100.000000
+ProgramBench = 100.000000
+TerminalBench21 = 98.691855
+TerminalBench21Composite = 98.691855
+Toolathlon = 99.800781
+
+[models.raw_metrics]
+BrowseComp = 91.200000
+DeepSWE = 67.300000
+GPQA = 93.500000
+HLE = 43.500000
+HLETools = 56.000000
+KimiCodeBenchV2 = 72.900000
+MCPAtlas = 84.200000
+MLSBenchLite = 48.300000
+ProgramBench = 77.800000
+TerminalBench21 = 88.300000
+Toolathlon = 73.200000
+
+[models.metric_evidence."BrowseComp"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, BrowseComp with context compaction triggered at 300K tokens; 90.4 with the full 1M context and no context management (blog footnote 12), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."DeepSWE"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog footnote 1, official DeepSWE leaderboard (https://deepswe.datacurve.ai/) under the mini-SWE-agent harness; the KimiCode-harness table value is 67.5, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."GPQA"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, GPQA-Diamond without tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."HLE"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, HLE-Full without tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."HLETools"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, HLE-Full with tools, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."KimiCodeBenchV2"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, Kimi Code Bench 2.0 (Internal) with the KimiCode harness, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."MCPAtlas"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, MCP Atlas 500-task public subset, 100-turn limit, Gemini 3.1 Pro judge (blog footnote 10), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."MLSBenchLite"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, MLS Bench Lite with the KimiCode harness (blog footnote 7), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."ProgramBench"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, Program Bench with the KimiCode harness (blog footnote 3), https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."TerminalBench21"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, Terminal-Bench 2.1 with the KimiCode harness, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.metric_evidence."Toolathlon"]
+class = "direct"
+source = "overrides"
+citation = "Moonshot Kimi K3 tech blog, Toolathlon-Verified, https://www.kimi.com/blog/kimi-k3, accessed 2026-07-16"
+
+[models.evidence.groups."BUILD"]
+direct = 0.300000
+missing = 0.700000
+effective = 0.300000
+family_count = 3
+direct_families = ["deepswe", "scale", "terminal_bench"]
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.175000
+missing = 0.825000
+effective = 0.175000
+family_count = 1
+direct_families = ["aa_reasoning"]
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.400000
+missing = 0.600000
+effective = 0.400000
+family_count = 2
+direct_families = ["scale", "terminal_bench"]
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.319850
+missing = 0.680150
+effective = 0.319850
+family_count = 3
+direct_families = ["deepswe", "scale", "terminal_bench"]
+core_direct = 0.177743
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.069433
+missing = 0.930567
+effective = 0.069433
+family_count = 1
+direct_families = ["aa_reasoning"]
+core_direct = 0.069433
+core_family_count = 1
+core_direct_families = ["aa_reasoning"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.321250
+missing = 0.678750
+effective = 0.321250
+family_count = 3
+direct_families = ["aa_reasoning", "scale", "terminal_bench"]
+core_direct = 0.188856
+core_family_count = 2
+core_direct_families = ["aa_reasoning", "terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.210000
+missing = 0.790000
+effective = 0.210000
+family_count = 3
+direct_families = ["deepswe", "scale", "terminal_bench"]
+core_direct = 0.143590
+core_family_count = 1
+core_direct_families = ["terminal_bench"]
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
@@ -12960,7 +13205,7 @@ HLE = 94.820566
 HiLBench = 95.887328
 IFBench = 89.055121
 KimiClaw247Bench = 100.000000
-KimiCodeBenchV2 = 100.000000
+KimiCodeBenchV2 = 83.578947
 LMArenaCreative = 81.463379
 LMArenaDocument = 89.765862
 LMArenaSearch = 93.995683
@@ -12970,10 +13215,10 @@ LongContextComposite = 96.041211
 LongContextRecall = 95.492871
 MCPAtlas = 76.374962
 MCPMarkVerified = 100.000000
-MLSBenchLite = 54.856311
+MLSBenchLite = 37.832094
 OSWorldVerified = 85.597132
 OutputSpeed = 71.211026
-ProgramBench = 100.000000
+ProgramBench = 73.932584
 SWEAtlasComposite = 83.582241
 SWEAtlasQnA = 89.732699
 SWEAtlasRefactoring = 87.009443
