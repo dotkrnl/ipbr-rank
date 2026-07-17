@@ -1,7 +1,9 @@
 //! The expanded row: why a model scores what it scores.
 //!
-//! The panel answers three questions in order, and nothing else:
-//!   1. What is each of its four scores, and how well is it evidenced?
+//! A dashboard band opens the panel — who the model is, the shape of its four
+//! scores, and the scores themselves — then the panel answers three questions
+//! in order, and nothing else:
+//!   1. How well is each of its four scores evidenced?
 //!   2. What went into each score, and how much did each input count?
 //!   3. What was actually measured, and where did the numbers come from?
 //!
@@ -16,17 +18,25 @@ use std::fmt::Write;
 use crate::Scoreboard;
 
 use super::html_escape;
-use super::index::{RoleSpec, role_specs, score_tier};
+use super::index::{RoleSpec, composite, role_specs, score_tier};
 use super::labels::{Area, input_label, metric_label, ordinal, source_label};
+use super::radar::{RadarScales, RadarSlice, render_radar_mini};
 
 /// Inputs below this share of a role are rolled into a single trailing line.
 /// They exist, they are weighted, and they are honestly accounted for — but at
 /// 1% of a score they are noise in a list a reader is trying to scan.
 const MINOR_INPUT_SHARE: f64 = 0.03;
 
-pub fn render_detail(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
-    let mut html = String::from(r#"<div class="detail"><div class="det-top">"#);
+pub fn render_detail(
+    scoreboard: &Scoreboard,
+    model: &ipbr_core::ModelRecord,
+    radar_scales: RadarScales,
+) -> String {
+    let mut html = String::from(r#"<div class="detail">"#);
 
+    html.push_str(&render_band(scoreboard, model, radar_scales));
+
+    html.push_str(r#"<div class="det-top">"#);
     for spec in role_specs() {
         html.push_str(&render_role_card(scoreboard, model, &spec));
     }
@@ -40,22 +50,160 @@ pub fn render_detail(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) ->
     html
 }
 
-/// One role: its score, how well evidenced it is, and what fed it.
+/// The dashboard band: who this model is, the shape of its four scores, and
+/// the scores themselves — everything a reader needs before deciding whether
+/// to dig into the evidence below.
+fn render_band(
+    scoreboard: &Scoreboard,
+    model: &ipbr_core::ModelRecord,
+    radar_scales: RadarScales,
+) -> String {
+    let s = &model.scores;
+    let evidence = scoreboard.coefficients.evidence.clone().unwrap_or_default();
+    let radar = render_radar_mini(
+        &RadarSlice {
+            idea: s.i_raw,
+            plan: s.p_raw,
+            build: s.b_raw,
+            review: s.r,
+            class: "solo",
+            label: Some(model.display_name.as_str()),
+            provisional: ipbr_core::balanced_is_provisional(model, &evidence),
+        },
+        radar_scales,
+    );
+
+    // Overall rank: the unweighted mean of the four roles, as in the hero.
+    let overall = rank_for(scoreboard, &model.canonical_id, |m| Some(composite(m)))
+        .map(|(place, total)| format!("{} of {total} overall", ordinal(place)))
+        .unwrap_or_else(|| "unranked overall".to_string());
+
+    let mut scores = String::new();
+    for spec in role_specs() {
+        let value = (spec.from_record)(model);
+        let rank = rank_for(scoreboard, &model.canonical_id, |m| {
+            Some((spec.from_record)(m))
+        });
+        let provisional = model
+            .evidence
+            .roles
+            .get(spec.evidence_key)
+            .is_some_and(|coverage| coverage.provisional);
+        write!(
+            scores,
+            r#"<div class="bs role-{id}"><span class="bs-label">{label}</span><span class="bs-score" data-tier="{tier}" data-status="{status}">{value:.1}</span><span class="bs-rank">{rank}</span></div>"#,
+            id = spec.id,
+            label = spec.label,
+            tier = score_tier(value),
+            status = if provisional {
+                "provisional"
+            } else {
+                "ranked"
+            },
+            rank = match rank {
+                Some((place, total)) => format!("{} of {total}", ordinal(place)),
+                None => "unranked".to_string(),
+            },
+        )
+        .unwrap();
+    }
+
+    format!(
+        r#"<header class="det-band"><div class="band-id"><div class="band-name">{name}</div><div class="band-sub"><span class="band-vendor">{vendor}</span><span class="band-rank" title="Unweighted mean of the four role scores">{overall}</span></div></div><div class="band-radar">{radar}</div><div class="band-scores">{scores}</div><p class="band-summary">{summary}</p></header>"#,
+        name = html_escape(&model.display_name),
+        vendor = html_escape(model.vendor.as_str()),
+        summary = render_band_summary_html(scoreboard, model),
+    )
+}
+
+/// One strictly factual sentence for the band: the model's best and worst role
+/// by rank, and in how many roles the evidence earns a ranked badge. Neutral
+/// wording only — the numbers speak, no adjectives.
+fn render_band_summary(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
+    let specs = role_specs();
+    let mut places: Vec<(&str, usize, usize)> = Vec::new();
+    let mut ranked_roles = 0usize;
+    for spec in &specs {
+        if let Some((place, total)) = rank_for(scoreboard, &model.canonical_id, |m| {
+            Some((spec.from_record)(m))
+        }) {
+            places.push((spec.label, place, total));
+        }
+        if model
+            .evidence
+            .roles
+            .get(spec.evidence_key)
+            .is_some_and(|coverage| !coverage.provisional)
+        {
+            ranked_roles += 1;
+        }
+    }
+
+    let ranked = format!("Ranked in {ranked_roles} of {} roles", specs.len());
+    let Some(best) = places.iter().min_by_key(|(_, place, _)| *place) else {
+        return ranked;
+    };
+    let worst = places
+        .iter()
+        .max_by_key(|(_, place, _)| *place)
+        .expect("places is non-empty when best exists");
+    if best.1 == worst.1 {
+        return format!(
+            "All four roles tied at {} of {} · {ranked}",
+            ordinal(best.1),
+            best.2
+        );
+    }
+    format!(
+        "Strongest: {} ({} of {}) · Weakest: {} ({} of {}) · {ranked}",
+        capitalize(best.0),
+        ordinal(best.1),
+        best.2,
+        capitalize(worst.0),
+        ordinal(worst.1),
+        worst.2,
+    )
+}
+
+/// The summary, split at its `·` separators into unbreakable segments: on
+/// narrow screens it wraps segment-per-line instead of splitting mid-fact.
+fn render_band_summary_html(scoreboard: &Scoreboard, model: &ipbr_core::ModelRecord) -> String {
+    render_band_summary(scoreboard, model)
+        .split(" · ")
+        .enumerate()
+        .map(|(idx, segment)| {
+            let prefix = if idx == 0 { "" } else { "· " };
+            format!(r#"<span class="ss">{prefix}{segment}</span>"#)
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+/// Role labels are stored lowercase for the table headers; sentence-initial
+/// positions in the band want a capital.
+fn capitalize(label: &str) -> String {
+    let mut chars = label.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
+    }
+}
+
+/// One role: how well its score is evidenced, and what fed it. The score
+/// itself lives in the dashboard band above and is not repeated here.
 fn render_role_card(
     scoreboard: &Scoreboard,
     model: &ipbr_core::ModelRecord,
     spec: &RoleSpec,
 ) -> String {
-    let value = (spec.from_record)(model);
     let rank = rank_for(scoreboard, &model.canonical_id, |m| {
         Some((spec.from_record)(m))
     });
 
     let mut html = format!(
-        r#"<section class="det-role role-{id}"><header class="dr-head"><h4 class="dr-title">{label}</h4><span class="dr-score" data-tier="{tier}">{value:.1}</span><span class="dr-rank">{rank}</span></header>"#,
+        r#"<section class="det-role role-{id}"><header class="dr-head"><h4 class="dr-title">{label}</h4><span class="dr-rank">{rank}</span></header>"#,
         id = spec.id,
         label = spec.label,
-        tier = score_tier(value),
         rank = match rank {
             Some((place, total)) => format!("{} of {total}", ordinal(place)),
             None => "unranked".to_string(),
@@ -89,7 +237,7 @@ fn render_role_evidence(model: &ipbr_core::ModelRecord, spec: &RoleSpec) -> Stri
     };
 
     format!(
-        r#"<p class="dr-evidence"><span class="dr-badge {badge_class}">{badge}</span> <span class="dr-meter" aria-hidden="true"><i style="width:{pct:.0}%"></i></span> Measured on <b>{pct:.0}%</b> of the evidence this score looks for, across <b>{families}</b> unrelated {benchmarks}.{tail}</p>"#,
+        r#"<p class="dr-evidence"><span class="dr-badge {badge_class}">{badge}</span> <span class="dr-meter" aria-hidden="true"><i style="width:{pct:.0}%"></i></span> <span class="dr-ev-text">Measured on <b>{pct:.0}%</b> of the evidence this score looks for, across <b>{families}</b> unrelated {benchmarks}.{tail}</span></p>"#,
         pct = coverage.direct * 100.0,
         families = coverage.family_count,
         benchmarks = if coverage.family_count == 1 {

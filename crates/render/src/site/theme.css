@@ -4,9 +4,11 @@
   --panel: #10232a;
   --text: #cbd3d1;
   --text-strong: #eef5f1;
-  --muted: #6f7d78;
-  --line: #1c2e30;
-  --line-soft: #17252a;
+  /* Muted is label text, not decoration: it stays above WCAG AA (4.5:1) on
+     --bg so 13px labels read at a glance. */
+  --muted: #84958e;
+  --line: #22363b;
+  --line-soft: #1c2d32;
   --accent: #5bc7ba;
   --accent-deep: #8adbd0;
   --idea: #f2cc60;
@@ -23,9 +25,9 @@
     --panel: #ece6d8;
     --text: #16241f;
     --text-strong: #081217;
-    --muted: #7c7566;
-    --line: #ddd6ca;
-    --line-soft: #eae4d6;
+    --muted: #6d675a;
+    --line: #d8d0bf;
+    --line-soft: #e3ddcb;
     --accent: #235752;
     --accent-deep: #14403c;
     --idea: #b8851c;
@@ -73,7 +75,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visibl
 
 header {
   display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
-  border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 22px;
+  border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 24px;
   flex-wrap: wrap;
 }
 .brand { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
@@ -90,11 +92,13 @@ nav a:hover { color: var(--text-strong); }
 
 /* === Hero ===
    Typography rule: only two sizes in this site — body (13px, inherited from
-   <body>) and one display step for the tagline. Section labels lean on
-   weight + uppercase + letter-spacing for distinction, never font-size. */
+   <body>) and one display step (24px) shared by the hero tagline, the about
+   page title, and the expanded row's dashboard band (name, scores, stats).
+   Section labels lean on weight + uppercase + letter-spacing for distinction,
+   never font-size. */
 .hero { margin: 6px 0 48px; }
 
-.hero-head { margin-bottom: 22px; }
+.hero-head { margin-bottom: 24px; }
 .hero-tagline {
   font-size: 24px; line-height: 1.25;
   margin: 0 0 10px;
@@ -210,7 +214,7 @@ nav a:hover { color: var(--text-strong); }
 .leaders-grid .row {
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr) auto;
-  gap: 6px; align-items: baseline; padding: 3px 0;
+  gap: 6px; align-items: baseline; padding: 4px 0;
   border-bottom: 1px solid var(--line-soft);
 }
 .leaders-grid .row:last-child { border-bottom: 0; }
@@ -236,7 +240,7 @@ nav a:hover { color: var(--text-strong); }
 .delta-down { color: var(--review); }
 
 /* === Scoring panel === */
-details.scoring { border: 1px solid var(--line); margin-bottom: 28px; }
+details.scoring { border: 1px solid var(--line); margin-bottom: 32px; }
 details.scoring > summary {
   cursor: pointer; padding: 10px 14px; font-weight: 700; color: var(--text-strong);
   list-style: none;
@@ -244,13 +248,14 @@ details.scoring > summary {
 details.scoring > summary::-webkit-details-marker { display: none; }
 details.scoring > summary::before { content: "▸ "; color: var(--muted); }
 details.scoring[open] > summary::before { content: "▾ "; color: var(--muted); }
+details.scoring > summary:hover, .det-results > summary:hover { color: var(--accent); }
 details.scoring .scoring-body { padding: 4px 16px 16px; color: var(--text); border-top: 1px solid var(--line-soft); }
 details.scoring h3 { margin: 14px 0 4px; color: var(--text-strong); }
 details.scoring p { margin: 6px 0; line-height: 1.55; }
 details.scoring code, details.scoring pre { background: var(--panel); padding: 1px 5px; }
 
 /* === Leaderboard === */
-.toolbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 8px 0 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 8px 0 16px; }
 .search-box { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; }
 .search-box .search-icon {
   position: absolute; left: 8px; width: 12px; height: 12px;
@@ -281,6 +286,8 @@ table.leaderboard th, table.leaderboard td {
 table.leaderboard th {
   background: var(--bg); font-weight: 700;
   color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
+  /* A firm rule under the header separates it from the data rows beneath. */
+  border-bottom: 1px solid var(--line);
 }
 /* Keep column labels visible while scanning a long table. Only where the
    table isn't the horizontal scroll container — an overflow ancestor would
@@ -295,6 +302,9 @@ table.leaderboard th.rank, table.leaderboard td.rank {
   text-align: right; color: var(--muted); font-variant-numeric: tabular-nums;
   width: 1%; white-space: nowrap; padding-right: 4px;
 }
+/* Vendor leads the row and gets a generous, comfortable column; the model-name
+   column takes whatever slack remains. */
+table.leaderboard td.vendor { min-width: 120px; }
 
 /* Active sort column — a faint vertical wash so the ranked metric reads at a
    glance. `data-active-col` is set on the table (default build). */
@@ -382,15 +392,19 @@ table.leaderboard td.num[data-status="provisional"] .cell-score {
   color: var(--muted); font-size: 0.78rem; font-style: italic;
 }
 table.leaderboard tr.row:hover { background: color-mix(in srgb, var(--accent) 11%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  table.leaderboard tr.row { transition: background-color .12s ease-out; }
+}
 table.leaderboard tr.row.expanded { background: var(--panel); }
 table.leaderboard tr.expand { display: none; }
 table.leaderboard tr.expand.open { display: table-row; background: var(--panel); }
-table.leaderboard tr.expand td { padding: 14px 18px 18px; border-bottom: 1px solid var(--line); }
+table.leaderboard tr.expand td { padding: 16px 20px 20px; border-bottom: 1px solid var(--line); }
 table.leaderboard tr.row td.expand-toggle { width: 24px; text-align: center; color: var(--muted); }
 table.leaderboard tr.row td.expand-toggle button {
   font: inherit; color: inherit; background: transparent; border: 0; padding: 0;
   cursor: pointer; width: 22px; height: 22px; line-height: 22px;
 }
+table.leaderboard tr.row td.expand-toggle button:hover { color: var(--accent); }
 table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); }
 
 /* === Expanded row: why a model scores what it scores ===
@@ -402,20 +416,69 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .detail { padding: 4px 2px 2px; }
 .detail h5 {
   margin: 0 0 8px; color: var(--text-strong);
-  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
 }
 .det-note { color: var(--muted); font-style: italic; margin: 6px 0 0; }
+
+/* --- Dashboard band: who the model is, the shape of its four scores, and the
+   scores themselves. Identity left, mini radar centre, scores right. --- */
+.det-band {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px 28px; align-items: center;
+  border: 1px solid var(--line); background: var(--bg);
+  padding: 14px 18px; margin-bottom: 20px;
+}
+.band-name {
+  font-size: 24px; line-height: 1.15; font-weight: 700;
+  letter-spacing: -0.005em; color: var(--text-strong);
+}
+.band-sub { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.band-vendor { color: var(--muted); }
+.band-rank {
+  border: 1px solid var(--line); padding: 0 6px;
+  color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+/* The summary grounds the numbers in words; it takes a full-width row of its
+   own so it never wraps ragged beside the radar or the scores. */
+.band-summary {
+  grid-column: 1 / -1; margin: 4px 0 0; padding-top: 10px;
+  border-top: 1px solid var(--line-soft); color: var(--muted);
+}
+.band-summary .ss { white-space: nowrap; }
+.band-radar .radar-mini { display: block; width: 92px; height: 92px; }
+.band-scores { display: grid; grid-template-columns: repeat(4, auto); gap: 20px; }
+.bs { min-width: 54px; }
+.bs.role-idea   { --role-color: var(--idea); }
+.bs.role-plan   { --role-color: var(--plan); }
+.bs.role-build  { --role-color: var(--build); }
+.bs.role-review { --role-color: var(--review); }
+.bs-label {
+  display: block; text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: 700; font-size: 0.8em; color: var(--role-color);
+}
+.bs-score {
+  display: block; font-size: 24px; line-height: 1.15;
+  font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text);
+}
+.bs-score[data-tier="high"] { color: var(--text-strong); }
+.bs-score[data-tier="low"] { color: var(--muted); }
+/* Provisional scores grey out and italicize, matching the leaderboard. */
+.bs-score[data-status="provisional"] { color: var(--muted); font-style: italic; font-weight: 400; }
+.bs-rank {
+  display: block; color: var(--muted);
+  font-variant-numeric: tabular-nums; font-size: 0.88em; white-space: nowrap;
+}
 
 /* --- Top: one card per score --- */
 .det-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 14px 18px;
+  gap: 16px 20px;
 }
 
 .det-role {
   border: 1px solid var(--line); background: var(--bg);
-  padding: 10px 12px 12px; min-width: 0;
+  padding: 12px 14px 14px; min-width: 0;
   border-left: 3px solid var(--role-color);
 }
 .det-role.role-idea   { --role-color: var(--idea); }
@@ -424,20 +487,24 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .det-role.role-review { --role-color: var(--review); }
 
 .dr-head {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 10px; align-items: baseline;
-  border-bottom: 1px solid var(--line-soft); padding-bottom: 6px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px; align-items: baseline;
+  border-bottom: 1px solid var(--line-soft); padding-bottom: 8px;
 }
 .dr-title {
   margin: 0; color: var(--role-color);
   text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: inherit;
 }
-.dr-score { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); }
-.dr-score[data-tier="high"] { color: var(--text-strong); }
-.dr-score[data-tier="low"] { color: var(--muted); }
 .dr-rank { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-.dr-evidence { margin: 8px 0 10px; color: var(--muted); line-height: 1.5; }
+/* Badge + meter + sentence as a flex row: the sentence wraps inside its own
+   column with a hanging indent, so a two-line evidence note still scans as
+   one unit instead of breaking ragged under the badge. */
+.dr-evidence {
+  margin: 10px 0 12px; color: var(--muted); line-height: 1.5;
+  display: flex; gap: 2px 8px; align-items: baseline;
+}
+.dr-evidence .dr-ev-text { flex: 1 1 auto; min-width: 0; }
 .dr-evidence b { color: var(--text); font-weight: 700; }
 .dr-badge {
   display: inline-block; border: 1px solid var(--line);
@@ -459,9 +526,9 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .dr-inputs { list-style: none; padding: 0; margin: 0; }
 .dr-inputs li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 30px 50px 38px 36px;
-  gap: 7px; align-items: center;
-  padding: 3px 0; border-bottom: 1px solid var(--line-soft);
+  grid-template-columns: minmax(0, 1fr) 32px 56px 44px 40px;
+  gap: 8px; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--line-soft);
 }
 .dr-inputs li:last-child { border-bottom: 0; }
 .di-name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -488,7 +555,7 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .di-minor .di-name { color: var(--muted); font-style: italic; }
 
 /* --- The evidence behind the panel above --- */
-.det-results { margin: 18px 0 0; border: 1px solid var(--line); }
+.det-results { margin: 20px 0 0; border: 1px solid var(--line); }
 .det-results > summary {
   cursor: pointer; padding: 8px 12px; font-weight: 700; color: var(--text-strong);
   list-style: none;
@@ -510,18 +577,18 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .dot.role-build  { --role-color: var(--build); }
 .dot.role-review { --role-color: var(--review); }
 
-.det-area { padding: 12px 12px 14px; border-top: 1px solid var(--line-soft); }
+.det-area { padding: 14px 14px 16px; border-top: 1px solid var(--line-soft); }
 /* Left-packed rather than stretched across the panel: a row a reader's eye can
    cross in one movement beats one that spans the full width of a 1200px page. */
 .res-grid {
   display: grid;
   grid-template-columns: minmax(200px, 36ch) 46px 92px 120px 44px 84px;
   justify-content: start;
-  gap: 5px 14px; align-items: center;
+  gap: 6px 14px; align-items: center;
 }
 .res-head {
   color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
-  font-weight: 700; font-size: 0.72em; align-self: end;
+  font-weight: 700; font-size: 0.8em; align-self: end;
   padding-bottom: 4px; border-bottom: 1px solid var(--line-soft);
   white-space: nowrap; overflow: hidden;
 }
@@ -538,19 +605,26 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 .res-rank { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .res-of { color: var(--muted); opacity: 0.7; }
 
-/* --- Deliberately powerless: speed, price, context --- */
-.det-ref { margin-top: 18px; }
-.ref-row { display: flex; flex-wrap: wrap; gap: 8px; }
+/* --- Deliberately powerless: speed, price, context. A proper stat strip:
+   even columns, muted uppercase labels above display-step values. --- */
+.det-ref { margin-top: 20px; }
+.ref-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .ref-stat {
-  flex: 1 1 150px; border: 1px solid var(--line); background: var(--bg);
-  padding: 7px 10px; display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid var(--line); background: var(--bg);
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0;
 }
-.ref-name { color: var(--muted); }
-.ref-value { color: var(--text-strong); font-weight: 700; font-variant-numeric: tabular-nums; }
+.ref-name {
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.05em; font-size: 0.8em;
+}
+.ref-value {
+  color: var(--text-strong); font-weight: 700;
+  font-size: 24px; line-height: 1.15; font-variant-numeric: tabular-nums;
+}
 
 /* --- Provenance --- */
 .det-prov {
-  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px;
 }
 .prov-block { min-width: 0; }
@@ -564,17 +638,30 @@ table.leaderboard tr.row.expanded td.expand-toggle { color: var(--text-strong); 
 /* About page */
 .doc { max-width: 760px; }
 .doc .about-tagline {
-  font-size: 18px; color: var(--text-strong);
-  margin: 6px 0 22px; letter-spacing: 0.005em;
+  font-size: 24px; line-height: 1.3; color: var(--text-strong);
+  margin: 4px 0 28px; letter-spacing: -0.005em;
 }
-.doc h2 { color: var(--text-strong); margin-top: 28px; }
-.doc h3 { color: var(--text-strong); }
+/* Section headings follow the site's label system — uppercase, letter-spaced —
+   and each opens with a rule so the long page reads as deliberate sections. */
+.doc h2 {
+  color: var(--text-strong); text-transform: uppercase; letter-spacing: 0.06em;
+  margin: 40px 0 10px; padding-top: 20px; border-top: 1px solid var(--line-soft);
+}
+.doc h3 { color: var(--text-strong); margin: 18px 0 6px; }
 .doc p, .doc li { line-height: 1.65; }
 .doc pre { background: var(--panel); padding: 12px 14px; overflow-x: auto; }
 .doc table { width: 100%; border-collapse: collapse; margin: 14px 0; }
 .doc th, .doc td { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; }
+.doc th {
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
+  font-weight: 700; border-bottom: 1px solid var(--line);
+}
+/* Sources table: the three rightmost columns are counts. */
+.doc th:nth-child(n+3), .doc td:nth-child(n+3) {
+  text-align: right; font-variant-numeric: tabular-nums;
+}
 
-footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); }
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); }
 
 /* === Tablet (560-960px): radar column narrows === */
 @media (max-width: 960px) {
@@ -584,6 +671,10 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
   /* Two score cards side by side no longer leave room for an input's name, its
      share, a bar, a score, and a rank — so each card takes the full width. */
   .det-top { grid-template-columns: minmax(0, 1fr); }
+  /* The band stacks too: identity + radar on one row, the four scores across
+     the full width beneath. */
+  .det-band { grid-template-columns: minmax(0, 1fr) auto; }
+  .band-scores { grid-column: 1 / -1; grid-template-columns: repeat(4, auto); }
   .res-grid { grid-template-columns: minmax(150px, 1.4fr) 46px 88px minmax(50px, 1fr) 44px 76px; }
 }
 
@@ -618,6 +709,7 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
     flex-direction: column; gap: 2px;
     font-size: 21px;
   }
+  .doc .about-tagline { font-size: 21px; }
   .hero-body {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -653,9 +745,15 @@ footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
   }
   .det-top { gap: 10px; }
 
+  /* Band stacks: identity + radar on the first row, scores 2×2 beneath. */
+  .det-band { grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; padding: 12px 14px; }
+  .band-name { font-size: 21px; }
+  .band-scores { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+  .ref-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   /* Every score bar goes: at this width the name, its share, and the number it
      scored are all a phone reader can hold at once. */
-  .dr-inputs li { grid-template-columns: minmax(0, 1fr) 34px 40px 44px; }
+  .dr-inputs li { grid-template-columns: minmax(0, 1fr) 32px 44px 40px; }
   .di-bar { display: none; }
   .di-none { grid-column: 3 / -1; }
   .res-grid { grid-template-columns: minmax(0, 1fr) 44px 74px 44px 50px; }

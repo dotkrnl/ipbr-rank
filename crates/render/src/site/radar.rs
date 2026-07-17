@@ -85,6 +85,48 @@ pub fn render_radar(slices: &[RadarSlice<'_>], scales: RadarScales) -> String {
     svg
 }
 
+/// A compact single-slice radar for the expanded row's dashboard band. Same
+/// axes and shared scales as the hero so every shape on the page is comparable,
+/// but no axis labels and only two tick rings — at ~92px the hero's full
+/// annotation would be noise.
+pub fn render_radar_mini(slice: &RadarSlice<'_>, scales: RadarScales) -> String {
+    let mut svg = String::new();
+    svg.push_str(
+        r#"<svg class="radar radar-mini" viewBox="-51 -51 102 102" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Role scores across Idea, Plan, Build, Review">"#,
+    );
+
+    for radius in [25.0_f64, 50.0] {
+        write!(svg, r#"<circle class="radar-grid" r="{radius:.1}"/>"#).unwrap();
+    }
+    for (x, y) in [(0.0, -50.0_f64), (50.0, 0.0), (0.0, 50.0), (-50.0, 0.0)] {
+        write!(
+            svg,
+            r#"<line class="radar-axis" x1="0" y1="0" x2="{x:.1}" y2="{y:.1}"/>"#
+        )
+        .unwrap();
+    }
+
+    let points = polygon_points(slice, scales);
+    let title = slice
+        .label
+        .map(|label| format!("<title>{}</title>", html_escape(label)))
+        .unwrap_or_default();
+    write!(
+        svg,
+        r#"<polygon class="radar-poly {cls}{provisional}" points="{points}">{title}</polygon>"#,
+        cls = slice.class,
+        provisional = if slice.provisional {
+            " provisional"
+        } else {
+            ""
+        },
+    )
+    .unwrap();
+
+    svg.push_str("</svg>");
+    svg
+}
+
 const RADAR_RADIUS: f64 = 50.0;
 
 /// Minimum span between an axis's min and max. Without this, an axis whose

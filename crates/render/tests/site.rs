@@ -691,11 +691,11 @@ fn provisional_models_remain_in_hero_rankings_with_marked_scores() {
     assert!(!index.contains(r#"<div class="role-head">[ review proxy ]</div>"#));
 }
 
-/// The hero is the page's only radar — the expansion explains a model in words
-/// and numbers instead. Each hero axis scales against the reference cohort, not
-/// against the model's own four scores.
+/// Radars on the page: exactly one hero, plus one mini radar in each expanded
+/// row's dashboard band — all drawn against the same top-10 cohort frame, so
+/// every shape on the page is comparable.
 #[test]
-fn the_hero_holds_the_only_radar_and_scales_each_axis_against_the_cohort() {
+fn every_radar_scales_each_axis_against_the_cohort() {
     let mut scoreboard = sample_scoreboard();
     // All three fixture models tie at 80/81/82/83 by default. Give Claude a
     // standout Build score so its axis has real spread across the top-10
@@ -709,24 +709,27 @@ fn the_hero_holds_the_only_radar_and_scales_each_axis_against_the_cohort() {
 
     let index = read(site_dir.join("index.html"));
     assert_eq!(
-        index.matches("class=\"radar ").count(),
+        index.matches(r#"class="radar radar-hero""#).count(),
         1,
-        "the hero radar should be the only radar on the page"
+        "exactly one hero radar"
     );
-    let panels: String = index
-        .split(r#"<div class="detail">"#)
-        .skip(1)
-        .map(|panel| panel.split("</td></tr>").next().unwrap_or_default())
-        .collect();
-    assert!(!panels.contains("<svg"), "the expansion carries no radar");
+    assert_eq!(
+        index.matches(r#"class="radar radar-mini""#).count(),
+        scoreboard.models.len(),
+        "one mini radar per expanded row"
+    );
 
-    // Claude's Build (90) sits 40% of the way through the cohort's floored
+    // Claude's Build (90) plots at radius 40 of 50 through the cohort's floored
     // (82, 92) range; Idea/Plan/Review are tied across the whole cohort, so
     // those axes floor to a neutral window whose min equals every model's own
-    // score — 0% on each.
-    assert!(
-        index.contains(r#"points="0,-0.0 0.0,0 0,40.0 -0.0,0""#),
-        "Build axis must scale independently against the top-10 cohort range"
+    // score — 0% on each. Hero and mini radar share the frame, so Claude's
+    // polygon appears twice, once in each.
+    assert_eq!(
+        index
+            .matches(r#"points="0,-0.0 0.0,0 0,40.0 -0.0,0""#)
+            .count(),
+        2,
+        "hero and mini radar must scale the Build axis identically"
     );
 }
 

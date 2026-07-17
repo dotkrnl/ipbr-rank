@@ -21,7 +21,7 @@ pub fn render_index(scoreboard: &Scoreboard) -> String {
         r#"<p class="provisional-note"><span aria-hidden="true">*</span> provisional — direct-evidence requirements not met</p>"#,
     );
 
-    body.push_str(&render_leaderboard(scoreboard, &ranks));
+    body.push_str(&render_leaderboard(scoreboard, &ranks, radar_scales));
 
     write!(
         body,
@@ -114,7 +114,7 @@ fn render_leaders(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
     html
 }
 
-fn composite(model: &ipbr_core::ModelRecord) -> f64 {
+pub(super) fn composite(model: &ipbr_core::ModelRecord) -> f64 {
     let s = &model.scores;
     (s.i_raw + s.p_raw + s.b_raw + s.r) / 4.0
 }
@@ -123,8 +123,9 @@ const RADAR_REFERENCE_COHORT: usize = 10;
 
 /// Fixes each axis's [min, max] to the spread of the top-10 balanced-score
 /// models, so the hero's three shapes share one reference frame instead of each
-/// self-normalizing to its own.
-fn top10_axis_scales(scoreboard: &Scoreboard) -> RadarScales {
+/// self-normalizing to its own. The expanded row's mini radar draws against the
+/// same frame, keeping every radar on the page comparable.
+pub(super) fn top10_axis_scales(scoreboard: &Scoreboard) -> RadarScales {
     let top10: Vec<&ipbr_core::ModelRecord> =
         dense_ranked_models(scoreboard.models.iter().collect(), composite)
             .into_iter()
@@ -396,7 +397,11 @@ fn render_rank_delta(delta: Option<i64>) -> String {
     )
 }
 
-fn render_leaderboard(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
+fn render_leaderboard(
+    scoreboard: &Scoreboard,
+    ranks: &RoleRanks,
+    radar_scales: RadarScales,
+) -> String {
     let mut models: Vec<&ipbr_core::ModelRecord> = scoreboard.models.iter().collect();
     // Default order: build score. Individual role columns remain
     // independently sortable.
@@ -429,10 +434,10 @@ fn render_leaderboard(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
     html.push_str(r#"</div></div><div class="lb-scroll"><table class="leaderboard" id="leaderboard-table" data-active-col="b"><thead><tr>"#);
     html.push_str(r#"<th scope="col" class="rank" aria-label="rank">#</th>"#);
     html.push_str(
-        r#"<th scope="col" data-sort="model" aria-sort="none"><button type="button" class="sort" aria-label="sort by model descending">model</button></th>"#,
+        r#"<th scope="col" data-sort="vendor" aria-sort="none"><button type="button" class="sort" aria-label="sort by vendor descending">vendor</button></th>"#,
     );
     html.push_str(
-        r#"<th scope="col" data-sort="vendor" aria-sort="none"><button type="button" class="sort" aria-label="sort by vendor descending">vendor</button></th>"#,
+        r#"<th scope="col" data-sort="model" aria-sort="none"><button type="button" class="sort" aria-label="sort by model descending">model</button></th>"#,
     );
 
     // Score columns — build is the default sort.
@@ -457,6 +462,7 @@ fn render_leaderboard(scoreboard: &Scoreboard, ranks: &RoleRanks) -> String {
             model,
             bar_scales,
             ranks,
+            radar_scales,
             position + 1,
         ));
     }
@@ -470,6 +476,7 @@ fn render_row(
     model: &ipbr_core::ModelRecord,
     bar_scales: [(f64, f64); 4],
     ranks: &RoleRanks,
+    radar_scales: RadarScales,
     position: usize,
 ) -> String {
     let mut html = String::new();
@@ -480,7 +487,7 @@ fn render_row(
 
     write!(
         html,
-        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="rank" data-rank>{position}</td><td class="model-name">{name}</td><td>{vendor}</td>"#,
+        r#"<tr class="row" id="{id}" data-vendor="{vendor}" data-sort-model="{name_lc}" data-sort-vendor="{vendor}" data-sort-i="{i:.4}" data-sort-p="{p:.4}" data-sort-b="{b:.4}" data-sort-r="{r:.4}"><td class="rank" data-rank>{position}</td><td class="vendor">{vendor}</td><td class="model-name">{name}</td>"#,
         name_lc = name.to_lowercase(),
         i = s.i_raw,
         p = s.p_raw,
@@ -519,7 +526,7 @@ fn render_row(
     write!(
         html,
         r#"<tr class="expand" id="{details_id}" data-row="{id}"><td colspan="8">{detail}</td></tr>"#,
-        detail = render_detail(scoreboard, model),
+        detail = render_detail(scoreboard, model, radar_scales),
     )
     .unwrap();
 
