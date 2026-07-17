@@ -188,6 +188,26 @@ fn select_openrouter_identity(
     alias_records: &[ModelRecord],
     alias_index: &AliasIndex<'_>,
 ) -> Option<OpenRouterIdentity> {
+    // Versioned canonical slugs carry a trailing release date
+    // (`openai/gpt-5.6-luna-20260709`) that the alias index does not know and
+    // the fuzzy matcher's digit guard refuses to strip. Left dated, one family
+    // member's slug prefix-matches the base-route alias of its sibling
+    // (`openai/gpt-5.6`), and the row — price, context, everything — lands on
+    // the wrong model. Undating the slug up front lets each row resolve to its
+    // own endpoint. The strip is trusted only when the public ID names the
+    // same endpoint: upstream sometimes points a distinct variant (the vision
+    // `z-ai/glm-4.6v`) at a dated base-model slug, and undating there would
+    // merge the variant's row into the base model. Public IDs and display
+    // names keep the digit guard's full protection; only the canonical slug
+    // is undated.
+    let canonical_slug = canonical_slug.map(|slug| {
+        let undated = undated_canonical_slug(slug);
+        let same_endpoint = public_id.is_none_or(|id| {
+            compact_endpoint(id) == compact_endpoint(slug)
+                || compact_endpoint(id) == compact_endpoint(undated)
+        });
+        if same_endpoint { undated } else { slug }
+    });
     let validated_slug =
         canonical_slug.filter(|slug| public_id.is_none_or(|id| provider_prefixes_match(id, slug)));
     let preferred = validated_slug.or(public_id).or(display_name)?;
@@ -273,6 +293,32 @@ fn select_openrouter_identity(
         output_name: preferred.to_string(),
         vendor_hint,
     })
+}
+
+/// Strip a trailing `-YYYYMMDD` release date from a canonical slug
+/// (`openai/gpt-5.6-luna-20260709` → `openai/gpt-5.6-luna`). Only an exact
+/// 8-digit suffix is removed — shorter numeric tails (`kimi-k2.5-0127`) and
+/// dashed dates (`-2025-08-07`) are part of the name.
+fn undated_canonical_slug(slug: &str) -> &str {
+    let Some((stem, date)) = slug.rsplit_once('-') else {
+        return slug;
+    };
+    if date.len() == 8 && date.bytes().all(|b| b.is_ascii_digit()) {
+        stem
+    } else {
+        slug
+    }
+}
+
+/// Endpoint identity for the same-endpoint check above: two spellings agree
+/// when they normalize to the same alphanumeric key. (`openai/gpt-5.6-luna`
+/// and `openai/gpt-5.6-luna-20260709` differ; the former and the undated slug
+/// agree.)
+fn compact_endpoint(value: &str) -> String {
+    normalize_name(value)
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .collect()
 }
 
 fn provider_prefix(value: &str) -> Option<&str> {
@@ -481,5 +527,129 @@ mod tests {
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].model_name, "openai/gpt-5.5");
         assert_eq!(rows[0].vendor_hint.as_deref(), Some("openai"));
+    }
+
+    /// Mirrors the live 2026-07 cache: every GPT-5.6-family endpoint carries a
+    /// dated canonical slug. Before undating, each dated slug prefix-matched
+    /// the base-route alias `openai/gpt-5.6` (owned by Sol), so all three
+    /// rows min-merged into Sol — Sol showed Luna's $2.25 price and Luna and
+    /// Terra lost their whole OpenRouter rows.
+    #[test]
+    fn dated_canonical_slugs_resolve_to_their_own_family_member() {
+        let entry = |id: &str, slug: &str, ctx: u64, prompt: &str, completion: &str| {
+            json!({
+                "id": id,
+                "canonical_slug": slug,
+                "name": format!("OpenAI: {id}"),
+                "context_length": ctx,
+                "pricing": { "prompt": prompt, "completion": completion }
+            })
+        };
+        let payload = json!({ "data": [
+            entry("openai/gpt-5.6-sol", "openai/gpt-5.6-sol-20260709", 1050000, "0.000005", "0.00003"),
+            entry("openai/gpt-5.6-luna", "openai/gpt-5.6-luna-20260709", 262144, "0.000001", "0.000006"),
+            entry("openai/gpt-5.6-terra", "openai/gpt-5.6-terra-20260709", 524288, "0.0000025", "0.000015"),
+            // The separately named Pro endpoints must stay unmatched: their
+            // prices are lower, so a leak would visibly drag the base rows down.
+            entry("openai/gpt-5.6-sol-pro", "openai/gpt-5.6-sol-pro-20260709", 1050000, "0.0000001", "0.0000004"),
+            entry("openai/gpt-5.6-luna-pro", "openai/gpt-5.6-luna-pro-20260709", 262144, "0.00000005", "0.0000002"),
+            entry("openai/gpt-5.6-terra-pro", "openai/gpt-5.6-terra-pro-20260709", 524288, "0.00000008", "0.0000003"),
+        ]});
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        let expect = |model: &str, blended: f64, ctx: f64| {
+            let matching: Vec<_> = rows.iter().filter(|row| row.model_name == model).collect();
+            assert_eq!(matching.len(), 1, "expected exactly one row for {model}");
+            let row = matching[0];
+            let got = row
+                .fields
+                .get("BlendedCost")
+                .and_then(number_like)
+                .expect("BlendedCost should be present");
+            assert!(
+                (got - blended).abs() < 1e-9,
+                "{model} BlendedCost {got} != {blended}"
+            );
+            assert_eq!(
+                row.fields.get("ContextWindow").and_then(number_like),
+                Some(ctx),
+                "{model} should keep its own OpenRouter row"
+            );
+        };
+        expect("openai/gpt-5.6-sol", 11.25, 1050000.0);
+        expect("openai/gpt-5.6-luna", 2.25, 262144.0);
+        expect("openai/gpt-5.6-terra", 5.625, 524288.0);
+
+        for pro in [
+            "openai/gpt-5.6-sol-pro",
+            "openai/gpt-5.6-luna-pro",
+            "openai/gpt-5.6-terra-pro",
+        ] {
+            assert!(
+                rows.iter().any(|row| row.model_name == pro),
+                "{pro} should land in triage as a raw row, not merge into the base model"
+            );
+        }
+    }
+
+    /// The public ID can dispute the slug's date strip: `z-ai/glm-4.6v` is a
+    /// distinct vision model whose canonical slug is the dated base
+    /// `z-ai/glm-4.6-20251208`. Undating there would merge the vision row
+    /// (cheaper) into the text model — the strip only applies when the public
+    /// ID names the same endpoint.
+    #[test]
+    fn vision_variant_public_id_blocks_slug_undating() {
+        let payload = json!({ "data": [
+            {
+                "id": "z-ai/glm-4.6",
+                "canonical_slug": "z-ai/glm-4.6",
+                "name": "Z.ai: GLM 4.6",
+                "context_length": 202752,
+                "pricing": { "prompt": "0.0000005", "completion": "0.000002" }
+            },
+            {
+                "id": "z-ai/glm-4.6v",
+                "canonical_slug": "z-ai/glm-4.6-20251208",
+                "name": "Z.ai: GLM 4.6V",
+                "context_length": 131072,
+                "pricing": { "prompt": "0.0000004", "completion": "0.0000006" }
+            }
+        ]});
+
+        let rows = parse_rows(&payload).expect("payload should parse");
+        let text = rows
+            .iter()
+            .filter(|row| row.model_name == "z-ai/glm-4.6")
+            .collect::<Vec<_>>();
+        assert_eq!(text.len(), 1, "the vision row must not join glm-4.6");
+        let blended = text[0]
+            .fields
+            .get("BlendedCost")
+            .and_then(number_like)
+            .expect("BlendedCost should be present");
+        assert!((blended - 0.875).abs() < 1e-9, "blended={blended}");
+        assert!(
+            rows.iter()
+                .any(|row| row.model_name == "z-ai/glm-4.6-20251208"),
+            "the vision row stays a dated raw row for triage"
+        );
+    }
+
+    #[test]
+    fn undates_only_exact_8digit_release_dates() {
+        assert_eq!(
+            undated_canonical_slug("openai/gpt-5.6-luna-20260709"),
+            "openai/gpt-5.6-luna"
+        );
+        // Shorter numeric tails and dashed dates are part of the name.
+        assert_eq!(
+            undated_canonical_slug("moonshotai/kimi-k2.5-0127"),
+            "moonshotai/kimi-k2.5-0127"
+        );
+        assert_eq!(
+            undated_canonical_slug("openai/gpt-5-2025-08-07"),
+            "openai/gpt-5-2025-08-07"
+        );
+        assert_eq!(undated_canonical_slug("openai/gpt-5.5"), "openai/gpt-5.5");
     }
 }

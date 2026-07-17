@@ -126,9 +126,9 @@ n_rows_unmatched = 2
 
 [sources."openrouter"]
 status = "verified"
-n_rows_ingested = 317
+n_rows_ingested = 321
 n_rows_matched = 43
-n_rows_unmatched = 274
+n_rows_unmatched = 278
 
 [sources."overrides"]
 status = "verified"
