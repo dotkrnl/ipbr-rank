@@ -151,12 +151,28 @@ fn parse_rows(html: &str) -> Result<Vec<RawRow>, SourceError> {
         .collect())
 }
 
+/// Resolves the `"from:to" -> stats` map for an item. The current upstream
+/// payload nests ranges under per-language segments (`all`, `go`, `java`,
+/// `python`, `rust`, `typescript`); `all` is the cross-language aggregate the
+/// leaderboard headlines. Older payloads placed ranges flat under `rangeStats`
+/// directly, which we keep as a fallback so a partial upstream change still
+/// parses. Timestamps shifted from seconds to milliseconds in the same revision,
+/// but that is transparent here — `release` and the range keys share a unit, so
+/// the `from < release` contamination check is unaffected.
+fn range_map(item: &Value) -> Option<&serde_json::Map<String, Value>> {
+    let rs = item.get("rangeStats")?.as_object()?;
+    if let Some(all) = rs.get("all").and_then(Value::as_object) {
+        return Some(all);
+    }
+    Some(rs)
+}
+
 fn headline_stats(item: &Value) -> Option<(f64, Option<f64>)> {
     let release = item
         .get("release")?
         .get("timestamp")
         .and_then(Value::as_i64)?;
-    let ranges = item.get("rangeStats")?.as_object()?;
+    let ranges = range_map(item)?;
 
     // The page's selected `taskRangeTimestamp` may begin before the model was
     // released. The site flags such rows as potentially contaminated, but that
@@ -325,6 +341,44 @@ mod tests {
         });
 
         assert_eq!(headline_stats(&item), None);
+    }
+
+    /// Current upstream payload: `rangeStats` nests ranges under per-language
+    /// segments, `all` being the aggregate, and every timestamp is in
+    /// milliseconds. We must descend into `all`, ignore the per-language
+    /// segments, and still drop ranges that begin before release.
+    #[test]
+    fn descends_into_all_segment_of_nested_rangestats() {
+        let item = serde_json::json!({
+            "release": { "timestamp": 1744588800000i64 },
+            "taskRangeTimestamp": { "from": 1735689600000i64, "to": 1754006400000i64 },
+            "agentVersion": "tools",
+            "rangeStats": {
+                // Pre-release range (from < release) must be skipped even though
+                // it has a higher headline rate.
+                "1735689600000:1736899200000": { "resolvedRate": 99.0, "sem": 9.9 },
+                // First full post-release range.
+                "1744848000000:1748736000000": { "resolvedRate": 45.0, "sem": 0.5 },
+                // Later, wider post-release range — latest end wins.
+                "1744848000000:1754006400000": { "resolvedRate": 52.0, "sem": 0.4 },
+                // Per-language segments must not be read as ranges.
+                "python": { "1744848000000:1754006400000": { "resolvedRate": 12.0 } }
+            }
+        });
+
+        assert_eq!(headline_stats(&item), Some((52.0, Some(0.4))));
+    }
+
+    /// End-to-end check that a realistic nested HTML payload (as emitted today)
+    /// produces rows rather than the "no models with resolved rates" parse error.
+    #[test]
+    fn parses_current_nested_payload_shape() {
+        let html = r#"<html>streaming junk here \"items\":[{\"modelId\":\"opus__tools\",\"modelName\":\"Claude Opus 4.7\",\"release\":{\"timestamp\":1744588800000,\"date\":\"2025-04-14\"},\"taskRangeTimestamp\":{\"from\":1735689600000,\"to\":1754006400000},\"agentVersion\":\"tools\",\"rangeStats\":{\"all\":{\"1735689600000:1736899200000\":{\"resolvedRate\":99.0,\"sem\":9.9},\"1744848000000:1754006400000\":{\"resolvedRate\":57.5,\"sem\":0.4}}}}],\"otherKey\":\"...\"}</html>"#;
+        let rows = parse_rows(html).expect("nested payload should parse");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].model_name, "Claude Opus 4.7");
+        assert_eq!(rows[0].fields.get("SWERebench"), Some(&Value::from(57.5)));
+        assert_eq!(rows[0].fields.get("SWERebenchSEM"), Some(&Value::from(0.4)));
     }
 
     #[test]
