@@ -13,6 +13,27 @@ use crate::{
 
 const SOURCE_ID: &str = "artificial_analysis";
 const CACHE_KEY: &str = "artificial_analysis_llms";
+// TODO(aa-v2-retirement): this legacy `/api/v2/data/*` route is being retired
+// 2026-11-04. The documented replacement is the Free/Pro split under
+// `/api/v2/language/models`. We intentionally stay on the legacy route until a
+// Pro-tier key is available: the Pro route (`/api/v2/language/models`) preserves
+// the full evaluations payload, whereas Free (`/api/v2/language/models/free`)
+// carries only intelligence/coding/agentic indices and would silently drop ~11
+// scored AA metrics (GPQA, HLE, MMLUPro, AIME25, SciCode, IFBench,
+// LongContextRecall, Tau2Bench, TerminalBenchHard, LiveCodeBench, Math) plus
+// relocate speed/TTFT into a `performance.*` sub-object. With the current
+// Free-tier key the Pro route returns 403.
+//
+// Migration plan once a Pro key is in hand:
+//   1. Point `URL` at `https://artificialanalysis.ai/api/v2/language/models`.
+//   2. Envelope parsing is already `data[]`-agnostic (siblings like
+//      `tier`/`pagination` are ignored), so no change there.
+//   3. Add `performance.median_output_tokens_per_second` and
+//      `performance.median_time_to_first_token_seconds` to the speed/TTFT
+//      `number_at_paths` fallback lists.
+//   4. If Pro is paginated like Free (`pagination.total_pages`), follow pages.
+//   5. Refresh `data/fixtures/artificial_analysis_llms.json` from the new route
+//      and regenerate the golden scoreboard.
 const URL: &str = "https://artificialanalysis.ai/api/v2/data/llms/models";
 
 pub(crate) fn automatic_fallback_note(label: &str) -> String {
