@@ -261,24 +261,27 @@ async fn fetch_evaluation(
     opts: FetchOptions<'_>,
     config: EvaluationConfig,
 ) -> Result<Vec<RawRow>, SourceError> {
-    let html = if use_cached_html(opts, config.cache_key, CACHE_TTL) {
+    if use_cached_html(opts, config.cache_key, CACHE_TTL) {
         let Some(dir) = opts.cache_dir else {
             return Err(SourceError::CacheMiss(format!(
                 "{} requires --cache in --offline mode",
                 config.source_id
             )));
         };
-        read_cached_string(&cache_html_path(dir, config.cache_key))?
-    } else {
-        let html = http
-            .get_text(config.url, &[("User-Agent", "ipbr-rank")])
-            .await?;
-        if let Some(dir) = opts.cache_dir {
-            write_cache_html(dir, config.cache_key, &html)?;
-        }
-        html
-    };
-    parse_evaluation_rows(&html, config)
+        let html = read_cached_string(&cache_html_path(dir, config.cache_key))?;
+        return parse_evaluation_rows(&html, config);
+    }
+
+    let html = http
+        .get_text(config.url, &[("User-Agent", "ipbr-rank")])
+        .await?;
+    let rows = parse_evaluation_rows(&html, config)?;
+    if let Some(dir) = opts.cache_dir {
+        // Only replace the last known-good payload after the live response
+        // passes both the JSON-LD schema gate and full RSC coverage checks.
+        write_cache_html(dir, config.cache_key, &html)?;
+    }
+    Ok(rows)
 }
 
 #[derive(Debug)]
@@ -667,16 +670,23 @@ fn merge_rsc_rows(
     alias_index: &AliasIndex<'_>,
     pending: &mut BTreeMap<PendingKey, PendingRow>,
 ) -> Result<(), SourceError> {
-    const MODEL_OBJECT_ANCHOR: &str = r#"{\"additional_text\":"#;
+    // `additional_text` is present on every streamed model object, but AA does
+    // not guarantee object-key order. Find the discriminator wherever it
+    // appears, then balance backward to the containing object's opening brace.
+    const MODEL_OBJECT_ANCHOR: &str = r#"\"additional_text\":"#;
     let mut cursor = 0usize;
     let mut anchors = 0usize;
     let mut parsed_objects = 0usize;
     let mut useful_observations = 0usize;
     while let Some(relative) = html[cursor..].find(MODEL_OBJECT_ANCHOR) {
-        let start = cursor + relative;
+        let anchor = cursor + relative;
         anchors += 1;
+        let Some(start) = find_balanced_object_start(html, anchor) else {
+            cursor = anchor + MODEL_OBJECT_ANCHOR.len();
+            continue;
+        };
         let Some(end) = find_balanced_object_end(html, start) else {
-            cursor = start + MODEL_OBJECT_ANCHOR.len();
+            cursor = anchor + MODEL_OBJECT_ANCHOR.len();
             continue;
         };
         cursor = end + 1;
@@ -684,6 +694,12 @@ fn merge_rsc_rows(
         let Ok(item) = serde_json::from_str::<Value>(&decoded) else {
             continue;
         };
+        if !item
+            .as_object()
+            .is_some_and(|object| object.contains_key("additional_text"))
+        {
+            continue;
+        }
         parsed_objects += 1;
 
         let Some(label) = item.get("name").and_then(Value::as_str) else {
@@ -788,6 +804,43 @@ fn merge_rsc_rows(
         )));
     }
     Ok(())
+}
+
+fn find_balanced_object_start(html: &str, anchor: usize) -> Option<usize> {
+    let bytes = html.as_bytes();
+    if anchor > bytes.len() {
+        return None;
+    }
+
+    let mut depth = 0usize;
+    let mut in_string = false;
+    for index in (0..anchor).rev() {
+        let byte = bytes[index];
+        if byte == b'"' {
+            let backslashes = bytes[..index]
+                .iter()
+                .rev()
+                .take_while(|byte| **byte == b'\\')
+                .count();
+            // RSC embeds JSON inside a JavaScript string. JSON delimiters are
+            // encoded as \" (one slash modulo four), while a literal quote in
+            // JSON string content is encoded as \\\" (three modulo four).
+            if backslashes % 4 == 1 {
+                in_string = !in_string;
+            }
+            continue;
+        }
+        if in_string {
+            continue;
+        }
+        match byte {
+            b'}' => depth += 1,
+            b'{' if depth == 0 => return Some(index),
+            b'{' => depth -= 1,
+            _ => {}
+        }
+    }
+    None
 }
 
 fn find_balanced_object_end(html: &str, start: usize) -> Option<usize> {
@@ -959,6 +1012,27 @@ fn infer_vendor(label: &str) -> Option<&'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct StaticHtmlHttp(&'static str);
+
+    #[async_trait::async_trait]
+    impl Http for StaticHtmlHttp {
+        async fn get_json(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<Value, SourceError> {
+            panic!("evaluation sources should fetch HTML")
+        }
+
+        async fn get_text(
+            &self,
+            _url: &str,
+            _headers: &[(&str, &str)],
+        ) -> Result<String, SourceError> {
+            Ok(self.0.to_string())
+        }
+    }
 
     fn numeric(row: &RawRow, metric: &str) -> Option<f64> {
         row.fields.get(metric).and_then(number_like)
@@ -1248,6 +1322,55 @@ mod tests {
         let rows = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect("braces inside a string must not truncate the object");
         assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
+    }
+
+    #[test]
+    fn rsc_object_scanner_allows_reordered_and_nested_leading_fields() {
+        let html = r#"<script type="application/ld+json">{
+          "@type":"Dataset","name":"CritPt: Score","data":[{
+            "label":"GPT-5.5 (xhigh)","CritPt":0.20,"detailsUrl":"/models/gpt-5-5"
+          }]
+        }</script>
+        <script>self.__next_f.push([1,"{\"metadata\":{\"note\":\"literal } and { plus \\\"quote\\\"\"},\"aa_analyst_agent\":null,\"additional_text\":null,\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
+        let rows = parse_evaluation_rows(html, CRITPT_CONFIG)
+            .expect("model fields before the discriminator should parse");
+        assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
+    }
+
+    #[tokio::test]
+    async fn invalid_live_payload_does_not_replace_last_good_cache() {
+        let tmp = tempfile::tempdir().expect("tempdir");
+        let cached = include_str!("../../../../data/fixtures/aa_critpt.html");
+        write_cache_html(tmp.path(), CRITPT_CONFIG.cache_key, cached).expect("cache should write");
+        let cache_path = cache_html_path(tmp.path(), CRITPT_CONFIG.cache_key);
+        let status = std::process::Command::new("touch")
+            .args(["-t", "202001010000"])
+            .arg(&cache_path)
+            .status()
+            .expect("touch should run");
+        assert!(status.success(), "touch should mark fixture cache stale");
+
+        let invalid_live = r#"<script type="application/ld+json">{
+          "@type":"Dataset","name":"CritPt: Score","data":[{
+            "label":"GPT-5.5 (xhigh)","CritPt":0.25,"detailsUrl":"/models/gpt-5-5"
+          }]
+        }</script>"#;
+        let error = fetch_evaluation(
+            &StaticHtmlHttp(invalid_live),
+            FetchOptions {
+                cache_dir: Some(tmp.path()),
+                offline: false,
+            },
+            CRITPT_CONFIG,
+        )
+        .await
+        .expect_err("invalid live data must fail validation");
+
+        assert!(error.to_string().contains("missing required RSC"));
+        assert_eq!(
+            std::fs::read_to_string(cache_path).expect("cache should remain readable"),
+            cached
+        );
     }
 
     #[test]
