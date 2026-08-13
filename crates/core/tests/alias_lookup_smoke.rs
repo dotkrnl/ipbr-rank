@@ -219,6 +219,64 @@ fn lookup_2026_07_distinct_models() {
 }
 
 #[test]
+fn lookup_2026_08_models_and_deepseek_snapshots() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        (
+            "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+            Some("anthropic"),
+            "anthropic/claude-opus-5",
+        ),
+        (
+            "gemini-3-5-flash-lite",
+            Some("google"),
+            "google/gemini-3.5-flash-lite",
+        ),
+        (
+            "gemini-3-6-flash",
+            Some("google"),
+            "google/gemini-3.6-flash",
+        ),
+        ("thinkingmachines/Inkling", None, "thinkingmachines/inkling"),
+        ("qwen3-8-max", Some("alibaba"), "qwen/qwen3.8-max"),
+        ("muse-spark-1-2", Some("meta"), "meta/muse-spark-1.2"),
+        ("grok-4-6", Some("xai"), "xai/grok-4.6"),
+        (
+            "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+            Some("deepseek"),
+            "deepseek/deepseek-v4-flash-0731",
+        ),
+        (
+            "deepseek/deepseek-v4-pro-20260813",
+            Some("deepseek"),
+            "deepseek/deepseek-v4-pro-0813",
+        ),
+        (
+            "deepseek-v4-flash-0420",
+            Some("deepseek"),
+            "deepseek/deepseek-v4-flash",
+        ),
+        (
+            "deepseek-v4-pro-0424",
+            Some("deepseek"),
+            "deepseek/deepseek-v4-pro",
+        ),
+        ("qwen3-6-max", Some("alibaba"), "qwen/qwen3.6-max-preview"),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .lookup_exact(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
 fn lookup_2026_06_12_models() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
@@ -355,6 +413,9 @@ fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
         ("minimax-m2", Some("minimax")),
         ("glm-4.6v", Some("zai")),
         ("Kimi K2 Instruct", Some("moonshot")),
+        ("deepseek-v3-2-speciale", Some("deepseek")),
+        ("deepseek-v3-2-speciale", None),
+        ("thinkingmachines/inkling-small", Some("thinking-machines")),
     ];
     for &(input, vendor) in cases {
         let matched = idx
@@ -387,8 +448,6 @@ fn lifecycle_aliases_preserve_frozen_and_moving_identities() {
     assert_eq!(matched("grok-4-0709", Some("xai")), Some("xai/grok-4-0709"));
     assert_eq!(matched("grok-4-latest", Some("xai")), None);
     assert_eq!(matched("kimi-latest", Some("moonshot")), None);
-    assert_eq!(
-        matched("deepseek-reasoner", Some("deepseek")),
-        Some("deepseek/deepseek-v4-flash")
-    );
+    assert_eq!(matched("deepseek-reasoner", Some("deepseek")), None);
+    assert_eq!(matched("deepseek-chat", Some("deepseek")), None);
 }

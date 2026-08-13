@@ -432,10 +432,19 @@ fn stable_model_identity(
 ) -> StableModelIdentity {
     let slug = details_url.and_then(details_model_slug);
     let vendor = infer_vendor(label);
-    // The details URL is the stable upstream identity; display labels are
-    // mutable and only serve as a fallback when no model slug is available.
-    let catalog_index = slug
-        .and_then(|slug| alias_index.lookup_exact(slug, vendor))
+    // The details URL normally supplies the stable upstream identity. When AA
+    // reuses a slug for a newer dated snapshot, however, its exact dated label
+    // wins so the old and new products cannot contaminate each other.
+    let preferred = super::preferred_aa_model_identity(
+        slug,
+        Some(label),
+        None,
+        vendor,
+        alias_records,
+        alias_index,
+    );
+    let catalog_index = preferred
+        .and_then(|value| alias_index.lookup_exact(value, vendor))
         .or_else(|| alias_index.lookup_exact(label, vendor));
     if let Some(index) = catalog_index {
         let canonical = alias_records[index].canonical_id.clone();
@@ -1279,6 +1288,21 @@ mod tests {
         );
 
         assert_eq!(identity.output_name, "anthropic/claude-opus-4.8");
+        assert!(identity.catalog_match);
+    }
+
+    #[test]
+    fn exact_dated_label_overrides_a_reused_slug() {
+        let records = crate::embedded_alias_records();
+        let index = AliasIndex::build(&records);
+        let identity = stable_model_identity(
+            "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+            Some("/models/deepseek-v4-flash"),
+            &records,
+            &index,
+        );
+
+        assert_eq!(identity.output_name, "deepseek/deepseek-v4-flash-0731");
         assert!(identity.catalog_match);
     }
 

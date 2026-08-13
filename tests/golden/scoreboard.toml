@@ -54,9 +54,9 @@ n_rows_unmatched = 93
 
 [sources."artificial_analysis"]
 status = "verified"
-n_rows_ingested = 529
+n_rows_ingested = 530
 n_rows_matched = 86
-n_rows_unmatched = 443
+n_rows_unmatched = 444
 
 [sources."bfcl"]
 status = "verified"
@@ -78,9 +78,9 @@ n_rows_unmatched = 0
 
 [sources."eqbench_creative_writing"]
 status = "verified"
-n_rows_ingested = 106
+n_rows_ingested = 107
 n_rows_matched = 28
-n_rows_unmatched = 78
+n_rows_unmatched = 79
 
 [sources."eqbench_judgemark"]
 status = "verified"
@@ -2895,6 +2895,171 @@ metrics = ["AutomationBenchAA", "EnterpriseOpsGymAA", "LMArenaSearch", "SWEReben
 groups_shrunk = ["LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
+canonical_id = "anthropic/claude-opus-5"
+display_name = "claude-opus-5"
+vendor = "anthropic"
+thinking_effort = "best_available"
+aliases = ["Claude Opus 5 (Adaptive Reasoning, High Effort)", "Claude Opus 5 (Adaptive Reasoning, Low Effort)", "Claude Opus 5 (Adaptive Reasoning, Max Effort)", "Claude Opus 5 (Adaptive Reasoning, Medium Effort)", "Claude Opus 5 (Adaptive Reasoning, Xhigh Effort)", "Claude Opus 5 (High)", "Claude Opus 5 (Max)", "Claude Opus 5 Thinking", "Opus 5 (Claude Code) xHigh", "anthropic/claude-opus-5", "anthropic/claude-opus-5-20260723", "anthropic/claude-opus-5-fast", "anthropic/claude-opus-5-fast-20260723", "anthropic:claude-opus-5", "claude 5 opus", "claude opus 5", "claude-5-opus", "claude-opus-5", "claude-opus-5 (max)", "claude-opus-5 (xhigh)", "claude-opus-5-20260723", "claude-opus-5-fast", "claude-opus-5-high", "claude-opus-5-low", "claude-opus-5-medium", "claude-opus-5-xhigh", "opus 5"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
 canonical_id = "anthropic/claude-sonnet-4"
 display_name = "claude-sonnet-4"
 vendor = "anthropic"
@@ -4805,7 +4970,7 @@ canonical_id = "deepseek/deepseek-v4-flash"
 display_name = "deepseek-v4-flash"
 vendor = "deepseek"
 thinking_effort = "best_available"
-aliases = ["deepseek chat", "deepseek reasoner", "deepseek v4 flash", "deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash", "deepseek/deepseek-chat", "deepseek/deepseek-reasoner", "deepseek/deepseek-v4-flash"]
+aliases = ["DeepSeek V4 Flash (Non-reasoning)", "DeepSeek V4 Flash (Reasoning, High Effort)", "DeepSeek V4 Flash (Reasoning, Max Effort)", "deepseek v4 flash", "deepseek-v4-flash", "deepseek-v4-flash-0420", "deepseek-v4-flash-0420-high", "deepseek-v4-flash-20260423", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-20260423"]
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
@@ -5157,11 +5322,176 @@ metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2"
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
 
 [[models]]
+canonical_id = "deepseek/deepseek-v4-flash-0731"
+display_name = "deepseek-v4-flash-0731"
+vendor = "deepseek"
+thinking_effort = "best_available"
+aliases = ["DeepSeek V4 Flash 0731 (High)", "DeepSeek V4 Flash 0731 (Low)", "DeepSeek V4 Flash 0731 (Max)", "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)", "deepseek v4 flash 0731", "deepseek-ai/DeepSeek-V4-Flash-0731", "deepseek-v4-flash-0731", "deepseek-v4-flash-20260731", "deepseek/deepseek-v4-flash-0731", "deepseek/deepseek-v4-flash-20260731"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
 canonical_id = "deepseek/deepseek-v4-pro"
 display_name = "deepseek-v4-pro"
 vendor = "deepseek"
 thinking_effort = "best_available"
-aliases = ["deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-v4-pro", "deepseek-v4-pro", "deepseek-v4-pro-20260423", "deepseek-v4-pro-thinking", "deepseek/deepseek-v4-pro", "deepseek/deepseek-v4-pro-20260423"]
+aliases = ["DeepSeek V4 Pro (Non-reasoning)", "DeepSeek V4 Pro (Reasoning, High Effort)", "DeepSeek V4 Pro (Reasoning, Max Effort)", "deepseek v4 pro", "deepseek v4 pro thinking", "deepseek-ai/deepseek-v4-pro", "deepseek-v4-pro", "deepseek-v4-pro-0424", "deepseek-v4-pro-0424-high", "deepseek-v4-pro-0424-non-reasoning", "deepseek-v4-pro-20260423", "deepseek-v4-pro-thinking", "deepseek/deepseek-v4-pro", "deepseek/deepseek-v4-pro-20260423"]
 sources = ["artificial_analysis", "eqbench_creative_writing", "eqbench_judgemark", "lmarena", "openrouter", "overrides", "swerebench"]
 
 [models.scores]
@@ -5517,6 +5847,171 @@ provisional = false
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CritPt", "DeepSWE", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "HiLBench", "LMArenaDocument", "LMArenaSearch", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN"]
+
+[[models]]
+canonical_id = "deepseek/deepseek-v4-pro-0813"
+display_name = "deepseek-v4-pro-0813"
+vendor = "deepseek"
+thinking_effort = "best_available"
+aliases = ["DeepSeek V4 Pro 0813 (Reasoning, Max Effort)", "deepseek v4 pro 0813", "deepseek-ai/DeepSeek-V4-Pro-0813", "deepseek-v4-pro-0813", "deepseek-v4-pro-20260813", "deepseek/deepseek-v4-pro-0813", "deepseek/deepseek-v4-pro-20260813"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
 canonical_id = "google/gemini-2.5-flash"
@@ -8168,6 +8663,336 @@ metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "Automation
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
+canonical_id = "google/gemini-3.5-flash-lite"
+display_name = "gemini-3.5-flash-lite"
+vendor = "google"
+thinking_effort = "best_available"
+aliases = ["Gemini 3.5 Flash-Lite", "Gemini 3.5 Flash-Lite (High)", "Gemini 3.5 Flash-Lite (Low)", "Gemini 3.5 Flash-Lite (Medium)", "Gemini 3.5 Flash-Lite (Minimal)", "gemini 3.5 flash lite", "gemini flash lite 3.5", "gemini-3-5-flash-lite", "gemini-3-5-flash-lite-high", "gemini-3-5-flash-lite-low", "gemini-3-5-flash-lite-medium", "gemini-3-5-flash-lite-minimal", "gemini-3.5-flash-lite", "gemini-3.5-flash-lite-20260721", "gemini-3.5-flash-lite-high", "gemini-3.5-flash-lite-low", "gemini-3.5-flash-lite-medium", "gemini-3.5-flash-lite-minimal", "google/gemini-3.5-flash-lite", "google/gemini-3.5-flash-lite-20260721"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
+canonical_id = "google/gemini-3.6-flash"
+display_name = "gemini-3.6-flash"
+vendor = "google"
+thinking_effort = "best_available"
+aliases = ["Gemini 3.6 Flash", "Gemini 3.6 Flash (High)", "Gemini 3.6 Flash (Low)", "Gemini 3.6 Flash (Medium)", "Gemini 3.6 Flash (Minimal)", "gemini 3.6 flash", "gemini flash 3.6", "gemini-3-6-flash", "gemini-3-6-flash-high", "gemini-3-6-flash-low", "gemini-3-6-flash-medium", "gemini-3-6-flash-minimal", "gemini-3.6-flash", "gemini-3.6-flash-20260721", "gemini-3.6-flash-high", "gemini-3.6-flash-low", "gemini-3.6-flash-medium", "gemini-3.6-flash-minimal", "google/gemini-3.6-flash", "google/gemini-3.6-flash-20260721"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
 canonical_id = "meta/muse-spark"
 display_name = "muse-spark"
 vendor = "meta"
@@ -8446,6 +9271,171 @@ display_name = "muse-spark-1.1"
 vendor = "meta"
 thinking_effort = "best_available"
 aliases = ["Meta Muse Spark 1.1", "Muse Spark 1.1 (Mini-SWE-Agent) xHigh", "Muse Spark 1.1 (xhigh)", "meta/muse-spark-1.1", "muse spark 1.1", "muse-spark-1-1", "muse-spark-1.1"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
+canonical_id = "meta/muse-spark-1.2"
+display_name = "muse-spark-1.2"
+vendor = "meta"
+thinking_effort = "best_available"
+aliases = ["Meta Muse Spark 1.2", "Muse Spark 1.2 (xhigh)", "meta/muse-spark-1.2", "meta/muse-spark-1.2-20260805", "muse spark 1.2", "muse-spark-1-2", "muse-spark-1.2", "muse-spark-1.2-20260805"]
 sources = []
 
 [models.scores]
@@ -14734,7 +15724,7 @@ canonical_id = "qwen/qwen3.6-max-preview"
 display_name = "qwen3.6-max-preview"
 vendor = "alibaba"
 thinking_effort = "best_available"
-aliases = ["Qwen3.6-Max-Preview", "alibaba/qwen3.6-max-preview", "qwen 3.6 max preview", "qwen/qwen3.6-max-preview", "qwen3-6-max-preview", "qwen3-6-max-preview-20260420", "qwen3.6 max preview", "qwen3.6-max-preview", "qwen3.6-max-preview-20260420"]
+aliases = ["Qwen3.6-Max-Preview", "alibaba/qwen3.6-max-preview", "qwen 3.6 max preview", "qwen/qwen3.6-max-preview", "qwen3-6-max", "qwen3-6-max-preview", "qwen3-6-max-preview-20260420", "qwen3.6 max", "qwen3.6 max preview", "qwen3.6-max", "qwen3.6-max-preview", "qwen3.6-max-preview-20260420"]
 sources = ["artificial_analysis", "eqbench_judgemark", "lmarena", "openrouter", "overrides"]
 
 [models.scores]
@@ -15926,6 +16916,336 @@ metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2"
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]
+canonical_id = "qwen/qwen3.8-max"
+display_name = "qwen3.8-max"
+vendor = "alibaba"
+thinking_effort = "best_available"
+aliases = ["Qwen3.8 Max", "Qwen3.8-Max", "alibaba/qwen3.8-max", "qwen 3.8 max", "qwen/qwen3.8-max", "qwen/qwen3.8-max-20260803", "qwen3-8-max", "qwen3.8 max", "qwen3.8-max", "qwen3.8-max-20260803"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
+canonical_id = "thinkingmachines/inkling"
+display_name = "inkling"
+vendor = "thinking-machines"
+thinking_effort = "best_available"
+aliases = ["Inkling (xHigh)", "Inkling (xhigh)", "Thinking Machines Inkling", "inkling", "inkling-xhigh", "thinking-machines/inkling", "thinkingmachines/Inkling", "thinkingmachines/inkling", "thinkingmachines/inkling-20260715"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
 canonical_id = "xai/grok-4-0709"
 display_name = "grok-4-0709"
 vendor = "xai"
@@ -17077,6 +18397,171 @@ provisional = true
 
 [models.missing]
 metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWERebench", "SciCode", "Tau3Banking"]
+groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
+
+[[models]]
+canonical_id = "xai/grok-4.6"
+display_name = "grok-4.6"
+vendor = "xai"
+thinking_effort = "best_available"
+aliases = ["Grok 4.6 (high)", "grok 4.6", "grok-4-6", "grok-4-6-high", "grok-4.6", "grok-4.6-20260810", "grok-4.6-high", "x-ai/grok-4.6", "x-ai/grok-4.6-20260810", "xai/grok-4.6"]
+sources = []
+
+[models.scores]
+i_raw = 50.000000
+p_raw = 50.000000
+b_raw = 50.000000
+r = 50.000000
+i_status = "provisional"
+p_status = "provisional"
+b_status = "provisional"
+r_status = "provisional"
+balanced_status = "provisional"
+
+[models.groups]
+BUILD = 50.000000
+CODE_REVIEW_DIRECT = 50.000000
+CRE = 50.000000
+GEN = 50.000000
+LM_ARENA_REVIEW_PROXY = 50.000000
+OPS_long = 50.000000
+OPS_precision = 50.000000
+OPS_review = 50.000000
+PLAN = 50.000000
+REVIEW_DIRECT = 50.000000
+
+[models.metrics]
+
+[models.raw_metrics]
+
+[models.evidence.groups."BUILD"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CODE_REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."CRE"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."GEN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."LM_ARENA_REVIEW_PROXY"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_long"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_precision"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."OPS_review"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."PLAN"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.groups."REVIEW_DIRECT"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+
+[models.evidence.roles."B_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."I_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."P_raw"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.evidence.roles."R"]
+direct = 0.000000
+missing = 1.000000
+effective = 0.000000
+family_count = 0
+direct_families = []
+core_direct = 0.000000
+core_family_count = 0
+core_direct_families = []
+historical_family_count = 0
+historical_direct_families = []
+qualification_path = "unqualified"
+provisional = true
+
+[models.missing]
+metrics = ["AAOmniscienceAccuracy", "AAOmniscienceNonHallucination", "ARC_AGI_2", "AutomationBenchAA", "ContextArenaMRCR128k", "CopilotArenaOrLMArenaCode", "CritPt", "DeepSWE", "EQBenchCreativeWriting", "EnterpriseOpsGymAA", "FactoryCodeReviewF1", "GDPvalAA2", "GPQA", "HLE", "HiLBench", "LMArenaCreative", "LMArenaDocument", "LMArenaSearch", "LMArenaText", "LongContextRecall", "MCPAtlas", "SWEAtlasQnA", "SWEAtlasRefactoring", "SWEAtlasTestWriting", "SWEBenchMultilingual", "SWEBenchPro", "SWERebench", "SciCode", "Tau3Banking", "TerminalBench21Composite"]
 groups_shrunk = ["BUILD", "CODE_REVIEW_DIRECT", "CRE", "GEN", "LM_ARENA_REVIEW_PROXY", "OPS_long", "OPS_precision", "OPS_review", "PLAN", "REVIEW_DIRECT"]
 
 [[models]]

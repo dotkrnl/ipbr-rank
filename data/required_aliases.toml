@@ -254,6 +254,32 @@ aliases = [
     "Opus 4.8 (Claude Code) xHigh",
 ]
 
+# Claude Opus 5 — 2026-07-23 successor. Keep the moving
+# `claude-opus-latest` route unmatched; map only explicit Opus 5 identities.
+[models."anthropic/claude-opus-5"]
+vendor = "anthropic"
+aliases = [
+    "opus 5", "claude opus 5", "claude-opus-5",
+    "claude 5 opus", "claude-5-opus",
+    "anthropic/claude-opus-5", "anthropic:claude-opus-5",
+    "claude-opus-5-20260723", "anthropic/claude-opus-5-20260723",
+    # OpenRouter accelerated endpoint; it serves the same model weights.
+    "claude-opus-5-fast", "anthropic/claude-opus-5-fast",
+    "anthropic/claude-opus-5-fast-20260723",
+    # Artificial Analysis effort rows.
+    "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Xhigh Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, High Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Medium Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Low Effort)",
+    "claude-opus-5-xhigh", "claude-opus-5-high",
+    "claude-opus-5-medium", "claude-opus-5-low",
+    # ARC, Context Arena, Scale, and Sonar spellings.
+    "Claude Opus 5 (Max)", "Claude Opus 5 (High)",
+    "claude-opus-5 (max)", "claude-opus-5 (xhigh)",
+    "Claude Opus 5 Thinking", "Opus 5 (Claude Code) xHigh",
+]
+
 [models."anthropic/claude-fable-5"]
 vendor = "anthropic"
 aliases = [
@@ -303,6 +329,41 @@ aliases = [
     "gemini flash 3.5", "gemini 3.5 flash",
     "gemini-3.5-flash", "gemini-3-5-flash",
     "google/gemini-3.5-flash",
+]
+
+# Gemini 3.5 Flash-Lite — a distinct lighter product from Gemini 3.5 Flash.
+[models."google/gemini-3.5-flash-lite"]
+vendor = "google"
+aliases = [
+    "gemini flash lite 3.5", "gemini 3.5 flash lite",
+    "gemini-3.5-flash-lite", "gemini-3-5-flash-lite",
+    "google/gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite-20260721",
+    "google/gemini-3.5-flash-lite-20260721",
+    "Gemini 3.5 Flash-Lite", "Gemini 3.5 Flash-Lite (High)",
+    "Gemini 3.5 Flash-Lite (Medium)", "Gemini 3.5 Flash-Lite (Low)",
+    "Gemini 3.5 Flash-Lite (Minimal)",
+    "gemini-3.5-flash-lite-high", "gemini-3-5-flash-lite-high",
+    "gemini-3.5-flash-lite-medium", "gemini-3-5-flash-lite-medium",
+    "gemini-3.5-flash-lite-low", "gemini-3-5-flash-lite-low",
+    "gemini-3.5-flash-lite-minimal", "gemini-3-5-flash-lite-minimal",
+]
+
+# Gemini 3.6 Flash — 2026-07-21 Flash successor.
+[models."google/gemini-3.6-flash"]
+vendor = "google"
+aliases = [
+    "gemini flash 3.6", "gemini 3.6 flash",
+    "gemini-3.6-flash", "gemini-3-6-flash",
+    "google/gemini-3.6-flash",
+    "gemini-3.6-flash-20260721", "google/gemini-3.6-flash-20260721",
+    "Gemini 3.6 Flash", "Gemini 3.6 Flash (High)",
+    "Gemini 3.6 Flash (Medium)", "Gemini 3.6 Flash (Low)",
+    "Gemini 3.6 Flash (Minimal)",
+    "gemini-3.6-flash-high", "gemini-3-6-flash-high",
+    "gemini-3.6-flash-medium", "gemini-3-6-flash-medium",
+    "gemini-3.6-flash-low", "gemini-3-6-flash-low",
+    "gemini-3.6-flash-minimal", "gemini-3-6-flash-minimal",
 ]
 
 # Gemini 3 Pro shipped only as Preview and was shut down on 2026-03-09.
@@ -472,17 +533,32 @@ aliases = [
     "gpt-5.2-search", "gpt-5.2-search-non-reasoning",
 ]
 
-# DeepSeek V4-Flash. The upstream DeepSeek API exposes `deepseek-chat`
-# (thinking off) and `deepseek-reasoner` (thinking on) as effort modes of the
-# same served V4-Flash product. Both are eligible under the max-effort policy;
-# explicit aliases keep the relationship source-auditable instead of relying
-# on fuzzy matching.
+# DeepSeek V4-Flash's original April 2026 release. Generic historical
+# leaderboard labels remain attached to this original product. The rolling
+# `deepseek-chat` and `deepseek-reasoner` routes are intentionally unmatched.
 [models."deepseek/deepseek-v4-flash"]
 vendor = "deepseek"
 aliases = [
-    "deepseek-chat", "deepseek chat", "deepseek/deepseek-chat",
-    "deepseek-reasoner", "deepseek reasoner", "deepseek/deepseek-reasoner",
     "deepseek-v4-flash", "deepseek v4 flash", "deepseek/deepseek-v4-flash",
+    "deepseek-v4-flash-0420", "deepseek-v4-flash-0420-high",
+    "deepseek-v4-flash-20260423", "deepseek/deepseek-v4-flash-20260423",
+    "DeepSeek V4 Flash (Reasoning, Max Effort)",
+    "DeepSeek V4 Flash (Reasoning, High Effort)",
+    "DeepSeek V4 Flash (Non-reasoning)",
+]
+
+# DeepSeek V4 Flash 0731 is a distinct July snapshot. Artificial Analysis
+# reuses the bare product slug, so source parsers use its dated display label.
+[models."deepseek/deepseek-v4-flash-0731"]
+vendor = "deepseek"
+aliases = [
+    "deepseek-v4-flash-0731", "deepseek v4 flash 0731",
+    "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-flash-20260731", "deepseek/deepseek-v4-flash-20260731",
+    "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+    "DeepSeek V4 Flash 0731 (Max)", "DeepSeek V4 Flash 0731 (High)",
+    "DeepSeek V4 Flash 0731 (Low)",
 ]
 
 [models."deepseek/deepseek-v3.2"]
@@ -508,6 +584,23 @@ aliases = [
     "deepseek-v4-pro-thinking", "deepseek v4 pro thinking",
     "deepseek-v4-pro-20260423", "deepseek/deepseek-v4-pro-20260423",
     "deepseek-ai/deepseek-v4-pro",
+    "deepseek-v4-pro-0424", "deepseek-v4-pro-0424-high",
+    "deepseek-v4-pro-0424-non-reasoning",
+    "DeepSeek V4 Pro (Reasoning, Max Effort)",
+    "DeepSeek V4 Pro (Reasoning, High Effort)",
+    "DeepSeek V4 Pro (Non-reasoning)",
+]
+
+# DeepSeek V4 Pro 0813 is a distinct August snapshot. As with Flash 0731,
+# Artificial Analysis identifies it with a dated label over a reused slug.
+[models."deepseek/deepseek-v4-pro-0813"]
+vendor = "deepseek"
+aliases = [
+    "deepseek-v4-pro-0813", "deepseek v4 pro 0813",
+    "deepseek/deepseek-v4-pro-0813",
+    "deepseek-v4-pro-20260813", "deepseek/deepseek-v4-pro-20260813",
+    "deepseek-ai/DeepSeek-V4-Pro-0813",
+    "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
 ]
 
 # Frozen 2025-07-09 Grok 4 build. xAI retired `grok-4-0709` on 2026-05-15
@@ -541,6 +634,16 @@ aliases = [
     "grok-4.5", "grok 4.5", "grok-4-5",
     "x-ai/grok-4.5", "xai/grok-4.5", "x-ai/grok-4.5-20260708",
     "Grok 4.5 (high)", "grok-4-5-high",
+]
+
+# Grok 4.6 — 2026-08-10 successor, distinct from Grok 4.5 and 4.20.
+[models."xai/grok-4.6"]
+vendor = "xai"
+aliases = [
+    "grok-4.6", "grok 4.6", "grok-4-6",
+    "x-ai/grok-4.6", "xai/grok-4.6",
+    "Grok 4.6 (high)", "grok-4-6-high", "grok-4.6-high",
+    "grok-4.6-20260810", "x-ai/grok-4.6-20260810",
 ]
 
 [models."xai/grok-4.20"]
@@ -720,6 +823,9 @@ aliases = [
 vendor = "alibaba"
 aliases = [
     "qwen3.6-max-preview", "qwen3.6 max preview", "qwen3-6-max-preview",
+    # AA's bare slug currently displays "Qwen3.6 Max Preview" and carries
+    # the same 2026-04-20 release identity.
+    "qwen3.6-max", "qwen3.6 max", "qwen3-6-max",
     "qwen 3.6 max preview",
     "qwen/qwen3.6-max-preview", "alibaba/qwen3.6-max-preview",
     "Qwen3.6-Max-Preview", "qwen3.6-max-preview-20260420",
@@ -756,6 +862,17 @@ aliases = [
     "Qwen3.7 Max", "Qwen3.7-Max",
 ]
 
+# Qwen3.8 Max — August 2026 successor to Qwen3.7 Max.
+[models."qwen/qwen3.8-max"]
+vendor = "alibaba"
+aliases = [
+    "qwen3.8-max", "qwen3.8 max", "qwen3-8-max",
+    "qwen 3.8 max",
+    "qwen/qwen3.8-max", "alibaba/qwen3.8-max",
+    "Qwen3.8 Max", "Qwen3.8-Max",
+    "qwen3.8-max-20260803", "qwen/qwen3.8-max-20260803",
+]
+
 [models."meta/muse-spark"]
 vendor = "meta"
 aliases = [
@@ -772,4 +889,25 @@ aliases = [
     "meta/muse-spark-1.1", "Meta Muse Spark 1.1",
     "Muse Spark 1.1 (xhigh)",
     "Muse Spark 1.1 (Mini-SWE-Agent) xHigh",
+]
+
+# Muse Spark 1.2 — August 2026 successor; keep it separate from 1.1.
+[models."meta/muse-spark-1.2"]
+vendor = "meta"
+aliases = [
+    "muse-spark-1.2", "muse spark 1.2", "muse-spark-1-2",
+    "meta/muse-spark-1.2", "Meta Muse Spark 1.2",
+    "Muse Spark 1.2 (xhigh)",
+    "muse-spark-1.2-20260805", "meta/muse-spark-1.2-20260805",
+]
+
+# Inkling — Thinking Machines' flagship. Inkling Small remains a distinct,
+# deliberately unmatched product.
+[models."thinkingmachines/inkling"]
+vendor = "thinking-machines"
+aliases = [
+    "inkling", "Thinking Machines Inkling",
+    "thinkingmachines/inkling", "thinking-machines/inkling",
+    "thinkingmachines/Inkling", "thinkingmachines/inkling-20260715",
+    "Inkling (xhigh)", "Inkling (xHigh)", "inkling-xhigh",
 ]

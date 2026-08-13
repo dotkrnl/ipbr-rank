@@ -497,10 +497,17 @@ mod tests {
                     == Some("deepseek/deepseek-chat-v3")
             })
             .expect("historical V3 row should remain visible");
-        assert_eq!(v3.model_name, "DeepSeek: DeepSeek V3");
+        assert_eq!(v3.model_name, "deepseek/deepseek-chat-v3");
 
         let mut records = crate::embedded_alias_records();
-        ipbr_core::ingest_rows(&mut records, rows);
+        let stats = ipbr_core::ingest_rows(&mut records, rows);
+        assert!(
+            stats
+                .unmatched
+                .iter()
+                .any(|row| row.model_name == "deepseek/deepseek-chat-v3"),
+            "the rolling historical route must remain outside the fixed catalog"
+        );
         let ranked_v4 = records
             .iter()
             .find(|record| record.canonical_id == "deepseek/deepseek-v4-flash")
@@ -510,6 +517,50 @@ mod tests {
             Some(1048576.0),
             "the larger V3 context must not leak into V4"
         );
+    }
+
+    #[test]
+    fn dated_deepseek_snapshots_remain_distinct_from_april_releases() {
+        let payload = json!({"data": [
+            {
+                "id": "deepseek/deepseek-v4-flash",
+                "canonical_slug": "deepseek/deepseek-v4-flash-20260423",
+                "name": "DeepSeek: DeepSeek V4 Flash 0423",
+                "context_length": 1048576
+            },
+            {
+                "id": "deepseek/deepseek-v4-flash-0731",
+                "canonical_slug": "deepseek/deepseek-v4-flash-20260731",
+                "name": "DeepSeek: DeepSeek V4 Flash 0731",
+                "context_length": 2000000
+            },
+            {
+                "id": "deepseek/deepseek-v4-pro",
+                "canonical_slug": "deepseek/deepseek-v4-pro-20260423",
+                "name": "DeepSeek: DeepSeek V4 Pro",
+                "context_length": 1048576
+            },
+            {
+                "id": "deepseek/deepseek-v4-pro-0813",
+                "canonical_slug": "deepseek/deepseek-v4-pro-20260813",
+                "name": "DeepSeek: DeepSeek V4 Pro 0813",
+                "context_length": 2000000
+            }
+        ]});
+
+        let rows = parse_rows(&payload).expect("DeepSeek snapshots should parse");
+        assert_eq!(rows.len(), 4);
+        for canonical in [
+            "deepseek/deepseek-v4-flash",
+            "deepseek/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4-pro",
+            "deepseek/deepseek-v4-pro-0813",
+        ] {
+            assert!(
+                rows.iter().any(|row| row.model_name == canonical),
+                "missing distinct OpenRouter row for {canonical}"
+            );
+        }
     }
 
     #[test]

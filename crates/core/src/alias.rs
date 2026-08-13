@@ -30,7 +30,7 @@ const KNOWN_SUFFIXES: &[&str] = &[
 
 const DISTINCT_VARIANT_TOKENS: &[&str] = &[
     "beta", "chat", "codex", "fast", "flash", "image", "instant", "lite", "mini", "minimal",
-    "multi", "nano", "latest", "preview", "pro", "turbo", "vision",
+    "multi", "nano", "latest", "preview", "pro", "small", "speciale", "turbo", "vision",
 ];
 
 fn html_unescape(s: &str) -> String {
@@ -671,6 +671,7 @@ mod tests {
             ("gpt-5.4-preview-2026-01-01", Some("openai")),
             ("gpt-5.2-codex", Some("openai")),
             ("gpt-5.2-turbo", Some("openai")),
+            ("deepseek-v3-2-speciale", Some("deepseek")),
             ("minimax-m2", Some("minimax")),
             ("grok-4.1", Some("xai")),
             ("grok-4.20-beta1", Some("xai")),

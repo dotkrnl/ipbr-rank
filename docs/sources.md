@@ -82,14 +82,15 @@ eligibility.
 - **Product tiers**: reasoning labels such as `xhigh` and `max` are eligible configurations of a canonical model. Separately named products such as `GPT-5.5 Pro` are not silently folded into the base `GPT-5.5` record; they require their own catalog entry before ranking.
 - **Ranked-product routing**: vendor-automatic fallback is part of the served product and counts as direct evidence. The fallback disclosure is retained as the winning observation's citation; separately named multi-agent or premium endpoints remain distinct.
 - **Ranking use**: Output speed, TTFT, price, and blended cost are diagnostics only.
-- **DeepSeek merge**: The DeepSeek API routes both `deepseek-chat` and `deepseek-reasoner` to the same underlying model (thinking on vs. off), so both alias into `deepseek/deepseek-v4-flash` (`data/required_aliases.toml`).
+- **DeepSeek snapshots**: generic V4 Flash/Pro observations remain on the original April 2026 products. The later Flash 0731 and Pro 0813 snapshots have separate records. Rolling `deepseek-chat` and `deepseek-reasoner` routes stay unmatched unless a source supplies dated identity evidence.
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
-The five Artificial Analysis evaluation-page sources below parse official
+The six Artificial Analysis evaluation-page sources below parse official
 server-rendered model objects, need no secret, cache for 24 hours, and rename
 fallback-assisted observations to primary direct metrics with an explicit
-routing citation. Their stable `/models/...` details slug defines identity;
-the newest explicit label revision and release date win atomically, and the
+routing citation. Their `/models/...` details slug normally defines identity;
+an exact dated label takes precedence when AA reuses a slug for a newer model
+snapshot. The newest label revision and release date win atomically, and the
 upstream display label is retained as provenance.
 
 ## aa_gdpval_v2

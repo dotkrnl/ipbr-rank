@@ -3,7 +3,7 @@ use std::time::Duration;
 
 pub mod evaluations;
 
-use ipbr_core::{AliasIndex, RawRow, normalize_name};
+use ipbr_core::{AliasIndex, ModelRecord, RawRow, normalize_name};
 use serde_json::Value;
 
 use crate::{
@@ -40,6 +40,50 @@ pub(crate) fn automatic_fallback_note(label: &str) -> String {
     format!(
         "Routed-product observation: Artificial Analysis labels this configuration {label:?}; its vendor-automatic fallback is part of the served product."
     )
+}
+
+/// Prefer AA's stable slug, except when it has been reused for a newer dated
+/// snapshot whose display label maps exactly to a separate catalog record.
+/// This keeps historical generic labels on their original products while
+/// allowing explicit identities such as DeepSeek V4 Flash 0731 to remain
+/// separate from the April V4 Flash release.
+fn preferred_aa_model_identity<'a>(
+    slug: Option<&'a str>,
+    label: Option<&'a str>,
+    fallback: Option<&'a str>,
+    vendor_hint: Option<&str>,
+    alias_records: &[ModelRecord],
+    alias_index: &AliasIndex<'_>,
+) -> Option<&'a str> {
+    let slug_match = slug.and_then(|value| alias_index.lookup_exact(value, vendor_hint));
+    let label_match = label.and_then(|value| alias_index.lookup_exact(value, vendor_hint));
+
+    match (slug_match, label_match) {
+        (Some(slug_index), Some(label_index))
+            if slug_index != label_index
+                && canonical_has_dated_snapshot(&alias_records[label_index].canonical_id) =>
+        {
+            label
+        }
+        _ => slug.or(label).or(fallback),
+    }
+}
+
+fn canonical_has_dated_snapshot(canonical_id: &str) -> bool {
+    let Some(suffix) = canonical_id.rsplit('-').next() else {
+        return false;
+    };
+    if !suffix.bytes().all(|byte| byte.is_ascii_digit()) {
+        return false;
+    }
+    let mmdd = match suffix.len() {
+        4 => suffix,
+        8 => &suffix[4..],
+        _ => return false,
+    };
+    let month = mmdd[..2].parse::<u8>().ok();
+    let day = mmdd[2..].parse::<u8>().ok();
+    matches!(month, Some(1..=12)) && matches!(day, Some(1..=31))
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -140,17 +184,6 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
             .get("name")
             .and_then(Value::as_str)
             .is_some_and(|name| name.to_ascii_lowercase().contains("fallback"));
-        // AA's `id` is a UUID; use the human-readable `slug` (e.g.
-        // "claude-opus-4-7") for alias matching, then fall back to `name`,
-        // and finally the UUID `id` to keep parsing infallible.
-        let model_name = item
-            .get("slug")
-            .and_then(Value::as_str)
-            .or_else(|| item.get("name").and_then(Value::as_str))
-            .or_else(|| item.get("id").and_then(Value::as_str))
-            .ok_or_else(|| {
-                SourceError::Parse("Artificial Analysis row missing slug/name/id".into())
-            })?;
         let vendor_hint = item
             .get("model_creator")
             .and_then(|value| value.get("slug"))
@@ -160,6 +193,17 @@ fn parse_rows(payload: &Value) -> Result<Vec<RawRow>, SourceError> {
                     .and_then(|value| value.get("slug"))
                     .and_then(Value::as_str)
             });
+        // AA's `id` is a UUID. Prefer the human-readable slug unless AA has
+        // reused it for a newer explicitly dated product identity.
+        let model_name = preferred_aa_model_identity(
+            item.get("slug").and_then(Value::as_str),
+            item.get("name").and_then(Value::as_str),
+            item.get("id").and_then(Value::as_str),
+            vendor_hint,
+            &alias_records,
+            &alias_index,
+        )
+        .ok_or_else(|| SourceError::Parse("Artificial Analysis row missing slug/name/id".into()))?;
 
         let mut fields = BTreeMap::new();
         copy_if_present(&mut fields, "ModelId", item.get("id"));
@@ -646,6 +690,61 @@ mod tests {
             row.fields.get("BlendedCost").and_then(number_like),
             Some(11.25)
         );
+    }
+
+    #[test]
+    fn reused_deepseek_slugs_keep_dated_snapshots_separate() {
+        let payload = json!({
+            "data": [
+                {
+                    "slug": "deepseek-v4-flash-0420",
+                    "name": "DeepSeek V4 Flash (Reasoning, Max Effort)",
+                    "model_creator": {"slug": "deepseek"},
+                    "evaluations": {"intelligence_index": 42.0}
+                },
+                {
+                    "slug": "deepseek-v4-flash",
+                    "name": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+                    "model_creator": {"slug": "deepseek"},
+                    "evaluations": {"intelligence_index": 52.0}
+                },
+                {
+                    "slug": "deepseek-v4-pro-0424",
+                    "name": "DeepSeek V4 Pro (Reasoning, Max Effort)",
+                    "model_creator": {"slug": "deepseek"},
+                    "evaluations": {"intelligence_index": 45.0}
+                },
+                {
+                    "slug": "deepseek-v4-pro",
+                    "name": "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
+                    "model_creator": {"slug": "deepseek"},
+                    "evaluations": {"intelligence_index": 53.0}
+                }
+            ]
+        });
+
+        let rows = parse_rows(&payload).expect("DeepSeek snapshots should parse");
+        assert_eq!(rows.len(), 4);
+        let mut records = crate::embedded_alias_records();
+        let stats = ipbr_core::ingest_rows(&mut records, rows);
+        assert_eq!(stats.matched, 4);
+        assert!(stats.unmatched.is_empty());
+
+        let intelligence = |canonical: &str| {
+            records
+                .iter()
+                .find(|record| record.canonical_id == canonical)
+                .and_then(|record| {
+                    record
+                        .raw_metrics
+                        .get("ArtificialAnalysisIntelligence")
+                        .copied()
+                })
+        };
+        assert_eq!(intelligence("deepseek/deepseek-v4-flash"), Some(42.0));
+        assert_eq!(intelligence("deepseek/deepseek-v4-flash-0731"), Some(52.0));
+        assert_eq!(intelligence("deepseek/deepseek-v4-pro"), Some(45.0));
+        assert_eq!(intelligence("deepseek/deepseek-v4-pro-0813"), Some(53.0));
     }
 
     #[tokio::test]
