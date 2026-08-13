@@ -254,32 +254,6 @@ aliases = [
     "Opus 4.8 (Claude Code) xHigh",
 ]
 
-# Claude Opus 5 — 2026-07-23 successor. Keep the moving
-# `claude-opus-latest` route unmatched; map only explicit Opus 5 identities.
-[models."anthropic/claude-opus-5"]
-vendor = "anthropic"
-aliases = [
-    "opus 5", "claude opus 5", "claude-opus-5",
-    "claude 5 opus", "claude-5-opus",
-    "anthropic/claude-opus-5", "anthropic:claude-opus-5",
-    "claude-opus-5-20260723", "anthropic/claude-opus-5-20260723",
-    # OpenRouter accelerated endpoint; it serves the same model weights.
-    "claude-opus-5-fast", "anthropic/claude-opus-5-fast",
-    "anthropic/claude-opus-5-fast-20260723",
-    # Artificial Analysis effort rows.
-    "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
-    "Claude Opus 5 (Adaptive Reasoning, Xhigh Effort)",
-    "Claude Opus 5 (Adaptive Reasoning, High Effort)",
-    "Claude Opus 5 (Adaptive Reasoning, Medium Effort)",
-    "Claude Opus 5 (Adaptive Reasoning, Low Effort)",
-    "claude-opus-5-xhigh", "claude-opus-5-high",
-    "claude-opus-5-medium", "claude-opus-5-low",
-    # ARC, Context Arena, Scale, and Sonar spellings.
-    "Claude Opus 5 (Max)", "Claude Opus 5 (High)",
-    "claude-opus-5 (max)", "claude-opus-5 (xhigh)",
-    "Claude Opus 5 Thinking", "Opus 5 (Claude Code) xHigh",
-]
-
 [models."anthropic/claude-fable-5"]
 vendor = "anthropic"
 aliases = [

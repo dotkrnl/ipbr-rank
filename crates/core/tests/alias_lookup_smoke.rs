@@ -224,11 +224,6 @@ fn lookup_2026_08_models_and_deepseek_snapshots() {
     let idx = AliasIndex::build(&records);
     let cases: &[(&str, Option<&str>, &str)] = &[
         (
-            "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
-            Some("anthropic"),
-            "anthropic/claude-opus-5",
-        ),
-        (
             "gemini-3-5-flash-lite",
             Some("google"),
             "google/gemini-3.5-flash-lite",
@@ -274,6 +269,15 @@ fn lookup_2026_08_models_and_deepseek_snapshots() {
             "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
         );
     }
+
+    assert!(
+        idx.match_record(
+            "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+            Some("anthropic")
+        )
+        .is_none(),
+        "Claude Opus 5 must remain outside the ranked catalog"
+    );
 }
 
 #[test]
