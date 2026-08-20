@@ -70,9 +70,9 @@ const GDPVAL_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     transform: Transform::Identity,
     rsc_transform: Transform::Identity,
     interval: true,
-    rsc_path: &["gdpval_v2_breakdown", "elo"],
-    rsc_lower_path: &["gdpval_v2_breakdown", "lower_95ci"],
-    rsc_upper_path: &["gdpval_v2_breakdown", "upper_95ci"],
+    rsc_path: &["gdpval"],
+    rsc_lower_path: &["gdpvalBreakdown", "lower95ci"],
+    rsc_upper_path: &["gdpvalBreakdown", "upper95ci"],
 }];
 
 const CRITPT_DATASETS: &[DatasetMetric] = &[DatasetMetric {
@@ -106,7 +106,7 @@ const OMNISCIENCE_DATASETS: &[DatasetMetric] = &[
         transform: Transform::Percent,
         rsc_transform: Transform::Percent,
         interval: false,
-        rsc_path: &["omniscience_breakdown", "total", "accuracy"],
+        rsc_path: &["omniscienceBreakdown", "accuracy"],
         rsc_lower_path: &[],
         rsc_upper_path: &[],
     },
@@ -115,11 +115,11 @@ const OMNISCIENCE_DATASETS: &[DatasetMetric] = &[
         upstream_key: "omniscienceHallucinationRate",
         metric: "AAOmniscienceNonHallucination",
         transform: Transform::ComplementPercent,
-        rsc_transform: Transform::Percent,
+        rsc_transform: Transform::ComplementPercent,
         interval: false,
-        // The RSC object publishes the already-oriented non-hallucination
-        // rate, whereas JSON-LD publishes hallucination rate.
-        rsc_path: &["omniscience_breakdown", "total", "non_hallucination_rate"],
+        // Both transports publish the hallucination rate, which this ranking
+        // inverts so a higher component score is always better.
+        rsc_path: &["omniscienceBreakdown", "hallucinationRate"],
         rsc_lower_path: &[],
         rsc_upper_path: &[],
     },
@@ -132,7 +132,7 @@ const ENTERPRISE_OPS_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     transform: Transform::Percent,
     rsc_transform: Transform::Percent,
     interval: false,
-    rsc_path: &["enterprise_ops_gym_breakdown", "summary", "success_rate"],
+    rsc_path: &["enterpriseOpsGym"],
     rsc_lower_path: &[],
     rsc_upper_path: &[],
 }];
@@ -144,7 +144,7 @@ const AUTOMATION_BENCH_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     transform: Transform::Percent,
     rsc_transform: Transform::Percent,
     interval: false,
-    rsc_path: &["automation_bench_breakdown", "summary", "partial_score"],
+    rsc_path: &["automationBenchPartialScore"],
     rsc_lower_path: &[],
     rsc_upper_path: &[],
 }];
@@ -159,7 +159,7 @@ const ITBENCH_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     transform: Transform::Percent,
     rsc_transform: Transform::Percent,
     interval: false,
-    rsc_path: &["it_bench_sre"],
+    rsc_path: &["itbenchSre"],
     rsc_lower_path: &[],
     rsc_upper_path: &[],
 }];
@@ -679,10 +679,11 @@ fn merge_rsc_rows(
     alias_index: &AliasIndex<'_>,
     pending: &mut BTreeMap<PendingKey, PendingRow>,
 ) -> Result<(), SourceError> {
-    // `additional_text` is present on every streamed model object, but AA does
-    // not guarantee object-key order. Find the discriminator wherever it
-    // appears, then balance backward to the containing object's opening brace.
-    const MODEL_OBJECT_ANCHOR: &str = r#"\"additional_text\":"#;
+    // `shortName` is present on every streamed model object and carries the
+    // same label JSON-LD publishes, but AA does not guarantee object-key
+    // order. Find the discriminator wherever it appears, then balance backward
+    // to the containing object's opening brace.
+    const MODEL_OBJECT_ANCHOR: &str = r#"\"shortName\":"#;
     let mut cursor = 0usize;
     let mut anchors = 0usize;
     let mut parsed_objects = 0usize;
@@ -705,13 +706,17 @@ fn merge_rsc_rows(
         };
         if !item
             .as_object()
-            .is_some_and(|object| object.contains_key("additional_text"))
+            .is_some_and(|object| object.contains_key("shortName"))
         {
             continue;
         }
         parsed_objects += 1;
 
-        let Some(label) = item.get("name").and_then(Value::as_str) else {
+        let Some(label) = item
+            .get("shortName")
+            .and_then(Value::as_str)
+            .or_else(|| item.get("name").and_then(Value::as_str))
+        else {
             continue;
         };
         let details_url = item
@@ -1193,7 +1198,7 @@ mod tests {
             "label":"GPT-5.5 (xhigh)","CritPt":"0.25","detailsUrl":"/models/gpt-5-5"
           }]}]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
+        <script>self.__next_f.push([1,"{\"slug\":\"gpt-5-5\",\"shortName\":\"GPT-5.5 (xhigh)\",\"critpt\":0.25}"])</script>"#;
         let rows = parse_evaluation_rows(html, CRITPT_CONFIG).expect("graph should parse");
         assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
     }
@@ -1211,8 +1216,8 @@ mod tests {
             ],"detailsUrl":"/models/test-b"}
           ]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Claude Test A (with fallback)\",\"slug\":\"test-a\",\"gdpval_v2_breakdown\":{\"elo\":1200,\"lower_95ci\":1190,\"upper_95ci\":1210}}"])</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Claude Test B\",\"slug\":\"test-b\",\"gdpval_v2_breakdown\":{\"elo\":1300,\"lower_95ci\":1290,\"upper_95ci\":1310}}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"test-a\",\"shortName\":\"Claude Test A (with fallback)\",\"gdpval\":1200,\"gdpvalBreakdown\":{\"lower95ci\":1190,\"upper95ci\":1210}}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"test-b\",\"shortName\":\"Claude Test B\",\"gdpval\":1300,\"gdpvalBreakdown\":{\"lower95ci\":1290,\"upper95ci\":1310}}"])</script>
         "#;
         let rows = parse_evaluation_rows(html, GDPVAL_CONFIG).expect("labels should merge");
         assert_eq!(rows.len(), 2);
@@ -1247,10 +1252,10 @@ mod tests {
             {"label":"Grok 4.20 0309 (Non-reasoning)","CritPt":0.02,"detailsUrl":"/models/grok-4-20"}
           ]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 v2 (Reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-04-07\",\"critpt\":0.065714}"])</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 (Reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-03-10\",\"critpt\":0.06}"])</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 v2 (Non-reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-04-07\",\"critpt\":0.03}"])</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"Grok 4.20 0309 (Non-reasoning)\",\"slug\":\"grok-4-20\",\"release_date\":\"2026-03-10\",\"critpt\":0.02}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"grok-4-20\",\"shortName\":\"Grok 4.20 0309 v2 (Reasoning)\",\"releaseDate\":\"2026-04-07\",\"critpt\":0.065714}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"grok-4-20\",\"shortName\":\"Grok 4.20 0309 (Reasoning)\",\"releaseDate\":\"2026-03-10\",\"critpt\":0.06}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"grok-4-20\",\"shortName\":\"Grok 4.20 0309 v2 (Non-reasoning)\",\"releaseDate\":\"2026-04-07\",\"critpt\":0.03}"])</script>
+        <script>self.__next_f.push([1,"{\"slug\":\"grok-4-20\",\"shortName\":\"Grok 4.20 0309 (Non-reasoning)\",\"releaseDate\":\"2026-03-10\",\"critpt\":0.02}"])</script>
         "#;
 
         let rows = parse_evaluation_rows(html, CRITPT_CONFIG).expect("Grok rows should parse");
@@ -1274,6 +1279,36 @@ mod tests {
         assert!(upstream_label(non_reasoning).contains("v2"));
         assert!((numeric(reasoning, "CritPt").unwrap() - 6.5714).abs() < 1e-10);
         assert_eq!(numeric(non_reasoning, "CritPt"), Some(3.0));
+    }
+
+    #[test]
+    fn rsc_short_name_keys_the_row_and_long_name_is_only_a_fallback() {
+        let html = r#"<script type="application/ld+json">{
+          "@type":"Dataset","name":"CritPt: Score","data":[{
+            "label":"GPT-5.5 (xhigh)","CritPt":0.20,"detailsUrl":"/models/gpt-5-5"
+          }]
+        }</script>
+        <script>self.__next_f.push([1,"{\"initialModels\":[{\"slug\":\"gpt-5-5\",\"name\":\"GPT-5.5 (Reasoning, Extra High Effort)\",\"shortName\":\"GPT-5.5 (xhigh)\",\"critpt\":0.25}]}"])</script>"#;
+        let rows = parse_evaluation_rows(html, CRITPT_CONFIG).expect("short name should parse");
+        assert_eq!(rows.len(), 1, "both transports describe one model");
+        assert_eq!(
+            upstream_label(&rows[0]),
+            "GPT-5.5 (xhigh)",
+            "the short name is what JSON-LD keys its rows by"
+        );
+        assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
+    }
+
+    #[test]
+    fn rsc_falls_back_to_the_long_name_when_the_short_name_is_absent() {
+        let html = r#"<script type="application/ld+json">{
+          "@type":"Dataset","name":"CritPt: Score","data":[{
+            "label":"GPT-5.5 (xhigh)","CritPt":0.20,"detailsUrl":"/models/gpt-5-5"
+          }]
+        }</script>
+        <script>self.__next_f.push([1,"{\"initialModels\":[{\"slug\":\"gpt-5-5\",\"shortName\":null,\"name\":\"GPT-5.5 (xhigh)\",\"critpt\":0.25}]}"])</script>"#;
+        let rows = parse_evaluation_rows(html, CRITPT_CONFIG).expect("long name should parse");
+        assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
     }
 
     #[test]
@@ -1325,7 +1360,7 @@ mod tests {
             "label":"GPT-5.5 (xhigh)","CritPt":0.25,"detailsUrl":"/models/gpt-5-5"
           }]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"unrelated_metric\":0.99}"])</script>"#;
+        <script>self.__next_f.push([1,"{\"slug\":\"gpt-5-5\",\"shortName\":\"GPT-5.5 (xhigh)\",\"unrelated_metric\":0.99}"])</script>"#;
         let error = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect_err("RSC schema drift must not silently truncate coverage");
         assert!(
@@ -1342,7 +1377,7 @@ mod tests {
             "label":"GPT-5.5 (xhigh)","CritPt":0.25,"detailsUrl":"/models/gpt-5-5"
           }]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":\"literal } closing and { opening braces\",\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
+        <script>self.__next_f.push([1,"{\"name\":\"literal } closing and { opening braces\",\"shortName\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
         let rows = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect("braces inside a string must not truncate the object");
         assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
@@ -1355,7 +1390,7 @@ mod tests {
             "label":"GPT-5.5 (xhigh)","CritPt":0.20,"detailsUrl":"/models/gpt-5-5"
           }]
         }</script>
-        <script>self.__next_f.push([1,"{\"metadata\":{\"note\":\"literal } and { plus \\\"quote\\\"\"},\"aa_analyst_agent\":null,\"additional_text\":null,\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
+        <script>self.__next_f.push([1,"{\"metadata\":{\"note\":\"literal } and { plus \\\"quote\\\"\"},\"aa_analyst_agent\":null,\"shortName\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":0.25}"])</script>"#;
         let rows = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect("model fields before the discriminator should parse");
         assert_eq!(numeric(&rows[0], "CritPt"), Some(25.0));
@@ -1404,7 +1439,7 @@ mod tests {
             "label":"GPT-5.5 (xhigh)","CritPt":1.25,"detailsUrl":"/models/gpt-5-5"
           }]
         }</script>
-        <script>self.__next_f.push([1,"{\"additional_text\":null,\"name\":\"GPT-5.5 (xhigh)\",\"slug\":\"gpt-5-5\",\"critpt\":1.25}"])</script>"#;
+        <script>self.__next_f.push([1,"{\"slug\":\"gpt-5-5\",\"shortName\":\"GPT-5.5 (xhigh)\",\"critpt\":1.25}"])</script>"#;
         let error = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect_err("fraction metrics outside [0,1] must fail");
         assert!(

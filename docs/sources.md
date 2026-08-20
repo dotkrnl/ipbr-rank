@@ -93,6 +93,16 @@ an exact dated label takes precedence when AA reuses a slug for a newer model
 snapshot. The newest label revision and release date win atomically, and the
 upstream display label is retained as provenance.
 
+Each page publishes its leaderboard twice: a schema.org `Dataset` JSON-LD block
+that carries a capped top-N view, and the streamed RSC model objects that carry
+the full cohort. Both transports are required — a page that parses only its
+JSON-LD fails rather than silently shipping truncated coverage.
+
+- **Fragility note**: Depends on AA's RSC object shape. The parser anchors on
+  `shortName` and reads per-metric fields such as `gdpval`/`gdpvalBreakdown`
+  and `omniscienceBreakdown`; renaming or re-nesting those keys fails the
+  source loudly and needs a parser update.
+
 ## aa_gdpval_v2
 
 - **Status**: Verified
