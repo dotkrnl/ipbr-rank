@@ -165,6 +165,76 @@ const ITBENCH_DATASETS: &[DatasetMetric] = &[DatasetMetric {
     rsc_upper_path: &[],
 }];
 
+// Terminal-Bench 4.0 supersedes 2.1. AA's independent run is currently the
+// only machine-readable 4.0 feed; tbench.ai has not published a native 4.0
+// leaderboard. JSON-LD and RSC both publish the score as a fraction.
+const TERMINAL_BENCH_4_0_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "Terminal-Bench 4.0: Score",
+    upstream_key: "Terminal-Bench 4.0",
+    metric: "AATerminalBench40",
+    transform: Transform::Percent,
+    rsc_transform: Transform::Percent,
+    interval: false,
+    rsc_path: &["terminalBench40"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
+// AA-Briefcase is AA's agentic knowledge-work benchmark, published as an Elo.
+const BRIEFCASE_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "AA-Briefcase Elo",
+    upstream_key: "briefcaseElo",
+    metric: "AABriefcase",
+    transform: Transform::Identity,
+    rsc_transform: Transform::Identity,
+    interval: false,
+    rsc_path: &["briefcaseElo"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
+// MLCR-AA grades expert long-form reports on accuracy, completeness, and
+// conciseness; the overall score is a judged fraction.
+const MLCR_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "MLCR-AA: Score",
+    upstream_key: "MLCR-AA",
+    metric: "MLCRAA",
+    transform: Transform::Percent,
+    rsc_transform: Transform::Percent,
+    interval: false,
+    rsc_path: &["mlcrOverall"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
+// GDP.pdf is AA's document-grounded GDPval-lineage track; the headline metric
+// is the all-pass share, a fraction.
+const GDP_PDF_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "GDP.pdf: All-pass",
+    upstream_key: "GDP.pdf",
+    metric: "GDPdfAA",
+    transform: Transform::Percent,
+    rsc_transform: Transform::Percent,
+    interval: false,
+    rsc_path: &["gdpPdfAllPass"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
+// Terminal-Bench-Science is an early (v0.1) science-domain terminal track;
+// ingested as a diagnostic while the version label settles.
+const TERMINAL_BENCH_SCIENCE_DATASETS: &[DatasetMetric] = &[DatasetMetric {
+    dataset_name: "Terminal-Bench-Science 0.1: Score",
+    upstream_key: "Terminal-Bench-Science",
+    metric: "AATerminalBenchScience",
+    transform: Transform::Percent,
+    rsc_transform: Transform::Percent,
+    interval: false,
+    rsc_path: &["terminalBenchScience"],
+    rsc_lower_path: &[],
+    rsc_upper_path: &[],
+}];
+
 const GDPVAL_CONFIG: EvaluationConfig = EvaluationConfig {
     source_id: "aa_gdpval_v2",
     cache_key: "aa_gdpval_v2",
@@ -205,6 +275,41 @@ const ITBENCH_CONFIG: EvaluationConfig = EvaluationConfig {
     cache_key: "aa_itbench",
     url: "https://artificialanalysis.ai/evaluations/itbench-aa",
     datasets: ITBENCH_DATASETS,
+};
+
+const TERMINAL_BENCH_4_0_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_terminal_bench_4_0",
+    cache_key: "aa_terminal_bench_4_0",
+    url: "https://artificialanalysis.ai/evaluations/terminalbench-4-0",
+    datasets: TERMINAL_BENCH_4_0_DATASETS,
+};
+
+const BRIEFCASE_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_briefcase",
+    cache_key: "aa_briefcase",
+    url: "https://artificialanalysis.ai/evaluations/aa-briefcase",
+    datasets: BRIEFCASE_DATASETS,
+};
+
+const MLCR_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_mlcr",
+    cache_key: "aa_mlcr",
+    url: "https://artificialanalysis.ai/evaluations/mlcr-aa",
+    datasets: MLCR_DATASETS,
+};
+
+const GDP_PDF_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_gdp_pdf",
+    cache_key: "aa_gdp_pdf",
+    url: "https://artificialanalysis.ai/evaluations/gdp-pdf",
+    datasets: GDP_PDF_DATASETS,
+};
+
+const TERMINAL_BENCH_SCIENCE_CONFIG: EvaluationConfig = EvaluationConfig {
+    source_id: "aa_terminal_bench_science",
+    cache_key: "aa_terminal_bench_science",
+    url: "https://artificialanalysis.ai/evaluations/terminal-bench-science",
+    datasets: TERMINAL_BENCH_SCIENCE_DATASETS,
 };
 
 macro_rules! evaluation_source {
@@ -256,6 +361,11 @@ evaluation_source!(AaOmniscienceSource, OMNISCIENCE_CONFIG);
 evaluation_source!(AaEnterpriseOpsGymSource, ENTERPRISE_OPS_CONFIG);
 evaluation_source!(AaAutomationBenchSource, AUTOMATION_BENCH_CONFIG);
 evaluation_source!(AaItBenchSource, ITBENCH_CONFIG);
+evaluation_source!(AaTerminalBench40Source, TERMINAL_BENCH_4_0_CONFIG);
+evaluation_source!(AaBriefcaseSource, BRIEFCASE_CONFIG);
+evaluation_source!(AaMlcrSource, MLCR_CONFIG);
+evaluation_source!(AaGdpPdfSource, GDP_PDF_CONFIG);
+evaluation_source!(AaTerminalBenchScienceSource, TERMINAL_BENCH_SCIENCE_CONFIG);
 
 async fn fetch_evaluation(
     http: &dyn Http,
@@ -1187,6 +1297,71 @@ mod tests {
             .expect("Claude Opus 4.7 row");
         assert_eq!(opus.model_name, "anthropic/claude-opus-4.7");
         assert!((numeric(opus, "ITBenchAA").unwrap() - 46.6572504708098).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parses_terminal_bench_4_0_fixture() {
+        let rows = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_terminal_bench_4_0.html"),
+            TERMINAL_BENCH_4_0_CONFIG,
+        )
+        .expect("Terminal-Bench 4.0 fixture should parse");
+        assert_eq!(rows.len(), 3);
+        let gpt = rows
+            .iter()
+            .find(|row| upstream_label(row) == "GPT-5.5 (xhigh)")
+            .expect("GPT row");
+        assert_eq!(numeric(gpt, "AATerminalBench40"), Some(43.8));
+    }
+
+    #[test]
+    fn parses_briefcase_elo_fixture() {
+        let rows = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_briefcase.html"),
+            BRIEFCASE_CONFIG,
+        )
+        .expect("Briefcase fixture should parse");
+        assert_eq!(rows.len(), 3);
+        let fable = rows
+            .iter()
+            .find(|row| upstream_label(row).contains("Fable"))
+            .expect("Fable row");
+        assert_eq!(numeric(fable, "AABriefcase"), Some(1621.4));
+    }
+
+    #[test]
+    fn parses_mlcr_gdp_pdf_and_tb_science_fixtures() {
+        let mlcr = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_mlcr.html"),
+            MLCR_CONFIG,
+        )
+        .expect("MLCR fixture should parse");
+        assert_eq!(mlcr.len(), 3);
+        assert!(
+            mlcr.iter()
+                .all(|row| numeric(row, "MLCRAA").is_some_and(|v| (0.0..=100.0).contains(&v)))
+        );
+
+        let pdf = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_gdp_pdf.html"),
+            GDP_PDF_CONFIG,
+        )
+        .expect("GDP.pdf fixture should parse");
+        assert_eq!(pdf.len(), 3);
+        assert!(
+            pdf.iter()
+                .all(|row| numeric(row, "GDPdfAA").is_some_and(|v| (0.0..=100.0).contains(&v)))
+        );
+
+        let science = parse_evaluation_rows(
+            include_str!("../../../../data/fixtures/aa_terminal_bench_science.html"),
+            TERMINAL_BENCH_SCIENCE_CONFIG,
+        )
+        .expect("TB-Science fixture should parse");
+        assert_eq!(science.len(), 3);
+        assert!(science.iter().all(|row| {
+            numeric(row, "AATerminalBenchScience").is_some_and(|v| (0.0..=100.0).contains(&v))
+        }));
     }
 
     #[test]

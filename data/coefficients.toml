@@ -42,13 +42,16 @@ AAGeneralComposite = 0.35
 # cohort no longer affects the primary rank. Terminal-Bench 2.0 is superseded
 # by 2.1; the manually curated Toolathlon/OSWorld/HLETools/BrowseComp and
 # construct-mismatched ARC paths likewise remain diagnostic.
-MCPAtlas = 0.30
-Tau3Banking = 0.20
-LongContextComposite = 0.15
-GDPvalAA2 = 0.10
-EnterpriseWorkflowComposite = 0.10
-TerminalBench21Composite = 0.10
-HiLBench = 0.05
+# AA-Briefcase (2026-09) joins GDPval-AA as a second agentic knowledge-work
+# signal; the incumbents rescale proportionally to make room.
+MCPAtlas = 0.27
+Tau3Banking = 0.18
+LongContextComposite = 0.14
+GDPvalAA2 = 0.09
+EnterpriseWorkflowComposite = 0.09
+TerminalBench21Composite = 0.09
+HiLBench = 0.04
+AABriefcase = 0.10
 
 # BUILD is centered on direct software-work evidence. SWEComposite remains the
 # largest input; live coding, MCP orchestration, SWE Atlas, terminal work,
@@ -147,11 +150,14 @@ ContextArenaMRCR128k = 0.40
 EnterpriseOpsGymAA = 0.65
 AutomationBenchAA = 0.35
 
-# The weights encode precedence: official Terminal-Bench 2.1 is preferred and
-# AA's observation is a coverage fallback. They are never averaged together.
+# The weights encode precedence: Terminal-Bench 4.0 (AA's independent run,
+# currently the only 4.0 feed) supersedes the 2.1 line and wins wherever
+# published; official Terminal-Bench 2.1 follows and AA's 2.1 observation is
+# the coverage fallback. They are never averaged together.
 [composite_metrics.TerminalBench21Composite]
-TerminalBench21 = 0.55
-AATerminalBench21 = 0.45
+AATerminalBench40 = 0.40
+TerminalBench21 = 0.35
+AATerminalBench21 = 0.25
 
 # BFCLComposite keeps Berkeley's overall V4 accuracy as a single leaf. The
 # published category splits remain visible diagnostics and are not stacked
@@ -489,6 +495,19 @@ eligibility = "core"
 anchor_low = 34.4944
 anchor_high = 84.4007
 # Input to TerminalBench21Composite; AA's terminalbench_v2_1 field.
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AATerminalBench40]
+family = "terminal_bench"
+eligibility = "core"
+anchor_low = 0.5051
+anchor_high = 59.596
+# Input to TerminalBench21Composite; AA's terminalBench40 field, fraction
+# rescaled to 0-100. Anchors are the p5/p95 of the 32-model cohort at the
+# 2026-09-29 source refresh.
 higher_better = true
 log_scale = false
 groups = []
@@ -874,6 +893,39 @@ anchor_high = 1512.132
 higher_better = true
 log_scale = false
 groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.AABriefcase]
+family = "aa_briefcase"
+eligibility = "core"
+anchor_low = 591.024
+anchor_high = 1793.63
+# AA-Briefcase Elo; anchors are the p5/p95 of the 32-model cohort at the
+# 2026-09-29 source refresh.
+higher_better = true
+log_scale = false
+groups = ["PLAN"]
+transform = "percentile"
+
+[metrics.MLCRAA]
+family = "aa_mlcr"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.GDPdfAA]
+family = "gdpval"
+higher_better = true
+log_scale = false
+groups = []
+transform = "percentile"
+
+[metrics.AATerminalBenchScience]
+family = "terminal_bench"
+higher_better = true
+log_scale = false
+groups = []
 transform = "percentile"
 
 [metrics.CritPt]

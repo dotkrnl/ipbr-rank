@@ -181,6 +181,15 @@ pub fn metric_label(key: &str) -> Option<MetricLabel> {
         "Tau2Bench" => metric("τ²-bench — tool dialogue", Area::Agentic, Unit::Percent),
         "TauBanking" => metric("τ-bench — banking", Area::Agentic, Unit::Percent),
         "GDPvalAA2" => metric("GDPval — professional work", Area::Agentic, Unit::Elo),
+        "AABriefcase" => metric(
+            "Briefcase — agentic knowledge work",
+            Area::Agentic,
+            Unit::Elo,
+        ),
+        "MLCRAA" => metric("MLCR — expert report quality", Area::Agentic, Unit::Percent),
+        "GDPdfAA" => metric("GDP.pdf — document work", Area::Agentic, Unit::Percent),
+        "AATerminalBench40" => metric("Terminal-Bench 4.0", Area::Agentic, Unit::Percent),
+        "AATerminalBenchScience" => metric("Terminal-Bench Science", Area::Agentic, Unit::Percent),
         "GDPval" => metric(
             "GDPval — professional work (vendor-reported)",
             Area::Agentic,

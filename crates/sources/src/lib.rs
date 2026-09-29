@@ -31,8 +31,9 @@ pub use agc_bench::AgcBenchSource;
 pub use arc_agi::ArcAgiSource;
 pub use artificial_analysis::ArtificialAnalysisSource;
 pub use artificial_analysis::evaluations::{
-    AaAutomationBenchSource, AaCritPtSource, AaEnterpriseOpsGymSource, AaGdpvalV2Source,
-    AaItBenchSource, AaOmniscienceSource,
+    AaAutomationBenchSource, AaBriefcaseSource, AaCritPtSource, AaEnterpriseOpsGymSource,
+    AaGdpPdfSource, AaGdpvalV2Source, AaItBenchSource, AaMlcrSource, AaOmniscienceSource,
+    AaTerminalBench40Source, AaTerminalBenchScienceSource,
 };
 pub use bfcl::BfclSource;
 pub use context_arena::ContextArenaSource;

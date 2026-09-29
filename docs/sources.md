@@ -85,7 +85,7 @@ eligibility.
 - **DeepSeek snapshots**: generic V4 Flash/Pro observations remain on the original April 2026 products. The later Flash 0731 and Pro 0813 snapshots have separate records. Rolling `deepseek-chat` and `deepseek-reasoner` routes stay unmatched unless a source supplies dated identity evidence.
 - **Fixture**: `data/fixtures/artificial_analysis_llms.json`
 
-The six Artificial Analysis evaluation-page sources below parse official
+The eleven Artificial Analysis evaluation-page sources below parse official
 server-rendered model objects, need no secret, cache for 24 hours, and rename
 fallback-assisted observations to primary direct metrics with an explicit
 routing citation. Their `/models/...` details slug normally defines identity;
@@ -144,6 +144,45 @@ shipping truncated coverage.
 - **Cohort**: 32 models, published at each product's strongest effort (GPT-5.6 Sol at max, Claude Opus 4.7 at max), so the rows match this ranking's best-available-effort policy.
 - **Ranking use**: Diagnostic. `ITBenchAA` carries no group weight and no path to any role or Balanced rank. Its natural home is Plan — it shares the `enterprise_workflow` family and the agentic-operations contour with `EnterpriseOpsGymAA` and `AutomationBenchAA`, and Plan is its strongest construct match (rank correlation +0.83 against PLAN, versus +0.77 BUILD and +0.63 GEN over the 20 models carrying both). It is held diagnostic because the cohort omits the current leaders: Claude Fable 5 and Claude Opus 4.8 have no ITBench row, so scoring it would move Plan for their challengers on an axis the leaders were never measured on. To promote once AA covers them, give it a share of `EnterpriseWorkflowComposite` — Plan's 0.10 leaf weight is unaffected, only the composite's internal split — with anchors from a frozen direct-evidence p5/p95 snapshot.
 - **Fixture**: `data/fixtures/aa_itbench.html`
+
+## aa_terminal_bench_4_0
+
+- **Status**: Verified
+- **Metric**: `AATerminalBench40`, the highest-precedence input to
+  `TerminalBench21Composite` (supersedes the 2.1 line wherever published).
+  tbench.ai has not shipped a native 4.0 leaderboard, so AA's independent run
+  is currently the only machine-readable 4.0 feed.
+- **Fixture**: `data/fixtures/aa_terminal_bench_4_0.html`
+
+## aa_briefcase
+
+- **Status**: Verified
+- **Metric**: `AABriefcase`, AA's agentic knowledge-work Elo; a direct PLAN
+  input alongside GDPval-AA.
+- **Fixture**: `data/fixtures/aa_briefcase.html`
+
+## aa_mlcr
+
+- **Status**: Verified
+- **Metric**: `MLCRAA`, judged accuracy/completeness/conciseness of expert
+  long-form reports. Ingested as a diagnostic; promotion to GEN is pending one
+  refresh cycle of cohort and family-cap observation.
+- **Fixture**: `data/fixtures/aa_mlcr.html`
+
+## aa_gdp_pdf
+
+- **Status**: Verified
+- **Metric**: `GDPdfAA`, the all-pass share on AA's document-grounded
+  GDPval-lineage track. Diagnostic while its construct overlap with GDPval-AA
+  is assessed.
+- **Fixture**: `data/fixtures/aa_gdp_pdf.html`
+
+## aa_terminal_bench_science
+
+- **Status**: Verified
+- **Metric**: `AATerminalBenchScience`, pass rate on the science-domain
+  terminal track. Diagnostic while the benchmark carries a v0.1 label.
+- **Fixture**: `data/fixtures/aa_terminal_bench_science.html`
 
 ## deep_swe_v1_1
 
