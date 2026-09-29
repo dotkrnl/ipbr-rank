@@ -93,10 +93,12 @@ an exact dated label takes precedence when AA reuses a slug for a newer model
 snapshot. The newest label revision and release date win atomically, and the
 upstream display label is retained as provenance.
 
-Each page publishes its leaderboard twice: a schema.org `Dataset` JSON-LD block
-that carries a capped top-N view, and the streamed RSC model objects that carry
-the full cohort. Both transports are required — a page that parses only its
-JSON-LD fails rather than silently shipping truncated coverage.
+Each page marks its leaderboard up with schema.org `Dataset` JSON-LD blocks
+and streams the chart cohort as RSC model objects (`initialModels`). Since
+AA's GDPval v2.1 reshuffle the JSON-LD blocks are metadata-only, so they serve
+as the dataset-name schema gate while the RSC objects carry every score; a
+page whose JSON-LD drops an expected dataset name fails rather than silently
+shipping truncated coverage.
 
 - **Fragility note**: Depends on AA's RSC object shape. The parser anchors on
   `shortName` and reads per-metric fields such as `gdpval`/`gdpvalBreakdown`
@@ -107,6 +109,8 @@ JSON-LD fails rather than silently shipping truncated coverage.
 
 - **Status**: Verified
 - **Metric**: `GDPvalAA2`, a core Plan signal; published confidence bounds are diagnostic.
+  Upstream renamed the leaderboard to "GDPval-AA v2.1" (re-anchored Elo); the
+  parser gates on the exact dataset name, so a further rename fails loudly.
 - **Fixture**: `data/fixtures/aa_gdpval_v2.html`
 
 ## aa_critpt

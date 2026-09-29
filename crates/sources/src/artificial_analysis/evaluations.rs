@@ -1,9 +1,10 @@
 //! Public Artificial Analysis evaluation leaderboards.
 //!
-//! These pages render their leaderboard observations into schema.org
-//! `Dataset` JSON-LD blocks. Parsing that server-rendered structured data is
-//! both more stable and more precise than scraping the presentation table or
-//! decoding the surrounding Next.js/RSC payload.
+//! These pages stream their leaderboard observations as Next.js/RSC model
+//! objects (the `initialModels` chart cohort) and mark the page up with
+//! schema.org `Dataset` JSON-LD blocks. The JSON-LD blocks are metadata-only
+//! since AA's v2.1 reshuffle, so they serve as the dataset-name schema gate
+//! while the RSC objects carry the scores.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -64,7 +65,7 @@ struct EvaluationConfig {
 }
 
 const GDPVAL_DATASETS: &[DatasetMetric] = &[DatasetMetric {
-    dataset_name: "GDPval-AA v2 Leaderboard",
+    dataset_name: "GDPval-AA v2.1 Leaderboard",
     upstream_key: "gdpvalAaElo",
     metric: "GDPvalAA2",
     transform: Transform::Identity,
@@ -312,7 +313,6 @@ struct PendingKey {
 struct StableModelIdentity {
     key: String,
     output_name: String,
-    catalog_match: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -451,20 +451,17 @@ fn stable_model_identity(
         return StableModelIdentity {
             key: format!("canonical:{canonical}"),
             output_name: canonical,
-            catalog_match: true,
         };
     }
     if let Some(slug) = slug {
         return StableModelIdentity {
             key: format!("slug:{}", normalize_name(slug)),
             output_name: slug.to_string(),
-            catalog_match: false,
         };
     }
     StableModelIdentity {
         key: format!("label:{}", normalize_name(label)),
         output_name: label.to_string(),
-        catalog_match: false,
     }
 }
 
@@ -535,9 +532,16 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
                 continue;
             };
             matched_datasets.insert(spec.dataset_name);
-            let Some(items) = dataset.get("data").and_then(Value::as_array) else {
+            // AA stopped shipping observations in JSON-LD: the Dataset blocks
+            // are metadata-only and every score lives in the streamed RSC
+            // model objects. Keep parsing data[] when it is published again,
+            // but treat its absence as the new normal rather than drift.
+            let Some(data) = dataset.get("data") else {
+                continue;
+            };
+            let Some(items) = data.as_array() else {
                 return Err(SourceError::Parse(format!(
-                    "{} dataset {name:?} missing data[]",
+                    "{} dataset {name:?} data is not an array",
                     config.source_id
                 )));
             };
@@ -622,19 +626,18 @@ fn parse_evaluation_rows(html: &str, config: EvaluationConfig) -> Result<Vec<Raw
             config.datasets.len()
         )));
     }
+    // JSON-LD is the schema gate: the expected Dataset names must all be
+    // present. The observations themselves come from the streamed RSC model
+    // objects, which carry the complete chart cohort (and, while AA still
+    // published data[], used to supplement JSON-LD's capped top-20 view).
+    merge_rsc_rows(html, config, &alias_records, &alias_index, &mut pending)?;
+
     if pending.is_empty() {
         return Err(SourceError::Parse(format!(
             "{} contained no parseable leaderboard observations",
             config.source_id
         )));
     }
-
-    // JSON-LD deliberately caps each chart at 20 rows. The streamed model
-    // objects carry the complete observations used to render those charts;
-    // supplementing from them matters when two charts sort differently (for
-    // example Omniscience accuracy versus non-hallucination). JSON-LD remains
-    // the schema gate and source of the visible raw labels.
-    merge_rsc_rows(html, config, &alias_records, &alias_index, &mut pending)?;
 
     Ok(pending
         .into_values()
@@ -730,30 +733,28 @@ fn merge_rsc_rows(
             effort: AaEffort::from_label(label),
         };
 
-        // RSC includes hundreds of historical and untracked models. Retain
-        // every row visible in the official JSON-LD chart plus any additional
-        // row that maps to this ranking's current model catalog. This recovers
-        // complete component coverage without turning routine scoring into a
-        // fuzzy-match pass over the entire AA archive.
-        if !pending.contains_key(&key) && !identity.catalog_match {
-            continue;
-        }
-
         let observations: Vec<(&DatasetMetric, f64, Option<f64>, Option<f64>)> = config
             .datasets
             .iter()
             .filter_map(|spec| {
-                let mid = number_at_path(&item, spec.rsc_path)?;
-                mid.is_finite().then(|| {
-                    (
-                        spec,
-                        mid,
-                        number_at_path(&item, spec.rsc_lower_path),
-                        number_at_path(&item, spec.rsc_upper_path),
-                    )
-                })
+                let mid = spec
+                    .rsc_transform
+                    .apply(number_at_path(&item, spec.rsc_path)?)?;
+                Some((
+                    spec,
+                    mid,
+                    number_at_path(&item, spec.rsc_lower_path)
+                        .and_then(|value| spec.rsc_transform.apply(value)),
+                    number_at_path(&item, spec.rsc_upper_path)
+                        .and_then(|value| spec.rsc_transform.apply(value)),
+                ))
             })
             .collect();
+        // These pages stream exactly the visible chart cohort
+        // (`initialModels`), so any object carrying a configured observation
+        // is a leaderboard row. Rows that do not map to this ranking's model
+        // catalog are dropped by downstream catalog matching and surface in
+        // the fuzzy-match audit.
         if observations.is_empty() {
             continue;
         }
@@ -776,20 +777,17 @@ fn merge_rsc_rows(
             continue;
         }
         for (spec, mid, lower, upper) in observations {
-            let Some(mid) = spec.rsc_transform.apply(mid) else {
-                continue;
-            };
             useful_observations += 1;
             let metric = spec.metric.to_string();
             row.merge_field(metric.clone(), Value::from(mid), ObservationTransport::Rsc);
-            if let Some(lower) = lower.and_then(|value| spec.rsc_transform.apply(value)) {
+            if let Some(lower) = lower {
                 row.merge_field(
                     format!("{metric}CILow"),
                     Value::from(lower),
                     ObservationTransport::Rsc,
                 );
             }
-            if let Some(upper) = upper.and_then(|value| spec.rsc_transform.apply(value)) {
+            if let Some(upper) = upper {
                 row.merge_field(
                     format!("{metric}CIHigh"),
                     Value::from(upper),
@@ -1207,7 +1205,7 @@ mod tests {
     fn fallback_disclosure_is_sticky_across_json_ld_and_rsc_labels() {
         let html = r#"
         <script type="application/ld+json">{
-          "@type":"Dataset","name":"GDPval-AA v2 Leaderboard","data":[
+          "@type":"Dataset","name":"GDPval-AA v2.1 Leaderboard","data":[
             {"label":"Claude Test A","gdpvalAaElo":[
               {"name":"mid","value":1000},{"name":"lower","value":990},{"name":"upper","value":1010}
             ],"detailsUrl":"/models/test-a"},
@@ -1312,6 +1310,26 @@ mod tests {
     }
 
     #[test]
+    fn parses_rsc_rows_when_json_ld_is_metadata_only() {
+        // AA stopped shipping data[] in its JSON-LD Dataset blocks: the
+        // schema.org block remains as the dataset-name gate while the
+        // streamed RSC model objects carry every observation.
+        let html = r#"<script type="application/ld+json">{
+          "@type":"Dataset","name":"GDPval-AA v2.1 Leaderboard",
+          "description":"Elo rating for performance on real-world work tasks"
+        }</script>
+        <script>self.__next_f.push([1,"{\"initialModels\":[{\"slug\":\"gpt-5-5\",\"shortName\":\"GPT-5.5 (xhigh)\",\"releaseDate\":\"2026-02-11\",\"gdpval\":1493.72,\"gdpvalBreakdown\":{\"lower95ci\":1477.17,\"upper95ci\":1510.28}}]}"])</script>"#;
+        let rows = parse_evaluation_rows(html, GDPVAL_CONFIG)
+            .expect("metadata-only JSON-LD with RSC observations should parse");
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(upstream_label(row), "GPT-5.5 (xhigh)");
+        assert_eq!(numeric(row, "GDPvalAA2"), Some(1493.72));
+        assert_eq!(numeric(row, "GDPvalAA2CILow"), Some(1477.17));
+        assert_eq!(numeric(row, "GDPvalAA2CIHigh"), Some(1510.28));
+    }
+
+    #[test]
     fn stable_slug_takes_precedence_over_a_mutable_display_label() {
         let records = crate::embedded_alias_records();
         let index = AliasIndex::build(&records);
@@ -1323,7 +1341,7 @@ mod tests {
         );
 
         assert_eq!(identity.output_name, "anthropic/claude-opus-4.8");
-        assert!(identity.catalog_match);
+        assert!(identity.key.starts_with("canonical:"));
     }
 
     #[test]
@@ -1338,7 +1356,7 @@ mod tests {
         );
 
         assert_eq!(identity.output_name, "deepseek/deepseek-v4-flash-0731");
-        assert!(identity.catalog_match);
+        assert!(identity.key.starts_with("canonical:"));
     }
 
     #[test]
@@ -1442,11 +1460,7 @@ mod tests {
         <script>self.__next_f.push([1,"{\"slug\":\"gpt-5-5\",\"shortName\":\"GPT-5.5 (xhigh)\",\"critpt\":1.25}"])</script>"#;
         let error = parse_evaluation_rows(html, CRITPT_CONFIG)
             .expect_err("fraction metrics outside [0,1] must fail");
-        assert!(
-            error
-                .to_string()
-                .contains("no parseable leaderboard observations")
-        );
+        assert!(error.to_string().contains("leaderboard observations"));
     }
 
     #[test]
