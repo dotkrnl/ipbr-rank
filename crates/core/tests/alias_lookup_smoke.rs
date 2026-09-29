@@ -258,6 +258,73 @@ fn lookup_2026_08_models_and_deepseek_snapshots() {
             "deepseek/deepseek-v4-pro",
         ),
         ("qwen3-6-max", Some("alibaba"), "qwen/qwen3.6-max-preview"),
+        (
+            "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+            Some("anthropic"),
+            "anthropic/claude-opus-5",
+        ),
+    ];
+    for &(input, vendor, expected) in cases {
+        let matched = idx
+            .lookup_exact(input, vendor)
+            .map(|i| records[i].canonical_id.as_str());
+        assert_eq!(
+            matched,
+            Some(expected),
+            "input={input:?} vendor={vendor:?} matched={matched:?} expected={expected:?}",
+        );
+    }
+}
+
+#[test]
+fn lookup_2026_09_29_models() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    let cases: &[(&str, Option<&str>, &str)] = &[
+        (
+            "claude-opus-5-5-xhigh",
+            Some("anthropic"),
+            "anthropic/claude-opus-5.5",
+        ),
+        (
+            "Fable-5.1 (Claude Code) xHigh",
+            None,
+            "anthropic/claude-fable-5.1",
+        ),
+        ("gpt-6-astra", Some("openai"), "openai/gpt-6-astra"),
+        ("GPT-6 Sol (Max)", Some("openai"), "openai/gpt-6-sol"),
+        ("openai/gpt-6-luna", None, "openai/gpt-6-luna"),
+        (
+            "gemini-3-8-flash",
+            Some("google"),
+            "google/gemini-3.8-flash",
+        ),
+        (
+            "deepseek-v4-1-flash",
+            Some("deepseek"),
+            "deepseek/deepseek-v4.1-flash",
+        ),
+        ("grok-4-7", Some("xai"), "xai/grok-4.7"),
+        ("GLM 5.3", Some("zai"), "z-ai/glm-5.3"),
+        ("glm-5-3-flash", Some("zai"), "z-ai/glm-5.3-flash"),
+        (
+            "mistralai/mistral-medium-3.5",
+            None,
+            "mistral/mistral-medium-3.5",
+        ),
+        ("meta-models/Muse-Glimmer-30B", None, "meta/muse-glimmer"),
+        ("muse-spark-1-3", Some("meta"), "meta/muse-spark-1.3"),
+        (
+            "Nemotron 3 Ultra (thinking)",
+            None,
+            "nvidia/nemotron-3-ultra-550b-a55b",
+        ),
+        ("Qwen/Qwen3.8-27B", None, "qwen/qwen3.8-27b"),
+        (
+            "xiaomi/mimo-v2.6-pro-ultraspeed",
+            None,
+            "xiaomi/mimo-v2.6-pro",
+        ),
     ];
     for &(input, vendor, expected) in cases {
         let matched = idx
@@ -270,14 +337,13 @@ fn lookup_2026_08_models_and_deepseek_snapshots() {
         );
     }
 
-    assert!(
-        idx.match_record(
-            "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
-            Some("anthropic")
-        )
-        .is_none(),
-        "Claude Opus 5 must remain outside the ranked catalog"
-    );
+    // Distinct products that must not collapse into the new records.
+    for input in ["z-ai/glm-5.3-prime", "z-ai/glm-5.3-flashx"] {
+        assert!(
+            idx.lookup_exact(input, Some("zai")).is_none(),
+            "{input:?} must not exact-match the glm-5.3 records"
+        );
+    }
 }
 
 #[test]

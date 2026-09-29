@@ -254,6 +254,32 @@ aliases = [
     "Opus 4.8 (Claude Code) xHigh",
 ]
 
+# Claude Opus 5 — 2026-07-23 successor. Keep the moving
+# `claude-opus-latest` route unmatched; map only explicit Opus 5 identities.
+[models."anthropic/claude-opus-5"]
+vendor = "anthropic"
+aliases = [
+    "opus 5", "claude opus 5", "claude-opus-5",
+    "claude 5 opus", "claude-5-opus",
+    "anthropic/claude-opus-5", "anthropic:claude-opus-5",
+    "claude-opus-5-20260723", "anthropic/claude-opus-5-20260723",
+    # OpenRouter accelerated endpoint; it serves the same model weights.
+    "claude-opus-5-fast", "anthropic/claude-opus-5-fast",
+    "anthropic/claude-opus-5-fast-20260723",
+    # Artificial Analysis effort rows.
+    "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Xhigh Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, High Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Medium Effort)",
+    "Claude Opus 5 (Adaptive Reasoning, Low Effort)",
+    "claude-opus-5-xhigh", "claude-opus-5-high",
+    "claude-opus-5-medium", "claude-opus-5-low",
+    # ARC, Context Arena, Scale, and Sonar spellings.
+    "Claude Opus 5 (Max)", "Claude Opus 5 (High)",
+    "claude-opus-5 (max)", "claude-opus-5 (xhigh)",
+    "Claude Opus 5 Thinking", "Opus 5 (Claude Code) xHigh",
+]
+
 [models."anthropic/claude-fable-5"]
 vendor = "anthropic"
 aliases = [
@@ -884,4 +910,212 @@ aliases = [
     "thinkingmachines/inkling", "thinking-machines/inkling",
     "thinkingmachines/Inkling", "thinkingmachines/inkling-20260715",
     "Inkling (xhigh)", "Inkling (xHigh)", "inkling-xhigh",
+]
+
+# ------------------------------------------------------------------
+# Models added from the 2026-09-29 source refresh
+# ------------------------------------------------------------------
+
+# Claude Opus 5.5 — 2026-09-22 flagship. AA routes the product with an
+# automatic fallback and discloses it in the label; the "(max with fallback)"
+# rows are this product's primary observations. The Pro/orchestration routes
+# stay unmatched, as with every other family.
+[models."anthropic/claude-opus-5.5"]
+vendor = "anthropic"
+aliases = [
+    "claude-opus-5.5", "claude-opus-5-5", "claude opus 5.5",
+    "anthropic/claude-opus-5.5", "anthropic/claude-opus-5.5-20260921",
+    "Claude Opus 5.5",
+    "Claude Opus 5.5 (Adaptive Reasoning, Max Effort, Default Fallback)",
+    "Claude Opus 5.5 (Adaptive Reasoning, Xhigh Effort, Default Fallback)",
+    "Claude Opus 5.5 (Adaptive Reasoning, High Effort, Default Fallback)",
+    "Claude Opus 5.5 (max with fallback)", "Claude Opus 5.5 (xhigh with fallback)",
+    "Claude Opus 5.5 (high with fallback)",
+    "claude-opus-5-5-xhigh", "claude-opus-5-5-high", "claude-opus-5-5-medium",
+    "claude-opus-5-5-low", "claude-opus-5-5-max",
+    "claude-opus-5.5-max", "claude-opus-5.5-high",
+    "Claude Opus 5.5 (Max)", "Claude Opus 5.5 (XHigh)", "Claude Opus 5.5 (High)",
+    "Claude Opus 5.5 (Medium)", "Claude Opus 5.5 (Low)",
+    "Claude Opus 5.5 Thinking High", "Claude Opus 5.5 Thinking Medium",
+]
+
+# Claude Fable 5.1 — 2026-09-01 refresh of Fable 5. Scale publishes it under
+# the Claude Code harness spelling; keep "Fable 5.1" mapped here and distinct
+# from the fable-5 record.
+[models."anthropic/claude-fable-5.1"]
+vendor = "anthropic"
+aliases = [
+    "claude-fable-5.1", "claude-fable-5-1", "claude fable 5.1",
+    "anthropic/claude-fable-5.1", "anthropic/claude-fable-5.1-20260831",
+    "Claude Fable 5.1", "Fable 5.1",
+    "Claude Fable 5.1 (Adaptive Reasoning, Max Effort, Default Fallback)",
+    "Claude Fable 5.1 (Adaptive Reasoning, Xhigh Effort, Default Fallback)",
+    "Claude Fable 5.1 (max with fallback)", "Claude Fable 5.1 (xhigh with fallback)",
+    "claude-fable-5-1-xhigh", "claude-fable-5-1-high", "claude-fable-5-1-max",
+    "claude-fable-5.1-max",
+    "Claude Fable 5.1 (Max)", "Claude Fable 5.1 (XHigh)", "Claude Fable 5.1 (High)",
+    "Claude Fable 5.1 (Medium)", "Claude Fable 5.1 (Low)",
+    "Fable-5.1 (Claude Code) xHigh", "Fable-5.1 (Claude Code) xHigh*",
+]
+
+# GPT-6 family — Astra (2026-09-03) is the frontier tier, Sol and Luna
+# (both 2026-09-22) the flagship/API and fast tiers. Keep the `-pro`
+# orchestration endpoints unmatched, mirroring the GPT-5.6 policy.
+[models."openai/gpt-6-astra"]
+vendor = "openai"
+aliases = [
+    "gpt-6-astra", "gpt 6 astra", "GPT-6 Astra",
+    "openai/gpt-6-astra", "openai/gpt-6-astra-20260903",
+    "gpt-6-astra-max", "gpt-6-astra-xhigh", "gpt-6-astra-high",
+    "gpt-6-astra-medium", "gpt-6-astra-low", "gpt-6-astra-non-reasoning",
+    "GPT-6 Astra (Max)", "GPT-6 Astra (XHigh)", "GPT-6 Astra (High)",
+    "GPT-6 Astra (Medium)", "GPT-6 Astra (Low)", "GPT-6 Astra (None)",
+    "GPT-6 Astra Medium",
+    "GPT 6 Astra (Codex) xHigh", "GPT 6 Astra (Codex) xHigh*",
+]
+
+[models."openai/gpt-6-sol"]
+vendor = "openai"
+aliases = [
+    "gpt-6-sol", "gpt 6 sol", "GPT-6 Sol",
+    "openai/gpt-6-sol", "openai/gpt-6-sol-20260922",
+    "gpt-6-sol-max", "gpt-6-sol-xhigh", "gpt-6-sol-high",
+    "gpt-6-sol-medium", "gpt-6-sol-low", "gpt-6-sol-non-reasoning",
+    "GPT-6 Sol (Max)", "GPT-6 Sol (XHigh)", "GPT-6 Sol (High)",
+    "GPT-6 Sol (Medium)", "GPT-6 Sol (Low)", "GPT-6 Sol (None)",
+    "GPT-6 Sol High", "GPT-6 Sol Medium",
+]
+
+[models."openai/gpt-6-luna"]
+vendor = "openai"
+aliases = [
+    "gpt-6-luna", "gpt 6 luna", "GPT-6 Luna",
+    "openai/gpt-6-luna", "openai/gpt-6-luna-20260922",
+    "gpt-6-luna-max", "gpt-6-luna-xhigh", "gpt-6-luna-high",
+    "gpt-6-luna-medium", "gpt-6-luna-low", "gpt-6-luna-non-reasoning",
+    "GPT-6 Luna (Max)", "GPT-6 Luna (XHigh)", "GPT-6 Luna (High)",
+    "GPT-6 Luna (Medium)", "GPT-6 Luna (Low)", "GPT-6 Luna (None)",
+]
+
+# Gemini 3.8 Flash — 2026-09-02 Flash successor. ARC's "Provider Adapter"
+# rows stay unmatched, consistent with every other family.
+[models."google/gemini-3.8-flash"]
+vendor = "google"
+aliases = [
+    "gemini-3.8-flash", "gemini-3-8-flash", "gemini 3.8 flash",
+    "Gemini 3.8 Flash", "google/gemini-3.8-flash",
+    "google/gemini-3.8-flash-20260902",
+    "gemini-3.8-flash-high", "gemini-3.8-flash-max", "gemini-3.8-flash-low",
+    "Gemini 3.8 Flash (high)", "Gemini 3.8 Flash (High)",
+    "Gemini 3.8 Flash (Medium)", "Gemini 3.8 Flash (Low)",
+]
+
+# DeepSeek V4.1 Flash — 2026-09-10; AA's GDPval v2.1 anchor model.
+[models."deepseek/deepseek-v4.1-flash"]
+vendor = "deepseek"
+aliases = [
+    "deepseek-v4.1-flash", "deepseek-v4-1-flash", "deepseek v4.1 flash",
+    "DeepSeek V4.1 Flash", "deepseek/deepseek-v4.1-flash",
+    "deepseek/deepseek-v4.1-flash-20260910",
+    "deepseek-v4.1-flash-max",
+    "DeepSeek V4.1 Flash (Reasoning, Max Effort)",
+    "DeepSeek V4.1 Flash (Reasoning, Xhigh Effort)",
+    "deepseek-v4-1-flash-xhigh", "deepseek-v4-1-flash-high",
+]
+
+# Grok 4.7 — 2026-09-21; canonical id follows the dotted 4.5/4.6 records.
+[models."xai/grok-4.7"]
+vendor = "xai"
+aliases = [
+    "grok-4.7", "grok-4-7", "grok 4.7", "Grok 4.7",
+    "x-ai/grok-4.7", "xai/grok-4.7",
+    "grok-4-7-xhigh", "grok-4-7-high", "grok-4.7-xhigh",
+    "Grok 4.7 (xhigh)", "Grok 4.7 (high)", "Grok 4.7 (Max)",
+]
+
+# GLM-5.3 — 2026-08-18 flagship. `glm-5.3-prime` is a distinct product and
+# stays unmatched until it has its own coverage; do not alias it here.
+[models."z-ai/glm-5.3"]
+vendor = "zai"
+aliases = [
+    "glm-5.3", "glm-5-3", "glm 5.3", "GLM 5.3", "GLM-5.3",
+    "z-ai/glm-5.3", "zai/glm-5.3",
+    "glm-5.3-max", "glm-5.3 (max)", "GLM-5.3 (max)", "GLM 5.3 (max)",
+    "glm-5-3-xhigh", "glm-5-3-high",
+]
+
+# GLM 5.3 Flash — 2026-08-26 lighter tier. `glm-5.3-flashx` is a distinct
+# product; keep it unmatched.
+[models."z-ai/glm-5.3-flash"]
+vendor = "zai"
+aliases = [
+    "glm-5.3-flash", "glm-5-3-flash", "glm 5.3 flash",
+    "GLM 5.3 Flash", "GLM-5.3 Flash",
+    "z-ai/glm-5.3-flash", "zai/glm-5.3-flash",
+    "glm-5.3-flash (max)",
+]
+
+# Mistral Medium 3.5 — 2026-04-29; first Mistral entry in the catalog.
+[models."mistral/mistral-medium-3.5"]
+vendor = "mistral"
+aliases = [
+    "mistral-medium-3.5", "mistral-medium-3-5", "mistral medium 3.5",
+    "Mistral Medium 3.5", "mistralai/mistral-medium-3.5",
+    "mistralai/mistral-medium-3.5-20260430",
+    "mistral-medium-3.5 (high)",
+]
+
+# Muse Glimmer — Meta's 30B open model, 2026-08-10. Distinct from the Muse
+# Spark line; the Hugging Face id carries the parameter suffix.
+[models."meta/muse-glimmer"]
+vendor = "meta"
+aliases = [
+    "muse-glimmer", "muse glimmer", "Muse Glimmer",
+    "meta/muse-glimmer-30b", "meta-models/Muse-Glimmer-30B",
+    "Muse-Glimmer-30B", "muse-glimmer-30b",
+    "Muse Glimmer (high)", "Muse Glimmer (max)",
+]
+
+# Muse Spark 1.3 — 2026-09-02 successor; keep separate from 1.1/1.2. The
+# OpenRouter `-contributor` build stays unmatched.
+[models."meta/muse-spark-1.3"]
+vendor = "meta"
+aliases = [
+    "muse-spark-1.3", "muse spark 1.3", "muse-spark-1-3",
+    "Muse Spark 1.3", "meta/muse-spark-1.3", "Meta Muse Spark 1.3",
+    "muse-spark-1.3-max", "Muse Spark 1.3 (max)", "Muse Spark 1.3 (xhigh)",
+    "muse-spark-1.3 (xHigh)",
+]
+
+# Nemotron 3 Ultra 550B A55B — NVIDIA's 2026-06-04 open-weight flagship.
+# EQ-Bench and LM Arena publish the NVFP4 checkpoint id; MCP Atlas publishes
+# the thinking row under the short name.
+[models."nvidia/nemotron-3-ultra-550b-a55b"]
+vendor = "nvidia"
+aliases = [
+    "nvidia-nemotron-3-ultra-550b-a55b", "nemotron-3-ultra-550b-a55b",
+    "Nemotron 3 Ultra 550B A55B", "nvidia/nemotron-3-ultra-550b-a55b",
+    "nvidia/nemotron-3-ultra-550b-a55b-20260604",
+    "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4",
+    "nvidia-nemotron-3-ultra-550b-a55b-nvfp4",
+    "Nemotron 3 Ultra", "Nemotron 3 Ultra (thinking)",
+    "Nemotron 3 Ultra 550B A55B (Reasoning)",
+]
+
+# Qwen3.8 27B — 2026-08-14 open-weight mid tier alongside the hosted Max.
+[models."qwen/qwen3.8-27b"]
+vendor = "alibaba"
+aliases = [
+    "qwen3.8-27b", "qwen3-8-27b", "qwen3.8 27b", "Qwen3.8 27B",
+    "qwen/qwen3.8-27b", "qwen/qwen3.8-27b-20260814", "Qwen/Qwen3.8-27B",
+    "qwen3.8-27b (xhigh)", "Qwen3.8 27B (xhigh)",
+]
+
+# MiMo-V2.6-Pro — 2026-09-21; the OpenRouter `-ultraspeed` route serves the
+# same weights. MiMo-V2.6-Flash stays unmatched until it has coverage.
+[models."xiaomi/mimo-v2.6-pro"]
+vendor = "xiaomi"
+aliases = [
+    "mimo-v2.6-pro", "mimo-v2-6-pro", "MiMo-V2.6-Pro",
+    "xiaomi/mimo-v2.6-pro", "xiaomi/mimo-v2.6-pro-ultraspeed",
 ]
