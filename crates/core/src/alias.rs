@@ -29,8 +29,9 @@ const KNOWN_SUFFIXES: &[&str] = &[
 ];
 
 const DISTINCT_VARIANT_TOKENS: &[&str] = &[
-    "beta", "chat", "codex", "fast", "flash", "image", "instant", "lite", "mini", "minimal",
-    "multi", "nano", "latest", "preview", "pro", "small", "speciale", "turbo", "vision",
+    "beta", "chat", "codex", "fast", "flash", "full", "image", "instant", "lite", "mini",
+    "minimal", "multi", "nano", "latest", "open", "preview", "pro", "small", "speciale", "turbo",
+    "vision",
 ];
 
 fn html_unescape(s: &str) -> String {
@@ -661,6 +662,8 @@ mod tests {
             ),
             rec("z-ai/glm-4.6", Vendor::Zai, &["glm-4.6"]),
             rec("xai/grok-4.20", Vendor::Xai, &["x-ai/grok-4.20"]),
+            rec("meta/muse-wonder", Vendor::Meta, &["muse-wonder"]),
+            rec("meta/muse-spark", Vendor::Meta, &["muse-spark"]),
         ];
         let idx = AliasIndex::build(&recs);
         for (input, vendor) in [
@@ -682,6 +685,8 @@ mod tests {
             ("glm-4.6v-turbo", Some("zai")),
             ("x-ai/grok-4.20-multi-agent", Some("xai")),
             ("x-ai/grok-4.20-multi-agent-20260309", Some("xai")),
+            ("muse-wonder-full-max", Some("meta")),
+            ("muse-spark-open-xhigh", Some("meta")),
         ] {
             assert!(
                 idx.match_record(input, vendor).is_none(),

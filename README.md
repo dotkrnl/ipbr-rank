@@ -10,6 +10,8 @@ evidence quality and provenance, and marks genuinely under-supported roles
 provisional without penalizing established models for gaps on narrow new
 leaderboards.
 See [`docs/methodology.md`](docs/methodology.md) for the scoring contract.
+See [`docs/model-roster.md`](docs/model-roster.md) for model admission, retirement,
+and the latest coverage audit.
 
 ## Quick Start
 

@@ -104,30 +104,6 @@ aliases = [
     "gpt-5-4-mini-non-reasoning",
 ]
 
-[models."openai/gpt-5.3-codex"]
-vendor = "openai"
-aliases = [
-    "gpt-5.3-codex", "gpt 5.3 codex", "gpt-5-3-codex",
-    "openai/gpt-5.3-codex", "gpt-5.3-codex-high",
-    # Sonar uses product-family-first ordering.
-    "gpt codex 5.3", "gpt-codex-5.3", "gpt-codex-5-3", "gpt-codex-5.3-high",
-    # LMArena webdev harness spelling.
-    "gpt-5.3-codex (codex-harness)",
-]
-
-[models."openai/gpt-5.2-codex"]
-vendor = "openai"
-aliases = [
-    "gpt-5.2-codex", "gpt 5.2 codex", "gpt-5-2-codex",
-    "openai/gpt-5.2-codex", "openai:gpt-5.2-codex",
-    "GPT-5.2-Codex", "GPT-5-2 Codex", "GPT 5.2 Codex",
-    "GPT-5.2 Codex High", "GPT-5.2 Codex Medium",
-    # Sonar uses product-family-first ordering.
-    "GPT Codex 5.2 High",
-    "gpt-5.2-codex-high", "gpt-5.2-codex-medium",
-    "gpt-5-2-codex-high", "gpt-5-2-codex-medium",
-]
-
 [models."anthropic/claude-sonnet-4"]
 vendor = "anthropic"
 aliases = [
@@ -396,14 +372,6 @@ aliases = [
     "gemini-3-flash-grounding", "gemini-3-flash (thinking-minimal)",
 ]
 
-[models."google/gemini-2.5-flash"]
-vendor = "google"
-aliases = [
-    "gemini flash 2.5", "gemini 2.5 flash",
-    "gemini-2.5-flash", "gemini-2-5-flash",
-    "google/gemini-2.5-flash",
-]
-
 [models."google/gemini-2.5-pro"]
 vendor = "google"
 aliases = [
@@ -660,13 +628,6 @@ aliases = [
     "grok-4.20-beta-0309-non-reasoning", "grok-4.20-0309-non-reasoning",
 ]
 
-[models."xai/grok-code-fast-1"]
-vendor = "xai"
-aliases = [
-    "grok-code-fast-1", "grok code fast 1", "grok-code-fast",
-    "x-ai/grok-code-fast-1", "xai/grok-code-fast-1",
-]
-
 [models."z-ai/glm-4.6"]
 vendor = "zai"
 aliases = [
@@ -683,17 +644,6 @@ vendor = "zai"
 aliases = [
     "glm-4.7", "glm 4.7", "glm-4-7",
     "z-ai/glm-4.7", "zai/glm-4.7", "zai-org/GLM-4.7", "glm-4p7",
-]
-
-[models."moonshotai/kimi-k2-0905"]
-vendor = "moonshot"
-aliases = [
-    "kimi-k2-0905-preview", "kimi k2 0905", "kimi-k2-0905",
-    "moonshotai/kimi-k2-0905", "moonshot/kimi-k2-0905",
-    "Kimi K2 Instruct 0905", "Kimi-K2-Instruct-0905",
-    "moonshotai/Kimi-K2-Instruct-0905",
-    # Turbo is the same model parameters, just a faster API endpoint
-    "kimi-k2-turbo-preview", "kimi k2 turbo", "kimi-k2-turbo",
 ]
 
 # ------------------------------------------------------------------
@@ -1118,4 +1068,314 @@ vendor = "xiaomi"
 aliases = [
     "mimo-v2.6-pro", "mimo-v2-6-pro", "MiMo-V2.6-Pro",
     "xiaomi/mimo-v2.6-pro", "xiaomi/mimo-v2.6-pro-ultraspeed",
+]
+
+
+# November 2026 coverage refresh. See docs/model-roster.md for admission evidence.
+
+[models."openai/gpt-6.1-sol"]
+vendor = "openai"
+aliases = [
+    "GPT 6.1 Sol",
+    "GPT-6.1 Sol (High)",
+    "GPT-6.1 Sol (Low)",
+    "GPT-6.1 Sol (Max)",
+    "GPT-6.1 Sol (Medium)",
+    "GPT-6.1 Sol (XHigh)",
+    "GPT-6.1 Sol (Xhigh)",
+    "GPT-6.1 Sol (high)",
+    "GPT-6.1 Sol (low)",
+    "GPT-6.1 Sol (max)",
+    "GPT-6.1 Sol (medium)",
+    "GPT-6.1 Sol (xhigh)",
+    "GPT-6.1 Sol Medium",
+    "gpt-6-1-sol",
+    "gpt-6-1-sol-high",
+    "gpt-6-1-sol-low",
+    "gpt-6-1-sol-medium",
+    "gpt-6-1-sol-xhigh",
+    "gpt-6.1-sol",
+    "gpt-6.1-sol-max",
+    "openai/gpt-6.1-sol",
+    "openai/gpt-6.1-sol-20260929",
+    "openai/gpt-6.1-sol:batch",
+]
+
+[models."openai/gpt-6.1-terra"]
+vendor = "openai"
+aliases = [
+    "GPT-6.1 Terra (High)",
+    "GPT-6.1 Terra (Low)",
+    "GPT-6.1 Terra (Max)",
+    "GPT-6.1 Terra (Medium)",
+    "GPT-6.1 Terra (Non-reasoning)",
+    "GPT-6.1 Terra (Xhigh)",
+    "GPT-6.1 Terra (high)",
+    "GPT-6.1 Terra (low)",
+    "GPT-6.1 Terra (max)",
+    "GPT-6.1 Terra (medium)",
+    "GPT-6.1 Terra (non-reasoning)",
+    "GPT-6.1 Terra (xhigh)",
+    "gpt-6-1-terra",
+    "gpt-6-1-terra-high",
+    "gpt-6-1-terra-low",
+    "gpt-6-1-terra-medium",
+    "gpt-6-1-terra-non-reasoning",
+    "gpt-6-1-terra-xhigh",
+    "gpt-6.1-terra",
+    "openai/gpt-6.1-terra",
+    "openai/gpt-6.1-terra-20261026",
+    "openai/gpt-6.1-terra:batch",
+]
+
+[models."anthropic/claude-sonnet-5.5"]
+vendor = "anthropic"
+aliases = [
+    "Claude Sonnet 5.5 (High)",
+    "Claude Sonnet 5.5 (High, Default Fallback)",
+    "Claude Sonnet 5.5 (Low)",
+    "Claude Sonnet 5.5 (Low, Default Fallback)",
+    "Claude Sonnet 5.5 (Max, Default Fallback)",
+    "Claude Sonnet 5.5 (Medium)",
+    "Claude Sonnet 5.5 (Medium, Default Fallback)",
+    "Claude Sonnet 5.5 (XHigh)",
+    "Claude Sonnet 5.5 (Xhigh, Default Fallback)",
+    "Claude Sonnet 5.5 (high with fallback)",
+    "Claude Sonnet 5.5 (low with fallback)",
+    "Claude Sonnet 5.5 (max with fallback)",
+    "Claude Sonnet 5.5 (medium with fallback)",
+    "Claude Sonnet 5.5 (xHigh)",
+    "Claude Sonnet 5.5 (xhigh with fallback)",
+    "Claude Sonnet 5.5 Thinking High",
+    "anthropic/claude-sonnet-5.5",
+    "anthropic/claude-sonnet-5.5-20260928",
+    "anthropic/claude-sonnet-5.5:batch",
+    "claude-sonnet-5-5",
+    "claude-sonnet-5-5-high",
+    "claude-sonnet-5-5-low",
+    "claude-sonnet-5-5-medium",
+    "claude-sonnet-5-5-xhigh",
+    "claude-sonnet-5.5",
+]
+
+[models."anthropic/claude-haiku-5.5"]
+vendor = "anthropic"
+aliases = [
+    "Claude Haiku 5.5 (High)",
+    "Claude Haiku 5.5 (Low)",
+    "Claude Haiku 5.5 (Max)",
+    "Claude Haiku 5.5 (Medium)",
+    "Claude Haiku 5.5 (XHigh)",
+    "Claude Haiku 5.5 (Xhigh)",
+    "Claude Haiku 5.5 (high)",
+    "Claude Haiku 5.5 (low)",
+    "Claude Haiku 5.5 (max)",
+    "Claude Haiku 5.5 (medium)",
+    "Claude Haiku 5.5 (xhigh)",
+    "anthropic/claude-haiku-5.5",
+    "anthropic/claude-haiku-5.5-20261007",
+    "anthropic/claude-haiku-5.5:batch",
+    "claude-haiku-5-5",
+    "claude-haiku-5-5-high",
+    "claude-haiku-5-5-low",
+    "claude-haiku-5-5-medium",
+    "claude-haiku-5-5-xhigh",
+    "claude-haiku-5.5",
+]
+
+[models."google/gemini-4-argon"]
+vendor = "google"
+aliases = [
+    "Gemini 4 Argon",
+    "Gemini 4 Argon (High)",
+    "Gemini 4 Argon (Low)",
+    "Gemini 4 Argon (Medium)",
+    "Gemini 4 Argon (high)",
+    "Gemini 4 Argon High",
+    "gemini-4-argon",
+    "google/gemini-4-argon",
+    "google/gemini-4-argon-20261013",
+    "google/gemini-4-argon:batch",
+]
+
+[models."google/gemini-4-carbon"]
+vendor = "google"
+aliases = [
+    "Gemini 4 Carbon (High)",
+    "Gemini 4 Carbon (Low)",
+    "Gemini 4 Carbon (Medium)",
+    "Gemini 4 Carbon (high)",
+    "Gemini 4 Carbon (low)",
+    "Gemini 4 Carbon (medium)",
+    "gemini-4-carbon",
+    "gemini-4-carbon-low",
+    "gemini-4-carbon-medium",
+]
+
+[models."google/gemini-3.7-flash"]
+vendor = "google"
+aliases = [
+    "Gemini 3.7 Flash (High)",
+    "Gemini 3.7 Flash (Low)",
+    "Gemini 3.7 Flash (Medium)",
+    "gemini-3-7-flash",
+    "gemini-3-7-flash-medium",
+    "gemini-3.7-flash",
+    "gemini-3.7-flash (high)",
+    "google/gemini-3.7-flash",
+    "google/gemini-3.7-flash-20260813",
+    "google/gemini-3.7-flash:batch",
+]
+
+[models."moonshotai/kimi-k3.1-pro"]
+vendor = "moonshot"
+aliases = [
+    "Kimi K3.1 Pro",
+    "Kimi K3.1 Pro (Max)",
+    "kimi-k3-1-pro",
+    "kimi-k3.1-pro",
+    "moonshotai/kimi-k3.1-pro",
+    "moonshotai/kimi-k3.1-pro-20261023",
+]
+
+[models."meta/muse-wonder"]
+vendor = "meta"
+aliases = [
+    "Muse Wonder (Max)",
+    "Muse Wonder (max)",
+    "Muse Wonder 1.0",
+    "meta/muse-wonder",
+    "meta/muse-wonder-20261012",
+    "muse-wonder",
+    "muse-wonder-1.0",
+]
+
+[models."meta/muse-wonder-full"]
+vendor = "meta"
+aliases = [
+    "Muse Wonder Full (Max)",
+    "Muse Wonder Full (max)",
+    "muse-wonder-full",
+    "muse-wonder-full-1.0",
+]
+
+[models."meta/muse-spark-open"]
+vendor = "meta"
+aliases = [
+    "Muse Spark Open",
+    "Muse Spark Open (High)",
+    "Muse Spark Open (Low)",
+    "Muse Spark Open (Medium)",
+    "Muse Spark Open (XHigh)",
+    "Muse Spark Open (Xhigh)",
+    "Muse Spark Open (xhigh)",
+    "meta/muse-spark-open",
+    "meta/muse-spark-open-20261015",
+    "muse-spark-open",
+]
+
+[models."deepseek/deepseek-v4.1-flash-1017"]
+vendor = "deepseek"
+aliases = [
+    "DeepSeek V4.1 Flash 1017 (High)",
+    "DeepSeek V4.1 Flash 1017 (Low)",
+    "DeepSeek V4.1 Flash 1017 (Max)",
+    "DeepSeek V4.1 Flash 1017 (Non-reasoning)",
+    "DeepSeek V4.1 Flash 1017 (None)",
+    "DeepSeek V4.1 Flash 1017 (high)",
+    "DeepSeek V4.1 Flash 1017 (max)",
+    "DeepSeek V4.1 Flash 1017 (non-reasoning)",
+    "DeepSeek-V4.1-Flash-20261017 (Max)",
+    "deepseek-v4-1-flash-1017",
+    "deepseek-v4-1-flash-1017-high",
+    "deepseek-v4-1-flash-1017-non-reasoning",
+    "deepseek-v4.1-flash-1017",
+    "deepseek/deepseek-v4.1-flash-1017",
+    "deepseek/deepseek-v4.1-flash-20261017",
+]
+
+[models."minimax/minimax-m3.1-flash"]
+vendor = "minimax"
+aliases = [
+    "MiniMax-M3.1-Flash",
+    "minimax-m3-1-flash",
+    "minimax-m3.1-flash",
+    "minimax/minimax-m3.1-flash",
+    "minimax/minimax-m3.1-flash-20261019",
+]
+
+[models."inclusionai/ling-3.1-flash-1019"]
+vendor = "inclusionai"
+aliases = [
+    "Ling 3.1 Flash 1019",
+    "ling-3-1-flash-1019",
+    "ling-3.1-flash-1019",
+]
+
+[models."stepfun/step-5-preview"]
+vendor = "stepfun"
+aliases = [
+    "Step 5 Preview",
+    "Step 5 Preview (High)",
+    "step-5",
+    "step-5-preview",
+    "stepfun/step-5-preview",
+    "stepfun/step-5-preview-20261008",
+]
+
+[models."ifm/k2-horizon-375b-a23b"]
+vendor = "ifm"
+aliases = [
+    "K2 Horizon 375B A23B",
+    "k2-horizon-375b-a23b",
+]
+
+[models."reflection/beam-1.0"]
+vendor = "reflection"
+aliases = [
+    "Beam 1.0",
+    "Beam 1.0 (High)",
+    "Beam 1.0 (Low)",
+    "Beam 1.0 (Medium)",
+    "Beam 1.0 (XHigh)",
+    "Beam 1.0 501B A23B",
+    "beam-1.0",
+    "reflection-beam",
+    "reflection/beam-1.0-501b-a23b",
+    "reflection/beam-1.0-501b-a23b-20261016",
+]
+
+[models."nvidia/nemotron-3.5-super-vl"]
+vendor = "nvidia"
+aliases = [
+    "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B (NVFP4)",
+    "Nemotron 3.5 Super VL",
+    "Nemotron 3.5 Super VL (High)",
+    "Nemotron 3.5 Super VL (Medium)",
+    "Nemotron 3.5 Super VL (None)",
+    "nemotron-3-5-super-vl",
+    "nemotron-3.5-super-vl",
+    "nvidia/nemotron-3.5-super-vl",
+    "nvidia/nemotron-3.5-super-vl-20261015",
+    "nvidia/nemotron-3.5-super-vl:free",
+]
+
+[models."thinkingmachines/inkling-small"]
+vendor = "thinking-machines"
+aliases = [
+    "Inkling Small",
+    "Inkling Small (High)",
+    "Inkling Small (Low)",
+    "Inkling Small (Medium)",
+    "Inkling Small (Minimal)",
+    "Inkling Small (None)",
+    "Inkling Small (XHigh)",
+    "Inkling-Small",
+    "Inkling-small",
+    "inkling-small",
+    "inkling-small (max)",
+    "thinkingmachines/Inkling-Small",
+    "thinkingmachines/inkling-small",
+    "thinkingmachines/inkling-small-20260730",
+    "thinkingmachines/inkling-small:free",
 ]

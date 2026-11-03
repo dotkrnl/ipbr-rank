@@ -1,6 +1,82 @@
 use ipbr_core::{alias::AliasIndex, required_aliases};
 
 #[test]
+fn lookup_november_2026_source_identities() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    for (input, expected) in [
+        ("gpt-6-1-sol", "openai/gpt-6.1-sol"),
+        ("openai/gpt-6.1-terra-20261026", "openai/gpt-6.1-terra"),
+        (
+            "Claude Sonnet 5.5 Thinking High",
+            "anthropic/claude-sonnet-5.5",
+        ),
+        ("claude-haiku-5-5", "anthropic/claude-haiku-5.5"),
+        ("Gemini 4 Argon (High)", "google/gemini-4-argon"),
+        ("Gemini 4 Carbon (High)", "google/gemini-4-carbon"),
+        ("gemini-3-7-flash-medium", "google/gemini-3.7-flash"),
+        ("kimi-k3-1-pro", "moonshotai/kimi-k3.1-pro"),
+        ("Muse Wonder 1.0", "meta/muse-wonder"),
+        ("Muse Wonder Full (Max)", "meta/muse-wonder-full"),
+        ("muse-spark-open", "meta/muse-spark-open"),
+        (
+            "DeepSeek-V4.1-Flash-20261017 (Max)",
+            "deepseek/deepseek-v4.1-flash-1017",
+        ),
+        ("deepseek-v4-1-flash", "deepseek/deepseek-v4.1-flash"),
+        ("minimax-m3-1-flash", "minimax/minimax-m3.1-flash"),
+        ("ling-3-1-flash-1019", "inclusionai/ling-3.1-flash-1019"),
+        ("step-5", "stepfun/step-5-preview"),
+        ("k2-horizon-375b-a23b", "ifm/k2-horizon-375b-a23b"),
+        ("reflection-beam", "reflection/beam-1.0"),
+        ("Beam 1.0 501B A23B", "reflection/beam-1.0"),
+        (
+            "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B (NVFP4)",
+            "nvidia/nemotron-3.5-super-vl",
+        ),
+        (
+            "thinkingmachines/Inkling-Small",
+            "thinkingmachines/inkling-small",
+        ),
+    ] {
+        assert_eq!(
+            idx.lookup_exact(input, None)
+                .map(|i| records[i].canonical_id.as_str()),
+            Some(expected),
+            "audited source identity {input:?} must match exactly",
+        );
+    }
+}
+
+#[test]
+fn retired_and_unaudited_products_do_not_match_the_active_roster() {
+    let records = required_aliases::load_embedded().unwrap();
+    let idx = AliasIndex::build(&records);
+    for input in [
+        "google/gemini-2.5-flash",
+        "Kimi K2 Instruct 0905",
+        "moonshotai/kimi-k2-0905",
+        "GPT Codex 5.2 High",
+        "openai/gpt-5.2-codex",
+        "GPT Codex 5.3 High",
+        "gpt-5.3-codex (codex-harness)",
+        "xai/grok-code-fast-1",
+        "openai/gpt-6.1-sol-pro",
+        "openai/gpt-6.1-terra-pro",
+        "inclusionai/ling-3.1-flash-20261002",
+        "inclusionai/ling-3.1-flash",
+        "mistral-large-4",
+        "mimo-v2.6-flash",
+        "openrouter/horizon-alpha",
+    ] {
+        assert!(
+            idx.match_record(input, None).is_none(),
+            "{input:?} must stay unmatched"
+        );
+    }
+}
+
+#[test]
 fn lookup_gpt_56_family() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
@@ -71,13 +147,7 @@ fn lookup_refreshed_source_spellings() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
     let cases: &[(&str, Option<&str>, &str)] = &[
-        ("GPT Codex 5.3 High", Some("openai"), "openai/gpt-5.3-codex"),
         ("GLM-4.6 (T=1)", None, "z-ai/glm-4.6"),
-        (
-            "gpt-5.3-codex (codex-harness)",
-            Some("openai"),
-            "openai/gpt-5.3-codex",
-        ),
         (
             "gpt-5.5-xhigh (codex-harness)",
             Some("openai"),
@@ -133,7 +203,6 @@ fn lookup_audited_source_spellings_at_exact_tier() {
         ("zai-org/GLM-5.1", None, "z-ai/glm-5.1"),
         ("zai-org/GLM-5.2", None, "z-ai/glm-5.2"),
         ("deepseek-v3p2", None, "deepseek/deepseek-v3.2"),
-        ("GPT Codex 5.2 High", None, "openai/gpt-5.2-codex"),
         (
             "Claude Sonnet 4.6 (Adaptive Reasoning, Max Effort)",
             None,
@@ -145,7 +214,6 @@ fn lookup_audited_source_spellings_at_exact_tier() {
             None,
             "anthropic/claude-opus-4.5",
         ),
-        ("Kimi K2 Instruct 0905", None, "moonshotai/kimi-k2-0905"),
     ];
     for &(input, vendor, expected) in cases {
         let matched = idx
@@ -351,7 +419,6 @@ fn lookup_2026_06_12_models() {
     let records = required_aliases::load_embedded().unwrap();
     let idx = AliasIndex::build(&records);
     let cases: &[(&str, Option<&str>, &str)] = &[
-        ("gpt-5.2-codex", Some("openai"), "openai/gpt-5.2-codex"),
         ("gpt-5.4-mini-high", Some("openai"), "openai/gpt-5.4-mini"),
         (
             "deepseek-v3-2-reasoning-0925",
@@ -485,7 +552,6 @@ fn fuzzy_lookup_rejects_distinct_lmarena_variants() {
         ("Kimi K2 Instruct", Some("moonshot")),
         ("deepseek-v3-2-speciale", Some("deepseek")),
         ("deepseek-v3-2-speciale", None),
-        ("thinkingmachines/inkling-small", Some("thinking-machines")),
     ];
     for &(input, vendor) in cases {
         let matched = idx

@@ -43,7 +43,6 @@ fn ingest_fixture_rows(rows: Vec<ipbr_core::RawRow>) -> (Vec<ModelRecord>, usize
 const FLAGSHIPS: &[&str] = &[
     "openai/gpt-5.5",
     "openai/gpt-5.4",
-    "openai/gpt-5.3-codex",
     "anthropic/claude-sonnet-4",
     "anthropic/claude-sonnet-4.5",
     "anthropic/claude-opus-4.6",
@@ -51,7 +50,6 @@ const FLAGSHIPS: &[&str] = &[
     "google/gemini-3.1-pro-preview",
     "google/gemini-3-pro-preview",
     "google/gemini-3-flash-preview",
-    "google/gemini-2.5-flash",
     "google/gemini-2.5-pro",
     "moonshotai/kimi-k2.7-code",
     "moonshotai/kimi-k2.6",
