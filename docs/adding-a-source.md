@@ -84,10 +84,11 @@ impl Source for YourSource {
             ))?)?
         } else {
             let payload = http.get_json(URL, &[]).await?;
+            let rows = crate::require_rows(parse_response(&payload)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &payload)?;
             }
-            payload
+            return Ok(rows);
         };
 
         parse_response(&payload)
@@ -174,6 +175,12 @@ comparable effort variants, document its best-row rule in `docs/sources.md` and
 attach the winning submission label to `<Metric>__evidence_note`. Core ingestion
 removes that reserved field from numeric/effort processing and emits it as the
 direct metric's citation.
+
+Validate live responses and reject empty row sets before replacing the cache.
+Scheduled best-effort refreshes rely on the last valid payload after failures;
+fallback reads must preserve its modification time. Paginated sources should
+save resumable progress because best-effort refreshes allow two minutes per
+source.
 
 Do not assume `preview` or `latest` is a harmless suffix. Preview builds and
 moving aliases require an explicit entry in `data/required_aliases.toml`; a

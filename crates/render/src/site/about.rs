@@ -38,6 +38,7 @@ pub fn render_about(scoreboard: &Scoreboard) -> String {
 <p>The ranking intentionally compares served products, not every effort or agent-harness permutation. Automatic vendor routing is included; separately named multi-agent or premium endpoints remain distinct. A score can therefore combine the best available public observation from benchmarks that expose different configuration detail. The API labels this policy <code>best_available_max_effort</code>; it should not be read as a controlled same-harness experiment.</p>
 
 <h2>Sources</h2>
+<p>A stale source uses its last valid cached observations after a failed refresh. An unavailable source contributes no observations. The scoreboard update time does not imply every source refreshed successfully.</p>
 <div class="doc-scroll"><table><thead><tr><th>source</th><th>status</th><th>rows</th><th>matched</th><th>unmatched</th></tr></thead><tbody>"#);
 
     for (source, summary) in &scoreboard.source_summary {

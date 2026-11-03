@@ -66,10 +66,16 @@ impl Source for HilBenchSource {
             let html = http
                 .get_text(HIL_URL, &[("User-Agent", "ipbr-rank")])
                 .await?;
+            let rows = crate::require_rows(parse_rows_with_model_map(
+                &html,
+                "HiLBench",
+                self.id(),
+                clean_scale_agentic_model_name,
+            )?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_html(dir, self.cache_key(), &html)?;
             }
-            html
+            return Ok(rows);
         };
         parse_rows_with_model_map(&html, "HiLBench", self.id(), clean_scale_agentic_model_name)
     }

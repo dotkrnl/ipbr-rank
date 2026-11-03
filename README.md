@@ -55,10 +55,13 @@ npx wrangler login
 scripts/refresh.sh --publish
 ```
 
-The current production deployment is at https://ipbr.pages.dev. CI re-runs
-`refresh.sh --publish` every 10 minutes on `main` (see
-`.github/workflows/refresh.yml`), so the site stays current without manual
-intervention.
+The current production deployment is at https://ipbr.pages.dev. The refresh
+workflow is scheduled every 10 minutes on `main` (see
+`.github/workflows/refresh.yml`). It runs `all --best-effort` and deploys the
+rendered site. Failed sources reuse valid cached observations when available;
+sources without usable data are omitted. Stale and unavailable sources appear
+in the site's source table and the workflow run summary. A run with no matched
+benchmark source fails before writing output, preserving the published site.
 
 ### Rank change
 
@@ -270,6 +273,11 @@ Command options (render, all):
                                 against (see "Rank change"). Render-only; never
                                 persisted. Missing/unreadable file -> no chips.
 
+Command options (all):
+  --best-effort                 Recover from live source failures using valid
+                                stale cache, or omit an unavailable source.
+                                Cannot be combined with --offline.
+
 Options:
   --out DIR                     Output directory [default: out]
   --coefficients PATH           Override embedded coefficients.toml
@@ -301,10 +309,23 @@ cache regardless of mtime.
 To force a refresh of one source, delete its cache file (or `touch -t` it to
 the past) and rerun.
 
+Prefer expiring the timestamp to deleting the file when using `all --best-effort`
+(also accepted by `scripts/refresh.sh --best-effort`). Invalid or empty live
+responses never replace the last valid cached payload, and fallback reads do
+not renew its TTL. No test fixtures are used as production fallbacks. Missing
+credentials can still fall back to a valid cache. Ordinary `all`, `fetch`,
+`score`, and `verify-sources` retain their strict error handling.
+Best-effort refreshes allow up to two minutes per source, including retries and
+pagination. LMArena retains partially downloaded pages across runs and resumes
+them on the next attempt; a timeout can therefore reuse stale data while the
+new response is still being downloaded.
+
 The HTTP layer also retries on `429 Too Many Requests` and `5xx` with
-exponential backoff (500 ms → 60 s, up to 6 attempts), honoring `Retry-After`
+exponential backoff (500 ms → 60 s, up to 6 retries), honoring `Retry-After`
 when present — the HuggingFace datasets-server in particular rate-limits
 aggressively while paginating LMArena, so set `HF_TOKEN` when available.
+Connections time out after 10 seconds and individual HTTP attempts after 30
+seconds; retry delays, including `Retry-After`, are capped at 60 seconds.
 
 ### Offline Mode (for CI/tests)
 

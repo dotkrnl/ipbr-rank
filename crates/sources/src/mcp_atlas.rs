@@ -80,10 +80,11 @@ impl Source for McpAtlasSource {
             read_cached_string(&cache_html_path(dir, self.cache_key()))?
         } else {
             let html = http.get_text(URL, &[("User-Agent", "ipbr-rank")]).await?;
+            let rows = crate::require_rows(parse_rows(&html, "MCPAtlas", SOURCE_ID)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_html(dir, self.cache_key(), &html)?;
             }
-            html
+            return Ok(rows);
         };
         parse_rows(&html, "MCPAtlas", SOURCE_ID)
     }

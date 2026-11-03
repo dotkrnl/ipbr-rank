@@ -174,10 +174,16 @@ async fn fetch_scale_leaderboard(
         read_cached_string(&cache_html_path(dir, cache_key))?
     } else {
         let html = http.get_text(url, &[("User-Agent", "ipbr-rank")]).await?;
+        let rows = crate::require_rows(parse_rows_with_model_map(
+            &html,
+            metric,
+            source_id,
+            clean_swe_atlas_model_name,
+        )?)?;
         if let Some(dir) = opts.cache_dir {
             write_cache_html(dir, cache_key, &html)?;
         }
-        html
+        return Ok(rows);
     };
     parse_rows_with_model_map(&html, metric, source_id, clean_swe_atlas_model_name)
 }

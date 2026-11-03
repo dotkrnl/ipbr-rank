@@ -34,17 +34,20 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: cache
-          key: upstream-cache-${{ github.run_id }}
+          key: upstream-cache-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             upstream-cache-
 
       - name: Invalidate high-churn source cache on demand
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
-          rm -f cache/artificial_analysis_llms.json
+          # Expire the response without deleting the fallback for an outage.
+          if [[ -f cache/artificial_analysis_llms.json ]]; then
+            touch -d '1970-01-01 UTC' cache/artificial_analysis_llms.json
+          fi
 
       - name: Build CLI
-        run: cargo build --release -p ipbr-rank-cli
+        run: cargo build --locked --release -p ipbr-rank-cli
 
       # Rank-change chips compare against the scoreboard as it stood at the
       # start of last week, so the baseline is stable for a whole week rather
@@ -64,14 +67,31 @@ jobs:
         env:
           AA_API_KEY: ${{ secrets.AA_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: ./target/release/ipbr-rank --cache cache --out out all ${{ steps.baseline.outputs.prev_arg }}
+        run: ./target/release/ipbr-rank --cache cache --out out all --best-effort ${{ steps.baseline.outputs.prev_arg }}
+
+      - name: Report source health
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import tomllib
+
+          scoreboard = pathlib.Path('out/scoreboard.toml')
+          if scoreboard.exists():
+              sources = tomllib.loads(scoreboard.read_text())['sources']
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write('| Source | Status | Rows | Matched |\n|---|---|---:|---:|\n')
+                  for name, source in sorted(sources.items()):
+                      summary.write(f"| {name} | {source['status']} | {source['n_rows_ingested']} | {source['n_rows_matched']} |\n")
+          PY
 
       - name: Save upstream response cache
         if: always()
         uses: actions/cache/save@v4
         with:
           path: cache
-          key: upstream-cache-${{ github.run_id }}
+          key: upstream-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Deploy to Cloudflare Pages
         env:

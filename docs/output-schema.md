@@ -69,6 +69,12 @@ n_rows_unmatched = 15
 can be `skipped` when a required secret is unavailable. Row counts distinguish
 parsed upstream coverage from canonical model matches.
 
+For `all --best-effort`, `stale` means the refresh could not obtain a current
+response and reused valid cached observations. `unavailable` means neither the
+live response nor the cache was usable; its row counts are zero. These statuses
+also appear in the site's source table. `generated_at` is the scoreboard build
+time, not the observation time of every source.
+
 ### Model records
 
 Models are repeated TOML array tables sorted deterministically by canonical ID:

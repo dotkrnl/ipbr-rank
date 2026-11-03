@@ -128,10 +128,11 @@ async fn fetch_terminal_bench(
         read_cached_string(&cache_html_path(dir, cache_key))?
     } else {
         let html = http.get_text(url, &[]).await?;
+        let rows = crate::require_rows(parse_rows(&html, metric, source_id)?)?;
         if let Some(dir) = opts.cache_dir {
             write_cache_html(dir, cache_key, &html)?;
         }
-        html
+        return Ok(rows);
     };
     parse_rows(&html, metric, source_id)
 }

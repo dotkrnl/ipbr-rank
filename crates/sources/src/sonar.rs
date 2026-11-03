@@ -105,10 +105,11 @@ impl Source for SonarSource {
             ))?)?
         } else {
             let payload = fetch_live_payload(http).await?;
+            let rows = crate::require_rows(parse_rows(&payload)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &payload)?;
             }
-            payload
+            return Ok(rows);
         };
         parse_rows(&payload)
     }

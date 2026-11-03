@@ -93,10 +93,11 @@ impl Source for ArcAgiSource {
                 "models": models,
                 "evaluations": evals,
             });
+            let rows = crate::require_rows(parse_rows(&combined)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &combined)?;
             }
-            combined
+            return Ok(rows);
         };
         parse_rows(&combined)
     }

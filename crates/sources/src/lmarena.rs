@@ -105,13 +105,24 @@ impl Source for LmArenaSource {
         if !refresh_cache {
             append_live_web_pages_to_payload(http, &mut payload).await;
         }
+        let rows = match parse_rows(&payload).and_then(crate::require_rows) {
+            Ok(rows) => rows,
+            Err(error) => {
+                // A completed but invalid response must not be resumed forever.
+                // Interrupted downloads still retain their partial progress.
+                if let (true, Some(path)) = (refresh_cache, partial_cache.as_deref()) {
+                    remove_partial_cache(path)?;
+                }
+                return Err(error);
+            }
+        };
         if let (true, Some(dir)) = (refresh_cache, opts.cache_dir) {
             write_cache_json(dir, self.cache_key(), &payload)?;
         }
         if let (true, Some(path)) = (refresh_cache, partial_cache.as_deref()) {
             remove_partial_cache(path)?;
         }
-        parse_rows(&payload)
+        Ok(rows)
     }
 }
 
@@ -654,8 +665,13 @@ mod tests {
             self.calls.fetch_add(1, Ordering::Relaxed);
             assert_eq!(headers, &[("Authorization", "Bearer hf_test_token")]);
             Ok(json!({
-                "rows": [],
-                "num_rows_total": 0
+                "rows": [{"row": {
+                    "model_name": "gpt-5.5",
+                    "organization": "openai",
+                    "rating": 1500.0,
+                    "category": "overall"
+                }}],
+                "num_rows_total": 1
             }))
         }
 
@@ -685,9 +701,9 @@ mod tests {
                 &secrets,
             )
             .await
-            .expect("empty HF pages still parse");
+            .expect("authenticated HF pages should parse");
 
-        assert!(rows.is_empty());
+        assert!(!rows.is_empty());
         assert_eq!(http.calls.load(Ordering::Relaxed), CONFIGS.len());
     }
 
@@ -1000,6 +1016,58 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn empty_completed_refresh_discards_resume_state_and_preserves_full_cache() {
+        let tmp = tempfile::tempdir().expect("tempdir");
+        let partial_path = partial_cache_path(tmp.path(), CACHE_KEY);
+        let configs: Map<String, Value> = CONFIGS
+            .iter()
+            .map(|config| {
+                (
+                    (*config).to_string(),
+                    json!([{"rows": [], "num_rows_total": 0}]),
+                )
+            })
+            .collect();
+        std::fs::write(
+            &partial_path,
+            serde_json::to_vec(&json!({"configs": configs})).unwrap(),
+        )
+        .unwrap();
+        let cache_path = cache_json_path(tmp.path(), CACHE_KEY);
+        let original = json!({"rows": [{"row": {"model_name": "gpt-5.5", "rating": 1500.0}}]});
+        write_cache_json(tmp.path(), CACHE_KEY, &original).unwrap();
+        std::fs::File::options()
+            .write(true)
+            .open(&cache_path)
+            .unwrap()
+            .set_modified(std::time::SystemTime::UNIX_EPOCH)
+            .unwrap();
+
+        let http = HeaderCheckingHttp {
+            calls: AtomicUsize::new(0),
+        };
+        let error = LmArenaSource
+            .fetch(
+                &http,
+                FetchOptions {
+                    cache_dir: Some(tmp.path()),
+                    offline: false,
+                },
+                &SecretStore::default(),
+            )
+            .await
+            .unwrap_err();
+        assert!(error.to_string().contains("no rows parsed"));
+        assert_eq!(http.calls.load(Ordering::Relaxed), 0);
+        assert!(
+            !partial_path.exists(),
+            "bad completed response must not be resumed"
+        );
+        let cached: Value = serde_json::from_slice(&std::fs::read(cache_path).unwrap()).unwrap();
+        assert_eq!(cached, original);
+    }
+
+    #[tokio::test]
     async fn successful_fetch_removes_partial_cache() {
         let tmp = tempfile::tempdir().expect("tempdir");
         let partial_path = partial_cache_path(tmp.path(), CACHE_KEY);
@@ -1034,7 +1102,7 @@ mod tests {
             .await
             .expect("successful fetch should parse");
 
-        assert!(rows.is_empty());
+        assert!(!rows.is_empty());
         assert!(
             !partial_path.exists(),
             "successful full refresh should remove partial cache"

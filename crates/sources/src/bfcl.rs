@@ -66,10 +66,11 @@ impl Source for BfclSource {
             read_cached_string(&cache_csv_path(dir, self.cache_key()))?
         } else {
             let csv = http.get_text(URL, &[("User-Agent", "ipbr-rank")]).await?;
+            let rows = crate::require_rows(parse_rows(&csv)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_csv(dir, self.cache_key(), &csv)?;
             }
-            csv
+            return Ok(rows);
         };
         parse_rows(&csv)
     }

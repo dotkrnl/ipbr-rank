@@ -73,6 +73,10 @@ enum Command {
         prev: Option<PathBuf>,
     },
     All {
+        /// Continue past failed live sources, reusing valid cached data when available.
+        #[arg(long, conflicts_with = "offline")]
+        best_effort: bool,
+
         /// Optional prior scoreboard.toml to compute per-role deltas from.
         /// Render-only; never persisted. Missing/unreadable file → no deltas.
         #[arg(long)]
@@ -94,13 +98,16 @@ async fn main() -> anyhow::Result<()> {
 
 async fn run(cli: Cli) -> anyhow::Result<()> {
     let secrets = resolve_secrets(&cli)?;
-    let command = cli.command.clone().unwrap_or(Command::All { prev: None });
+    let command = cli.command.clone().unwrap_or(Command::All {
+        prev: None,
+        best_effort: false,
+    });
 
     match command {
         Command::Fetch => cmd_fetch(&cli, &secrets).await,
         Command::Score => cmd_score(&cli, &secrets).await,
         Command::Render { prev } => cmd_render(&cli, prev).await,
-        Command::All { prev } => cmd_all(&cli, &secrets, prev).await,
+        Command::All { prev, best_effort } => cmd_all(&cli, &secrets, prev, best_effort).await,
         Command::VerifySources => cmd_verify_sources(&cli, &secrets).await,
         Command::ListModels => cmd_list_models(&cli).await,
         Command::Triage { min_count } => cmd_triage(&cli, &secrets, min_count).await,
@@ -275,7 +282,8 @@ async fn cmd_fetch(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
 }
 
 async fn cmd_score(cli: &Cli, secrets: &SecretStore) -> anyhow::Result<()> {
-    let (scoreboard, coefficients) = build_scoreboard(cli, secrets, FetchMode::Offline).await?;
+    let (scoreboard, coefficients) =
+        build_scoreboard(cli, secrets, FetchMode::Offline, false).await?;
     write_scoreboard(&scoreboard, &cli.out)?;
     write_missing(&scoreboard, &cli.out)?;
     write_coefficients(&coefficients, &cli.out)?;
@@ -330,14 +338,19 @@ async fn cmd_render(cli: &Cli, prev: Option<PathBuf>) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn cmd_all(cli: &Cli, secrets: &SecretStore, prev: Option<PathBuf>) -> anyhow::Result<()> {
+async fn cmd_all(
+    cli: &Cli,
+    secrets: &SecretStore,
+    prev: Option<PathBuf>,
+    best_effort: bool,
+) -> anyhow::Result<()> {
     let mode = if cli.offline {
         FetchMode::Offline
     } else {
         FetchMode::Online
     };
 
-    let (mut scoreboard, coefficients) = build_scoreboard(cli, secrets, mode).await?;
+    let (mut scoreboard, coefficients) = build_scoreboard(cli, secrets, mode, best_effort).await?;
     scoreboard.prev_scores = load_prev_scores(prev.as_deref());
     write_scoreboard(&scoreboard, &cli.out)?;
     write_missing(&scoreboard, &cli.out)?;
@@ -463,6 +476,7 @@ async fn build_scoreboard(
     cli: &Cli,
     secrets: &SecretStore,
     mode: FetchMode,
+    best_effort: bool,
 ) -> anyhow::Result<(RenderScoreboard, Coefficients)> {
     let now = resolve_generated_at(cli)?;
     let coefficients = load_coefficients(cli)?;
@@ -491,6 +505,7 @@ async fn build_scoreboard(
 
     for source in selected {
         if matches!(mode, FetchMode::Online)
+            && !best_effort
             && source
                 .required_secret()
                 .is_some_and(|s| secrets.get(s).is_none())
@@ -512,15 +527,36 @@ async fn build_scoreboard(
             continue;
         }
 
-        let rows = source
-            .fetch(&http, fetch_opts, secrets)
-            .await
-            .with_context(|| format!("fetch failed for source {}", source.id()))?;
+        let mut status = format!("{:?}", source.status()).to_lowercase();
+        let result = if best_effort {
+            ipbr_sources::refresh::fetch_with_fallback(source, &http, fetch_opts, secrets)
+                .await
+                .map(|result| {
+                    if result.stale {
+                        status = "stale".to_string();
+                    }
+                    result.rows
+                })
+        } else {
+            source.fetch(&http, fetch_opts, secrets).await
+        };
+        let rows = match result {
+            Ok(rows) => rows,
+            Err(error) if best_effort && source.id() != "overrides" => {
+                eprintln!("warning: {} unavailable: {error}", source.id());
+                status = "unavailable".to_string();
+                Vec::new()
+            }
+            Err(error) => {
+                return Err(error)
+                    .with_context(|| format!("fetch failed for source {}", source.id()));
+            }
+        };
         // Match counts are unknown until every source has been ingested below.
         source_summary.insert(
             source.id().to_string(),
             SourceSummary {
-                status: format!("{:?}", source.status()).to_lowercase(),
+                status,
                 rows: rows.len(),
                 matched: 0,
                 unmatched: 0,
@@ -546,6 +582,10 @@ async fn build_scoreboard(
         }
     }
 
+    if best_effort {
+        ensure_refresh_evidence(&source_summary)?;
+    }
+
     ipbr_core::compute_scores_with(&mut records, &coefficients);
 
     Ok((
@@ -560,6 +600,18 @@ async fn build_scoreboard(
         },
         coefficients,
     ))
+}
+
+fn ensure_refresh_evidence(sources: &BTreeMap<String, SourceSummary>) -> anyhow::Result<()> {
+    // Discovery/pricing and embedded overrides alone must not replace the site
+    // during a complete outage or after a cache eviction.
+    anyhow::ensure!(
+        sources.iter().any(|(id, summary)| {
+            !matches!(id.as_str(), "openrouter" | "overrides") && summary.matched > 0
+        }),
+        "no usable benchmark sources; refusing to publish a scoreboard from only discovery/overrides"
+    );
+    Ok(())
 }
 
 #[derive(Debug, Deserialize)]

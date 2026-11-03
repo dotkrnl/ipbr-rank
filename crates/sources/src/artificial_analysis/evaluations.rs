@@ -386,7 +386,7 @@ async fn fetch_evaluation(
     let html = http
         .get_text(config.url, &[("User-Agent", "ipbr-rank")])
         .await?;
-    let rows = parse_evaluation_rows(&html, config)?;
+    let rows = crate::require_rows(parse_evaluation_rows(&html, config)?)?;
     if let Some(dir) = opts.cache_dir {
         // Only replace the last known-good payload after the live response
         // passes both the JSON-LD schema gate and full RSC coverage checks.

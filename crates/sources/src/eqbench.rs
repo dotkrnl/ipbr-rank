@@ -72,16 +72,15 @@ impl Source for EqBenchCreativeWritingSource {
         opts: FetchOptions<'_>,
         _secrets: &SecretStore,
     ) -> Result<Vec<RawRow>, SourceError> {
-        let js = fetch_js(
+        fetch_rows(
             http,
             opts,
             self.id(),
             self.cache_key(),
-            self.cache_ttl(),
             CREATIVE_URL,
+            parse_creative_rows,
         )
-        .await?;
-        parse_creative_rows(&js)
+        .await
     }
 }
 
@@ -117,41 +116,41 @@ impl Source for EqBenchJudgemarkSource {
         opts: FetchOptions<'_>,
         _secrets: &SecretStore,
     ) -> Result<Vec<RawRow>, SourceError> {
-        let js = fetch_js(
+        fetch_rows(
             http,
             opts,
             self.id(),
             self.cache_key(),
-            self.cache_ttl(),
             JUDGEMARK_URL,
+            parse_judgemark_rows,
         )
-        .await?;
-        parse_judgemark_rows(&js)
+        .await
     }
 }
 
-async fn fetch_js(
+async fn fetch_rows(
     http: &dyn Http,
     opts: FetchOptions<'_>,
     source_id: &str,
     cache_key: &str,
-    ttl: Duration,
     url: &str,
-) -> Result<String, SourceError> {
-    if use_cached_js(opts, cache_key, ttl) {
+    parse: fn(&str) -> Result<Vec<RawRow>, SourceError>,
+) -> Result<Vec<RawRow>, SourceError> {
+    if use_cached_js(opts, cache_key, CACHE_TTL) {
         let Some(dir) = opts.cache_dir else {
             return Err(SourceError::CacheMiss(format!(
                 "{source_id} requires --cache in --offline mode"
             )));
         };
-        return read_cached_string(&cache_js_path(dir, cache_key));
+        return parse(&read_cached_string(&cache_js_path(dir, cache_key))?);
     }
 
     let js = http.get_text(url, &[("User-Agent", "ipbr-rank")]).await?;
+    let rows = crate::require_rows(parse(&js)?)?;
     if let Some(dir) = opts.cache_dir {
         write_cache_js(dir, cache_key, &js)?;
     }
-    Ok(js)
+    Ok(rows)
 }
 
 fn parse_creative_rows(js: &str) -> Result<Vec<RawRow>, SourceError> {

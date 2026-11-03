@@ -65,10 +65,11 @@ impl Source for GsoSource {
             ))?)?
         } else {
             let payload = http.get_json(URL, &[]).await?;
+            let rows = crate::require_rows(parse_rows(&payload)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &payload)?;
             }
-            payload
+            return Ok(rows);
         };
         parse_rows(&payload)
     }

@@ -8,7 +8,11 @@ pub struct ReqwestHttp {
 impl Default for ReqwestHttp {
     fn default() -> Self {
         Self {
-            client: reqwest::Client::new(),
+            client: reqwest::Client::builder()
+                .connect_timeout(Duration::from_secs(10))
+                .timeout(Duration::from_secs(30))
+                .build()
+                .expect("HTTP client should build"),
         }
     }
 }
@@ -22,7 +26,7 @@ fn parse_retry_after(headers: &reqwest::header::HeaderMap) -> Option<Duration> {
         .get(reqwest::header::RETRY_AFTER)
         .and_then(|h| h.to_str().ok())
         .and_then(|s| s.parse::<u64>().ok())
-        .map(Duration::from_secs)
+        .map(|seconds| Duration::from_secs(seconds).min(Duration::from_millis(MAX_BACKOFF_MS)))
 }
 
 async fn send_with_retry(
@@ -105,5 +109,23 @@ impl crate::Http for ReqwestHttp {
         resp.text()
             .await
             .map_err(|err| crate::SourceError::Http(err.to_string()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn retry_after_preserves_short_delays_and_bounds_long_delays() {
+        let mut headers = reqwest::header::HeaderMap::new();
+        assert_eq!(parse_retry_after(&headers), None);
+        for (value, expected) in [("2", Some(2)), ("86400", Some(60)), ("invalid", None)] {
+            headers.insert(reqwest::header::RETRY_AFTER, value.parse().unwrap());
+            assert_eq!(
+                parse_retry_after(&headers),
+                expected.map(Duration::from_secs)
+            );
+        }
     }
 }

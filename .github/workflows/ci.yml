@@ -22,7 +22,7 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --check
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
   test:
     name: Test
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace
+      - run: cargo test --locked --workspace
 
   golden:
     name: Golden end-to-end
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test -p ipbr-rank-cli --test golden
+      - run: cargo test --locked -p ipbr-rank-cli --test golden
 
   site-validation:
     name: Site validation
@@ -51,14 +51,14 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Build and render site
         run: |
-          cargo build -p ipbr-rank-cli
-          cargo run -p ipbr-rank-cli -- all \
+          cargo build --locked -p ipbr-rank-cli
+          cargo run --locked -p ipbr-rank-cli -- all \
             --offline \
             --cache data/fixtures \
             --out /tmp/ci-out \
             --now 2026-01-01T00:00:00Z
       - name: Run site link tests
-        run: cargo test -p ipbr-rank-render --test site
+        run: cargo test --locked -p ipbr-rank-render --test site
 
   check-docs:
     name: Doc-source consistency
@@ -76,4 +76,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo run -p ipbr-rank-cli -- --cache /tmp/ipbr-live-cache verify-sources
+      - run: cargo run --locked -p ipbr-rank-cli -- --cache /tmp/ipbr-live-cache verify-sources

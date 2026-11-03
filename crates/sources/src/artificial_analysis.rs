@@ -134,10 +134,11 @@ impl Source for ArtificialAnalysisSource {
                 .ok_or_else(|| SourceError::MissingSecret(SOURCE_ID.to_string()))?;
             let headers = [("x-api-key", api_key)];
             let payload = http.get_json(URL, &headers).await?;
+            let rows = crate::require_rows(parse_rows(&payload)?)?;
             if let Some(dir) = opts.cache_dir {
                 write_cache_json(dir, self.cache_key(), &payload)?;
             }
-            payload
+            return Ok(rows);
         };
         parse_rows(&payload)
     }

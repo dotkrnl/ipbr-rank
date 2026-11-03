@@ -18,6 +18,7 @@ pub mod lmarena;
 pub mod mcp_atlas;
 pub mod openrouter;
 pub mod overrides;
+pub mod refresh;
 pub mod registry;
 pub mod scale_agentic;
 pub mod scale_swe_atlas;
@@ -105,6 +106,9 @@ pub enum SecretRef {
     HfToken,
 }
 
+// async-trait adds #[must_use] to boxed futures, which Rust 1.99 already marks
+// must-use. Keep the workaround scoped to the macro-generated trait methods.
+#[allow(clippy::double_must_use)]
 #[async_trait::async_trait]
 pub trait Http: Send + Sync {
     async fn get_json(
@@ -116,6 +120,7 @@ pub trait Http: Send + Sync {
     async fn get_text(&self, url: &str, headers: &[(&str, &str)]) -> Result<String, SourceError>;
 }
 
+#[allow(clippy::double_must_use)]
 #[async_trait::async_trait]
 pub trait Source: Send + Sync {
     fn id(&self) -> &str;
@@ -152,6 +157,14 @@ pub(crate) fn use_cached_json(opts: FetchOptions<'_>, key: &str, ttl: Duration) 
     opts.cache_dir
         .map(|d| cache_is_fresh(&cache_json_path(d, key), ttl))
         .unwrap_or(false)
+}
+
+/// An empty live response must not replace a usable cache after upstream drift.
+pub(crate) fn require_rows(rows: Vec<RawRow>) -> Result<Vec<RawRow>, SourceError> {
+    if rows.is_empty() {
+        return Err(SourceError::Parse("no rows parsed".into()));
+    }
+    Ok(rows)
 }
 
 pub(crate) fn use_cached_html(opts: FetchOptions<'_>, key: &str, ttl: Duration) -> bool {
